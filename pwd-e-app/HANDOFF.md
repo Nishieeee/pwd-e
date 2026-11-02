@@ -4,15 +4,14 @@ Overwrite this file at the end of every session.
 
 ## Last session
 - **Date:** 2026-11-02
-- **Done:** Implemented PWD-E home page UI: design tokens, hero/sections/footer, component-based Blade layout (site-header, site-footer, eyebrow-pill, section-header, badge, stat-box). Wired logo/bg/icons. Floating transparent nav over hero.
-- **State of the code:** Home route serves `resources/views/home.blade.php`; assets in `public/assets` and `public/icons`; CSS tokens in `resources/css/app.css`.
+- **Done:** Refactored `resources/views/home.blade.php` per `prototype/Home_implementation.md`: verbatim copy, mobile-first responsive layout, hero search card, accessibility floating toggle panel (bottom-right), mobile hamburger nav in `site-header.blade.php`, flex-column card CTAs pinned to bottom. Created `prototype/jobspage_implementation.md` (1:1 Jobs page spec). Added mobile-first frontend rule + local dev rules to `AGENTS.md`.
+- **State of the code:** Home route serves `resources/views/home.blade.php`; Jobs page not yet built. `public/hot` present (Vite running). View cache cleared.
 
 ## Next concrete action
-Wire search form to Jobs route, implement a11y toolbar interactivity (contrast, font resize, screen reader, readable font), and start candidate/employer feature pages.
+Build the Jobs page (`resources/views/jobs.blade.php`) following `prototype/jobspage_implementation.md`; wire search/filter to a Livewire `jobs-directory` component; implement a11y toolbar interactivity (contrast, font resize, screen reader, readable font).
 
 ## Open questions
 - Who owns which track
-- ~~Database engine confirmation~~ → PostgreSQL accepted (2026-11-02); DB `pwd_e` created and connected, base migrations run
 
 ## Notes for the next session
 - Keep navigation as plain page loads (no `wire:navigate`).
