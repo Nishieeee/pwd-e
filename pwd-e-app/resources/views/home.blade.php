@@ -15,7 +15,7 @@
 
     {{-- A11y floating toggle --}}
     <button type="button" @click="a11yOpen = !a11yOpen" class="fixed bottom-4 right-4 z-50 w-14 h-14 rounded-full bg-primary text-white flex items-center justify-center shadow-lg" aria-label="Accessibility options" :aria-expanded="a11yOpen">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m-8-8h16"/></svg>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="4" r="2"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0l-3 6m3-6l3 6M9 9h6"/></svg>
     </button>
     <div x-show="a11yOpen" x-cloak class="fixed bottom-20 right-4 z-50 bg-primary-dark text-white rounded-xl shadow-lg p-3 flex flex-col gap-2 text-xs w-56" role="dialog" aria-label="Accessibility controls">
         <button type="button" class="px-2 py-2 rounded hover:bg-white/10 text-left" aria-pressed="false">High Contrast</button>
@@ -30,7 +30,7 @@
     <main id="main">
         {{-- S1 Hero --}}
         <section class="relative bg-primary-tint" style="background-image: url('{{ asset('assets/Background.jpg') }}'); background-size: cover; background-position: center;">
-            <div class="absolute inset-0" style="background-color: rgba(255,255,255,0.7);" aria-hidden="true"></div>
+            <div class="absolute inset-0" style="background-color: rgba(255,255,255,0.8);" aria-hidden="true"></div>
             <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-16 text-center">
                 <span class="inline-flex items-center gap-2 bg-white text-primary-dark text-sm font-medium px-4 py-2 rounded-full border border-primary-border">
                     <svg class="w-4 h-4 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
