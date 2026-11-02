@@ -7,6 +7,7 @@ Planning is complete; implementation starts now. **Core features are due Decembe
 
 ## Working
 - PostgreSQL 18 connected: local DB `pwd_e` (role `pwd_e_user`), base migrations (users, cache, jobs, spatie permissions) applied. D-06 accepted; domain migrations pending per `DATABASE.md`.
+- Home page UI implemented: design tokens (colors, typography), hero, sections, footer; component-based Blade layout (`site-header`, `site-footer`, `section-header`, `stat-box`, etc.). Assets wired (logo, hero background, icons).
 
 ## Done (documentation and decisions)
 - Project proposal (Chapter 1) with features, roles, and workflow
