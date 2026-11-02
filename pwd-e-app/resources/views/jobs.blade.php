@@ -21,7 +21,7 @@
     </div>
     <main id="main">
         <section class="relative" style="background: linear-gradient(180deg, #DCEAF4 0%, #FFFFFF 100%);">
-            <div class="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 pt-24 pb-12 text-center">
+            <div class="max-w-[1200px] mx-auto px-6 sm:px-10 lg:px-12 pt-24 pb-12 text-center">
                 <h1 class="font-heading text-primary-dark text-3xl sm:text-4xl font-bold">Inclusive Job Directory</h1>
                 <p class="text-body-muted mt-3 max-w-2xl mx-auto">Every job opening below has been verified under our <strong>Workspace Accessibility Matrix</strong> and is accredited under Republic Act 10524.</p>
                 <div class="mt-8 bg-white rounded-2xl shadow-sm border border-primary-border p-4 max-w-5xl mx-auto">
@@ -39,7 +39,7 @@
                 </div>
             </div>
         </section>
-        <section class="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 py-12">
+        <section class="max-w-[1200px] mx-auto px-6 sm:px-10 lg:px-12 py-12">
             <ul class="space-y-4 md:space-y-6 list-none p-0">
                 @php
                 $jobs = [

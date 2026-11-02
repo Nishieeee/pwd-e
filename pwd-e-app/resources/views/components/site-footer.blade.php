@@ -1,5 +1,5 @@
 <footer class="bg-dark-neutral text-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="max-w-[1200px] mx-auto px-6 sm:px-10 lg:px-12 py-12">
         <div class="flex flex-row flex-wrap items-start gap-8 [&>div]:flex-1 [&>div]:min-w-[200px]">
             <div class="flex-[2] min-w-[280px]">
                 <div class="flex items-center gap-3">

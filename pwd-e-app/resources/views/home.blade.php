@@ -31,7 +31,7 @@
         {{-- S1 Hero --}}
         <section class="relative bg-primary-tint" style="background-image: url('{{ asset('assets/Background.jpg') }}'); background-size: cover; background-position: center;">
             <div class="absolute inset-0" style="background-color: rgba(255,255,255,0.8);" aria-hidden="true"></div>
-            <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-16 text-center">
+            <div class="relative max-w-[1200px] mx-auto px-6 sm:px-10 lg:px-12 pt-32 pb-16 text-center">
                 <span class="inline-flex items-center gap-2 bg-white text-primary-dark text-sm font-medium px-4 py-2 rounded-full border border-primary-border">
                     <svg class="w-4 h-4 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                     WCAG 2.1 Level AA &amp; Republic Act No. 10524 / 11036 Compliant
@@ -55,7 +55,7 @@
         </section>
 
         {{-- S2 Why Choose --}}
-        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <section class="max-w-[1200px] mx-auto px-6 sm:px-10 lg:px-12 py-16">
             <div class="text-center">
                 <span class="inline-block bg-primary-tint text-primary-dark text-sm font-medium px-4 py-2 rounded-full">Our Purpose &amp; Vision</span>
                 <h2 class="font-heading text-primary-dark text-3xl font-bold mt-4">Why Choose PWD-E</h2>
@@ -95,7 +95,7 @@
 
         {{-- S3 How it works --}}
         <section class="bg-surface py-16">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="max-w-[1200px] mx-auto px-6 sm:px-10 lg:px-12">
                 <div class="text-center">
                     <span class="inline-block bg-primary-tint text-primary-dark text-sm font-medium px-4 py-2 rounded-full">Seamless 3-Step Journey</span>
                     <h2 class="font-heading text-primary-dark text-3xl font-bold mt-4">How PWD-E Works</h2>
@@ -120,7 +120,7 @@
         </section>
 
         {{-- S4 Features --}}
-        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <section class="max-w-[1200px] mx-auto px-6 sm:px-10 lg:px-12 py-16">
             <div class="text-center">
                 <span class="inline-block bg-primary-tint text-primary-dark text-sm font-medium px-4 py-2 rounded-full">Platform Innovations</span>
                 <h2 class="font-heading text-primary-dark text-3xl font-bold mt-4">Empowering Features Showcase</h2>
@@ -162,7 +162,7 @@
 
         {{-- S5 Impact --}}
         <section class="bg-surface py-16">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="max-w-[1200px] mx-auto px-6 sm:px-10 lg:px-12">
                 <x-section-header eyebrow="Proven Nationwide Results" title="Real Impact &amp; Authentic Representation" intro="Verified employment metrics and real Filipino PWD professionals excelling in barrier-free physical and remote workspaces." eyebrow-tone="green" />
                 <div class="mt-10 bg-white rounded-2xl shadow-sm border border-primary-border p-6">
                     <div class="flex flex-wrap items-center justify-between gap-3">
@@ -192,7 +192,7 @@
 
         {{-- S6 Final CTA --}}
         <section class="bg-primary-tint py-12">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="max-w-[1200px] mx-auto px-6 sm:px-10 lg:px-12 text-center">
                 <span class="inline-block bg-white text-primary-dark text-sm font-medium px-4 py-2 rounded-full">Begin Your Journey</span>
                 <h2 class="font-heading text-primary-dark text-3xl font-bold mt-4">Ready to Experience Barrier-Free Employment?</h2>
                 <p class="text-body-muted mt-3 max-w-2xl mx-auto">Choose your tailored gateway below and start building an inclusive, accessible future today.</p>

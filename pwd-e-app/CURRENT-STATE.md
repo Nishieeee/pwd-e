@@ -7,7 +7,7 @@ Planning is complete; implementation starts now. **Core features are due Decembe
 
 ## Working
 - PostgreSQL 18 connected: local DB `pwd_e` (role `pwd_e_user`), base migrations (users, cache, jobs, spatie permissions) applied. D-06 accepted; domain migrations pending per `DATABASE.md`.
-- Home page UI implemented: design tokens (colors, typography), hero, sections, footer; component-based Blade layout (`site-header`, `site-footer`, `section-header`, `stat-box`, etc.). Assets wired (logo, hero background, icons).
+- Home, Jobs, Employers, About pages implemented (static Blade, mobile-first): design tokens (colors, typography), hero, sections, footer; component-based Blade layout (`site-header`, `site-footer`, `section-header`, `stat-box`, etc.). Assets wired (logo, hero background, icons).
 
 ## Done (documentation and decisions)
 - Project proposal (Chapter 1) with features, roles, and workflow
@@ -23,3 +23,4 @@ Planning is complete; implementation starts now. **Core features are due Decembe
 - Speech-to-text for the prototype will be the Web Speech API (Chromium browsers only); the form must work without it.
 - Whether to use an LLM API for rewrite suggestions is undecided; the lexicon-based detector comes first.
 - Matching weights (0.6 / 0.4) and the score threshold are placeholders until tested with sample data.
+

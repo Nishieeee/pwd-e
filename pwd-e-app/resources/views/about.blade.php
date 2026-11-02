@@ -22,7 +22,7 @@
     <main id="main">
         <!-- Hero -->
         <section class="relative" style="background: linear-gradient(180deg, #DCEAF4 0%, #FFFFFF 100%);">
-            <div class="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 pt-24 pb-12 md:grid md:grid-cols-5 md:gap-8 md:items-start">
+            <div class="max-w-[1200px] mx-auto px-6 sm:px-10 lg:px-12 pt-24 pb-12 md:grid md:grid-cols-5 md:gap-8 md:items-start">
                 <div class="md:col-span-3">
                     <span class="inline-flex items-center bg-white border border-primary-border text-primary-dark text-sm font-medium px-4 py-1 rounded-full">About PWD-E</span>
                     <h1 class="font-heading text-primary-dark text-3xl sm:text-4xl md:text-5xl font-bold mt-4">Ability deserves opportunity. Access makes it possible.</h1>
@@ -62,7 +62,7 @@
         </section>
         <!-- Purpose & Vision -->
         <section class="bg-surface py-16">
-            <div class="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10">
+            <div class="max-w-[1200px] mx-auto px-6 sm:px-10 lg:px-12">
                 <div class="text-center">
                     <span class="inline-block bg-primary-tint text-primary-dark text-sm font-medium px-4 py-2 rounded-full">Our Purpose &amp; Vision</span>
                     <h2 class="font-heading text-primary-dark text-3xl font-bold mt-4">Employment inclusion starts with access.</h2>
@@ -92,7 +92,7 @@
         </section>
         <!-- Why This Matters -->
         <section class="bg-surface py-16">
-            <div class="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10">
+            <div class="max-w-[1200px] mx-auto px-6 sm:px-10 lg:px-12">
                 <div class="text-center">
                     <span class="inline-block bg-primary-tint text-primary-dark text-sm font-medium px-4 py-2 rounded-full">Why This Matters</span>
                     <h2 class="font-heading text-primary-dark text-3xl font-bold mt-4">The barriers are in the process—not the person.</h2>
@@ -124,7 +124,7 @@
             </div>
         </section>
         <!-- How PWD-E Works -->
-        <section class="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 py-16">
+        <section class="max-w-[1200px] mx-auto px-6 sm:px-10 lg:px-12 py-16">
             <div class="text-center">
                 <span class="inline-block bg-primary-tint text-primary-dark text-sm font-medium px-4 py-2 rounded-full">How PWD-E Works</span>
                 <h2 class="font-heading text-primary-dark text-3xl font-bold mt-4">How PWD-E Works</h2>
@@ -156,7 +156,7 @@
         </section>
         <!-- Accommodation First -->
         <section class="bg-surface py-16">
-            <div class="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10">
+            <div class="max-w-[1200px] mx-auto px-6 sm:px-10 lg:px-12">
                 <div class="md:grid md:grid-cols-2 md:gap-10 items-start">
                     <div>
                         <span class="inline-flex items-center bg-white border border-primary-border text-primary-dark text-sm font-medium px-4 py-1 rounded-full">Accommodation First</span>
@@ -209,7 +209,7 @@
             </div>
         </section>
         <!-- Rooted in the Philippines -->
-        <section class="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 py-16">
+        <section class="max-w-[1200px] mx-auto px-6 sm:px-10 lg:px-12 py-16">
             <div class="md:grid md:grid-cols-5 md:gap-8 items-start">
                 <div class="md:col-span-3">
                     <span class="inline-flex items-center bg-secondary-tint text-secondary text-sm font-medium px-4 py-1 rounded-full">Rooted in the Philippines</span>
@@ -234,7 +234,7 @@
             </div>
         </section>
         <!-- Access, Rights & Trust -->
-        <section class="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 py-16">
+        <section class="max-w-[1200px] mx-auto px-6 sm:px-10 lg:px-12 py-16">
             <div class="text-center">
                 <span class="inline-block bg-primary-tint text-primary-dark text-sm font-medium px-4 py-2 rounded-full">Access, Rights &amp; Trust</span>
                 <h2 class="font-heading text-primary-dark text-3xl font-bold mt-4">Inclusion must also protect your choices.</h2>
@@ -274,7 +274,7 @@
             </div>
         </section>
         <!-- Dark CTA -->
-        <section class="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 py-12">
+        <section class="max-w-[1200px] mx-auto px-6 sm:px-10 lg:px-12 py-12">
             <div class="rounded-2xl bg-primary-dark text-white text-center p-10 md:p-16">
                 <h2 class="font-heading text-white text-2xl sm:text-3xl font-bold">Be Part of a More Inclusive Workforce</h2>
                 <p class="mt-3 text-white/80 max-w-xl mx-auto">Join PWD-E and help create a future where employment opportunities are accessible to everyone.</p>
