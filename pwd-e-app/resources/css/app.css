@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Atkinson+Hyperlegible+Next:wght@400;700&display=swap');
 @import 'tailwindcss';
 @import '../../vendor/livewire/flux/dist/flux.css';
 
@@ -9,7 +10,19 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-heading: 'Lexend', 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+    /* PWD-E palette (from Figma) */
+    --color-primary: #244F73;
+    --color-primary-dark: #1A2840;
+    --color-secondary: #176B47;
+    --color-dark-neutral: #25313B;
+    --color-body-muted: #4E5F6E;
+    --color-primary-tint: #DCEAF4;
+    --color-primary-border: #B8D0E2;
+    --color-surface: #F4F7FA;
+    --color-secondary-tint: #E8F5E9;
 
     --color-zinc-50: #fafafa;
     --color-zinc-100: #f5f5f5;
@@ -37,6 +50,36 @@
 }
 
 @layer base {
+    :root {
+        --font-heading: 'Lexend', 'Inter', system-ui, sans-serif;
+        --font-body: 'Inter', system-ui, sans-serif;
+    }
+
+    body[data-readable-font="true"] {
+        --font-heading: 'Atkinson Hyperlegible Next', sans-serif;
+        --font-body: 'Atkinson Hyperlegible Next', sans-serif;
+    }
+
+    html {
+        font-size: 100%;
+    }
+
+    body {
+        font-family: var(--font-body);
+        font-size: 1rem;
+        line-height: 1.5;
+        color: var(--color-dark-neutral);
+        font-feature-settings: 'cv05', 'ss02';
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        font-family: var(--font-heading);
+        color: var(--color-primary-dark);
+    }
+
+    .tabular-nums {
+        font-variant-numeric: tabular-nums;
+    }
 
     *,
     ::after,
