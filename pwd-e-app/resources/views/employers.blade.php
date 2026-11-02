@@ -22,7 +22,7 @@
     <main id="main">
         <!-- Hero -->
         <section class="relative" style="background: linear-gradient(180deg, #DCEAF4 0%, #FFFFFF 100%);">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12 md:grid md:grid-cols-2 md:gap-8 md:items-center">
+            <div class="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 pt-24 pb-12 md:grid md:grid-cols-2 md:gap-8 md:items-center">
                 <div>
                     <span class="inline-flex items-center bg-secondary-tint text-secondary text-sm font-medium px-4 py-1 rounded-full">For Employers</span>
                     <h1 class="font-heading text-primary-dark text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mt-4">Build a Stronger, Inclusive Workforce.</h1>
@@ -38,7 +38,7 @@
             </div>
         </section>
         <!-- Why Partner -->
-        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <section class="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 py-16">
             <div class="text-center">
                 <span class="inline-block bg-primary-tint text-primary-dark text-sm font-medium px-4 py-2 rounded-full">The Value Proposition</span>
                 <h2 class="font-heading text-primary-dark text-3xl font-bold mt-4">Why Partner with PWD-E?</h2>
@@ -67,7 +67,7 @@
         </section>
         <!-- Features -->
         <section class="bg-surface py-16">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10">
                 <div class="text-center">
                     <span class="inline-block bg-primary-tint text-primary-dark text-sm font-medium px-4 py-2 rounded-full">Built for Inclusive Hiring</span>
                     <h2 class="font-heading text-primary-dark text-3xl font-bold mt-4">Employer-Exclusive Platform Features</h2>
@@ -161,7 +161,7 @@
             </div>
         </section>
         <!-- Steps -->
-        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <section class="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 py-16">
             <div class="text-center">
                 <span class="inline-block bg-primary-tint text-primary-dark text-sm font-medium px-4 py-2 rounded-full">Your Hiring Journey</span>
                 <h2 class="font-heading text-primary-dark text-3xl font-bold mt-4">How the Hiring Process Works</h2>
@@ -184,7 +184,7 @@
             </div>
         </section>
         <!-- Dark CTA -->
-        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <section class="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 py-12">
             <div class="rounded-2xl bg-primary-dark text-white text-center p-10 md:p-16">
                 <h2 class="font-heading text-white text-2xl sm:text-3xl font-bold">Ready to make accessibility your competitive advantage?</h2>
                 <a href="/employers/register" class="inline-flex items-center justify-center mt-6 bg-white text-primary-dark font-semibold px-6 py-3 rounded-lg min-h-[48px] hover:bg-primary-tint">Create Employer Account Today</a>

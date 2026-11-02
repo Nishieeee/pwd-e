@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 Route::view('/', 'home')->name('home');
 Route::view('/jobs', 'jobs')->name('jobs');
 Route::view('/employers', 'employers')->name('employers');
+Route::view('/about', 'about')->name('about');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::view('dashboard', 'dashboard')->name('dashboard');
