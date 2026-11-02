@@ -88,7 +88,7 @@
                         <li class="flex items-start gap-2"><span class="text-secondary shrink-0">✓</span><p class="text-justify"><strong>Workplace Accessibility Matrix:</strong> Audit facility ramps, elevators, and software to earn DOLE accreditation.</p></li>
                         <li class="flex items-start gap-2"><span class="text-secondary shrink-0">✓</span><p class="text-justify"><strong>25% Tax Deduction Claim:</strong> Automatically generate BIR Form 1702-RT schedules for significant tax savings.</p></li>
                     </ul>
-                    <a href="/employers" class="block text-center bg-secondary text-white font-semibold py-3 rounded-lg hover:bg-secondary/90">Join as Inclusive Employer →</a>
+                    <div class="mt-auto pt-6"><a href="/employers" class="block text-center bg-secondary text-white font-semibold py-3 rounded-lg hover:bg-secondary/90">Join as Inclusive Employer →</a></div>
                 </article>
             </div>
         </section>
