@@ -12,7 +12,7 @@ Assign owners to tracks A–D. Track A scaffolds Laravel 11 with Breeze (Blade) 
 
 ## Open questions
 - Who owns which track
-- Database engine confirmation
+- ~~Database engine confirmation~~ → PostgreSQL accepted (2026-11-02); DB `pwd_e` created and connected, base migrations run
 
 ## Notes for the next session
 - Check progress on Nov 15 against the fallback order in `ROADMAP.md`.

@@ -6,7 +6,7 @@ _Last updated: 2026-11-02_
 Planning is complete; implementation starts now. **Core features are due December 1, 2026.** All ten features are targeted for Nov 22 using four parallel tracks.
 
 ## Working
-- Nothing implemented yet. No application code exists.
+- PostgreSQL 18 connected: local DB `pwd_e` (role `pwd_e_user`), base migrations (users, cache, jobs, spatie permissions) applied. D-06 accepted; domain migrations pending per `DATABASE.md`.
 
 ## Done (documentation and decisions)
 - Project proposal (Chapter 1) with features, roles, and workflow
