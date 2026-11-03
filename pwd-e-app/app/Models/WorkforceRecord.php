@@ -7,11 +7,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class WorkforceRecord extends Model
 {
-    protected $fillable = ['employer_profile_id', 'user_id', 'hired_at', 'pwd_verified'];
+    protected $fillable = ['employer_profile_id', 'candidate_profile_id', 'application_id', 'hired_at', 'ended_at', 'pwd_verified', 'annual_wage'];
 
     protected $casts = [
-        'hired_at' => 'datetime',
+        'hired_at' => 'date',
+        'ended_at' => 'date',
         'pwd_verified' => 'boolean',
+        'annual_wage' => 'decimal:2',
     ];
 
     public function employerProfile(): BelongsTo
@@ -19,8 +21,13 @@ class WorkforceRecord extends Model
         return $this->belongsTo(EmployerProfile::class);
     }
 
-    public function user(): BelongsTo
+    public function candidateProfile(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(CandidateProfile::class);
+    }
+
+    public function application(): BelongsTo
+    {
+        return $this->belongsTo(Application::class);
     }
 }

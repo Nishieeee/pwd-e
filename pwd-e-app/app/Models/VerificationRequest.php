@@ -7,9 +7,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class VerificationRequest extends Model
 {
-    protected $fillable = ['user_id', 'document_path', 'status', 'reviewed_by', 'reviewed_at'];
+    protected $fillable = ['user_id', 'type', 'id_number', 'document_path', 'status', 'rejection_reason', 'reviewed_by', 'reviewed_at'];
 
     protected $casts = [
+        'id_number' => 'encrypted',
         'reviewed_at' => 'datetime',
     ];
 

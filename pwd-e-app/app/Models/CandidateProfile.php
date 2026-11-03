@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CandidateProfile extends Model
 {
-    protected $fillable = ['user_id', 'headline', 'skills', 'bio', 'fsl_video_path', 'visibility_settings'];
+    protected $fillable = ['user_id', 'headline', 'bio', 'location', 'skills', 'fsl_video_path', 'fsl_caption_path', 'visibility_settings'];
 
     protected $casts = [
         'skills' => 'array',

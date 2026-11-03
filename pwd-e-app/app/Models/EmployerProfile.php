@@ -9,10 +9,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class EmployerProfile extends Model
 {
-    protected $fillable = ['user_id', 'company_name', 'business_permit_path', 'verified_at', 'workforce_total'];
+    protected $fillable = ['user_id', 'company_name', 'industry', 'location', 'workforce_total', 'workforce_updated_at', 'matrix_completed_at'];
 
     protected $casts = [
-        'verified_at' => 'datetime',
+        'workforce_updated_at' => 'datetime',
+        'matrix_completed_at' => 'datetime',
     ];
 
     public function user(): BelongsTo
@@ -33,5 +34,10 @@ class EmployerProfile extends Model
     public function workforceRecords(): HasMany
     {
         return $this->hasMany(WorkforceRecord::class);
+    }
+
+    public function isMatrixComplete(): bool
+    {
+        return $this->matrix_completed_at !== null;
     }
 }

@@ -10,7 +10,7 @@ Deadline: core features working by **December 1, 2026**. All ten features target
 ## Track A: Foundation and Admin
 - [ ] Scaffold Laravel 11 with Breeze (Blade) and Livewire (**by Nov 4**)
 - [ ] spatie/laravel-permission with Candidate, Employer, Admin roles
-- [ ] Migrations from `DATABASE.md`; seeders for accommodations, lexicon, admin account
+- [x] Migrations from `DATABASE.md` (core schema per revised ERD) ; seeders for accommodations, lexicon, admin account (pending)
 - [ ] Verification (#9): private document upload, admin approve/reject, block unverified accounts
 - [ ] Accessibility auditor (#10): axe-core JS log endpoint, `accessibility_logs`, admin log view
 - [ ] Analytics dashboard (#8): hiring trends by sector, PWD employment rate, simple forecast

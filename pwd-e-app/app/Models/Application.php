@@ -10,9 +10,10 @@ class Application extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['candidate_profile_id', 'job_posting_id', 'status', 'applied_at'];
+    protected $fillable = ['candidate_profile_id', 'job_posting_id', 'status', 'fsl_video_path', 'fsl_caption_path', 'fit_score_at_apply', 'applied_at'];
 
     protected $casts = [
+        'fit_score_at_apply' => 'decimal:2',
         'applied_at' => 'datetime',
     ];
 
