@@ -14,18 +14,7 @@
     <x-site-header />
 
     {{-- A11y floating toggle --}}
-    <button type="button" @click="a11yOpen = !a11yOpen" class="fixed bottom-4 right-4 z-50 w-14 h-14 rounded-full bg-primary text-white flex items-center justify-center shadow-lg" aria-label="Accessibility options" :aria-expanded="a11yOpen">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="4" r="2"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0l-3 6m3-6l3 6M9 9h6"/></svg>
-    </button>
-    <div x-show="a11yOpen" x-cloak class="fixed bottom-20 right-4 z-50 bg-primary-dark text-white rounded-xl shadow-lg p-3 flex flex-col gap-2 text-xs w-56" role="dialog" aria-label="Accessibility controls">
-        <button type="button" class="px-2 py-2 rounded hover:bg-white/10 text-left" aria-pressed="false">High Contrast</button>
-        <label class="flex items-center gap-2 px-2 py-2">
-            <span>Font</span>
-            <input type="range" min="100" max="200" value="100" class="w-full" aria-label="Font resize">
-        </label>
-        <button type="button" class="px-2 py-2 rounded hover:bg-white/10 text-left" aria-pressed="false">Screen Reader</button>
-        <button type="button" @click="readable = !readable" class="px-2 py-2 rounded hover:bg-white/10 text-left" :aria-pressed="readable">Readable Font</button>
-    </div>
+    <x-accessibility-panel />
 
     <main id="main">
         {{-- S1 Hero --}}
