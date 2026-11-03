@@ -17,6 +17,10 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->enum('role', ['candidate', 'employer', 'admin'])->default('candidate');
+            $table->enum('status', ['pending', 'active', 'rejected', 'suspended'])->default('pending');
+            $table->timestamp('verified_at')->nullable();
+            $table->json('display_settings')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
