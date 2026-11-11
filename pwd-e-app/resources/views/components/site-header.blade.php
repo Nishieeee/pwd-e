@@ -1,0 +1,28 @@
+<header x-data="{ scrolled: false, menuOpen: false }" @scroll.window="scrolled = window.scrollY > 480" :class="scrolled ? 'bg-primary-dark text-white shadow' : 'bg-transparent text-primary'" class="fixed top-0 left-0 right-0 z-50 transition-colors">
+    <nav class="max-w-[1200px] mx-auto px-6 sm:px-10 lg:px-12 h-16 flex items-center justify-between" aria-label="Primary">
+        <div class="flex items-center gap-8">
+            <a href="/" class="flex items-center gap-2 font-heading font-bold text-lg"><img src="{{ asset('assets/Logo.png') }}" alt="PWD-E" class="h-24 w-auto">PWD-E</a>
+            <ul class="hidden md:flex gap-6 text-sm">
+                <li><a href="/" class="hover:underline">Home</a></li>
+                <li><a href="/jobs" class="hover:underline">Jobs</a></li>
+                <li><a href="/employers" class="hover:underline">Employers</a></li>
+                <li><a href="/about" class="hover:underline">About</a></li>
+            </ul>
+        </div>
+        <div class="flex items-center gap-3 text-sm">
+            <a href="/login" class="hidden md:inline hover:underline">Sign In</a>
+            <a href="/register" class="hidden md:inline bg-primary text-white font-semibold px-4 py-2 rounded-lg hover:bg-primary-dark">Register</a>
+            <button type="button" @click="menuOpen = !menuOpen" class="md:hidden w-11 h-11 flex items-center justify-center" aria-label="Menu" :aria-expanded="menuOpen">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+        </div>
+    </nav>
+    <div x-show="menuOpen" x-cloak class="md:hidden bg-primary-dark text-white px-4 py-4 space-y-2">
+        <a href="/" class="block min-h-[48px] flex items-center">Home</a>
+        <a href="/jobs" class="block min-h-[48px] flex items-center">Jobs</a>
+        <a href="/employers" class="block min-h-[48px] flex items-center">Employers</a>
+        <a href="/about" class="block min-h-[48px] flex items-center">About</a>
+        <a href="/login" class="block min-h-[48px] flex items-center">Sign In</a>
+        <a href="/register" class="block min-h-[48px] flex items-center bg-primary rounded-lg px-3">Register</a>
+    </div>
+</header>
