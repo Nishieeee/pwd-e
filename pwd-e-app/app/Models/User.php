@@ -25,7 +25,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name', 'email', 'password', 'role', 'status', 'verified_at', 'display_settings'])]
+#[Fillable(['name', 'email', 'password', 'role', 'status', 'verified_at', 'pwd_id_number', 'pwd_id_path', 'display_settings'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -38,6 +38,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'verified_at' => 'datetime',
+            'pwd_id_number' => 'encrypted',
             'display_settings' => 'array',
         ];
     }
@@ -55,6 +56,11 @@ class User extends Authenticatable
     public function verificationRequests()
     {
         return $this->hasMany(VerificationRequest::class);
+    }
+
+    public function notificationPreferences()
+    {
+        return $this->hasMany(NotificationPreference::class);
     }
 
     public function isActive(): bool

@@ -9,9 +9,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class EmployerProfile extends Model
 {
-    protected $fillable = ['user_id', 'company_name', 'industry', 'location', 'workforce_total', 'workforce_updated_at', 'matrix_completed_at'];
+    protected $fillable = ['user_id', 'company_name', 'business_permit_number', 'business_permit_path', 'verified_at', 'industry', 'location', 'workforce_total', 'workforce_updated_at', 'matrix_completed_at'];
 
     protected $casts = [
+        'verified_at' => 'datetime',
         'workforce_updated_at' => 'datetime',
         'matrix_completed_at' => 'datetime',
     ];
@@ -34,6 +35,11 @@ class EmployerProfile extends Model
     public function workforceRecords(): HasMany
     {
         return $this->hasMany(WorkforceRecord::class);
+    }
+
+    public function taxIncentiveSnapshots(): HasMany
+    {
+        return $this->hasMany(TaxIncentiveSnapshot::class)->orderByDesc('snapshot_date');
     }
 
     public function isMatrixComplete(): bool
