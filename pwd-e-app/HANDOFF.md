@@ -1,22 +1,22 @@
 # HANDOFF.md
 
 ## Last session
-- **Date:** 2026-11-11
+- **Date:** 2026-11-12 — branch `Nishieee/Auth_Registration`
 - **Done:**
-  - Stakeholder interview conducted with professor (person with cerebral palsy). Key findings: same job requirements + PWD ID, predictive text for motor-impaired users, reduce typing via selection UI, AT-tool compatibility, employer tax incentives.
-  - `docs/REQUIREMENTS.md` v1.1 written — full SRS with system, functional (9 modules, 70+ IDs), and non-functional requirements (7 categories).
-  - `TASKS.md` fully expanded with every requirement ID mapped to concrete tasks across all four tracks.
-  - `ROADMAP.md` updated: revised weekly plan, added Predictive Text and Tax Incentive as first-class features, updated milestone statuses.
-  - `DECISIONS.md` expanded with D-11–D-15 from interview findings.
-  - `PROJECT.md` updated to reference `docs/REQUIREMENTS.md`.
+  - Applied full profile-completion schema: name parts on `users`; work experience, education, certifications, profile drafts, notifications, notification preferences, word history, tax snapshots; PWD ID / permit / resume / cover-letter columns; encrypted casts.
+  - Added 7 models + relationships; synced `DATABASE.md` and knowledge vault.
+  - Registration redesign merged: role picker, conditional Candidate/Employer fields, PWD ID + permit uploads, disability type, DOB, RA 10173 consent. Transactional `User` + profile + `VerificationRequest`.
+  - Name parts (`first_name`, `middle_name`, `last_name`) persisted; `name` kept as composed display name.
+  - `EnsureAccountVerified` gate; `verification.notice` view; Pest suite green.
 
 ## State of the code
-- Login page done (Fortify + redesigned Blade, mobile-first, live validation).
-- Register page still uses default Fortify layout — **needs redesign with role picker + PWD ID field**.
-- Core schema applied and seeders run. `public/hot` present (Vite dev server expected running).
+- Login, registration, verification gate, pending-notice page working (Fortify + Blade, mobile-first).
+- Schema and models complete for profile/tax/notifications modules. Seeders run; `public/hot` present (Vite dev server expected running).
+- Static pages: Home, Jobs, Employers, About + accessibility panel component.
+- Migrations verified up/down; `./vendor/bin/pint` clean.
 
 ## Next concrete action
-**Registration redesign** — multi-role picker (Candidate / Employer), PWD ID number field for candidates, business permit number for employers, auto-create profile rows on register. See AUTH-01–03 and AUTH-09 in `docs/REQUIREMENTS.md`.
+**Verification admin queue** (ADMIN-01–03, AUTH-04): list pending `verification_requests` with inline document preview, then approve / reject / request-more-docs actions that set `users.status` + `verified_at` and fire notifications. See `TASKS.md` → Verification Queue.
 
 ## Open questions
 - Track ownership: who owns A, B, C, D? (Still TBD)
