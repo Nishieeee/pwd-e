@@ -20,10 +20,10 @@ _Last synced with `docs/REQUIREMENTS.md` v1.1 — 2026-11-11_
 ## Track A — Foundation & Admin
 
 ### Auth & Registration (AUTH-01–10)
-- [ ] Registration page redesign: role picker (Candidate / Employer) + auto-create profile rows (AUTH-01)
-- [ ] Candidate registration: collect disability type (dropdown/multi-select) + PWD ID number field (AUTH-02, AUTH-09)
-- [ ] Employer registration: collect company name, email, business permit number (AUTH-03)
-- [ ] Block unverified accounts from sensitive actions; redirect with friendly message (AUTH-04)
+- [x] Registration page redesign: role picker (Candidate / Employer) + auto-create profile rows (AUTH-01)
+- [x] Candidate registration: collect disability type (dropdown/multi-select) + PWD ID number field (AUTH-02, AUTH-09)
+- [x] Employer registration: collect company name, email, business permit number (AUTH-03)
+- [x] Block unverified accounts from sensitive actions; redirect with friendly message (AUTH-04)
 - [ ] Email notification on account approval / rejection (AUTH-05)
 - [ ] Password reset via time-limited token link (AUTH-06)
 - [ ] Session expiry after 2 h inactivity with redirect + message (AUTH-07)

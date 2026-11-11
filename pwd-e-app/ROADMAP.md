@@ -66,7 +66,7 @@ Nov 22     D runs full-loop integration once B + C are merged
 | Date | Milestone | Status |
 |---|---|---|
 | Nov 4 | Scaffold pushed; roles and auth working | ⚠️ Partial — login done, register pending |
-| **Nov 13** | Registration + unverified gate merged — B/C/D go fully parallel | 🔲 |
+| **Nov 13** | Registration + unverified gate merged — B/C/D go fully parallel | ✅ |
 | **Nov 15** | Language detector, profile wizard, matching service, predictive text alpha all merged | 🔲 Upcoming |
 | **Nov 22** | **All features working end to end (thin)** | 🔲 Target |
 | Nov 29 | Hardened, tested, demo-ready | 🔲 |
