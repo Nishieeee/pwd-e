@@ -15,6 +15,9 @@ use Spatie\Permission\Traits\HasRoles;
 /**
  * @property int $id
  * @property string $name
+ * @property string|null $first_name
+ * @property string|null $middle_name
+ * @property string|null $last_name
  * @property string $email
  * @property Carbon|null $email_verified_at
  * @property string $password
@@ -25,7 +28,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name', 'email', 'password', 'role', 'status', 'verified_at', 'display_settings'])]
+#[Fillable(['name', 'first_name', 'middle_name', 'last_name', 'email', 'password', 'role', 'status', 'verified_at', 'pwd_id_number', 'pwd_id_path', 'display_settings'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -38,6 +41,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'verified_at' => 'datetime',
+            'pwd_id_number' => 'encrypted',
             'display_settings' => 'array',
         ];
     }
@@ -57,9 +61,19 @@ class User extends Authenticatable
         return $this->hasMany(VerificationRequest::class);
     }
 
+    public function notificationPreferences()
+    {
+        return $this->hasMany(NotificationPreference::class);
+    }
+
     public function isActive(): bool
     {
         return $this->status === 'active';
+    }
+
+    public function isVerified(): bool
+    {
+        return $this->verified_at !== null && $this->status === 'active';
     }
 
     public function initials(): string

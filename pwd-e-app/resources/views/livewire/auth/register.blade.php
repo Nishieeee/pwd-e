@@ -1,69 +1,348 @@
-<x-layouts::auth :title="__('Register')">
-    <div class="flex flex-col gap-6">
-        <x-auth-header :title="__('Create an account')" :description="__('Enter your details below to create your account')" />
-
-        <!-- Session Status -->
-        <x-auth-session-status class="text-center" :status="session('status')" />
-
-        <form method="POST" action="{{ route('register.store') }}" class="flex flex-col gap-6">
-            @csrf
-            <!-- Name -->
-            <flux:input
-                name="name"
-                :label="__('Name')"
-                :value="old('name')"
-                type="text"
-                required
-                autofocus
-                autocomplete="name"
-                :placeholder="__('Full name')"
-            />
-
-            <!-- Email Address -->
-            <flux:input
-                name="email"
-                :label="__('Email address')"
-                :value="old('email')"
-                type="email"
-                required
-                autocomplete="email"
-                placeholder="email@example.com"
-            />
-
-            <!-- Password -->
-            <flux:input
-                name="password"
-                :label="__('Password')"
-                type="password"
-                required
-                autocomplete="new-password"
-                :placeholder="__('Password')"
-                passwordrules="{{ \Illuminate\Validation\Rules\Password::defaults()->toPasswordRulesString() }}"
-                viewable
-            />
-
-            <!-- Confirm Password -->
-            <flux:input
-                name="password_confirmation"
-                :label="__('Confirm password')"
-                type="password"
-                required
-                autocomplete="new-password"
-                :placeholder="__('Confirm password')"
-                passwordrules="{{ \Illuminate\Validation\Rules\Password::defaults()->toPasswordRulesString() }}"
-                viewable
-            />
-
-            <div class="flex items-center justify-end">
-                <flux:button type="submit" variant="primary" class="w-full" data-test="register-user-button">
-                    {{ __('Create account') }}
-                </flux:button>
+<x-layouts::auth.full :title="__('Register')">
+    <header class="bg-primary-dark">
+        <div class="mx-auto flex max-w-[1200px] items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+            <a href="{{ route('home') }}" class="flex items-center gap-2 text-white font-heading font-bold text-lg">
+                <span class="grid h-9 w-9 place-items-center rounded-full bg-primary text-white">P</span>
+                PWD-E
+            </a>
+            <nav class="hidden items-center gap-6 text-sm font-medium text-white md:flex">
+                <a href="{{ route('home') }}" class="hover:underline">Home</a>
+                <a href="{{ route('jobs') }}" class="hover:underline">Jobs</a>
+                <a href="{{ route('employers') }}" class="hover:underline">Employers</a>
+                <a href="{{ route('about') }}" class="hover:underline">About</a>
+            </nav>
+            <div class="flex items-center gap-2">
+                <a href="{{ route('login') }}" class="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-primary-dark">Sign In</a>
             </div>
-        </form>
-
-        <div class="space-x-1 rtl:space-x-reverse text-center text-sm text-zinc-600 dark:text-zinc-400">
-            <span>{{ __('Already have an account?') }}</span>
-            <flux:link :href="route('login')" wire:navigate>{{ __('Log in') }}</flux:link>
         </div>
-    </div>
-</x-layouts::auth>
+    </header>
+
+    <x-accessibility-panel />
+
+    <main class="mx-auto max-w-[1200px] px-4 py-6 sm:px-6">
+        <a href="{{ route('home') }}" class="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg> Back to Home
+        </a>
+
+        <div class="flex flex-col-reverse overflow-hidden rounded-2xl bg-white shadow-[0_8px_24px_rgba(26,40,64,0.06)] md:grid md:grid-cols-2">
+            <section class="bg-gradient-to-b from-primary-tint to-[#D6E7F3] p-5 md:p-10">
+                <span class="inline-flex items-center gap-1 rounded-full border border-primary-border bg-white px-3.5 py-2 text-xs font-semibold text-primary-dark">
+                    Accessibility-first employment
+                </span>
+                <h1 class="mt-4 font-heading text-3xl font-extrabold leading-tight text-primary-dark md:text-[40px]">
+                    Create your inclusive account.
+                </h1>
+                <p class="mt-3 max-w-[46ch] text-base text-body-muted">
+                    Multi-step registration. Your privacy is protected under RA 10173.
+                </p>
+            </section>
+
+            <section class="p-5 md:p-8 lg:p-16"
+                x-data="{
+                    role: '{{ old('role', 'candidate') }}',
+                    step: 0,
+                    candidateSteps: 3,
+                    employerSteps: 2,
+                    canContinue: false,
+                    totalSteps() { return this.role === 'candidate' ? this.candidateSteps : this.employerSteps; },
+                    val(id) { const el = document.getElementById(id); return el ? (el.value || '').trim() : ''; },
+                    isChecked(name) { const el = document.querySelector('input[name=' + name + ']'); return !!(el && el.checked); },
+                    stepValid() {
+                        if (this.role === 'candidate') {
+                            if (this.step === 0) return this.val('first_name') !== '' && this.val('last_name') !== '' && this.val('email') !== '' && document.querySelector('input[name=password]').value.length >= 8 && document.querySelector('input[name=password]').value === document.querySelector('input[name=password_confirmation]').value;
+                            if (this.step === 1) {
+                                const d = new Date(this.val('date_of_birth'));
+                                if (isNaN(d.getTime())) return false;
+                                const age = (Date.now() - d.getTime()) / (365.25*24*60*60*1000);
+                                return age >= 18;
+                            }
+                            if (this.step === 2) return this.val('disability_type') !== '' && this.val('pwd_id_number') !== '' && this.isChecked('consent') && this.isChecked('terms');
+                        } else {
+                            if (this.step === 0) return this.val('company_name') !== '' && this.val('email') !== '' && document.querySelector('input[name=password]').value.length >= 8 && document.querySelector('input[name=password]').value === document.querySelector('input[name=password_confirmation]').value;
+                            if (this.step === 1) return this.val('business_permit_number') !== '' && this.isChecked('terms');
+                        }
+                        return true;
+                    },
+                    updateState() { this.canContinue = this.stepValid(); },
+                    next() {
+                        if (!this.stepValid()) return;
+                        if (this.step < this.totalSteps() - 1) this.step++;
+                        this.$nextTick(() => this.updateState());
+                    },
+                    prev() { if (this.step > 0) this.step--; this.$nextTick(() => this.updateState()); },
+                }"
+                x-init="updateState()"
+                @input="updateState()"
+                @change="updateState()">
+                <p class="text-xs font-semibold uppercase tracking-[0.08em] text-primary">New Account</p>
+                <h2 class="mt-2 font-heading text-3xl font-bold text-primary-dark md:text-[34px]">Register</h2>
+
+                <div class="mt-4 flex items-center gap-2" aria-label="Registration progress">
+                    <template x-for="i in totalSteps()" :key="i">
+                        <span class="h-2 flex-1 rounded-full" :class="i-1 <= step ? 'bg-primary' : 'bg-[#CBD5E1]'"></span>
+                    </template>
+                </div>
+
+                <form method="POST" action="{{ route('register.store') }}" enctype="multipart/form-data" class="mt-6 flex flex-col gap-5" novalidate
+                      @keydown.enter="if (step < totalSteps() - 1) { $event.preventDefault(); next(); }">
+                    @csrf
+                    <input type="hidden" name="role" :value="role">
+
+                    {{-- Step 0: Role + first inputs --}}
+                    <div x-show="step === 0" x-cloak class="flex flex-col gap-5">
+                        <div>
+                            <p class="mb-1.5 text-sm font-semibold text-primary-dark">I am registering as <span class="text-[#B3261E]">*</span></p>
+                            <div class="flex gap-3" role="radiogroup" aria-label="Registration role">
+                                <label class="flex-1 cursor-pointer">
+                                    <input type="radio" name="role" value="candidate" x-model="role" class="sr-only">
+                                    <span class="flex h-12 items-center justify-center rounded-lg border border-[#CBD5E1] text-sm font-semibold text-primary-dark" :class="role === 'candidate' ? 'bg-primary text-white border-primary' : 'bg-white'">Candidate (PWD)</span>
+                                </label>
+                                <label class="flex-1 cursor-pointer">
+                                    <input type="radio" name="role" value="employer" x-model="role" class="sr-only">
+                                    <span class="flex h-12 items-center justify-center rounded-lg border border-[#CBD5E1] text-sm font-semibold text-primary-dark" :class="role === 'employer' ? 'bg-primary text-white border-primary' : 'bg-white'">Employer</span>
+                                </label>
+                            </div>
+                            @error('role')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                        </div>
+
+                        {{-- Candidate first inputs --}}
+                        <fieldset x-show="role === 'candidate'" class="flex flex-col gap-5 border-0 p-0 m-0" :disabled="role !== 'candidate'">
+                            <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                                <div>
+                                    <label for="first_name" class="mb-1.5 block text-sm font-semibold text-primary-dark">First name <span class="text-[#B3261E]">*</span></label>
+                                    <input id="first_name" name="first_name" type="text" value="{{ old('first_name') }}" :required="role === 'candidate'" autocomplete="given-name" placeholder="First name" :disabled="role !== 'candidate'"
+                                           class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                    @error('first_name')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                                </div>
+                                <div>
+                                    <label for="middle_name" class="mb-1.5 block text-sm font-semibold text-primary-dark">Middle name</label>
+                                    <input id="middle_name" name="middle_name" type="text" value="{{ old('middle_name') }}" autocomplete="additional-name" placeholder="Middle name"
+                                           class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                </div>
+                                <div>
+                                    <label for="last_name" class="mb-1.5 block text-sm font-semibold text-primary-dark">Last name <span class="text-[#B3261E]">*</span></label>
+                                    <input id="last_name" name="last_name" type="text" value="{{ old('last_name') }}" :required="role === 'candidate'" autocomplete="family-name" placeholder="Last name"
+                                           class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                    @error('last_name')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                                </div>
+                            </div>
+                            <div>
+                                <label for="email" class="mb-1.5 block text-sm font-semibold text-primary-dark">Email address <span class="text-[#B3261E]">*</span></label>
+                                <input id="email" name="email" type="email" value="{{ old('email') }}" :required="role === 'candidate'" autocomplete="email" placeholder="you@example.com"
+                                       class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                @error('email')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                            </div>
+                            <div>
+                                <label for="password" class="mb-1.5 block text-sm font-semibold text-primary-dark">Password <span class="text-[#B3261E]">*</span></label>
+                                <input id="password" name="password" type="password" autocomplete="new-password" placeholder="Password"
+                                       class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                @error('password')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                            </div>
+                            <div>
+                                <label for="password_confirmation" class="mb-1.5 block text-sm font-semibold text-primary-dark">Confirm password <span class="text-[#B3261E]">*</span></label>
+                                <input id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password" placeholder="Confirm password"
+                                       class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                            </div>
+                        </fieldset>
+
+                        {{-- Employer first inputs --}}
+                        <fieldset x-show="role === 'employer'" class="flex flex-col gap-5 border-0 p-0 m-0" :disabled="role !== 'employer'">
+                            <div>
+                                <label for="company_name" class="mb-1.5 block text-sm font-semibold text-primary-dark">Company name <span class="text-[#B3261E]">*</span></label>
+                                <input id="company_name" name="company_name" type="text" value="{{ old('company_name') }}" :required="role === 'employer'" placeholder="Company Inc."
+                                       class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                @error('company_name')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                            </div>
+                            <div>
+                                <label for="email" class="mb-1.5 block text-sm font-semibold text-primary-dark">Email address <span class="text-[#B3261E]">*</span></label>
+                                <input id="email" name="email" type="email" value="{{ old('email') }}" :required="role === 'employer'" autocomplete="email" placeholder="you@example.com"
+                                       class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                @error('email')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                            </div>
+                            <div>
+                                <label for="password" class="mb-1.5 block text-sm font-semibold text-primary-dark">Password <span class="text-[#B3261E]">*</span></label>
+                                <input id="password" name="password" type="password" autocomplete="new-password" placeholder="Password"
+                                       class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                @error('password')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                            </div>
+                            <div>
+                                <label for="password_confirmation" class="mb-1.5 block text-sm font-semibold text-primary-dark">Confirm password <span class="text-[#B3261E]">*</span></label>
+                                <input id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password" placeholder="Confirm password"
+                                       class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                            </div>
+                        </fieldset>
+
+                        <div class="flex gap-3">
+                            <button type="button" @click="next()" :disabled="!canContinue" :class="canContinue ? 'bg-[#2A5D8F] hover:bg-[#224B73]' : 'bg-[#94A3B8] cursor-not-allowed'" class="flex h-[52px] w-full items-center justify-center gap-2 rounded-lg text-base font-semibold text-white disabled:opacity-60">
+                                Continue
+                            </button>
+                        </div>
+                    </div>
+
+                    {{-- Candidate Step 1: DOB --}}
+                    <div x-show="role === 'candidate' && step === 1" x-cloak class="flex flex-col gap-5">
+                        <div>
+                            <label for="date_of_birth" class="mb-1.5 block text-sm font-semibold text-primary-dark">Date of birth <span class="text-[#B3261E]">*</span></label>
+                            <input id="date_of_birth" name="date_of_birth" type="date" value="{{ old('date_of_birth') }}" :required="role === 'candidate'"
+                                   class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                            @error('date_of_birth')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                        </div>
+                        <div class="flex gap-3">
+                            <button type="button" @click="prev()" class="flex h-[52px] flex-1 items-center justify-center rounded-lg border border-[#CBD5E1] text-base font-semibold text-primary-dark hover:bg-primary-tint">Back</button>
+                            <button type="button" @click="next()" :disabled="!canContinue" :class="canContinue ? 'bg-[#2A5D8F] hover:bg-[#224B73]' : 'bg-[#94A3B8] cursor-not-allowed'" class="flex h-[52px] flex-1 items-center justify-center rounded-lg text-base font-semibold text-white disabled:opacity-60">Next</button>
+                        </div>
+                    </div>
+
+                    {{-- Candidate Step 2: PWD ID --}}
+                    <div x-show="role === 'candidate' && step === 2" x-cloak class="flex flex-col gap-5">
+                        <div>
+                            <label for="disability_type" class="mb-1.5 block text-sm font-semibold text-primary-dark">Disability type <span class="text-[#B3261E]">*</span></label>
+                            <select id="disability_type" name="disability_type" :required="role === 'candidate'" class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                <option value="">Select…</option>
+                                @foreach (['Visual','Hearing','Motor/Physical','Speech','Cerebral Palsy','Psychosocial','Intellectual','Multiple'] as $dt)
+                                    <option value="{{ $dt }}" {{ old('disability_type') === $dt ? 'selected' : '' }}>{{ $dt }}</option>
+                                @endforeach
+                            </select>
+                            @error('disability_type')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label for="pwd_id_number" class="mb-1.5 block text-sm font-semibold text-primary-dark">PWD ID number <span class="text-[#B3261E]">*</span></label>
+                            <input id="pwd_id_number" name="pwd_id_number" type="text" value="{{ old('pwd_id_number') }}" :required="role === 'candidate'" placeholder="PWD-12345"
+                                   class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                            @error('pwd_id_number')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label for="pwd_id_file" class="mb-1.5 block text-sm font-semibold text-primary-dark">PWD ID document</label>
+                            <input id="pwd_id_file" name="pwd_id_file" type="file" accept=".jpg,.jpeg,.png,.pdf"
+                                   class="block w-full text-sm text-primary-dark file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-2 file:text-white">
+                            @error('pwd_id_file')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                        </div>
+                        <label class="flex cursor-pointer items-start gap-2 text-sm text-primary-dark">
+                            <input type="checkbox" name="consent" value="1" {{ old('consent') ? 'checked' : '' }} class="mt-1 h-4 w-4">
+                            <span>I consent to the collection of my disability information for matching purposes (RA 10173).</span>
+                        </label>
+                        @error('consent')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                        <label class="flex cursor-pointer items-start gap-2 text-sm text-primary-dark">
+                            <input type="checkbox" name="terms" value="1" {{ old('terms') ? 'checked' : '' }} class="mt-1 h-4 w-4">
+                            <span>I accept the Terms and Conditions. <span class="text-[#B3261E]">*</span></span>
+                        </label>
+                        @error('terms')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                        <div class="flex gap-3">
+                            <button type="button" @click="prev()" class="flex h-[52px] flex-1 items-center justify-center rounded-lg border border-[#CBD5E1] text-base font-semibold text-primary-dark hover:bg-primary-tint">Back</button>
+                            <button type="submit" :disabled="!canContinue" :class="canContinue ? 'bg-[#2A5D8F] hover:bg-[#224B73]' : 'bg-[#94A3B8] cursor-not-allowed'" class="flex h-[52px] flex-1 items-center justify-center gap-2 rounded-lg text-base font-semibold text-white disabled:opacity-60">
+                                Create account
+                            </button>
+                        </div>
+                    </div>
+
+                    {{-- Employer Step 1: Permit --}}
+                    <div x-show="role === 'employer' && step === 1" x-cloak class="flex flex-col gap-5">
+                        <div>
+                            <label for="business_permit_number" class="mb-1.5 block text-sm font-semibold text-primary-dark">Business permit number <span class="text-[#B3261E]">*</span></label>
+                            <input id="business_permit_number" name="business_permit_number" type="text" value="{{ old('business_permit_number') }}" :required="role === 'employer'" placeholder="BP-123456"
+                                   class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                            @error('business_permit_number')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label for="business_permit_file" class="mb-1.5 block text-sm font-semibold text-primary-dark">Business permit document</label>
+                            <input id="business_permit_file" name="business_permit_file" type="file" accept=".jpg,.jpeg,.png,.pdf"
+                                   class="block w-full text-sm text-primary-dark file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-2 file:text-white">
+                            @error('business_permit_file')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                        </div>
+                        <label class="flex cursor-pointer items-start gap-2 text-sm text-primary-dark">
+                            <input type="checkbox" name="terms" value="1" {{ old('terms') ? 'checked' : '' }} class="mt-1 h-4 w-4">
+                            <span>I accept the Terms and Conditions. <span class="text-[#B3261E]">*</span></span>
+                        </label>
+                        @error('terms')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                        <div class="flex gap-3">
+                            <button type="button" @click="prev()" class="flex h-[52px] flex-1 items-center justify-center rounded-lg border border-[#CBD5E1] text-base font-semibold text-primary-dark hover:bg-primary-tint">Back</button>
+                            <button type="submit" :disabled="!canContinue" :class="canContinue ? 'bg-[#2A5D8F] hover:bg-[#224B73]' : 'bg-[#94A3B8] cursor-not-allowed'" class="flex h-[52px] flex-1 items-center justify-center gap-2 rounded-lg text-base font-semibold text-white disabled:opacity-60">
+                                Create account
+                            </button>
+                        </div>
+                    </div>
+
+                    <p class="text-center text-base text-body-muted">
+                        Already have an account?
+                        <a href="{{ route('login') }}" class="font-semibold text-primary hover:underline">Sign in</a>
+                    </p>
+                </form>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        (function () {
+            const fields = document.querySelectorAll('input[name], select[name]');
+            const validate = function (el) {
+                const name = el.name;
+                const val = (el.value || '').trim();
+                let msg = '';
+                if (el.hasAttribute('required') && val === '') {
+                    msg = 'This field is required.';
+                } else if (name === 'email' && val && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+                    msg = 'Please enter a valid email address.';
+                } else if (name === 'password' && val && val.length < 8) {
+                    msg = 'Password must be at least 8 characters.';
+                } else if (name === 'password_confirmation' && val) {
+                    const pw = document.querySelector('input[name="password"]');
+                    if (pw && val !== pw.value) msg = 'Passwords do not match.';
+                } else if (name === 'date_of_birth' && val) {
+                    const d = new Date(val);
+                    if (isNaN(d.getTime())) msg = 'Please enter a valid date.';
+                    else {
+                        const age = (Date.now() - d.getTime()) / (365.25 * 24 * 60 * 60 * 1000);
+                        if (age < 18) msg = 'You must be at least 18 years old.';
+                    }
+                } else if (name === 'disability_type' && val === '') {
+                    msg = 'Please select a disability type.';
+                } else if ((name === 'pwd_id_number' || name === 'business_permit_number' || name === 'company_name' || name === 'first_name' || name === 'last_name') && val === '') {
+                    msg = 'This field is required.';
+                }
+                const span = el.parentElement.querySelector('.client-error');
+                if (msg) {
+                    if (!span) {
+                        const p = document.createElement('p');
+                        p.className = 'mt-1.5 text-sm text-[#FF0000] client-error';
+                        p.textContent = msg;
+                        el.insertAdjacentElement('afterend', p);
+                    } else {
+                        span.textContent = msg;
+                    }
+                    el.setAttribute('aria-invalid', 'true');
+                } else if (span) {
+                    span.remove();
+                    el.setAttribute('aria-invalid', 'false');
+                }
+            };
+            fields.forEach(function (el) {
+                if (el.type === 'checkbox' || el.type === 'hidden') return;
+                if (el.type === 'file') {
+                    el.addEventListener('change', function () {
+                        const f = el.files && el.files[0];
+                        const span = el.parentElement.querySelector('.client-error');
+                        if (f && f.size > 5 * 1024 * 1024) {
+                            if (!span) {
+                                const p = document.createElement('p');
+                                p.className = 'mt-1.5 text-sm text-[#FF0000] client-error';
+                                p.textContent = 'File must be 5 MB or smaller.';
+                                el.insertAdjacentElement('afterend', p);
+                            } else {
+                                span.textContent = 'File must be 5 MB or smaller.';
+                            }
+                            el.value = '';
+                        } else if (span) {
+                            span.remove();
+                        }
+                    });
+                    return;
+                }
+                let t;
+                const schedule = function () { clearTimeout(t); t = setTimeout(function () { validate(el); }, 2000); };
+                el.addEventListener('input', schedule);
+                el.addEventListener('change', schedule);
+                el.addEventListener('blur', function () { clearTimeout(t); validate(el); });
+            });
+        })();
+    </script>
+</x-layouts::auth.full>

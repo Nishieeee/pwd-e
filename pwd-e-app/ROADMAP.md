@@ -8,7 +8,7 @@ _Updated 2026-11-11 to reflect stakeholder interview findings (see `docs/REQUIRE
 
 ## Strategy
 
-Four team members own one track each and work in parallel. The goal is **all features working in thin form by Nov 22**, leaving the final week for hardening, accessibility testing, and bug fixes.
+All four tracks run **in parallel**. The goal is **all features working in thin form by Nov 22**, leaving the final week for hardening, accessibility testing, and bug fixes.
 
 > [!IMPORTANT]
 > Two new feature areas were added from the stakeholder interview:
@@ -16,6 +16,25 @@ Four team members own one track each and work in parallel. The goal is **all fea
 > - **Tax Incentive Reporting** (TAX-01–05) — RA 10524 deduction tracker and export (Track B)
 >
 > These are **first-class features**, not stretch goals.
+
+---
+
+## Parallel Execution — How it Works
+
+Track A has a **3–4 day critical path** (registration → gate → verification) that the other tracks depend on for end-to-end testing. While A lands that, B/C/D are **not idle** — they build skeletons, service classes, and unit tests against factory data.
+
+```
+Nov 11–13  Person A → Registration redesign + unverified gate  ← critical path
+           Person B → Job posting form skeleton + migrations
+           Person C → Profile wizard skeleton + service class stubs
+           Person D → Matching service unit tests (factory data) + predictive text spike
+
+Nov 14+    All four tracks go fully parallel against real registered users
+Nov 22     D runs full-loop integration once B + C are merged
+```
+
+> [!NOTE]
+> B, C, and D should **never wait idle** for A. Build the UI, write the service class, write unit tests with factories. Wire to real data once A's registration merges.
 
 ---
 
@@ -30,15 +49,15 @@ Four team members own one track each and work in parallel. The goal is **all fea
 
 ---
 
-## Weekly Plan (Revised)
+## Daily Plan (Nov 11–22)
 
-| Week | Dates | A. Foundation / Admin | B. Employer | C. Candidate | D. Matching / UI |
-|---|---|---|---|---|---|
-| ~~1~~ | ~~Nov 2–8~~ | ~~Scaffold, auth, roles, verification queue~~ → _login done; register + verification in progress_ | ~~Matrix migrations, models, onboarding form~~ | ~~Profile form skeleton~~ | ~~Base layout, display toggles~~ |
-| **2** | **Nov 9–15** | Registration redesign (role picker, PWD ID field); verification admin queue; email notifications | Posting editor; exclusionary language detector; applicant list | Profile wizard steps: skills chips, accessibility needs checklist, visibility toggles; résumé upload | Matching service wired to real data; ranked results page; predictive text engine (alpha) |
-| **3** | **Nov 16–22** | Analytics dashboard; demo data seeders; audit log view; suspend/reinstate | Hire flow → `workforce_records`; RA 10524 tracker + PDF/XLSX export | FSL video record/upload; voice input; candidate dashboard + application status | Full-loop integration; predictive text keyboard/ARIA; first axe-core + NVDA pass |
-| **4** | **Nov 23–29** | Privacy hardening (encrypted casts, signed URLs, policies); deploy / demo setup | Bug fixes; RA 10524 report accuracy checks; lexicon UI | Bug fixes; accessibility fixes; FSL/voice polish | End-to-end tests; second AT pass (NVDA + JAWS); documentation final update |
-| Buffer | **Nov 30–Dec 1** | Bug fixes only — freeze — rehearse demo | | | |
+| Day | A. Foundation / Admin | B. Employer | C. Candidate | D. Matching / UI |
+|---|---|---|---|---|
+| **Nov 11–13** ⚡ | **Registration redesign** (role picker, PWD ID field, employer permit); unverified account gate middleware | Job posting form skeleton (Livewire component, migrations) | Profile wizard skeleton (steps scaffold, models, auto-save) | Matching service unit tests on factory data; predictive text library spike |
+| **Nov 14–15** | Verification admin queue (list, approve/reject, email trigger) | Exclusionary language detector (lexicon + regex, live flag UI) | Profile wizard: skills chips, accessibility needs checklist, visibility toggles | Matching service wired to real users; ranked results page |
+| **Nov 16–17** | Email notifications (Mailable jobs, queue); in-app bell | Applicant list per posting (ranked by score); status updates | Résumé PDF upload; voice input (Web Speech API toggle) | Predictive text: keyboard nav, Tab-completion, ARIA listbox |
+| **Nov 18–19** | Analytics dashboard; audit log view; suspend/reinstate | Hire flow → `workforce_records`; RA 10524 deduction tracker | FSL video record/upload; candidate dashboard | Application flow (pre-fill from profile, PWD ID gate, confirmation email) |
+| **Nov 20–22** | Demo data seeders; privacy hardening (encrypted casts, signed URLs) | RA 10524 PDF/XLSX export; lexicon management UI | Application history + withdraw; accessibility/voice fixes | Full-loop integration tests; first axe-core + NVDA pass |
 
 ---
 
@@ -47,8 +66,8 @@ Four team members own one track each and work in parallel. The goal is **all fea
 | Date | Milestone | Status |
 |---|---|---|
 | Nov 4 | Scaffold pushed; roles and auth working | ⚠️ Partial — login done, register pending |
-| Nov 8 | Verification, matrix, profile form, layout merged | ⚠️ In progress |
-| **Nov 15** | Language detector, FSL, voice, matching, auditor merged; predictive text alpha | 🔲 Upcoming |
+| **Nov 13** | Registration + unverified gate merged — B/C/D go fully parallel | ✅ |
+| **Nov 15** | Language detector, profile wizard, matching service, predictive text alpha all merged | 🔲 Upcoming |
 | **Nov 22** | **All features working end to end (thin)** | 🔲 Target |
 | Nov 29 | Hardened, tested, demo-ready | 🔲 |
 | **Dec 1** | **Deadline** | 🔲 |
