@@ -189,4 +189,4 @@ Run the tests with `php artisan test`.
 
 ## 15. Related Docs
 
-`AGENTS.md` (start here) · `ARCHITECTURE.md` · `CURRENT-STATE.md` · `DECISIONS.md` · `CONVENTIONS.md` · `DATABASE.md` · `TESTING.md` · `TASKS.md` · `ROADMAP.md` · `HANDOFF.md`
+`AGENTS.md` (start here) · `ARCHITECTURE.md` · `CURRENT-STATE.md` · `DECISIONS.md` · `CONVENTIONS.md` · `DATABASE.md` · `TESTING.md` · `TASKS.md` · `ROADMAP.md` · `HANDOFF.md` · `docs/REQUIREMENTS.md`
