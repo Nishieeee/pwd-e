@@ -23,10 +23,12 @@ test('registration screen can be rendered', function () {
 test('candidate can register with pwd id and creates profile', function () {
     $response = $this->post(route('register.store'), [
         'role' => 'candidate',
-        'name' => 'John Doe',
+        'first_name' => 'John',
+        'last_name' => 'Doe',
         'email' => 'candidate@example.com',
         'password' => 'password',
         'password_confirmation' => 'password',
+        'date_of_birth' => now()->subYears(20)->toDateString(),
         'disability_type' => 'Visual',
         'pwd_id_number' => 'PWD-12345',
         'consent' => '1',
@@ -37,6 +39,8 @@ test('candidate can register with pwd id and creates profile', function () {
     $user = User::where('email', 'candidate@example.com')->first();
     expect($user)->not->toBeNull();
     expect($user->role)->toBe('candidate');
+    expect($user->first_name)->toBe('John');
+    expect($user->last_name)->toBe('Doe');
     expect($user->status)->toBe('pending');
     expect($user->verified_at)->toBeNull();
     expect(CandidateProfile::where('user_id', $user->id)->exists())->toBeTrue();
@@ -46,7 +50,8 @@ test('candidate can register with pwd id and creates profile', function () {
 test('employer can register with permit and creates profile', function () {
     $response = $this->post(route('register.store'), [
         'role' => 'employer',
-        'name' => 'Acme Corp',
+        'first_name' => 'Acme',
+        'last_name' => 'Corp',
         'email' => 'employer@example.com',
         'password' => 'password',
         'password_confirmation' => 'password',
@@ -59,6 +64,8 @@ test('employer can register with permit and creates profile', function () {
     $user = User::where('email', 'employer@example.com')->first();
     expect($user)->not->toBeNull();
     expect($user->role)->toBe('employer');
+    expect($user->first_name)->toBe('Acme');
+    expect($user->last_name)->toBe('Corp');
     expect($user->status)->toBe('pending');
     expect(EmployerProfile::where('user_id', $user->id)->exists())->toBeTrue();
     expect(VerificationRequest::where('user_id', $user->id)->where('type', 'business_permit')->exists())->toBeTrue();
@@ -67,11 +74,12 @@ test('employer can register with permit and creates profile', function () {
 test('registration fails without required role fields', function () {
     $response = $this->post(route('register.store'), [
         'role' => 'candidate',
-        'name' => 'John Doe',
+        'first_name' => 'John',
+        'last_name' => 'Doe',
         'email' => 'x@example.com',
         'password' => 'password',
         'password_confirmation' => 'password',
     ]);
 
-    $response->assertSessionHasErrors(['disability_type', 'pwd_id_number', 'consent']);
+    $response->assertSessionHasErrors(['date_of_birth', 'disability_type', 'pwd_id_number', 'consent']);
 });

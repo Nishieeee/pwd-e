@@ -7,11 +7,14 @@ _Confirm before writing new migrations._
 
 ## Application Tables
 
-### `users` (14 cols)
+### `users` (17 cols)
 | Column | Type | Notes |
 |---|---|---|
 | id | bigint PK | |
-| name | varchar | |
+| name | varchar | composed full name for display |
+| first_name | varchar | required at registration |
+| middle_name | varchar | optional |
+| last_name | varchar | required at registration |
 | email | varchar | unique |
 | email_verified_at | timestamp | Laravel default |
 | password | varchar | bcrypt ≥ 12 |

@@ -22,7 +22,10 @@ class CreateNewUser implements CreatesNewUsers
 
         $rules = [
             'role' => ['required', 'string', 'in:candidate,employer'],
-            ...$this->profileRules(),
+            'first_name' => ['required', 'string', 'max:100'],
+            'last_name' => ['required', 'string', 'max:100'],
+            'middle_name' => ['nullable', 'string', 'max:100'],
+            'email' => $this->emailRules(),
             'password' => $this->passwordRules(),
         ];
 
@@ -31,6 +34,7 @@ class CreateNewUser implements CreatesNewUsers
             $rules['pwd_id_number'] = ['required', 'string', 'max:50'];
             $rules['pwd_id_file'] = ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'];
             $rules['consent'] = ['accepted'];
+            $rules['date_of_birth'] = ['required', 'date', 'before_or_equal:'.now()->subYears(18)->toDateString()];
         } elseif ($role === 'employer') {
             $rules['company_name'] = ['required', 'string', 'max:255'];
             $rules['business_permit_number'] = ['required', 'string', 'max:100'];
@@ -45,8 +49,17 @@ class CreateNewUser implements CreatesNewUsers
             $pwdIdPath = $request->file('pwd_id_file')?->store('documents/pwd_ids', 'private');
             $permitPath = $request->file('business_permit_file')?->store('documents/permits', 'private');
 
+            $fullName = trim(implode(' ', array_filter([
+                $input['first_name'] ?? '',
+                $input['middle_name'] ?? '',
+                $input['last_name'] ?? '',
+            ])));
+
             $user = User::create([
-                'name' => $input['name'],
+                'name' => $fullName,
+                'first_name' => $input['first_name'],
+                'middle_name' => $input['middle_name'] ?? null,
+                'last_name' => $input['last_name'],
                 'email' => $input['email'],
                 'password' => $input['password'],
                 'role' => $role,
@@ -62,6 +75,7 @@ class CreateNewUser implements CreatesNewUsers
                 CandidateProfile::create([
                     'user_id' => $user->id,
                     'disability_type' => $input['disability_type'],
+                    'date_of_birth' => $input['date_of_birth'] ?? null,
                 ]);
                 VerificationRequest::create([
                     'user_id' => $user->id,
