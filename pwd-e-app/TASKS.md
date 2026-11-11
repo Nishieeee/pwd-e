@@ -13,6 +13,10 @@ _Last synced with `docs/REQUIREMENTS.md` v1.1 — 2026-11-11_
 - [x] Home, Jobs, Employers, About pages (static Blade, mobile-first)
 - [x] Accessibility panel componentized (reusable)
 - [x] Auth: Fortify scaffold + redesigned login page (1:1, mobile-first, live email validation)
+- [x] Registration redesign: role picker (Candidate / Employer), conditional fields, PWD ID + business permit, disability type, DOB, consent; transactionally creates User + profile + VerificationRequest
+- [x] Name parts persisted: `first_name`, `middle_name` (optional), `last_name` on `users`
+- [x] Unverified account gate middleware (pending users redirected to verification notice)
+- [x] Profile-completion schema: work experience, education, certifications, profile drafts, notifications, notification preferences, word history, tax snapshots + encrypted casts
 - [x] `docs/ERD.md` created; `docs/REQUIREMENTS.md` v1.1 written (SRS from stakeholder interview)
 
 ---

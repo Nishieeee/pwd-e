@@ -1,16 +1,19 @@
 # CURRENT-STATE.md
 
-_Last updated: 2026-11-11_
+_Last updated: 2026-11-12 — branch `Nishieee/Auth_Registration`_
 
 ## Phase
-Implementation in progress. **Core features are due December 1, 2026.** 20 days remaining.
+Implementation in progress. **Core features are due December 1, 2026.** 19 days remaining.
 
 ---
 
 ## Working ✅
-- PostgreSQL 18 connected: local DB `pwd_e` (role `pwd_e_user`); core schema applied (revised ERD); seeders run (accommodations, lexicon, admin + roles).
+- PostgreSQL 18 connected: local DB `pwd_e` (role `pwd_e_user`); full profile-completion schema applied (2026-11-12); seeders run (accommodations, lexicon, admin + roles).
 - Home, Jobs, Employers, About pages (static Blade, mobile-first); reusable accessibility panel component.
 - Auth: Fortify scaffold + redesigned login page (1:1 layout, mobile-first, live email validation, SVG icons, a11y error wiring).
+- **Registration redesign**: multi-role picker (Candidate / Employer), conditional fields, PWD ID number + optional upload, business permit number + optional upload, disability type, DOB (candidate), RA 10173 consent. Creates `User` + profile + `VerificationRequest` transactionally. Blocks until admin approval.
+- **Unverified account gate**: `EnsureAccountVerified` middleware redirects pending users to `verification.notice`; admins bypass.
+- **Schema complete for profile/tax/notifications**: name parts on `users`; work experience, education, certifications, profile drafts, notifications, notification preferences, word history, tax snapshots; encrypted casts on PWD ID, disability fields, cover letter.
 - `docs/ERD.md` created; `docs/REQUIREMENTS.md` v1.1 (full SRS from stakeholder interview).
 
 ## Done — Docs & Decisions ✅
@@ -24,8 +27,8 @@ Implementation in progress. **Core features are due December 1, 2026.** 20 days 
 ## Incomplete / Not Started 🔲
 
 ### Highest priority (blocker for all other tracks)
-- Registration redesign: role picker + PWD ID field for candidates, business permit for employers (AUTH-01–03, AUTH-09)
-- Verification admin queue (AUTH-04, ADMIN-01–03)
+- ~~Registration redesign: role picker + PWD ID field for candidates, business permit for employers (AUTH-01–03, AUTH-09)~~ ✅
+- Verification admin queue (AUTH-04, ADMIN-01–03) — **next up**
 
 ### Track A
 - Email notifications (NOTIF-01)
@@ -60,7 +63,7 @@ Implementation in progress. **Core features are due December 1, 2026.** 20 days 
 
 ## Known Issues & Open Questions
 - **Track ownership** still TBD — assign A/B/C/D before Nov 13.
-- Registration redesign is a blocker; every other track depends on the user existing with a role.
+- Verification admin queue is the next blocker: pending accounts cannot be approved until it exists.
 - Matching weights (0.6 / 0.4) and score threshold are placeholders — confirm with real data once profiles exist.
 - Predictive text library not yet chosen — evaluate `awesomplete` / `tribute.js` / custom Alpine.js component (see open question in `HANDOFF.md`).
 - Notification queue driver not yet decided: database (simple) vs. Redis.
