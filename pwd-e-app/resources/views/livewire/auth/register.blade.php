@@ -43,22 +43,39 @@
                     step: 0,
                     candidateSteps: 3,
                     employerSteps: 2,
+                    canContinue: false,
                     totalSteps() { return this.role === 'candidate' ? this.candidateSteps : this.employerSteps; },
-                    next() { if (this.step < this.totalSteps() - 1) this.step++; },
-                    prev() { if (this.step > 0) this.step--; },
-                }">
+                    val(id) { const el = document.getElementById(id); return el ? (el.value || '').trim() : ''; },
+                    isChecked(name) { const el = document.querySelector('input[name=' + name + ']'); return !!(el && el.checked); },
+                    stepValid() {
+                        if (this.role === 'candidate') {
+                            if (this.step === 0) return this.val('first_name') !== '' && this.val('last_name') !== '' && this.val('email') !== '' && document.querySelector('input[name=password]').value.length >= 8 && document.querySelector('input[name=password]').value === document.querySelector('input[name=password_confirmation]').value;
+                            if (this.step === 1) {
+                                const d = new Date(this.val('date_of_birth'));
+                                if (isNaN(d.getTime())) return false;
+                                const age = (Date.now() - d.getTime()) / (365.25*24*60*60*1000);
+                                return age >= 18;
+                            }
+                            if (this.step === 2) return this.val('disability_type') !== '' && this.val('pwd_id_number') !== '' && this.isChecked('consent') && this.isChecked('terms');
+                        } else {
+                            if (this.step === 0) return this.val('company_name') !== '' && this.val('email') !== '' && document.querySelector('input[name=password]').value.length >= 8 && document.querySelector('input[name=password]').value === document.querySelector('input[name=password_confirmation]').value;
+                            if (this.step === 1) return this.val('business_permit_number') !== '' && this.isChecked('terms');
+                        }
+                        return true;
+                    },
+                    updateState() { this.canContinue = this.stepValid(); },
+                    next() {
+                        if (!this.stepValid()) return;
+                        if (this.step < this.totalSteps() - 1) this.step++;
+                        this.$nextTick(() => this.updateState());
+                    },
+                    prev() { if (this.step > 0) this.step--; this.$nextTick(() => this.updateState()); },
+                }"
+                x-init="updateState()"
+                @input="updateState()"
+                @change="updateState()">
                 <p class="text-xs font-semibold uppercase tracking-[0.08em] text-primary">New Account</p>
                 <h2 class="mt-2 font-heading text-3xl font-bold text-primary-dark md:text-[34px]">Register</h2>
-
-                @if ($errors->any())
-                    <div class="mt-4 rounded-lg border border-[#B3261E] bg-[#FDECEA] px-3 py-2 text-sm text-[#B3261E]" role="alert" aria-live="assertive">
-                        <ul class="list-disc pl-5">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
 
                 <div class="mt-4 flex items-center gap-2" aria-label="Registration progress">
                     <template x-for="i in totalSteps()" :key="i">
@@ -66,7 +83,8 @@
                     </template>
                 </div>
 
-                <form method="POST" action="{{ route('register.store') }}" enctype="multipart/form-data" class="mt-6 flex flex-col gap-5" novalidate>
+                <form method="POST" action="{{ route('register.store') }}" enctype="multipart/form-data" class="mt-6 flex flex-col gap-5" novalidate
+                      @keydown.enter="if (step < totalSteps() - 1) { $event.preventDefault(); next(); }">
                     @csrf
                     <input type="hidden" name="role" :value="role">
 
@@ -155,7 +173,7 @@
                         </fieldset>
 
                         <div class="flex gap-3">
-                            <button type="button" @click="next()" class="flex h-[52px] w-full items-center justify-center gap-2 rounded-lg bg-[#2A5D8F] text-base font-semibold text-white hover:bg-[#224B73]">
+                            <button type="button" @click="next()" :disabled="!canContinue" :class="canContinue ? 'bg-[#2A5D8F] hover:bg-[#224B73]' : 'bg-[#94A3B8] cursor-not-allowed'" class="flex h-[52px] w-full items-center justify-center gap-2 rounded-lg text-base font-semibold text-white disabled:opacity-60">
                                 Continue
                             </button>
                         </div>
@@ -171,7 +189,7 @@
                         </div>
                         <div class="flex gap-3">
                             <button type="button" @click="prev()" class="flex h-[52px] flex-1 items-center justify-center rounded-lg border border-[#CBD5E1] text-base font-semibold text-primary-dark hover:bg-primary-tint">Back</button>
-                            <button type="button" @click="next()" class="flex h-[52px] flex-1 items-center justify-center rounded-lg bg-[#2A5D8F] text-base font-semibold text-white hover:bg-[#224B73]">Next</button>
+                            <button type="button" @click="next()" :disabled="!canContinue" :class="canContinue ? 'bg-[#2A5D8F] hover:bg-[#224B73]' : 'bg-[#94A3B8] cursor-not-allowed'" class="flex h-[52px] flex-1 items-center justify-center rounded-lg text-base font-semibold text-white disabled:opacity-60">Next</button>
                         </div>
                     </div>
 
@@ -211,7 +229,7 @@
                         @error('terms')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                         <div class="flex gap-3">
                             <button type="button" @click="prev()" class="flex h-[52px] flex-1 items-center justify-center rounded-lg border border-[#CBD5E1] text-base font-semibold text-primary-dark hover:bg-primary-tint">Back</button>
-                            <button type="submit" class="flex h-[52px] flex-1 items-center justify-center gap-2 rounded-lg bg-[#2A5D8F] text-base font-semibold text-white hover:bg-[#224B73]">
+                            <button type="submit" :disabled="!canContinue" :class="canContinue ? 'bg-[#2A5D8F] hover:bg-[#224B73]' : 'bg-[#94A3B8] cursor-not-allowed'" class="flex h-[52px] flex-1 items-center justify-center gap-2 rounded-lg text-base font-semibold text-white disabled:opacity-60">
                                 Create account
                             </button>
                         </div>
@@ -238,7 +256,7 @@
                         @error('terms')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                         <div class="flex gap-3">
                             <button type="button" @click="prev()" class="flex h-[52px] flex-1 items-center justify-center rounded-lg border border-[#CBD5E1] text-base font-semibold text-primary-dark hover:bg-primary-tint">Back</button>
-                            <button type="submit" class="flex h-[52px] flex-1 items-center justify-center gap-2 rounded-lg bg-[#2A5D8F] text-base font-semibold text-white hover:bg-[#224B73]">
+                            <button type="submit" :disabled="!canContinue" :class="canContinue ? 'bg-[#2A5D8F] hover:bg-[#224B73]' : 'bg-[#94A3B8] cursor-not-allowed'" class="flex h-[52px] flex-1 items-center justify-center gap-2 rounded-lg text-base font-semibold text-white disabled:opacity-60">
                                 Create account
                             </button>
                         </div>
