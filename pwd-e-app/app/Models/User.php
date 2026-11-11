@@ -68,6 +68,11 @@ class User extends Authenticatable
         return $this->status === 'active';
     }
 
+    public function isVerified(): bool
+    {
+        return $this->verified_at !== null && $this->status === 'active';
+    }
+
     public function initials(): string
     {
         $initials = Str::initials($this->name, true);

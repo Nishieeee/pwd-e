@@ -7,7 +7,11 @@ Route::view('/jobs', 'jobs')->name('jobs');
 Route::view('/employers', 'employers')->name('employers');
 Route::view('/about', 'about')->name('about');
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth'])->group(function () {
+    Route::get('verification/pending', fn () => view('auth.verification-pending'))->name('verification.notice');
+});
+
+Route::middleware(['auth', 'account.verified'])->group(function () {
     Route::view('dashboard', 'dashboard')->name('dashboard');
 });
 
