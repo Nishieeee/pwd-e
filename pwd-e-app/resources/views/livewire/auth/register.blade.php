@@ -92,7 +92,7 @@
                             <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
                                 <div>
                                     <label for="first_name" class="mb-1.5 block text-sm font-semibold text-primary-dark">First name <span class="text-[#B3261E]">*</span></label>
-                                    <input id="first_name" name="first_name" type="text" value="{{ old('first_name') }}" required autocomplete="given-name" placeholder="First name"
+                                    <input id="first_name" name="first_name" type="text" value="{{ old('first_name') }}" :required="role === 'candidate'" autocomplete="given-name" placeholder="First name"
                                            class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                                     @error('first_name')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                                 </div>
@@ -103,26 +103,26 @@
                                 </div>
                                 <div>
                                     <label for="last_name" class="mb-1.5 block text-sm font-semibold text-primary-dark">Last name <span class="text-[#B3261E]">*</span></label>
-                                    <input id="last_name" name="last_name" type="text" value="{{ old('last_name') }}" required autocomplete="family-name" placeholder="Last name"
+                                    <input id="last_name" name="last_name" type="text" value="{{ old('last_name') }}" :required="role === 'candidate'" autocomplete="family-name" placeholder="Last name"
                                            class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                                     @error('last_name')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                                 </div>
                             </div>
                             <div>
                                 <label for="email" class="mb-1.5 block text-sm font-semibold text-primary-dark">Email address <span class="text-[#B3261E]">*</span></label>
-                                <input id="email" name="email" type="email" value="{{ old('email') }}" required autocomplete="email" placeholder="you@example.com"
+                                <input id="email" name="email" type="email" value="{{ old('email') }}" :required="role === 'candidate'" autocomplete="email" placeholder="you@example.com"
                                        class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                                 @error('email')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                             </div>
                             <div>
                                 <label for="password" class="mb-1.5 block text-sm font-semibold text-primary-dark">Password <span class="text-[#B3261E]">*</span></label>
-                                <input id="password" name="password" type="password" required autocomplete="new-password" placeholder="Password"
+                                <input id="password" name="password" type="password" autocomplete="new-password" placeholder="Password"
                                        class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                                 @error('password')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                             </div>
                             <div>
                                 <label for="password_confirmation" class="mb-1.5 block text-sm font-semibold text-primary-dark">Confirm password <span class="text-[#B3261E]">*</span></label>
-                                <input id="password_confirmation" name="password_confirmation" type="password" required autocomplete="new-password" placeholder="Confirm password"
+                                <input id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password" placeholder="Confirm password"
                                        class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                             </div>
                         </div>
@@ -131,25 +131,25 @@
                         <div x-show="role === 'employer'" class="flex flex-col gap-5">
                             <div>
                                 <label for="company_name" class="mb-1.5 block text-sm font-semibold text-primary-dark">Company name <span class="text-[#B3261E]">*</span></label>
-                                <input id="company_name" name="company_name" type="text" value="{{ old('company_name') }}" required placeholder="Company Inc."
+                                <input id="company_name" name="company_name" type="text" value="{{ old('company_name') }}" :required="role === 'employer'" placeholder="Company Inc."
                                        class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                                 @error('company_name')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                             </div>
                             <div>
                                 <label for="email" class="mb-1.5 block text-sm font-semibold text-primary-dark">Email address <span class="text-[#B3261E]">*</span></label>
-                                <input id="email" name="email" type="email" value="{{ old('email') }}" required autocomplete="email" placeholder="you@example.com"
+                                <input id="email" name="email" type="email" value="{{ old('email') }}" :required="role === 'employer'" autocomplete="email" placeholder="you@example.com"
                                        class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                                 @error('email')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                             </div>
                             <div>
                                 <label for="password" class="mb-1.5 block text-sm font-semibold text-primary-dark">Password <span class="text-[#B3261E]">*</span></label>
-                                <input id="password" name="password" type="password" required autocomplete="new-password" placeholder="Password"
+                                <input id="password" name="password" type="password" autocomplete="new-password" placeholder="Password"
                                        class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                                 @error('password')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                             </div>
                             <div>
                                 <label for="password_confirmation" class="mb-1.5 block text-sm font-semibold text-primary-dark">Confirm password <span class="text-[#B3261E]">*</span></label>
-                                <input id="password_confirmation" name="password_confirmation" type="password" required autocomplete="new-password" placeholder="Confirm password"
+                                <input id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password" placeholder="Confirm password"
                                        class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                             </div>
                         </div>
@@ -165,7 +165,7 @@
                     <div x-show="role === 'candidate' && step === 1" x-cloak class="flex flex-col gap-5">
                         <div>
                             <label for="date_of_birth" class="mb-1.5 block text-sm font-semibold text-primary-dark">Date of birth <span class="text-[#B3261E]">*</span></label>
-                            <input id="date_of_birth" name="date_of_birth" type="date" value="{{ old('date_of_birth') }}" required
+                            <input id="date_of_birth" name="date_of_birth" type="date" value="{{ old('date_of_birth') }}" :required="role === 'candidate'">
                                    class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                             @error('date_of_birth')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                         </div>
@@ -179,7 +179,7 @@
                     <div x-show="role === 'candidate' && step === 2" x-cloak class="flex flex-col gap-5">
                         <div>
                             <label for="disability_type" class="mb-1.5 block text-sm font-semibold text-primary-dark">Disability type <span class="text-[#B3261E]">*</span></label>
-                            <select id="disability_type" name="disability_type" class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                            <select id="disability_type" name="disability_type" :required="role === 'candidate'" class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                                 <option value="">Select…</option>
                                 @foreach (['Visual','Hearing','Motor/Physical','Speech','Cerebral Palsy','Psychosocial','Intellectual','Multiple'] as $dt)
                                     <option value="{{ $dt }}" {{ old('disability_type') === $dt ? 'selected' : '' }}>{{ $dt }}</option>
@@ -189,7 +189,7 @@
                         </div>
                         <div>
                             <label for="pwd_id_number" class="mb-1.5 block text-sm font-semibold text-primary-dark">PWD ID number <span class="text-[#B3261E]">*</span></label>
-                            <input id="pwd_id_number" name="pwd_id_number" type="text" value="{{ old('pwd_id_number') }}" placeholder="PWD-12345"
+                            <input id="pwd_id_number" name="pwd_id_number" type="text" value="{{ old('pwd_id_number') }}" :required="role === 'candidate'" placeholder="PWD-12345"
                                    class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                             @error('pwd_id_number')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                         </div>
@@ -221,7 +221,7 @@
                     <div x-show="role === 'employer' && step === 1" x-cloak class="flex flex-col gap-5">
                         <div>
                             <label for="business_permit_number" class="mb-1.5 block text-sm font-semibold text-primary-dark">Business permit number <span class="text-[#B3261E]">*</span></label>
-                            <input id="business_permit_number" name="business_permit_number" type="text" value="{{ old('business_permit_number') }}" required placeholder="BP-123456"
+                            <input id="business_permit_number" name="business_permit_number" type="text" value="{{ old('business_permit_number') }}" :required="role === 'employer'" placeholder="BP-123456"
                                    class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                             @error('business_permit_number')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                         </div>
