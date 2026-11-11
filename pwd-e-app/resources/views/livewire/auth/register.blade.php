@@ -88,11 +88,11 @@
                         </div>
 
                         {{-- Candidate first inputs --}}
-                        <div x-show="role === 'candidate'" class="flex flex-col gap-5">
+                        <fieldset x-show="role === 'candidate'" class="flex flex-col gap-5 border-0 p-0 m-0" :disabled="role !== 'candidate'">
                             <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
                                 <div>
                                     <label for="first_name" class="mb-1.5 block text-sm font-semibold text-primary-dark">First name <span class="text-[#B3261E]">*</span></label>
-                                    <input id="first_name" name="first_name" type="text" value="{{ old('first_name') }}" :required="role === 'candidate'" autocomplete="given-name" placeholder="First name"
+                                    <input id="first_name" name="first_name" type="text" value="{{ old('first_name') }}" :required="role === 'candidate'" autocomplete="given-name" placeholder="First name" :disabled="role !== 'candidate'"
                                            class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                                     @error('first_name')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                                 </div>
@@ -125,10 +125,10 @@
                                 <input id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password" placeholder="Confirm password"
                                        class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                             </div>
-                        </div>
+                        </fieldset>
 
                         {{-- Employer first inputs --}}
-                        <div x-show="role === 'employer'" class="flex flex-col gap-5">
+                        <fieldset x-show="role === 'employer'" class="flex flex-col gap-5 border-0 p-0 m-0" :disabled="role !== 'employer'">
                             <div>
                                 <label for="company_name" class="mb-1.5 block text-sm font-semibold text-primary-dark">Company name <span class="text-[#B3261E]">*</span></label>
                                 <input id="company_name" name="company_name" type="text" value="{{ old('company_name') }}" :required="role === 'employer'" placeholder="Company Inc."
@@ -152,7 +152,7 @@
                                 <input id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password" placeholder="Confirm password"
                                        class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                             </div>
-                        </div>
+                        </fieldset>
 
                         <div class="flex gap-3">
                             <button type="button" @click="next()" class="flex h-[52px] w-full items-center justify-center gap-2 rounded-lg bg-[#2A5D8F] text-base font-semibold text-white hover:bg-[#224B73]">
@@ -205,7 +205,7 @@
                         </label>
                         @error('consent')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                         <label class="flex cursor-pointer items-start gap-2 text-sm text-primary-dark">
-                            <input type="checkbox" name="terms" value="1" {{ old('terms') ? 'checked' : '' }} class="mt-1 h-4 w-4" required>
+                            <input type="checkbox" name="terms" value="1" {{ old('terms') ? 'checked' : '' }} class="mt-1 h-4 w-4">
                             <span>I accept the Terms and Conditions. <span class="text-[#B3261E]">*</span></span>
                         </label>
                         @error('terms')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
@@ -232,7 +232,7 @@
                             @error('business_permit_file')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                         </div>
                         <label class="flex cursor-pointer items-start gap-2 text-sm text-primary-dark">
-                            <input type="checkbox" name="terms" value="1" {{ old('terms') ? 'checked' : '' }} class="mt-1 h-4 w-4" required>
+                            <input type="checkbox" name="terms" value="1" {{ old('terms') ? 'checked' : '' }} class="mt-1 h-4 w-4">
                             <span>I accept the Terms and Conditions. <span class="text-[#B3261E]">*</span></span>
                         </label>
                         @error('terms')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
@@ -298,7 +298,27 @@
                 }
             };
             fields.forEach(function (el) {
-                if (el.type === 'file' || el.type === 'checkbox' || el.type === 'hidden') return;
+                if (el.type === 'checkbox' || el.type === 'hidden') return;
+                if (el.type === 'file') {
+                    el.addEventListener('change', function () {
+                        const f = el.files && el.files[0];
+                        const span = el.parentElement.querySelector('.client-error');
+                        if (f && f.size > 5 * 1024 * 1024) {
+                            if (!span) {
+                                const p = document.createElement('p');
+                                p.className = 'mt-1.5 text-sm text-[#FF0000] client-error';
+                                p.textContent = 'File must be 5 MB or smaller.';
+                                el.insertAdjacentElement('afterend', p);
+                            } else {
+                                span.textContent = 'File must be 5 MB or smaller.';
+                            }
+                            el.value = '';
+                        } else if (span) {
+                            span.remove();
+                        }
+                    });
+                    return;
+                }
                 let t;
                 const schedule = function () { clearTimeout(t); t = setTimeout(function () { validate(el); }, 2000); };
                 el.addEventListener('input', schedule);
