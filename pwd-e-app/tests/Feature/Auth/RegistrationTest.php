@@ -32,6 +32,7 @@ test('candidate can register with pwd id and creates profile', function () {
         'disability_type' => 'Visual',
         'pwd_id_number' => 'PWD-12345',
         'consent' => '1',
+        'terms' => '1',
     ]);
 
     $response->assertSessionHasNoErrors();
@@ -57,6 +58,7 @@ test('employer can register with permit and creates profile', function () {
         'password_confirmation' => 'password',
         'company_name' => 'Acme Inc',
         'business_permit_number' => 'BP-999',
+        'terms' => '1',
     ]);
 
     $response->assertSessionHasNoErrors();
@@ -81,5 +83,5 @@ test('registration fails without required role fields', function () {
         'password_confirmation' => 'password',
     ]);
 
-    $response->assertSessionHasErrors(['date_of_birth', 'disability_type', 'pwd_id_number', 'consent']);
+    $response->assertSessionHasErrors(['date_of_birth', 'disability_type', 'pwd_id_number', 'consent', 'terms']);
 });

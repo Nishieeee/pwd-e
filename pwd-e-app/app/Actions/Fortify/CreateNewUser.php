@@ -27,6 +27,7 @@ class CreateNewUser implements CreatesNewUsers
             'middle_name' => ['nullable', 'string', 'max:100'],
             'email' => $this->emailRules(),
             'password' => $this->passwordRules(),
+            'terms' => ['accepted'],
         ];
 
         if ($role === 'candidate') {

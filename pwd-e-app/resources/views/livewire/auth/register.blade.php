@@ -33,11 +33,20 @@
                     Create your inclusive account.
                 </h1>
                 <p class="mt-3 max-w-[46ch] text-base text-body-muted">
-                    Join PWD-E as a job seeker or hiring partner. Your privacy is protected under RA 10173.
+                    Multi-step registration. Your privacy is protected under RA 10173.
                 </p>
             </section>
 
-            <section class="p-5 md:p-8 lg:p-16" x-data="{ role: '{{ old('role', 'candidate') }}' }">
+            <section class="p-5 md:p-8 lg:p-16"
+                x-data="{
+                    role: '{{ old('role', 'candidate') }}',
+                    step: 0,
+                    candidateSteps: 3,
+                    employerSteps: 2,
+                    totalSteps() { return this.role === 'candidate' ? this.candidateSteps : this.employerSteps; },
+                    next() { if (this.step < this.totalSteps() - 1) this.step++; },
+                    prev() { if (this.step > 0) this.step--; },
+                }">
                 <p class="text-xs font-semibold uppercase tracking-[0.08em] text-primary">New Account</p>
                 <h2 class="mt-2 font-heading text-3xl font-bold text-primary-dark md:text-[34px]">Register</h2>
 
@@ -51,53 +60,97 @@
                     </div>
                 @endif
 
+                <div class="mt-4 flex items-center gap-2" aria-label="Registration progress">
+                    <template x-for="i in totalSteps()" :key="i">
+                        <span class="h-2 flex-1 rounded-full" :class="i-1 <= step ? 'bg-primary' : 'bg-[#CBD5E1]'"></span>
+                    </template>
+                </div>
+
                 <form method="POST" action="{{ route('register.store') }}" enctype="multipart/form-data" class="mt-6 flex flex-col gap-5" novalidate>
                     @csrf
+                    <input type="hidden" name="role" :value="role">
 
-                    <div>
-                        <p class="mb-1.5 text-sm font-semibold text-primary-dark">I am registering as</p>
-                        <div class="flex gap-3" role="radiogroup" aria-label="Registration role">
-                            <label class="flex-1 cursor-pointer">
-                                <input type="radio" name="role" value="candidate" x-model="role" class="sr-only" {{ old('role', 'candidate') === 'candidate' ? 'checked' : '' }}>
-                                <span class="flex h-12 items-center justify-center rounded-lg border border-[#CBD5E1] text-sm font-semibold text-primary-dark" :class="role === 'candidate' ? 'bg-primary text-white border-primary' : 'bg-white'">Candidate (PWD)</span>
-                            </label>
-                            <label class="flex-1 cursor-pointer">
-                                <input type="radio" name="role" value="employer" x-model="role" class="sr-only" {{ old('role') === 'employer' ? 'checked' : '' }}>
-                                <span class="flex h-12 items-center justify-center rounded-lg border border-[#CBD5E1] text-sm font-semibold text-primary-dark" :class="role === 'employer' ? 'bg-primary text-white border-primary' : 'bg-white'">Employer</span>
-                            </label>
+                    {{-- Step 0: Role --}}
+                    <div x-show="step === 0" x-cloak class="flex flex-col gap-5">
+                        <div>
+                            <p class="mb-1.5 text-sm font-semibold text-primary-dark">I am registering as</p>
+                            <div class="flex gap-3" role="radiogroup" aria-label="Registration role">
+                                <label class="flex-1 cursor-pointer">
+                                    <input type="radio" name="role" value="candidate" x-model="role" class="sr-only">
+                                    <span class="flex h-12 items-center justify-center rounded-lg border border-[#CBD5E1] text-sm font-semibold text-primary-dark" :class="role === 'candidate' ? 'bg-primary text-white border-primary' : 'bg-white'">Candidate (PWD)</span>
+                                </label>
+                                <label class="flex-1 cursor-pointer">
+                                    <input type="radio" name="role" value="employer" x-model="role" class="sr-only">
+                                    <span class="flex h-12 items-center justify-center rounded-lg border border-[#CBD5E1] text-sm font-semibold text-primary-dark" :class="role === 'employer' ? 'bg-primary text-white border-primary' : 'bg-white'">Employer</span>
+                                </label>
+                            </div>
+                            @error('role')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                         </div>
-                        @error('role')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                        <button type="button" @click="next()" class="flex h-[52px] w-full items-center justify-center gap-2 rounded-lg bg-[#2A5D8F] text-base font-semibold text-white hover:bg-[#224B73]">
+                            Continue
+                        </button>
                     </div>
 
-                    <div>
-                        <label for="name" class="mb-1.5 block text-sm font-semibold text-primary-dark">Full name</label>
-                        <input id="name" name="name" type="text" value="{{ old('name') }}" required autofocus autocomplete="name" placeholder="Full name"
-                               class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
-                        @error('name')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                    {{-- Candidate Step 1 --}}
+                    <div x-show="role === 'candidate' && step === 1" x-cloak class="flex flex-col gap-5">
+                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                            <div>
+                                <label for="first_name" class="mb-1.5 block text-sm font-semibold text-primary-dark">First name</label>
+                                <input id="first_name" name="first_name" type="text" value="{{ old('first_name') }}" required autocomplete="given-name" placeholder="First name"
+                                       class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                @error('first_name')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                            </div>
+                            <div>
+                                <label for="middle_name" class="mb-1.5 block text-sm font-semibold text-primary-dark">Middle name (optional)</label>
+                                <input id="middle_name" name="middle_name" type="text" value="{{ old('middle_name') }}" autocomplete="additional-name" placeholder="Middle name"
+                                       class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                            </div>
+                            <div>
+                                <label for="last_name" class="mb-1.5 block text-sm font-semibold text-primary-dark">Last name</label>
+                                <input id="last_name" name="last_name" type="text" value="{{ old('last_name') }}" required autocomplete="family-name" placeholder="Last name"
+                                       class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                @error('last_name')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                            </div>
+                        </div>
+                        <div>
+                            <label for="email" class="mb-1.5 block text-sm font-semibold text-primary-dark">Email address</label>
+                            <input id="email" name="email" type="email" value="{{ old('email') }}" required autocomplete="email" placeholder="you@example.com"
+                                   class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                            @error('email')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label for="password" class="mb-1.5 block text-sm font-semibold text-primary-dark">Password</label>
+                            <input id="password" name="password" type="password" required autocomplete="new-password" placeholder="Password"
+                                   class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                            @error('password')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label for="password_confirmation" class="mb-1.5 block text-sm font-semibold text-primary-dark">Confirm password</label>
+                            <input id="password_confirmation" name="password_confirmation" type="password" required autocomplete="new-password" placeholder="Confirm password"
+                                   class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                        </div>
+                        <div class="flex gap-3">
+                            <button type="button" @click="prev()" class="flex h-[52px] flex-1 items-center justify-center rounded-lg border border-[#CBD5E1] text-base font-semibold text-primary-dark hover:bg-primary-tint">Back</button>
+                            <button type="button" @click="next()" class="flex h-[52px] flex-1 items-center justify-center rounded-lg bg-[#2A5D8F] text-base font-semibold text-white hover:bg-[#224B73]">Next</button>
+                        </div>
                     </div>
 
-                    <div>
-                        <label for="email" class="mb-1.5 block text-sm font-semibold text-primary-dark">Email address</label>
-                        <input id="email" name="email" type="email" value="{{ old('email') }}" required autocomplete="email" placeholder="you@example.com"
-                               class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
-                        @error('email')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                    {{-- Candidate Step 2 --}}
+                    <div x-show="role === 'candidate' && step === 2" x-cloak class="flex flex-col gap-5">
+                        <div>
+                            <label for="date_of_birth" class="mb-1.5 block text-sm font-semibold text-primary-dark">Date of birth</label>
+                            <input id="date_of_birth" name="date_of_birth" type="date" value="{{ old('date_of_birth') }}" required
+                                   class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                            @error('date_of_birth')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                        </div>
+                        <div class="flex gap-3">
+                            <button type="button" @click="prev()" class="flex h-[52px] flex-1 items-center justify-center rounded-lg border border-[#CBD5E1] text-base font-semibold text-primary-dark hover:bg-primary-tint">Back</button>
+                            <button type="button" @click="next()" class="flex h-[52px] flex-1 items-center justify-center rounded-lg bg-[#2A5D8F] text-base font-semibold text-white hover:bg-[#224B73]">Next</button>
+                        </div>
                     </div>
 
-                    <div>
-                        <label for="password" class="mb-1.5 block text-sm font-semibold text-primary-dark">Password</label>
-                        <input id="password" name="password" type="password" required autocomplete="new-password" placeholder="Password"
-                               class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
-                        @error('password')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
-                    </div>
-
-                    <div>
-                        <label for="password_confirmation" class="mb-1.5 block text-sm font-semibold text-primary-dark">Confirm password</label>
-                        <input id="password_confirmation" name="password_confirmation" type="password" required autocomplete="new-password" placeholder="Confirm password"
-                               class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
-                    </div>
-
-                    {{-- Candidate fields --}}
-                    <div x-show="role === 'candidate'" x-cloak class="flex flex-col gap-5">
+                    {{-- Candidate Step 3 --}}
+                    <div x-show="role === 'candidate' && step === 3" x-cloak class="flex flex-col gap-5">
                         <div>
                             <label for="disability_type" class="mb-1.5 block text-sm font-semibold text-primary-dark">Disability type</label>
                             <select id="disability_type" name="disability_type" class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
@@ -110,7 +163,7 @@
                         </div>
                         <div>
                             <label for="pwd_id_number" class="mb-1.5 block text-sm font-semibold text-primary-dark">PWD ID number</label>
-                            <input id="pwd_id_number" name="pwd_id_number" type="text" value="{{ old('pwd_id_number') }}" placeholder="PWD-123456"
+                            <input id="pwd_id_number" name="pwd_id_number" type="text" value="{{ old('pwd_id_number') }}" placeholder="PWD-12345"
                                    class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                             @error('pwd_id_number')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                         </div>
@@ -125,19 +178,55 @@
                             <span>I consent to the collection of my disability information for matching purposes (RA 10173).</span>
                         </label>
                         @error('consent')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                        <label class="flex cursor-pointer items-start gap-2 text-sm text-primary-dark">
+                            <input type="checkbox" name="terms" value="1" {{ old('terms') ? 'checked' : '' }} class="mt-1 h-4 w-4" required>
+                            <span>I accept the Terms and Conditions.</span>
+                        </label>
+                        @error('terms')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                        <div class="flex gap-3">
+                            <button type="button" @click="prev()" class="flex h-[52px] flex-1 items-center justify-center rounded-lg border border-[#CBD5E1] text-base font-semibold text-primary-dark hover:bg-primary-tint">Back</button>
+                            <button type="submit" class="flex h-[52px] flex-1 items-center justify-center gap-2 rounded-lg bg-[#2A5D8F] text-base font-semibold text-white hover:bg-[#224B73]">
+                                Create account
+                            </button>
+                        </div>
                     </div>
 
-                    {{-- Employer fields --}}
-                    <div x-show="role === 'employer'" x-cloak class="flex flex-col gap-5">
+                    {{-- Employer Step 1 --}}
+                    <div x-show="role === 'employer' && step === 1" x-cloak class="flex flex-col gap-5">
                         <div>
                             <label for="company_name" class="mb-1.5 block text-sm font-semibold text-primary-dark">Company name</label>
-                            <input id="company_name" name="company_name" type="text" value="{{ old('company_name') }}" placeholder="Company Inc."
+                            <input id="company_name" name="company_name" type="text" value="{{ old('company_name') }}" required placeholder="Company Inc."
                                    class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                             @error('company_name')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                         </div>
                         <div>
+                            <label for="email" class="mb-1.5 block text-sm font-semibold text-primary-dark">Email address</label>
+                            <input id="email" name="email" type="email" value="{{ old('email') }}" required autocomplete="email" placeholder="you@example.com"
+                                   class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                            @error('email')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label for="password" class="mb-1.5 block text-sm font-semibold text-primary-dark">Password</label>
+                            <input id="password" name="password" type="password" required autocomplete="new-password" placeholder="Password"
+                                   class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                            @error('password')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                        </div>
+                        <div>
+                            <label for="password_confirmation" class="mb-1.5 block text-sm font-semibold text-primary-dark">Confirm password</label>
+                            <input id="password_confirmation" name="password_confirmation" type="password" required autocomplete="new-password" placeholder="Confirm password"
+                                   class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                        </div>
+                        <div class="flex gap-3">
+                            <button type="button" @click="prev()" class="flex h-[52px] flex-1 items-center justify-center rounded-lg border border-[#CBD5E1] text-base font-semibold text-primary-dark hover:bg-primary-tint">Back</button>
+                            <button type="button" @click="next()" class="flex h-[52px] flex-1 items-center justify-center rounded-lg bg-[#2A5D8F] text-base font-semibold text-white hover:bg-[#224B73]">Next</button>
+                        </div>
+                    </div>
+
+                    {{-- Employer Step 2 --}}
+                    <div x-show="role === 'employer' && step === 2" x-cloak class="flex flex-col gap-5">
+                        <div>
                             <label for="business_permit_number" class="mb-1.5 block text-sm font-semibold text-primary-dark">Business permit number</label>
-                            <input id="business_permit_number" name="business_permit_number" type="text" value="{{ old('business_permit_number') }}" placeholder="BP-123456"
+                            <input id="business_permit_number" name="business_permit_number" type="text" value="{{ old('business_permit_number') }}" required placeholder="BP-123456"
                                    class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                             @error('business_permit_number')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                         </div>
@@ -147,12 +236,18 @@
                                    class="block w-full text-sm text-primary-dark file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-2 file:text-white">
                             @error('business_permit_file')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                         </div>
+                        <label class="flex cursor-pointer items-start gap-2 text-sm text-primary-dark">
+                            <input type="checkbox" name="terms" value="1" {{ old('terms') ? 'checked' : '' }} class="mt-1 h-4 w-4" required>
+                            <span>I accept the Terms and Conditions.</span>
+                        </label>
+                        @error('terms')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                        <div class="flex gap-3">
+                            <button type="button" @click="prev()" class="flex h-[52px] flex-1 items-center justify-center rounded-lg border border-[#CBD5E1] text-base font-semibold text-primary-dark hover:bg-primary-tint">Back</button>
+                            <button type="submit" class="flex h-[52px] flex-1 items-center justify-center gap-2 rounded-lg bg-[#2A5D8F] text-base font-semibold text-white hover:bg-[#224B73]">
+                                Create account
+                            </button>
+                        </div>
                     </div>
-
-                    <button type="submit" class="flex h-[52px] w-full items-center justify-center gap-2 rounded-lg bg-[#2A5D8F] text-base font-semibold text-white transition hover:bg-[#224B73] focus:outline-none focus:ring-2 focus:ring-primary/40">
-                        Create account
-                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                    </button>
 
                     <p class="text-center text-base text-body-muted">
                         Already have an account?
