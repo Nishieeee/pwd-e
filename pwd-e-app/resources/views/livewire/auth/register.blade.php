@@ -252,4 +252,59 @@
             </section>
         </div>
     </main>
+
+    <script>
+        (function () {
+            const fields = document.querySelectorAll('input[name], select[name]');
+            const validate = function (el) {
+                const name = el.name;
+                const val = (el.value || '').trim();
+                let msg = '';
+                if (el.hasAttribute('required') && val === '') {
+                    msg = 'This field is required.';
+                } else if (name === 'email' && val && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+                    msg = 'Please enter a valid email address.';
+                } else if (name === 'password' && val && val.length < 8) {
+                    msg = 'Password must be at least 8 characters.';
+                } else if (name === 'password_confirmation' && val) {
+                    const pw = document.querySelector('input[name="password"]');
+                    if (pw && val !== pw.value) msg = 'Passwords do not match.';
+                } else if (name === 'date_of_birth' && val) {
+                    const d = new Date(val);
+                    if (isNaN(d.getTime())) msg = 'Please enter a valid date.';
+                    else {
+                        const age = (Date.now() - d.getTime()) / (365.25 * 24 * 60 * 60 * 1000);
+                        if (age < 18) msg = 'You must be at least 18 years old.';
+                    }
+                } else if (name === 'disability_type' && val === '') {
+                    msg = 'Please select a disability type.';
+                } else if ((name === 'pwd_id_number' || name === 'business_permit_number' || name === 'company_name' || name === 'first_name' || name === 'last_name') && val === '') {
+                    msg = 'This field is required.';
+                }
+                const span = el.parentElement.querySelector('.client-error');
+                if (msg) {
+                    if (!span) {
+                        const p = document.createElement('p');
+                        p.className = 'mt-1.5 text-sm text-[#FF0000] client-error';
+                        p.textContent = msg;
+                        el.insertAdjacentElement('afterend', p);
+                    } else {
+                        span.textContent = msg;
+                    }
+                    el.setAttribute('aria-invalid', 'true');
+                } else if (span) {
+                    span.remove();
+                    el.setAttribute('aria-invalid', 'false');
+                }
+            };
+            fields.forEach(function (el) {
+                if (el.type === 'file' || el.type === 'checkbox' || el.type === 'hidden') return;
+                let t;
+                const schedule = function () { clearTimeout(t); t = setTimeout(function () { validate(el); }, 2000); };
+                el.addEventListener('input', schedule);
+                el.addEventListener('change', schedule);
+                el.addEventListener('blur', function () { clearTimeout(t); validate(el); });
+            });
+        })();
+    </script>
 </x-layouts::auth.full>
