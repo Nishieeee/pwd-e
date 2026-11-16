@@ -83,12 +83,12 @@ _Confirm before writing new migrations._
 
 ### `employer_accommodations`
 Pivot — what an employer **generally** provides across their workplace.
-| Column | Type |
-|---|---|
-| id | bigint PK |
-| employer_profile_id | bigint FK |
-| accommodation_id | bigint FK |
-| created_at / updated_at | timestamp |
+| Column | Type | Notes |
+|---|---|---|
+| id | bigint PK | |
+| employer_profile_id | bigint FK → employer_profiles | |
+| accommodation_id | bigint FK → accommodations | unique pair (`emp_accom_profile_accom_unique`) |
+| created_at / updated_at | timestamp | |
 
 ### `job_accommodations`
 Pivot — what a **specific job posting** provides (may differ from employer-wide matrix).
@@ -242,7 +242,7 @@ Pivot — what a **specific job posting** provides (may differ from employer-wid
 - **Encryption:** `users.pwd_id_number`, `candidate_profiles.disability_type`, `candidate_profiles.disability_description`, `applications.cover_letter` — Laravel encrypted casts (SEC-01).
 - **Private disk:** all `*_path` columns — served only via signed, 1-hour expiring URLs (SEC-02).
 - **Visibility:** `accessibility_needs.visible_to_employers` and `candidate_profiles.visibility_settings` enforced in Policies and query scopes, never just in UI (PROF-06).
-- **Unique constraints:** (`candidate_profile_id`, `job_posting_id`) on `matches` and `applications`; (`user_id`, `word`) on `user_word_history`.
+- **Unique constraints:** (`candidate_profile_id`, `job_posting_id`) on `matches` and `applications`; (`user_id`, `word`) on `user_word_history`; (`employer_profile_id`, `accommodation_id`) on `employer_accommodations` (`emp_accom_profile_accom_unique`).
 - **Unverified gate:** `users.verified_at IS NULL` → cannot apply, post, or appear in listings (AUTH-04).
 - **Soft deletes:** `job_postings`, `applications`; keep `workforce_records` permanently for RA 10524 reporting.
 - **Indexes:** all FKs; `job_postings.status`; `applications.status`; `notifications.(user_id, read_at)`; `user_word_history.(user_id, word)`.

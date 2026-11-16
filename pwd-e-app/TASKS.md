@@ -68,11 +68,11 @@ _Last synced with `docs/REQUIREMENTS.md` v1.1 — 2026-11-11_
 ## Track B — Employer
 
 ### Job Posting (POST-01–09) `#5, #6`
-- [ ] Posting create/edit form: title, rich-text description, skill chips, employment type, location, salary, accommodations provided checklist (POST-01, POST-06)
-- [ ] Exclusionary language detector: scan on save, highlight phrases with inclusive replacements (POST-02) `#5`
-- [ ] Accept / dismiss language suggestions before publish (POST-03)
-- [ ] Posting status machine: Draft → Pending Scan → Published → Closed → Archived (POST-04)
-- [ ] Employer posting management dashboard: list, edit, close, archive (POST-05)
+- [x] Posting create/edit form: title, rich-text description, skill chips, employment type, location, salary, accommodations provided checklist (POST-01, POST-06)
+- [x] Exclusionary language detector: scan on save, highlight phrases with inclusive replacements (POST-02) `#5`
+- [x] Accept / dismiss language suggestions before publish (POST-03)
+- [x] Posting status machine: Draft → Pending Scan → Published → Closed → Archived (POST-04)
+- [x] Employer posting management dashboard: list, edit, close, archive (POST-05)
 - [ ] Applicant list per posting: ranked by fit score (POST-07)
 - [ ] Update applicant status (Under Review → Interview → Hired / Rejected) with optional note (POST-08)
 - [ ] On "Hired": prompt employer to confirm PWD-verified status; write `workforce_records` (POST-09)
