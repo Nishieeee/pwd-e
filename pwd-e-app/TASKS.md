@@ -54,9 +54,9 @@ _Last synced with `docs/REQUIREMENTS.md` v1.1 — 2026-11-11_
 - [ ] Suppress stack traces in production (SEC-08)
 
 ### Notifications (NOTIF-01–03)
-- [ ] Email notification system (queued Mailable jobs) for all events in NOTIF-01
-- [ ] In-app notification bell: unread count, click-to-resource (NOTIF-02)
-- [ ] Notification preference settings per user (NOTIF-03)
+- [x] Email notification system (queued jobs) for account approved/rejected, application received, application status changed, verification document required (NOTIF-01)
+- [x] In-app notification bell with unread count + mark-all-read (NOTIF-02)
+- [ ] Notification preference settings per user (NOTIF-03) — deferred
 
 ### Infrastructure
 - [ ] Demo data seeders (candidates, employers, postings, applications)

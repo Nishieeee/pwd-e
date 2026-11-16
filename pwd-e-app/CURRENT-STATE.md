@@ -31,9 +31,9 @@ Implementation in progress. **Core features are due December 1, 2026.** 19 days 
 - Verification admin queue (AUTH-04, ADMIN-01–03) — ✅ shipped (list + filter tabs + approve/reject/request-more-docs + notify)
 
 ### Track A
-- Email notifications (NOTIF-01)
-- In-app notification bell (NOTIF-02)
-- Notification preferences (NOTIF-03)
+- Email notifications (NOTIF-01) — ✅ shipped (queued mail + database channel)
+- In-app notification bell (NOTIF-02) — ✅ shipped
+- Notification preferences (NOTIF-03) — deferred
 - Admin analytics dashboard (ADMIN-04) — ✅ partial shipped (role counts, apps/week, top employers; a11y error rate pending)
 - Audit log admin view (ADMIN-05) — ✅ shipped
 - Suspend / reinstate user (ADMIN-06) — ✅ shipped
