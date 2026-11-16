@@ -45,5 +45,5 @@ test('admin bypasses verification gate', function () {
 
     $this->actingAs($user)
         ->get(route('dashboard'))
-        ->assertOk();
+        ->assertRedirect(route('admin.dashboard'));
 });

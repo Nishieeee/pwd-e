@@ -72,6 +72,12 @@ class VerificationQueue extends Component
 
         $vr->user->notify(new VerificationStatusUpdated('approved'));
 
+        activity()
+            ->causedBy(Auth::user())
+            ->performedOn($vr)
+            ->event('approved')
+            ->log('Approved verification request #'.$vr->id);
+
         Flux::toast(variant: 'success', text: __('Verification approved.'));
         $this->closeReview();
     }
@@ -92,6 +98,12 @@ class VerificationQueue extends Component
 
         $vr->user->notify(new VerificationStatusUpdated('rejected', $this->reviewNote));
 
+        activity()
+            ->causedBy(Auth::user())
+            ->performedOn($vr)
+            ->event('rejected')
+            ->log('Rejected verification request #'.$vr->id.($this->reviewNote ? ': '.$this->reviewNote : ''));
+
         Flux::toast(variant: 'success', text: __('Verification rejected.'));
         $this->closeReview();
     }
@@ -107,6 +119,12 @@ class VerificationQueue extends Component
         ]);
 
         $vr->user->notify(new VerificationStatusUpdated('needs_more_docs', $this->reviewNote));
+
+        activity()
+            ->causedBy(Auth::user())
+            ->performedOn($vr)
+            ->event('needs_more_docs')
+            ->log('Requested more documents for verification request #'.$vr->id.($this->reviewNote ? ': '.$this->reviewNote : ''));
 
         Flux::toast(variant: 'success', text: __('Additional documents requested.'));
         $this->closeReview();

@@ -34,11 +34,11 @@ Implementation in progress. **Core features are due December 1, 2026.** 19 days 
 - Email notifications (NOTIF-01)
 - In-app notification bell (NOTIF-02)
 - Notification preferences (NOTIF-03)
-- Admin analytics dashboard (ADMIN-04)
-- Audit log admin view (ADMIN-05)
-- Suspend / reinstate user (ADMIN-06)
-- Scheduled a11y audit panel (ADMIN-07)
-- Lexicon management UI (ADMIN-08)
+- Admin analytics dashboard (ADMIN-04) — ✅ partial shipped (role counts, apps/week, top employers; a11y error rate pending)
+- Audit log admin view (ADMIN-05) — ✅ shipped
+- Suspend / reinstate user (ADMIN-06) — ✅ shipped
+- Scheduled a11y audit panel (ADMIN-07) — deferred (panel placeholder)
+- Lexicon management UI (ADMIN-08) — ✅ shipped
 - Privacy hardening (encrypted casts, signed URLs, rate limiting) (SEC-01–09)
 
 ### Track B
