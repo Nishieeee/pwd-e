@@ -21,6 +21,24 @@
                             {{ __('Job Postings') }}
                         </flux:sidebar.item>
                     @endif
+
+                    @if (auth()->user()?->isAdmin())
+                        <flux:sidebar.item icon="shield-check" :href="route('admin.dashboard')" :current="request()->routeIs('admin.dashboard')" wire:navigate>
+                            {{ __('Admin Dashboard') }}
+                        </flux:sidebar.item>
+                        <flux:sidebar.item icon="check-badge" :href="route('admin.verifications.index')" :current="request()->routeIs('admin.verifications.*')" wire:navigate>
+                            {{ __('Verification Queue') }}
+                        </flux:sidebar.item>
+                        <flux:sidebar.item icon="users" :href="route('admin.users')" :current="request()->routeIs('admin.users')" wire:navigate>
+                            {{ __('User Management') }}
+                        </flux:sidebar.item>
+                        <flux:sidebar.item icon="book-open-text" :href="route('admin.lexicon')" :current="request()->routeIs('admin.lexicon')" wire:navigate>
+                            {{ __('Lexicon') }}
+                        </flux:sidebar.item>
+                        <flux:sidebar.item icon="clipboard-document-list" :href="route('admin.audit-log')" :current="request()->routeIs('admin.audit-log')" wire:navigate>
+                            {{ __('Audit Log') }}
+                        </flux:sidebar.item>
+                    @endif
                 </flux:sidebar.group>
             </flux:sidebar.nav>
 
@@ -36,6 +54,8 @@
                 </flux:sidebar.item>
             </flux:sidebar.nav>
 
+            <livewire:notification-bell />
+
             <x-desktop-user-menu class="hidden lg:block" :name="auth()->user()->name" />
         </flux:sidebar>
 
@@ -44,6 +64,8 @@
             <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
 
             <flux:spacer />
+
+            <livewire:notification-bell />
 
             <flux:dropdown position="top" align="end">
                 <flux:profile

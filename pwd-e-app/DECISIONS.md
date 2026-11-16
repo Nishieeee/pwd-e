@@ -19,6 +19,7 @@
 | D-13 | Employer RA 10524 tax incentive tracker is a first-class feature with PDF + XLSX export | Accepted | Stakeholder interview 2026-11-11: employers receive deductions/discounts per PWD worker; see TAX-01–05 |
 | D-14 | All form UI must default to selection-based controls (chips, dropdowns, toggles, checkboxes) over free-text; free-text fields must have predictive text | Accepted | Stakeholder interview 2026-11-11: minimize typing for users with motor disabilities; see UX-01, ASSIST-01 |
 | D-15 | Site must be compatible with external AT tools (NVDA, JAWS, switch access) — not just WCAG conformance; manual AT testing is required before Dec 1 | Accepted | Stakeholder interview 2026-11-11; see AT-01–06 in `docs/REQUIREMENTS.md` |
+| D-16 | Use `spatie/laravel-activitylog` for the admin audit log (ADMIN-05) | Accepted | Provides filterable activity records for verification, suspension, and lexicon actions; installed 2026-11-16 |
 
 ## Adding a decision
 Add a row with the next ID, the decision, status, and a one-line rationale. Never delete old rows; mark them "Superseded by D-xx".
