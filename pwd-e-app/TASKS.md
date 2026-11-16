@@ -34,9 +34,9 @@ _Last synced with `docs/REQUIREMENTS.md` v1.1 — 2026-11-11_
 - [ ] "Remember me" 30-day persistent session (AUTH-10)
 
 ### Verification Queue (ADMIN-01–03) `#9`
-- [ ] Private document upload endpoint (PWD ID, business permit) → `verification_requests` (AUTH-09, SEC-02)
-- [ ] Admin queue view: list pending requests with inline document image preview (ADMIN-01, ADMIN-02)
-- [ ] Approve / reject / request-more-docs actions; email triggered on each (ADMIN-03, NOTIF-01)
+- [x] Private document stream endpoint for PWD ID / business permit (AUTH-09, SEC-02)
+- [x] Admin queue view: list requests with filter tabs + inline document preview (ADMIN-01, ADMIN-02)
+- [x] Approve / reject / request-more-docs actions; notification fired on each (ADMIN-03, NOTIF-01)
 
 ### Admin Dashboard (ADMIN-04–08) `#8`
 - [ ] Platform analytics panel: users by role, apps/week, top employers, top skills, a11y error rate (ADMIN-04)

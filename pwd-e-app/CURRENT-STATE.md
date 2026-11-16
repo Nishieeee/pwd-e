@@ -28,7 +28,7 @@ Implementation in progress. **Core features are due December 1, 2026.** 19 days 
 
 ### Highest priority (blocker for all other tracks)
 - ~~Registration redesign: role picker + PWD ID field for candidates, business permit for employers (AUTH-01–03, AUTH-09)~~ ✅
-- Verification admin queue (AUTH-04, ADMIN-01–03) — **next up**
+- Verification admin queue (AUTH-04, ADMIN-01–03) — ✅ shipped (list + filter tabs + approve/reject/request-more-docs + notify)
 
 ### Track A
 - Email notifications (NOTIF-01)
