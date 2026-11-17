@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         @include('partials.head')
     </head>
-    <body class="min-h-screen bg-white dark:bg-zinc-800">
-        <flux:sidebar sticky collapsible="mobile" class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
+    <body class="min-h-screen bg-surface text-dark-neutral antialiased">
+        <flux:sidebar sticky collapsible="mobile" class="border-e border-primary-border bg-white text-dark-neutral">
             <flux:sidebar.header>
                 <x-app-logo :sidebar="true" href="{{ route('dashboard') }}" wire:navigate />
                 <flux:sidebar.collapse class="lg:hidden" />
@@ -15,6 +15,30 @@
                     <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                         {{ __('Dashboard') }}
                     </flux:sidebar.item>
+
+                    @if (auth()->user()?->isEmployer())
+                        <flux:sidebar.item icon="briefcase" :href="route('employer.jobs.index')" :current="request()->routeIs('employer.jobs.*')" wire:navigate>
+                            {{ __('Job Postings') }}
+                        </flux:sidebar.item>
+                    @endif
+
+                    @if (auth()->user()?->isAdmin())
+                        <flux:sidebar.item icon="shield-check" :href="route('admin.dashboard')" :current="request()->routeIs('admin.dashboard')" wire:navigate>
+                            {{ __('Admin Dashboard') }}
+                        </flux:sidebar.item>
+                        <flux:sidebar.item icon="check-badge" :href="route('admin.verifications.index')" :current="request()->routeIs('admin.verifications.*')" wire:navigate>
+                            {{ __('Verification Queue') }}
+                        </flux:sidebar.item>
+                        <flux:sidebar.item icon="users" :href="route('admin.users')" :current="request()->routeIs('admin.users')" wire:navigate>
+                            {{ __('User Management') }}
+                        </flux:sidebar.item>
+                        <flux:sidebar.item icon="book-open-text" :href="route('admin.lexicon')" :current="request()->routeIs('admin.lexicon')" wire:navigate>
+                            {{ __('Lexicon') }}
+                        </flux:sidebar.item>
+                        <flux:sidebar.item icon="clipboard-document-list" :href="route('admin.audit-log')" :current="request()->routeIs('admin.audit-log')" wire:navigate>
+                            {{ __('Audit Log') }}
+                        </flux:sidebar.item>
+                    @endif
                 </flux:sidebar.group>
             </flux:sidebar.nav>
 
@@ -30,14 +54,18 @@
                 </flux:sidebar.item>
             </flux:sidebar.nav>
 
+            <livewire:notification-bell />
+
             <x-desktop-user-menu class="hidden lg:block" :name="auth()->user()->name" />
         </flux:sidebar>
 
         <!-- Mobile User Menu -->
-        <flux:header class="lg:hidden">
+        <flux:header class="lg:hidden border-b border-primary-border bg-white text-dark-neutral">
             <flux:sidebar.toggle class="lg:hidden" icon="bars-2" inset="left" />
 
             <flux:spacer />
+
+            <livewire:notification-bell />
 
             <flux:dropdown position="top" align="end">
                 <flux:profile

@@ -28,22 +28,22 @@ _Last synced with `docs/REQUIREMENTS.md` v1.1 — 2026-11-11_
 - [x] Candidate registration: collect disability type (dropdown/multi-select) + PWD ID number field (AUTH-02, AUTH-09)
 - [x] Employer registration: collect company name, email, business permit number (AUTH-03)
 - [x] Block unverified accounts from sensitive actions; redirect with friendly message (AUTH-04)
-- [ ] Email notification on account approval / rejection (AUTH-05)
+- [x] Email notification on account approval / rejection (AUTH-05) — covered by `VerificationStatusUpdated` notification fired in verification queue
 - [ ] Password reset via time-limited token link (AUTH-06)
 - [ ] Session expiry after 2 h inactivity with redirect + message (AUTH-07)
 - [ ] "Remember me" 30-day persistent session (AUTH-10)
 
 ### Verification Queue (ADMIN-01–03) `#9`
-- [ ] Private document upload endpoint (PWD ID, business permit) → `verification_requests` (AUTH-09, SEC-02)
-- [ ] Admin queue view: list pending requests with inline document image preview (ADMIN-01, ADMIN-02)
-- [ ] Approve / reject / request-more-docs actions; email triggered on each (ADMIN-03, NOTIF-01)
+- [x] Private document stream endpoint for PWD ID / business permit (AUTH-09, SEC-02)
+- [x] Admin queue view: list requests with filter tabs + inline document preview (ADMIN-01, ADMIN-02)
+- [x] Approve / reject / request-more-docs actions; notification fired on each (ADMIN-03, NOTIF-01)
 
 ### Admin Dashboard (ADMIN-04–08) `#8`
-- [ ] Platform analytics panel: users by role, apps/week, top employers, top skills, a11y error rate (ADMIN-04)
-- [ ] Audit log view: filterable by user, action, date (ADMIN-05) — spatie/laravel-activitylog
-- [ ] Suspend / reinstate user (ADMIN-06)
-- [ ] Scheduled axe-core / Pa11y report runner + admin panel view (ADMIN-07) `#10`
-- [ ] Exclusionary-language lexicon management UI: add / edit / remove terms (ADMIN-08)
+- [x] Platform analytics panel: users by role, apps/week, top employers (ADMIN-04) — a11y error rate pending (no data source yet)
+- [x] Audit log view: filterable by user, action, date (ADMIN-05) — spatie/laravel-activitylog — `/admin/audit-log` (D-16)
+- [x] Suspend / reinstate user (ADMIN-06) — `/admin/users`
+- [ ] Scheduled axe-core / Pa11y report runner + admin panel view (ADMIN-07) `#10` — **deferred, panel placeholder on dashboard**
+- [x] Exclusionary-language lexicon management UI: add / edit / remove terms (ADMIN-08) — `/admin/lexicon`
 
 ### Privacy & Security Hardening (SEC-01–09)
 - [ ] Encrypted casts on disability fields (`accessibility_needs`, disability type) (SEC-01)
@@ -54,12 +54,12 @@ _Last synced with `docs/REQUIREMENTS.md` v1.1 — 2026-11-11_
 - [ ] Suppress stack traces in production (SEC-08)
 
 ### Notifications (NOTIF-01–03)
-- [ ] Email notification system (queued Mailable jobs) for all events in NOTIF-01
-- [ ] In-app notification bell: unread count, click-to-resource (NOTIF-02)
-- [ ] Notification preference settings per user (NOTIF-03)
+- [x] Email notification system (queued jobs) for account approved/rejected, application received, application status changed, verification document required (NOTIF-01)
+- [x] In-app notification bell with unread count + mark-all-read (NOTIF-02)
+- [ ] Notification preference settings per user (NOTIF-03) — deferred
 
 ### Infrastructure
-- [ ] Demo data seeders (candidates, employers, postings, applications)
+- [x] Demo data seeders (candidates, employers, postings, applications) — see `docs/DEMO-ACCOUNTS.md`
 - [ ] Deploy / demo environment (Docker on VPS or Railway)
 - [ ] Background job queue (Redis or database driver) for video compression, reports, emails (REL-02)
 
@@ -68,11 +68,11 @@ _Last synced with `docs/REQUIREMENTS.md` v1.1 — 2026-11-11_
 ## Track B — Employer
 
 ### Job Posting (POST-01–09) `#5, #6`
-- [ ] Posting create/edit form: title, rich-text description, skill chips, employment type, location, salary, accommodations provided checklist (POST-01, POST-06)
-- [ ] Exclusionary language detector: scan on save, highlight phrases with inclusive replacements (POST-02) `#5`
-- [ ] Accept / dismiss language suggestions before publish (POST-03)
-- [ ] Posting status machine: Draft → Pending Scan → Published → Closed → Archived (POST-04)
-- [ ] Employer posting management dashboard: list, edit, close, archive (POST-05)
+- [x] Posting create/edit form: title, rich-text description, skill chips, employment type, location, salary, accommodations provided checklist (POST-01, POST-06)
+- [x] Exclusionary language detector: scan on save, highlight phrases with inclusive replacements (POST-02) `#5`
+- [x] Accept / dismiss language suggestions before publish (POST-03)
+- [x] Posting status machine: Draft → Pending Scan → Published → Closed → Archived (POST-04)
+- [x] Employer posting management dashboard: list, edit, close, archive (POST-05)
 - [ ] Applicant list per posting: ranked by fit score (POST-07)
 - [ ] Update applicant status (Under Review → Interview → Hired / Rejected) with optional note (POST-08)
 - [ ] On "Hired": prompt employer to confirm PWD-verified status; write `workforce_records` (POST-09)

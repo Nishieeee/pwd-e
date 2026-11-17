@@ -12,4 +12,7 @@
 @fonts
 
 @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+{{-- The custom UI is light-only; force light appearance so Flux dark-mode tokens don't render white-on-white. --}}
+<script>window.localStorage.setItem('flux.appearance', 'light');</script>
 @fluxAppearance
