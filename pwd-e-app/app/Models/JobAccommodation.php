@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class JobAccommodation extends Model
 {
-    protected $fillable = ['job_posting_id', 'accommodation_id'];
+    protected $fillable = ['job_posting_id', 'accommodation_id', 'scope', 'description', 'availability'];
 
     public function jobPosting(): BelongsTo
     {

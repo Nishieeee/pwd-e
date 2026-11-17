@@ -1,5 +1,9 @@
 <?php
 
+use App\Livewire\Candidate\ApplicationsTracker;
+use App\Livewire\Candidate\Dashboard;
+use App\Livewire\Candidate\JobMatches;
+use App\Livewire\Candidate\ProfileBuilder;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'home')->name('home');
@@ -12,7 +16,10 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::middleware(['auth', 'account.verified'])->group(function () {
-    Route::view('dashboard', 'dashboard')->name('dashboard');
+    Route::get('dashboard', Dashboard::class)->name('dashboard');
+    Route::get('profile/builder/{step?}', ProfileBuilder::class)->name('candidate.profile.builder');
+    Route::get('jobs/matches/{job?}', JobMatches::class)->name('candidate.jobs');
+    Route::get('applications', ApplicationsTracker::class)->name('candidate.applications');
 });
 
 require __DIR__.'/settings.php';
