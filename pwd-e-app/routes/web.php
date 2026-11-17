@@ -1,5 +1,9 @@
 <?php
 
+use App\Livewire\Candidate\ApplicationsTracker;
+use App\Livewire\Candidate\Dashboard;
+use App\Livewire\Candidate\JobMatches;
+use App\Livewire\Candidate\ProfileBuilder;
 use App\Http\Controllers\Admin\VerificationDocumentController;
 use App\Livewire\Admin\AuditLog;
 use App\Livewire\Admin\Dashboard;
@@ -31,6 +35,10 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 });
 
 Route::middleware(['auth', 'account.verified'])->group(function () {
+    Route::get('dashboard', Dashboard::class)->name('dashboard');
+    Route::get('profile/builder/{step?}', ProfileBuilder::class)->name('candidate.profile.builder');
+    Route::get('jobs/matches/{job?}', JobMatches::class)->name('candidate.jobs');
+    Route::get('applications', ApplicationsTracker::class)->name('candidate.applications');
     Route::get('dashboard', function () {
         if (auth()->user()?->isAdmin()) {
             return redirect()->route('admin.dashboard');
