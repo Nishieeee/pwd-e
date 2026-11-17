@@ -53,7 +53,7 @@ Implementation in progress. **Core features are due December 1, 2026.** 19 days 
 - Candidate dashboard + application history (APP-06–07)
 
 ### Track D
-- Predictive text engine (ASSIST-01–06) — **new, first-class feature**
+- Predictive text engine (ASSIST-01–06) — ✅ shipped (vanilla JS, auto-attaches to all text inputs/textareas; Tab/Escape/arrows; ARIA listbox; voice toggle)
 - Global accessibility settings panel (ASSIST-07–08)
 - Matching service wired to real data (MATCH-01–08)
 - Application flow with PWD ID gate (APP-01–05)

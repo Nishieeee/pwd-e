@@ -121,12 +121,12 @@ _Last synced with `docs/REQUIREMENTS.md` v1.1 — 2026-11-11_
 - [ ] `prefers-reduced-motion` respected for all animations (A11Y-09)
 
 ### Predictive Text Engine (ASSIST-01–06) `New feature — interview finding #2`
-- [ ] In-browser word-prediction library (or custom): fires on all `<input type="text">` and `<textarea>` after 2+ chars (ASSIST-01)
-- [ ] Tab → accept top suggestion; Escape → dismiss (ASSIST-02)
-- [ ] Vocabulary: English common words + Filipino words + job-domain terms + user personal history (ASSIST-03)
-- [ ] Keyboard navigation (arrow keys) through suggestion dropdown; no focus steal (ASSIST-04)
-- [ ] ARIA: `role="listbox"`, `aria-activedescendant`, live region for screen readers (ASSIST-05)
-- [ ] Voice toggle button (microphone icon) on all free-text fields (ASSIST-06)
+- [x] In-browser word-prediction (custom vanilla JS): fires on all `<input type="text">` and `<textarea>` after 2+ chars (ASSIST-01)
+- [x] Tab → accept top suggestion; Escape → dismiss (ASSIST-02)
+- [x] Vocabulary: English common words + Filipino words + job-domain terms + user personal history (localStorage) (ASSIST-03)
+- [x] Keyboard navigation (arrow keys) through suggestion dropdown; no focus steal (ASSIST-04)
+- [x] ARIA: `role="listbox"`, `aria-activedescendant`, live region for screen readers (ASSIST-05)
+- [x] Voice toggle button (microphone icon) on all free-text fields via Web Speech API (ASSIST-06)
 
 ### Matching Service (MATCH-01–08) `#2`
 - [ ] `AccessibilityFitService`: hard filter (exclude missing required accommodations) (MATCH-02)
