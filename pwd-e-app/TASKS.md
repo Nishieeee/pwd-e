@@ -18,6 +18,7 @@ _Last synced with `docs/REQUIREMENTS.md` v1.1 — 2026-11-11_
 - [x] Unverified account gate middleware (pending users redirected to verification notice)
 - [x] Profile-completion schema: work experience, education, certifications, profile drafts, notifications, notification preferences, word history, tax snapshots + encrypted casts
 - [x] `docs/ERD.md` created; `docs/REQUIREMENTS.md` v1.1 written (SRS from stakeholder interview)
+- [x] Candidate portal shipped: profile builder (5-step wizard, PSGC zip auto-fill, resume PDF gen, FSL/PWD ID cards), dashboard, job matches, applications tracker (merged PR #9)
 
 ---
 
@@ -93,22 +94,22 @@ _Last synced with `docs/REQUIREMENTS.md` v1.1 — 2026-11-11_
 ## Track C — Candidate
 
 ### Profile Building (PROF-01–10) `#1, #4`
-- [ ] Multi-step profile wizard with progress bar; each step saves independently (PROF-01)
+- [x] Multi-step profile wizard with progress bar; each step saves independently (PROF-01)
 - [ ] Auto-save draft every 60 seconds; restore on revisit (PROF-10, UX-09)
-- [ ] Skills tag/chip input with predictive autocomplete from skills taxonomy (PROF-03)
+- [x] Skills tag/chip input with predictive autocomplete from skills taxonomy (PROF-03)
 - [ ] Accessibility needs checklist (physical / sensory / schedule / tech); hard vs. soft toggle per item (PROF-04)
 - [ ] Per-field visibility toggles: public / employers-only / hidden (PROF-06)
 - [ ] Profile completion percentage bar + missing-section prompts (PROF-07)
 - [ ] Résumé PDF upload (PROF-08)
 - [ ] Voice input on all free-text fields (Web Speech API) with microphone toggle (PROF-02) `#1`
-- [ ] FSL video record / upload (max 5 min), attached to profile (PROF-05) `#4`
-- [ ] All free-text inputs wired to predictive text engine (PROF-09, ASSIST-01)
+- [x] FSL video record / upload (max 5 min), attached to profile (PROF-05) `#4`
+- [x] All free-text inputs wired to predictive text engine (PROF-09, ASSIST-01)
 
 ### Candidate Dashboard
-- [ ] Matched jobs list sorted by fit score (MATCH-06, MATCH-07)
+- [x] Matched jobs list sorted by fit score (MATCH-06, MATCH-07)
 - [ ] Bookmarked jobs list (MATCH-08)
-- [ ] Application history with statuses: Submitted, Under Review, Interview, Hired, Rejected (APP-06)
-- [ ] Withdraw pending application (APP-07)
+- [x] Application history with statuses: Submitted, Under Review, Interview, Hired, Rejected (APP-06)
+- [x] Withdraw pending application (APP-07)
 
 ---
 
@@ -121,12 +122,12 @@ _Last synced with `docs/REQUIREMENTS.md` v1.1 — 2026-11-11_
 - [ ] `prefers-reduced-motion` respected for all animations (A11Y-09)
 
 ### Predictive Text Engine (ASSIST-01–06) `New feature — interview finding #2`
-- [ ] In-browser word-prediction library (or custom): fires on all `<input type="text">` and `<textarea>` after 2+ chars (ASSIST-01)
-- [ ] Tab → accept top suggestion; Escape → dismiss (ASSIST-02)
-- [ ] Vocabulary: English common words + Filipino words + job-domain terms + user personal history (ASSIST-03)
-- [ ] Keyboard navigation (arrow keys) through suggestion dropdown; no focus steal (ASSIST-04)
-- [ ] ARIA: `role="listbox"`, `aria-activedescendant`, live region for screen readers (ASSIST-05)
-- [ ] Voice toggle button (microphone icon) on all free-text fields (ASSIST-06)
+- [x] In-browser word-prediction (custom vanilla JS): fires on all `<input type="text">` and `<textarea>` after 2+ chars (ASSIST-01)
+- [x] Tab → accept top suggestion; Escape → dismiss (ASSIST-02)
+- [x] Vocabulary: English common words + Filipino words + job-domain terms + user personal history (ASSIST-03)
+- [x] Keyboard navigation (arrow keys) through suggestion dropdown; no focus steal (ASSIST-04)
+- [x] ARIA: `role="listbox"`, `aria-activedescendant`, live region for screen readers (ASSIST-05)
+- [x] Voice toggle button (microphone icon) on all free-text fields (ASSIST-06)
 
 ### Matching Service (MATCH-01–08) `#2`
 - [ ] `AccessibilityFitService`: hard filter (exclude missing required accommodations) (MATCH-02)
@@ -149,9 +150,9 @@ _Last synced with `docs/REQUIREMENTS.md` v1.1 — 2026-11-11_
 - [ ] Final NVDA and axe-core passes (Nov 23–29)
 
 ### Testing & Docs
+- [x] PHPStan Level 5 clean; Pint formatted (routes pass level 7; pint clean on changed files)
 - [ ] Full-loop feature tests (Pest) for each user role
 - [ ] Laravel Dusk browser tests for critical flows: register, apply, hire
-- [ ] PHPStan Level 5 clean; Pint formatted
 - [ ] Documentation final update
 
 ---

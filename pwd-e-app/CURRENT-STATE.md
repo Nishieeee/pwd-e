@@ -47,16 +47,16 @@ Implementation in progress. **Core features are due December 1, 2026.** 19 days 
 - RA 10524 tax incentive tracker + export (TAX-01–05)
 
 ### Track C
-- Profile wizard (all steps) (PROF-01–10)
-- Voice input (PROF-02, ASSIST-06)
-- FSL video record/upload (PROF-05)
-- Candidate dashboard + application history (APP-06–07)
+- Profile wizard (all steps) (PROF-01–10) — ✅ shipped (5-step wizard, PSGC zip auto-fill, resume PDF, FSL/PWD ID cards)
+- Voice input (PROF-02, ASSIST-06) — predictive text engine covers text; Web Speech API toggle present
+- FSL video record/upload (PROF-05) — ✅ shipped
+- Candidate dashboard + application history (APP-06–07) — ✅ shipped
 
 ### Track D
-- Predictive text engine (ASSIST-01–06) — **new, first-class feature**
+- Predictive text engine (ASSIST-01–06) — ✅ shipped
 - Global accessibility settings panel (ASSIST-07–08)
-- Matching service wired to real data (MATCH-01–08)
-- Application flow with PWD ID gate (APP-01–05)
+- Matching service wired to real data (MATCH-01–08) — partial (job matches uses stored fit scores)
+- Application flow with PWD ID gate (APP-01–05) — partial (applyForJob persists application)
 - Full-loop feature tests + AT testing (NVDA/JAWS)
 
 ---
