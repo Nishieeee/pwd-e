@@ -28,7 +28,7 @@ _Last synced with `docs/REQUIREMENTS.md` v1.1 — 2026-11-11_
 - [x] Candidate registration: collect disability type (dropdown/multi-select) + PWD ID number field (AUTH-02, AUTH-09)
 - [x] Employer registration: collect company name, email, business permit number (AUTH-03)
 - [x] Block unverified accounts from sensitive actions; redirect with friendly message (AUTH-04)
-- [ ] Email notification on account approval / rejection (AUTH-05)
+- [x] Email notification on account approval / rejection (AUTH-05) — covered by `VerificationStatusUpdated` notification fired in verification queue
 - [ ] Password reset via time-limited token link (AUTH-06)
 - [ ] Session expiry after 2 h inactivity with redirect + message (AUTH-07)
 - [ ] "Remember me" 30-day persistent session (AUTH-10)
@@ -59,7 +59,7 @@ _Last synced with `docs/REQUIREMENTS.md` v1.1 — 2026-11-11_
 - [ ] Notification preference settings per user (NOTIF-03) — deferred
 
 ### Infrastructure
-- [ ] Demo data seeders (candidates, employers, postings, applications)
+- [x] Demo data seeders (candidates, employers, postings, applications) — see `docs/DEMO-ACCOUNTS.md`
 - [ ] Deploy / demo environment (Docker on VPS or Railway)
 - [ ] Background job queue (Redis or database driver) for video compression, reports, emails (REL-02)
 

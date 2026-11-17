@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             ExclusionaryTermSeeder::class,
             AdminUserSeeder::class,
             EmployerUserSeeder::class,
+            CandidateUserSeeder::class,
         ]);
     }
 }

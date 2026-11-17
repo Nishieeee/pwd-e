@@ -1,14 +1,15 @@
 # HANDOFF.md
 
 ## Last session
-- **Date:** 2026-11-16 — branch `feature/verification-admin-queue`
+- **Date:** 2026-11-17 — branch `feature/verification-admin-queue`
 - **Done:**
   - Verification admin queue shipped: `/admin/verifications` with filter tabs, document preview, approve/reject/request-more-docs + notifications; `needs_more_docs` status added.
   - Admin dashboard built (based on employer dashboard design): `/admin` analytics, `/admin/users` (suspend/reinstate), `/admin/lexicon` (exclusionary-term CRUD), `/admin/audit-log` (filterable, D-16).
   - Admin nav added to sidebar; activity logging wired into verification, suspension, lexicon actions.
   - Notifications: NOTIF-01 (queued mail + database classes: account approved/rejected, application received, application status changed, verification document required) + NOTIF-02 in-app bell with unread count; NOTIF-03 preferences deferred.
   - Dark-mode forced to light (partials/head) to fix white-on-white; `/dashboard` redirects admins to `/admin`.
-  - 66 tests passing; Pint clean on changed files.
+  - AUTH-05 confirmed already implemented via `VerificationStatusUpdated`.
+  - JobPostingFlowTest added (11 tests); full suite 77 passing; Pint clean.
 
 ## State of the code
 - Login, registration, verification gate + queue, admin dashboard/users/lexicon/audit-log, notifications (mail + bell) working.
