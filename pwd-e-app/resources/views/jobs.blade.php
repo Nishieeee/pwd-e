@@ -20,12 +20,12 @@
                     <label for="search" class="block text-sm font-bold text-primary-dark mb-2">Search for Inclusive Opportunities (Skill, Location, and Accommodation)</label>
                     <div class="flex flex-col md:flex-row gap-2">
                         <input id="search" type="search" inputmode="search" enterkeyhint="search" class="flex-1 rounded-lg border border-primary-border bg-surface px-4 py-3 text-base min-h-[48px] focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g. Accessibility in Manila with Ramp Access or Screen Reader">
-                        <button type="button" class="bg-primary-dark text-white font-semibold px-6 py-3 rounded-lg min-h-[48px] hover:bg-primary md:w-auto w-full">Find Inclusive Jobs</button>
+                        <button type="button" class="bg-primary-dark text-white font-semibold px-6 py-3 rounded-lg min-h-[48px] hover:bg-primary md:w-auto w-full focus:outline-none focus:ring-0">Find Inclusive Jobs</button>
                     </div>
                     <div class="mt-4 pt-4 border-t border-primary-border flex flex-wrap items-center gap-2">
                         <span class="text-sm text-body-muted">Popular Accommodations:</span>
                         @foreach (['Ramp Access','Screen Reader Ready','FSL Support','Remote / Hybrid','Braille Elevators'] as $pill)
-                            <button type="button" class="text-sm border border-primary-border rounded-full px-3 py-1.5 text-primary-dark bg-white hover:bg-primary-tint">{{ $pill }}</button>
+                            <button type="button" class="text-sm border border-primary-border rounded-full px-3 py-1.5 text-primary-dark bg-white hover:bg-primary-tint focus:outline-none focus:ring-0">{{ $pill }}</button>
                         @endforeach
                     </div>
                 </div>
@@ -45,7 +45,7 @@
                 @foreach ($jobs as $job)
                 <li>
                     <article class="bg-white rounded-2xl border border-primary-border shadow-sm p-5 md:p-6" style="box-shadow: 0 4px 16px rgba(26,40,64,0.08);">
-                        <div class="md:flex md:gap-6">
+                        <div class="md:flex md:items-center md:gap-6">
                             <div class="flex-1 min-w-0">
                                 <h2 class="font-heading text-primary-dark text-xl font-bold">{{ $job['title'] }}</h2>
                                 <div class="mt-2 flex flex-wrap gap-2">
@@ -68,10 +68,10 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="mt-4 md:mt-0 md:w-48 shrink-0">
-                                <div class="bg-surface rounded-xl border border-primary-border p-4 flex flex-col gap-2">
-                                    <span class="text-center text-sm font-medium text-primary-dark bg-primary-tint rounded-full px-3 py-1">Inclusive Employer</span>
-                                    <a href="#" class="block text-center bg-primary-dark text-white font-semibold py-2.5 rounded-lg min-h-[40px] flex items-center justify-center hover:bg-primary">Apply via Portal</a>
+                            <div class="mt-4 md:mt-0 md:w-48 shrink-0 md:self-center flex flex-col justify-center">
+                                <div class="bg-surface rounded-xl border border-primary-border p-4 flex flex-col items-center justify-center gap-2">
+                                    <span class="w-full text-center text-sm font-medium text-primary-dark bg-primary-tint rounded-full px-3 py-1">Inclusive Employer</span>
+                                    <a href="#" class="w-full text-center bg-primary-dark text-white font-semibold py-2.5 rounded-lg min-h-[40px] flex items-center justify-center hover:bg-primary focus:outline-none focus:ring-0">Apply via Portal</a>
                                 </div>
                             </div>
                         </div>
