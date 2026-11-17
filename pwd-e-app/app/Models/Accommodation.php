@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Accommodation extends Model
 {
-    protected $fillable = ['name', 'category'];
+    protected $fillable = ['name', 'category', 'description'];
 
     public function accessibilityNeeds()
     {

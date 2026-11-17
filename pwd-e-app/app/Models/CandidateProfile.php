@@ -9,10 +9,40 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CandidateProfile extends Model
 {
-    protected $fillable = ['user_id', 'headline', 'bio', 'location', 'skills', 'fsl_video_path', 'fsl_caption_path', 'resume_pdf_path', 'disability_type', 'disability_description', 'phone', 'date_of_birth', 'gender', 'visibility_settings'];
+    protected $fillable = [
+        'user_id',
+        'avatar_path',
+        'suffix',
+        'headline',
+        'education_badge',
+        'highest_education',
+        'input_mode',
+        'bio',
+        'location',
+        'country',
+        'location_city_id',
+        'city',
+        'location_barangay_id',
+        'barangay',
+        'zip_code',
+        'spoken_languages',
+        'other_language',
+        'skills',
+        'fsl_video_path',
+        'fsl_caption_path',
+        'resume_pdf_path',
+        'disability_type',
+        'disability_description',
+        'phone',
+        'date_of_birth',
+        'gender',
+        'visibility_settings',
+        'accommodation_notes',
+    ];
 
     protected $casts = [
         'skills' => 'array',
+        'spoken_languages' => 'array',
         'disability_type' => 'encrypted',
         'disability_description' => 'encrypted',
         'date_of_birth' => 'date',
@@ -22,6 +52,16 @@ class CandidateProfile extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function locationCity(): BelongsTo
+    {
+        return $this->belongsTo(LocationCity::class, 'location_city_id');
+    }
+
+    public function locationBarangay(): BelongsTo
+    {
+        return $this->belongsTo(LocationBarangay::class, 'location_barangay_id');
     }
 
     public function accessibilityNeeds(): HasMany

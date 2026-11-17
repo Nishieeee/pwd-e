@@ -10,12 +10,30 @@ class Application extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['candidate_profile_id', 'job_posting_id', 'status', 'cover_letter', 'employer_notes', 'fsl_video_path', 'fsl_caption_path', 'fit_score_at_apply', 'applied_at'];
+    protected $fillable = [
+        'candidate_profile_id',
+        'job_posting_id',
+        'status',
+        'status_subtext',
+        'cover_letter',
+        'employer_notes',
+        'fsl_video_path',
+        'fsl_caption_path',
+        'fit_score_at_apply',
+        'applied_at',
+        'interview_at',
+        'interview_location',
+        'interview_url',
+        'interview_accommodations',
+        'offer_details',
+    ];
 
     protected $casts = [
         'cover_letter' => 'encrypted',
         'fit_score_at_apply' => 'decimal:2',
         'applied_at' => 'datetime',
+        'interview_at' => 'datetime',
+        'offer_details' => 'array',
     ];
 
     public function candidateProfile(): BelongsTo
