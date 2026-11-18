@@ -21,5 +21,5 @@
 | D-15 | Site must be compatible with external AT tools (NVDA, JAWS, switch access) — not just WCAG conformance; manual AT testing is required before Dec 1 | Accepted | Stakeholder interview 2026-11-11; see AT-01–06 in `docs/REQUIREMENTS.md` |
 | D-16 | Use `spatie/laravel-activitylog` for the admin audit log (ADMIN-05) | Accepted | Provides filterable activity records for verification, suspension, and lexicon actions; installed 2026-11-16 |
 
-## Adding a decision
+| D-17 | Predictive text engine implemented as vanilla JS (no new dependency) auto-attaching to all text inputs/textareas; vocabulary (English + Filipino + job-domain) + localStorage personal history; voice input via Web Speech API | Accepted | Honors D-11/D-14 (no new deps, minimal typing); thin form for Nov 22 target |
 Add a row with the next ID, the decision, status, and a one-line rationale. Never delete old rows; mark them "Superseded by D-xx".
