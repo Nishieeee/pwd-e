@@ -76,6 +76,21 @@ class User extends Authenticatable
         return $this->verified_at !== null && $this->status === 'active';
     }
 
+    public function isEmployer(): bool
+    {
+        return $this->role === 'employer' || $this->hasRole('employer');
+    }
+
+    public function isCandidate(): bool
+    {
+        return $this->role === 'candidate' || $this->hasRole('candidate');
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin' || $this->hasRole('admin');
+    }
+
     public function initials(): string
     {
         $initials = Str::initials($this->name, true);

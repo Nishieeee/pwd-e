@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         @include('partials.head')
     </head>
-    <body class="min-h-screen bg-white dark:bg-zinc-800">
-        <flux:header container class="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
+    <body class="min-h-screen bg-surface text-dark-neutral antialiased">
+        <flux:header container class="border-b border-primary-border bg-white text-dark-neutral">
             <flux:sidebar.toggle class="lg:hidden mr-2" icon="bars-2" inset="left" />
 
             <x-app-logo href="{{ route('dashboard') }}" wire:navigate />
@@ -13,6 +13,12 @@
                 <flux:navbar.item icon="layout-grid" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                     {{ __('Dashboard') }}
                 </flux:navbar.item>
+
+                @if (auth()->user()?->isEmployer())
+                    <flux:navbar.item icon="briefcase" :href="route('employer.jobs.index')" :current="request()->routeIs('employer.jobs.*')" wire:navigate>
+                        {{ __('Job Postings') }}
+                    </flux:navbar.item>
+                @endif
             </flux:navbar>
 
             <flux:spacer />
@@ -56,6 +62,12 @@
                     <flux:sidebar.item icon="layout-grid" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                         {{ __('Dashboard')  }}
                     </flux:sidebar.item>
+
+                    @if (auth()->user()?->isEmployer())
+                        <flux:sidebar.item icon="briefcase" :href="route('employer.jobs.index')" :current="request()->routeIs('employer.jobs.*')" wire:navigate>
+                            {{ __('Job Postings') }}
+                        </flux:sidebar.item>
+                    @endif
                 </flux:sidebar.group>
             </flux:sidebar.nav>
 
