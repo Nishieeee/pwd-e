@@ -16,3 +16,19 @@
 {{-- The custom UI is light-only; force light appearance so Flux dark-mode tokens don't render white-on-white. --}}
 <script>window.localStorage.setItem('flux.appearance', 'light');</script>
 @fluxAppearance
+
+{{-- Apply persisted accessibility settings early to avoid FOUC. --}}
+@php
+    $a11y = auth()->user()?->display_settings ?? [];
+@endphp
+<script>
+    (function () {
+        var s = @json($a11y);
+        var h = document.documentElement;
+        if (s.high_contrast) h.classList.add('a11y-high-contrast');
+        if (s.large_text) h.classList.add('a11y-large-text');
+        if (s.dyslexia_font) h.classList.add('a11y-dyslexia');
+        if (s.reduced_motion) h.classList.add('a11y-reduced-motion');
+        if (s.predictive_text === false) h.classList.add('a11y-no-predictive');
+    })();
+</script>

@@ -132,6 +132,7 @@ if (typeof document !== 'undefined') {
     document.addEventListener('focusin', (e) => {
         const el = e.target;
         if (!isTextInput(el)) return;
+        if (document.documentElement.classList.contains('a11y-no-predictive')) return;
         activeInput = el;
         el.setAttribute('aria-autocomplete', 'list');
         el.setAttribute('aria-haspopup', 'listbox');

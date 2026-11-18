@@ -73,7 +73,7 @@ return [
     |
     */
 
-    'home' => '/jobs',
+    'home' => '/dashboard',
     'redirects' => [
         'register' => '/',
     ],

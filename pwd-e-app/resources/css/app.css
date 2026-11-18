@@ -51,9 +51,24 @@
 
 @layer base {
     :root {
-        --font-heading: 'Lexend', 'Inter', system-ui, sans-serif;
-        --font-body: 'Inter', system-ui, sans-serif;
+        --color-contrast: #000;
+        --font-scale: 1;
+        --font-family-dyslexia: 'Atkinson Hyperlegible Next', sans-serif;
     }
+
+    html.a11y-large-text { font-size: 150%; }
+    html.a11y-dyslexia body { font-family: var(--font-family-dyslexia); }
+    html.a11y-high-contrast { filter: contrast(1.25); }
+    html.a11y-reduced-motion *,
+    html.a11y-reduced-motion *::before,
+    html.a11y-reduced-motion *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+    html.a11y-no-predictive #predictive-dropdown { display: none !important; }
+}
 
     body[data-readable-font="true"] {
         --font-heading: 'Atkinson Hyperlegible Next', sans-serif;

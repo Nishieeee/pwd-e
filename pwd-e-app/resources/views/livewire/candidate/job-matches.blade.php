@@ -485,11 +485,10 @@
                         </div>
                     </div>
 
-                    <button type="button"
-                            wire:click="applyForJob({{ $selectedJob->id }})"
-                            class="w-full py-3 rounded-lg bg-[#244F73] text-white text-xs font-bold hover:bg-[#1A2840] shadow-sm transition-colors focus:ring-2 focus:ring-[#244F73]">
+                    <a href="{{ route('candidate.apply', $selectedJob) }}"
+                            class="block w-full py-3 rounded-lg bg-[#244F73] text-white text-xs font-bold hover:bg-[#1A2840] shadow-sm transition-colors focus:ring-2 focus:ring-[#244F73] text-center">
                         Apply Now &rarr;
-                    </button>
+                    </a>
 
                     <p class="text-[11px] text-center text-gray-500">
                         Your profile is shared with the employer only when you apply.

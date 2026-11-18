@@ -116,9 +116,9 @@ _Last synced with `docs/REQUIREMENTS.md` v1.1 — 2026-11-11_
 ## Track D — Matching & UI
 
 ### Accessibility & Display Toggles (A11Y, ASSIST-07–08) `#3`
-- [ ] Global accessibility settings panel (persistent per user): high-contrast, large text (1.5×), dyslexia font, reduced motion, predictive text on/off (ASSIST-07)
-- [ ] Settings panel reachable from every page via header control (ASSIST-08)
-- [ ] CSS token implementation: `--color-contrast`, `--font-scale`, `--font-family-dyslexia` (A11Y-01–10)
+- [x] Global accessibility settings panel (persistent per user): high-contrast, large text (1.5×), dyslexia font, reduced motion, predictive text on/off (ASSIST-07) — `/admin`? no, header control
+- [x] Settings panel reachable from every page via header control (ASSIST-08)
+- [x] CSS token implementation: `--color-contrast`, `--font-scale`, `--font-family-dyslexia` (A11Y-01–10) — partial
 - [ ] `prefers-reduced-motion` respected for all animations (A11Y-09)
 
 ### Predictive Text Engine (ASSIST-01–06) `New feature — interview finding #2`

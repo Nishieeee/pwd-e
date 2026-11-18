@@ -13,7 +13,7 @@
 - Schema and models complete. Seeders run.
 
 ## Next concrete action
-**Accessibility settings panel (ASSIST-07–08)** or **matching service (MATCH-01–08)** / **application flow (APP-01–05)** (Track D). Or **profile wizard (PROF-01–10)** (Track C). See `TASKS.md`.
+**Application flow single-page (APP-01–05)** — pre-fill from profile, cover letter (voice + predictive), PWD ID gate, confirmation + reference number, employer email. See `ROADMAP-PRESENTATION.md`.
 
 ## Open questions
 - Track ownership: who owns A, B, C, D? (Still TBD)

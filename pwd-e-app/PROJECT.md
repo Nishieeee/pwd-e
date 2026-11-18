@@ -41,18 +41,18 @@ Candidates build profiles by voice or form and may attach a Filipino Sign Langua
 | Layer | Choice |
 |---|---|
 | Backend | Laravel 11 (PHP 8.2+) |
-| Auth and roles | Laravel Breeze, spatie/laravel-permission |
-| Database | MySQL 8 (or PostgreSQL) |
+| Auth and roles | Laravel Fortify, spatie/laravel-permission |
+| Database | PostgreSQL 18 (D-06) |
 | Frontend | Blade, Livewire, Alpine.js, Tailwind CSS |
 | Speech-to-text | Web Speech API (prototype); OpenAI Whisper (upgrade path) |
 | Matching | Plain PHP/SQL weighted scoring (service class) |
 | Language detector | Rule-based lexicon and regex; optional LLM call for rewrite suggestions |
 | FSL video | Browser MediaRecorder, upload to private storage, FFmpeg compression |
 | Reports | barryvdh/laravel-dompdf (PDF), maatwebsite/excel (XLSX) |
-| Charts | Chart.js or ApexCharts |
+| Charts | Chart.js |
 | Accessibility auditing | axe-core, Lighthouse, Pa11y; JS error-logging endpoint |
 | Audit logging | spatie/laravel-activitylog |
-| Testing | Pest or PHPUnit, Laravel Dusk (browser tests) |
+| Testing | Pest (or PHPUnit); Laravel Dusk optional for browser tests |
 | Deployment | Docker on a VPS (or Railway/Render for demos) |
 
 ## 5. Architecture

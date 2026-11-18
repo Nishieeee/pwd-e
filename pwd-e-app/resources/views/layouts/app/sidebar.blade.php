@@ -56,6 +56,8 @@
 
             <livewire:notification-bell />
 
+            <livewire:accessibility-settings />
+
             <x-desktop-user-menu class="hidden lg:block" :name="auth()->user()->name" />
         </flux:sidebar>
 
@@ -66,6 +68,8 @@
             <flux:spacer />
 
             <livewire:notification-bell />
+
+            <livewire:accessibility-settings />
 
             <flux:dropdown position="top" align="end">
                 <flux:profile
