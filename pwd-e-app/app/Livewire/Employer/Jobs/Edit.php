@@ -8,10 +8,12 @@ use App\Services\Language\ExclusionaryLanguageScanner;
 use Flux\Flux;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Title('Edit Job Posting')]
+#[Layout('layouts.employer')]
 class Edit extends Component
 {
     public JobPosting $job;
@@ -127,7 +129,7 @@ class Edit extends Component
         $this->validate();
 
         $scanner = app(ExclusionaryLanguageScanner::class);
-        $fullText = $this->title . ' ' . $this->description;
+        $fullText = $this->title.' '.$this->description;
         $scan = $scanner->scan($fullText);
 
         if ($scan['has_flags'] && ! $ignoreScanWarnings) {

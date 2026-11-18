@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\VerificationDocumentController;
+use App\Http\Controllers\Employer\ApplicantDocumentController;
 use App\Livewire\Admin\AuditLog;
 use App\Livewire\Admin\Dashboard as AdminDashboard;
 use App\Livewire\Admin\Lexicon;
@@ -11,9 +12,11 @@ use App\Livewire\Candidate\Apply;
 use App\Livewire\Candidate\Dashboard as CandidateDashboard;
 use App\Livewire\Candidate\JobMatches;
 use App\Livewire\Candidate\ProfileBuilder;
+use App\Livewire\Employer\Applicants;
 use App\Livewire\Employer\Jobs\Create;
 use App\Livewire\Employer\Jobs\Edit;
 use App\Livewire\Employer\Jobs\Index;
+use App\Livewire\Employer\Workforce;
 use App\Livewire\Jobs\PublicListing;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -58,6 +61,10 @@ Route::middleware(['auth', 'account.verified'])->group(function () {
         Route::get('/jobs', Index::class)->name('jobs.index');
         Route::get('/jobs/create', Create::class)->name('jobs.create');
         Route::get('/jobs/{job}/edit', Edit::class)->name('jobs.edit');
+        Route::get('/jobs/{job}/applicants', Applicants::class)->name('jobs.applicants');
+        Route::get('/applicants/{application}/document/{type}', [ApplicantDocumentController::class, 'show'])->name('applicants.document');
+        Route::redirect('/applicants', '/employer/jobs')->name('applicants');
+        Route::get('/workforce', Workforce::class)->name('workforce');
     });
 });
 

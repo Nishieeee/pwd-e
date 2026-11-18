@@ -6,12 +6,14 @@ use App\Models\JobPosting;
 use Flux\Flux;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 #[Title('My Job Postings')]
+#[Layout('layouts.employer')]
 class Index extends Component
 {
     use WithPagination;

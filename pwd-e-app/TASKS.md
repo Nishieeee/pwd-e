@@ -74,20 +74,20 @@ _Last synced with `docs/REQUIREMENTS.md` v1.1 — 2026-11-11_
 - [x] Accept / dismiss language suggestions before publish (POST-03)
 - [x] Posting status machine: Draft → Pending Scan → Published → Closed → Archived (POST-04)
 - [x] Employer posting management dashboard: list, edit, close, archive (POST-05)
-- [ ] Applicant list per posting: ranked by fit score (POST-07)
-- [ ] Update applicant status (Under Review → Interview → Hired / Rejected) with optional note (POST-08)
-- [ ] On "Hired": prompt employer to confirm PWD-verified status; write `workforce_records` (POST-09)
+- [x] Applicant list per posting: ranked by fit score (POST-07)
+- [x] Update applicant status (Under Review → Interview → Hired / Rejected) with optional note (POST-08)
+- [x] On "Hired": prompt employer to confirm PWD-verified status; write `workforce_records` (POST-09)
 
 ### Workspace Accessibility Matrix (POST-06) `#6`
 - [ ] Employer onboarding: categorized checklist of accommodations provided (physical, sensory, schedule, tech)
 - [ ] Edit matrix from employer settings at any time
 
 ### Workforce & Tax Incentives (TAX-01–05) `#7`
-- [ ] PWD Workforce Summary widget: total employees, PWD count, PWD % (TAX-01)
-- [ ] RA 10524 deduction calculation display (TAX-02)
-- [ ] Plain-language RA 10524 benefit explanation (TAX-04)
-- [ ] Tax Incentive Report export: PDF + XLSX (TAX-03) — queued job, email when ready
-- [ ] Workforce records table: add/remove employees, mark PWD-verified (TAX-05)
+- [x] PWD Workforce Summary widget: total employees, PWD count, PWD % (TAX-01)
+- [x] RA 10524 deduction calculation display (TAX-02)
+- [x] Plain-language RA 10524 benefit explanation (TAX-04)
+- [ ] Tax Incentive Report export: PDF + XLSX (TAX-03) — queued job, email when ready — deferred
+- [x] Workforce records table: add/remove employees, mark PWD-verified (TAX-05)
 
 ---
 

@@ -1,4 +1,4 @@
-<x-layouts::app :title="__('Employer Dashboard')">
+<x-layouts::employer :title="__('Employer Dashboard')">
     <div class="flex h-full w-full flex-1 flex-col gap-6">
         @if (auth()->user()?->isEmployer())
             <!-- Employer Hero Banner matching Landing Page Design -->
@@ -135,4 +135,4 @@
             </div>
         @endif
     </div>
-</x-layouts::app>
+</x-layouts::employer>

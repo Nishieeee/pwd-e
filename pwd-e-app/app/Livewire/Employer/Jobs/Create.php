@@ -8,10 +8,12 @@ use App\Services\Language\ExclusionaryLanguageScanner;
 use Flux\Flux;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Title('Post a Job')]
+#[Layout('layouts.employer')]
 class Create extends Component
 {
     public string $title = '';
@@ -158,7 +160,7 @@ class Create extends Component
         $this->validate();
 
         $scanner = app(ExclusionaryLanguageScanner::class);
-        $fullText = $this->title . ' ' . $this->description;
+        $fullText = $this->title.' '.$this->description;
         $scan = $scanner->scan($fullText);
 
         // Check for exclusionary language

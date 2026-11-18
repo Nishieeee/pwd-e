@@ -42,9 +42,10 @@ Implementation in progress. **Core features are due December 1, 2026.** 19 days 
 - Privacy hardening (encrypted casts, signed URLs, rate limiting) (SEC-01–09)
 
 ### Track B
-- Job posting form + language detector (POST-01–09)
-- Workspace accessibility matrix (POST-06)
-- RA 10524 tax incentive tracker + export (TAX-01–05)
+- Job posting form + language detector (POST-01–05) — ✅ shipped
+- Applicant management + hire flow (POST-07–09) — ✅ shipped
+- Accessibility matrix (POST-06) — not started
+- RA 10524 tax tracker (TAX-01, 02, 04, 05) — ✅ shipped (export deferred)
 
 ### Track C
 - Profile wizard (all steps) (PROF-01–10) — ✅ shipped (5-step wizard, PSGC zip auto-fill, resume PDF, FSL/PWD ID cards)

@@ -285,6 +285,14 @@
                             <!-- Actions Group -->
                             <div class="flex items-center gap-2">
                                 <a
+                                    href="{{ route('employer.jobs.applicants', $job->id) }}"
+                                    wire:navigate
+                                    class="inline-flex items-center gap-1.5 rounded-xl border border-primary-border bg-white px-3.5 py-2 text-xs font-bold text-primary-dark shadow-xs transition hover:bg-primary-tint"
+                                >
+                                    {{ __('Applicants') }}
+                                </a>
+
+                                <a
                                     href="{{ route('employer.jobs.edit', $job->id) }}"
                                     wire:navigate
                                     class="inline-flex items-center gap-1.5 rounded-xl border border-primary-border bg-white px-3.5 py-2 text-xs font-bold text-primary-dark shadow-xs transition hover:bg-primary-tint"
