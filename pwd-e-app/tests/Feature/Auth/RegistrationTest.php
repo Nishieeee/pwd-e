@@ -73,6 +73,46 @@ test('employer can register with permit and creates profile', function () {
     expect(VerificationRequest::where('user_id', $user->id)->where('type', 'business_permit')->exists())->toBeTrue();
 });
 
+test('employer can register with company payload without representative name', function () {
+    $response = $this->post(route('register.store'), [
+        'role' => 'employer',
+        'company_name' => 'Stark Industries PH',
+        'email' => 'hr@starkph.example.com',
+        'password' => 'password',
+        'password_confirmation' => 'password',
+        'business_permit_number' => 'BP-STARK-2026',
+        'terms' => '1',
+    ]);
+
+    $response->assertSessionHasNoErrors();
+
+    $user = User::where('email', 'hr@starkph.example.com')->first();
+    expect($user)->not->toBeNull();
+    expect($user->role)->toBe('employer');
+    expect($user->first_name)->toBe('Stark Industries PH');
+    expect($user->last_name)->toBe('Representative');
+    expect($user->status)->toBe('pending');
+    expect(EmployerProfile::where('user_id', $user->id)->exists())->toBeTrue();
+});
+
+test('newly registered user following dashboard redirect lands on verification pending', function () {
+    $this->post(route('register.store'), [
+        'role' => 'candidate',
+        'first_name' => 'Maria',
+        'last_name' => 'Santos',
+        'email' => 'maria@example.com',
+        'password' => 'password',
+        'password_confirmation' => 'password',
+        'date_of_birth' => now()->subYears(22)->toDateString(),
+        'disability_type' => 'Visual',
+        'pwd_id_number' => 'PWD-MARIA-1',
+        'consent' => '1',
+        'terms' => '1',
+    ])->assertRedirect('/');
+
+    $this->get(route('dashboard'))->assertRedirect(route('verification.notice'));
+});
+
 test('registration fails without required role fields', function () {
     $response = $this->post(route('register.store'), [
         'role' => 'candidate',

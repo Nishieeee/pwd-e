@@ -22,15 +22,15 @@ class CreateNewUser implements CreatesNewUsers
 
         $rules = [
             'role' => ['required', 'string', 'in:candidate,employer'],
-            'first_name' => ['required', 'string', 'max:100'],
-            'last_name' => ['required', 'string', 'max:100'],
-            'middle_name' => ['nullable', 'string', 'max:100'],
             'email' => $this->emailRules(),
             'password' => $this->passwordRules(),
             'terms' => ['accepted'],
         ];
 
         if ($role === 'candidate') {
+            $rules['first_name'] = ['required', 'string', 'max:100'];
+            $rules['last_name'] = ['required', 'string', 'max:100'];
+            $rules['middle_name'] = ['nullable', 'string', 'max:100'];
             $rules['disability_type'] = ['required', 'string', 'max:100'];
             $rules['pwd_id_number'] = ['required', 'string', 'max:50'];
             $rules['pwd_id_file'] = ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'];
@@ -38,6 +38,9 @@ class CreateNewUser implements CreatesNewUsers
             $rules['date_of_birth'] = ['required', 'date', 'before_or_equal:'.now()->subYears(18)->toDateString()];
         } elseif ($role === 'employer') {
             $rules['company_name'] = ['required', 'string', 'max:255'];
+            $rules['first_name'] = ['nullable', 'string', 'max:100'];
+            $rules['last_name'] = ['nullable', 'string', 'max:100'];
+            $rules['middle_name'] = ['nullable', 'string', 'max:100'];
             $rules['business_permit_number'] = ['required', 'string', 'max:100'];
             $rules['business_permit_file'] = ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'];
         }
@@ -50,17 +53,24 @@ class CreateNewUser implements CreatesNewUsers
             $pwdIdPath = $request->file('pwd_id_file')?->store('documents/pwd_ids', 'private');
             $permitPath = $request->file('business_permit_file')?->store('documents/permits', 'private');
 
+            $firstName = !empty($input['first_name'])
+                ? $input['first_name']
+                : ($role === 'employer' ? $input['company_name'] : '');
+            $lastName = !empty($input['last_name'])
+                ? $input['last_name']
+                : ($role === 'employer' ? 'Representative' : '');
+
             $fullName = trim(implode(' ', array_filter([
-                $input['first_name'] ?? '',
+                $firstName,
                 $input['middle_name'] ?? '',
-                $input['last_name'] ?? '',
+                $lastName,
             ])));
 
             $user = User::create([
                 'name' => $fullName,
-                'first_name' => $input['first_name'],
+                'first_name' => $firstName,
                 'middle_name' => $input['middle_name'] ?? null,
-                'last_name' => $input['last_name'],
+                'last_name' => $lastName,
                 'email' => $input['email'],
                 'password' => $input['password'],
                 'role' => $role,
