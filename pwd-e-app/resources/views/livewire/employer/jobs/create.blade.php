@@ -5,7 +5,6 @@
             <div>
                 <a
                     href="{{ route('employer.jobs.index') }}"
-                    wire:navigate
                     class="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline -ml-1"
                 >
                     <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
@@ -310,7 +309,6 @@
         <div class="flex flex-col-reverse gap-4 sm:flex-row sm:items-center sm:justify-between pt-2">
             <a
                 href="{{ route('employer.jobs.index') }}"
-                wire:navigate
                 class="inline-flex items-center justify-center rounded-xl border border-primary-border bg-white px-6 py-3 text-sm font-semibold text-body-muted hover:bg-surface hover:text-primary-dark transition"
             >
                 {{ __('Cancel') }}

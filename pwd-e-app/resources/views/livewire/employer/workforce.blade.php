@@ -1,7 +1,39 @@
 <div class="space-y-6">
-    <div>
-        <h1 class="font-heading text-2xl font-bold text-primary-dark">{{ __('Workforce & Tax Incentives') }}</h1>
-        <p class="text-sm text-body-muted">{{ __('RA 10524 deduction tracker for PWD employees.') }}</p>
+    <!-- Screen Header & Actions -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="font-heading text-2xl font-bold text-primary-dark">{{ __('Workforce & Tax Incentives') }}</h1>
+            <p class="text-sm text-body-muted">{{ __('Statutory gross income deduction calculator and compliance records under Republic Act No. 10524.') }}</p>
+        </div>
+        <div class="print:hidden">
+            <button
+                type="button"
+                onclick="window.print()"
+                class="inline-flex items-center gap-2 rounded-xl border border-primary-border bg-white px-4 py-2.5 text-xs font-bold text-primary-dark shadow-xs hover:bg-primary-tint transition-colors focus:ring-2 focus:ring-primary min-h-[44px]"
+            >
+                <svg class="size-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                <span>{{ __('Print BIR Compliance Summary') }}</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Official BIR Certificate Print Header (Only visible on print) -->
+    <div class="hidden print:block border-b-2 border-primary-dark pb-4 mb-6">
+        <div class="text-center space-y-1">
+            <p class="text-xs font-bold uppercase tracking-wider text-gray-600">Republic of the Philippines</p>
+            <h2 class="text-lg font-bold text-black uppercase">Statutory PWD Employment Tax Deduction Certification</h2>
+            <p class="text-xs text-gray-600">Pursuant to Section 5, Republic Act No. 10524 &amp; BIR Revenue Regulations</p>
+        </div>
+        <div class="mt-4 grid grid-cols-2 text-xs border-t border-gray-300 pt-3">
+            <div>
+                <p><strong>Employer:</strong> {{ auth()->user()->employerProfile?->company_name ?? auth()->user()->name }}</p>
+                <p><strong>Reporting Period:</strong> Calendar Year {{ date('Y') }}</p>
+            </div>
+            <div class="text-right">
+                <p><strong>Date Generated:</strong> {{ date('F d, Y') }}</p>
+                <p><strong>Accreditation Status:</strong> DOLE / PESO Verified</p>
+            </div>
+        </div>
     </div>
 
     <!-- Summary widget -->

@@ -27,7 +27,6 @@
             <div class="shrink-0">
                 <a
                     href="{{ route('employer.jobs.create') }}"
-                    wire:navigate
                     class="inline-flex items-center gap-2 rounded-xl bg-primary-dark px-6 py-3.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary min-h-[48px]"
                 >
                     <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
@@ -165,7 +164,6 @@
             <div class="mt-6">
                 <a
                     href="{{ route('employer.jobs.create') }}"
-                    wire:navigate
                     class="inline-flex items-center gap-2 rounded-xl bg-primary-dark px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-primary"
                 >
                     <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
@@ -286,7 +284,6 @@
                             <div class="flex items-center gap-2">
                                 <a
                                     href="{{ route('employer.jobs.applicants', $job->id) }}"
-                                    wire:navigate
                                     class="inline-flex items-center gap-1.5 rounded-xl border border-primary-border bg-white px-3.5 py-2 text-xs font-bold text-primary-dark shadow-xs transition hover:bg-primary-tint"
                                 >
                                     {{ __('Applicants') }}
@@ -294,7 +291,6 @@
 
                                 <a
                                     href="{{ route('employer.jobs.edit', $job->id) }}"
-                                    wire:navigate
                                     class="inline-flex items-center gap-1.5 rounded-xl border border-primary-border bg-white px-3.5 py-2 text-xs font-bold text-primary-dark shadow-xs transition hover:bg-primary-tint"
                                 >
                                     <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>

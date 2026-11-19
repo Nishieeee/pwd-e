@@ -34,7 +34,13 @@ Implementation in progress. **Core demo features target: November 22, 2026. Hard
   - Encapsulated Settings within candidate/employer portal shells dynamically based on authenticated role (`layouts.candidate`, `layouts.employer`).
   - Wrapped settings forms within cohesive card containers matching design tokens, eliminating raw Laravel starter kit styling.
   - Cleared all `wire:navigate` usage from sidebar, layout, and nav components (Rule D-02 compliance).
-- **Tests & Quality**: 102/102 Pest tests passing, 13/13 JS predictive text tests passing, Tailwind v4 / Vite asset build clean.
+- **Production Parity & Compliance Verification**:
+  - Added official printable BIR RA 10524 Statutory Tax Certification summary in [workforce.blade.php](file:///C:/Users/ay/Projects/pwd-e/pwd-e-app/resources/views/livewire/employer/workforce.blade.php).
+  - Added multi-state verification recovery handling (`pending`, `needs_more_docs`, `rejected`) in [verification-pending.blade.php](file:///C:/Users/ay/Projects/pwd-e/pwd-e-app/resources/views/auth/verification-pending.blade.php).
+  - Fixed SQL like escaping bug in [PublicListing.php](file:///C:/Users/ay/Projects/pwd-e/pwd-e-app/app/Livewire/Jobs/PublicListing.php).
+  - Removed remaining `wire:navigate` instances in employer job views and desktop user menu for strict D-02 plain-page navigation compliance.
+  - Added exhaustive integration test suite in [ComponentIntegrityTest.php](file:///C:/Users/ay/Projects/pwd-e/pwd-e-app/tests/Feature/ComponentIntegrityTest.php).
+- **Tests & Quality**: 108/108 Pest tests passing, 13/13 JS predictive text tests passing, Tailwind v4 / Vite asset build clean.
 
 ## Done — Docs & Decisions ✅
 - Project proposal (Chapter 1) with features, roles, and workflow.
