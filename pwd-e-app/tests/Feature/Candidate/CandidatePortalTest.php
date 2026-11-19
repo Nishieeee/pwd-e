@@ -4,6 +4,7 @@ use App\Livewire\Candidate\ApplicationsTracker;
 use App\Livewire\Candidate\Dashboard;
 use App\Livewire\Candidate\JobMatches;
 use App\Livewire\Candidate\ProfileBuilder;
+use App\Livewire\Candidate\ShowProfile;
 use App\Models\Application;
 use App\Models\JobPosting;
 use App\Models\User;
@@ -324,6 +325,19 @@ test('candidate can view their digital bio-data profile', function () {
     $response->assertSee('RA 7277 Verified PWD');
     $response->assertSee('Print / Save Bio-Data');
     $response->assertSee('Required Workplace Accommodations');
+});
+
+test('candidate can toggle between bio-data view and edit profile modes on unified profile page', function () {
+    $this->actingAs($this->candidate);
+
+    Livewire::test(ShowProfile::class)
+        ->assertSet('tab', 'view')
+        ->assertSee('Digital Bio-Data')
+        ->call('setTab', 'edit')
+        ->assertSet('tab', 'edit')
+        ->assertSee('Edit Profile & Credentials')
+        ->call('setTab', 'view')
+        ->assertSet('tab', 'view');
 });
 
 test('employer can view candidate bio-data profile', function () {

@@ -190,13 +190,19 @@
                             <td class="py-4 px-6 align-top">
                                 @php
                                     $score = (int) ($app->fit_score_at_apply ?? 95);
-                                    $fitBadgeClass = $score >= 94
+                                    $fitBadgeClass = $score >= 90
                                         ? 'bg-[#E8F5E9] text-[#176B47] border-[#A5D6A7]'
-                                        : 'bg-[#DCEAF4] text-[#1A2840] border-[#B8D0E2]';
+                                        : ($score >= 80 ? 'bg-sky-50 text-[#1A2840] border-sky-200' : 'bg-amber-50 text-amber-800 border-amber-200');
                                 @endphp
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-full font-semibold border {{ $fitBadgeClass }}">
-                                    {{ $score }}% Composite Fit
-                                </span>
+                                <button type="button"
+                                        wire:click="viewFitBreakdown({{ $app->id }})"
+                                        class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold border tabular-nums transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#244F73]/30 cursor-pointer {{ $fitBadgeClass }}"
+                                        title="{{ $score }}% Composite Fit (Click to view breakdown)"
+                                        aria-label="{{ $score }}% Composite Fit">
+                                    <span class="size-1.5 rounded-full {{ $score >= 90 ? 'bg-[#176B47]' : ($score >= 80 ? 'bg-[#244F73]' : 'bg-amber-600') }}"></span>
+                                    <span>{{ $score }}%</span>
+                                    <span class="sr-only">Composite Fit</span>
+                                </button>
                             </td>
 
                             <!-- Application Status -->

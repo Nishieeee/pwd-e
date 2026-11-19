@@ -148,23 +148,14 @@
 
                     <!-- View my Profile -->
                     <a href="{{ route('candidate.profile.show') }}"
-                       class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('candidate.profile.show') ? 'bg-[#244F73] text-white shadow-sm' : 'text-gray-300 hover:text-white hover:bg-white/5' }}"
-                       @if(request()->routeIs('candidate.profile.show')) aria-current="page" @endif>
-                        <svg class="w-4 h-4 shrink-0 {{ request()->routeIs('candidate.profile.show') ? 'text-white' : 'text-gray-400' }}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/>
+                       class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('candidate.profile.show') || request()->routeIs('candidate.profile.builder') ? 'bg-[#244F73] text-white shadow-sm' : 'text-gray-300 hover:text-white hover:bg-white/5' }}"
+                       @if(request()->routeIs('candidate.profile.show') || request()->routeIs('candidate.profile.builder')) aria-current="page" @endif>
+                        <svg class="w-4 h-4 shrink-0 {{ request()->routeIs('candidate.profile.show') || request()->routeIs('candidate.profile.builder') ? 'text-white' : 'text-gray-400' }}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                         </svg>
-                        <span>View my Profile</span>
+                        <span>Profile</span>
                     </a>
 
-                    <!-- Profile Builder -->
-                    <a href="{{ route('candidate.profile.builder') }}"
-                       class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('candidate.profile.builder') ? 'bg-[#244F73] text-white shadow-sm' : 'text-gray-300 hover:text-white hover:bg-white/5' }}"
-                       @if(request()->routeIs('candidate.profile.builder')) aria-current="page" @endif>
-                        <svg class="w-4 h-4 shrink-0 {{ request()->routeIs('candidate.profile.builder') ? 'text-white' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                        </svg>
-                        <span>Profile Builder</span>
-                    </a>
 
                     <!-- Job Matches & Search -->
                     <a href="{{ route('candidate.jobs') }}"
@@ -219,7 +210,7 @@
     <!-- Main Content Area -->
     <div class="flex-1 flex flex-col min-w-0 lg:h-screen lg:overflow-y-auto">
         <!-- Top Accessibility & Navigation Header -->
-        <header class="bg-white border-b border-gray-200 px-6 py-2.5 flex flex-wrap items-center justify-between gap-4 sticky top-0 z-30 shadow-xs" role="region" aria-label="Accessibility settings and profile controls">
+        <header class="bg-white border-b border-gray-200 px-4 py-2 sm:px-6 sm:py-2.5 flex flex-wrap items-center justify-between gap-3 sm:gap-4 sticky top-0 z-20 shadow-xs" role="region" aria-label="Accessibility settings and profile controls">
             <!-- Left: Accessibility Tools -->
             <div class="flex items-center flex-wrap gap-2 text-xs text-gray-600">
                 <div class="flex items-center gap-1.5 font-semibold text-[#244F73] mr-2">
@@ -308,7 +299,7 @@
         </header>
 
         <!-- Dynamic Main Content -->
-        <main id="main-content" class="flex-1 p-6 lg:p-8" tabindex="-1">
+        <main id="main-content" class="flex-1 p-4 sm:p-6 lg:p-8 w-full min-w-0 max-w-full overflow-x-hidden" tabindex="-1">
             {{ $slot }}
         </main>
     </div>

@@ -1,4 +1,4 @@
-<div class="space-y-6">
+<div class="space-y-6 max-w-5xl mx-auto w-full min-w-0">
     <style>
         @media print {
             body {
@@ -44,7 +44,7 @@
     @endif
 
     {{-- Top Action Bar (Screen Only) --}}
-    <div class="no-print flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-primary-border">
+    <div class="no-print flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-primary-border w-full min-w-0">
         <div>
             <div class="flex items-center gap-2 text-xs text-body-muted">
                 @if($isEmployer)
@@ -54,11 +54,11 @@
                 @else
                     <a href="{{ route('dashboard') }}" class="hover:text-primary transition-colors">Dashboard</a>
                     <span>/</span>
-                    <span class="text-primary-dark font-medium">View my Profile</span>
+                    <span class="text-primary-dark font-medium">{{ __('View my Profile') }}</span>
                 @endif
             </div>
             <h1 class="font-heading text-2xl font-bold text-primary-dark mt-1">
-                {{ $isOwner ? __('View my Profile') : __('Candidate Digital Bio-Data') }}
+                {{ $isOwner ? __('Profile') : __('Candidate Digital Bio-Data') }}
             </h1>
             <p class="text-xs text-body-muted mt-0.5">
                 {{ __('Official multimodal employment profile and Philippine Bio-Data format under RA 10524.') }}
@@ -67,37 +67,76 @@
 
         <div class="flex flex-wrap items-center gap-2.5 shrink-0">
             @if($isOwner)
-                <a href="{{ route('candidate.profile.builder') }}"
-                   class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-primary-border bg-white text-xs font-semibold text-primary-dark hover:bg-primary-tint shadow-xs transition-colors focus:outline-none focus:ring-2 focus:ring-primary/30">
-                    <svg class="size-4 text-primary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
-                    </svg>
-                    <span>{{ __('Edit Profile') }}</span>
-                </a>
+                {{-- Mode Switcher Tabs --}}
+                <div class="inline-flex rounded-xl p-1 bg-surface border border-primary-border shadow-2xs" role="tablist" aria-label="Profile navigation">
+                    <button type="button"
+                            wire:click="setTab('view')"
+                            role="tab"
+                            aria-selected="{{ $tab === 'view' ? 'true' : 'false' }}"
+                            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all {{ $tab === 'view' ? 'bg-primary-dark text-white shadow-xs' : 'text-body-muted hover:text-primary-dark hover:bg-white/60' }}">
+                        <svg class="size-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                        <span>{{ __('View Bio-Data') }}</span>
+                    </button>
+                    <button type="button"
+                            wire:click="setTab('edit')"
+                            role="tab"
+                            aria-selected="{{ $tab === 'edit' ? 'true' : 'false' }}"
+                            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all {{ $tab === 'edit' ? 'bg-primary-dark text-white shadow-xs' : 'text-body-muted hover:text-primary-dark hover:bg-white/60' }}">
+                        <svg class="size-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                        <span>{{ __('Edit Profile') }}</span>
+                    </button>
+                </div>
+
+                @if($tab === 'view')
+                    <button type="button" onclick="window.print()"
+                            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-dark text-xs font-semibold text-white hover:bg-primary shadow-xs transition-colors focus:outline-none focus:ring-2 focus:ring-primary/40 cursor-pointer">
+                        <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                        </svg>
+                        <span>{{ __('Print / Save Bio-Data') }}</span>
+                    </button>
+                @endif
             @else
                 <button type="button" onclick="history.back()"
                         class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-lg border border-primary-border bg-white text-xs font-semibold text-primary-dark hover:bg-primary-tint shadow-xs transition-colors">
                     <svg class="size-4 text-primary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
                     <span>{{ __('Back') }}</span>
                 </button>
+                <button type="button" onclick="window.print()"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary-dark text-xs font-semibold text-white hover:bg-primary shadow-xs transition-colors focus:outline-none focus:ring-2 focus:ring-primary/40 cursor-pointer">
+                    <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                    </svg>
+                    <span>{{ __('Print / Save Bio-Data') }}</span>
+                </button>
             @endif
-
-            <button type="button" onclick="window.print()"
-                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary-dark text-xs font-semibold text-white hover:bg-primary shadow-xs transition-colors focus:outline-none focus:ring-2 focus:ring-primary/40 cursor-pointer">
-                <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
-                </svg>
-                <span>{{ __('Print / Save Bio-Data') }}</span>
-            </button>
         </div>
     </div>
 
-    {{-- Main Hybrid Bio-Data Card --}}
-    <article class="print-container bg-white rounded-2xl border border-primary-border shadow-sm p-6 sm:p-10 space-y-8" aria-label="{{ __('Candidate Employment Bio-Data') }}">
+    @if ($isOwner && $tab === 'edit')
+        {{-- Unified Profile Editor --}}
+        <div class="no-print space-y-4 w-full min-w-0">
+            <div class="flex items-center justify-between pb-2 border-b border-primary-border/60">
+                <div>
+                    <h2 class="text-base font-bold text-primary-dark">{{ __('Edit Profile & Credentials') }}</h2>
+                    <p class="text-xs text-body-muted">{{ __('Update your personal information, work history, education, skills, and workplace accommodations.') }}</p>
+                </div>
+                <button type="button" wire:click="setTab('view')"
+                        class="text-xs font-semibold text-primary hover:underline inline-flex items-center gap-1">
+                    <span>{{ __('View Bio-Data Preview') }}</span>
+                    <span>&rarr;</span>
+                </button>
+            </div>
+
+            <livewire:candidate.profile-builder :is-embedded="true" wire:key="embedded-profile-builder-{{ $profile->id }}" />
+        </div>
+    @else
+        {{-- Main Hybrid Bio-Data Card --}}
+        <article class="print-container bg-white rounded-2xl border border-primary-border shadow-sm p-6 sm:p-10 space-y-8 w-full min-w-0 overflow-hidden" aria-label="{{ __('Candidate Employment Bio-Data') }}">
 
         {{-- Bio-Data Official Header --}}
-        <header class="flex flex-col sm:flex-row items-start justify-between gap-6 pb-6 border-b-2 border-primary-dark/20 page-break-inside-avoid">
-            <div class="flex flex-col sm:flex-row items-start gap-6">
+        <header class="flex flex-col sm:flex-row items-start justify-between gap-6 pb-6 border-b-2 border-primary-dark/20 page-break-inside-avoid w-full min-w-0">
+            <div class="flex flex-col sm:flex-row items-start gap-6 min-w-0 flex-1">
                 {{-- 2x2 Photo Frame --}}
                 <div class="relative w-28 h-28 sm:w-32 sm:h-32 rounded-xl border-2 border-primary-border bg-primary-tint/30 flex items-center justify-center overflow-hidden shrink-0 shadow-xs">
                     @if($profile->avatar_path)
@@ -114,7 +153,7 @@
                 </div>
 
                 {{-- Name & Identity Meta --}}
-                <div class="space-y-1.5">
+                <div class="space-y-1.5 min-w-0 flex-1">
                     <div class="flex flex-wrap items-center gap-2">
                         <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#E8F5E9] text-[#176B47] border border-[#176B47]/20">
                             <svg class="size-3.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
@@ -127,29 +166,29 @@
                         @endif
                     </div>
 
-                    <h2 class="font-heading text-2xl sm:text-3xl font-extrabold text-primary-dark tracking-tight">
+                    <h2 class="font-heading text-2xl sm:text-3xl font-extrabold text-primary-dark tracking-tight break-words">
                         {{ $candidateUser->name }}@if($profile->suffix) {{ $profile->suffix }}@endif
                     </h2>
 
-                    <p class="text-sm font-semibold text-primary">
+                    <p class="text-sm font-semibold text-primary break-words">
                         {{ $profile->headline ?: __('Professional seeking inclusive and barrier-free opportunities') }}
                     </p>
 
-                    <div class="flex flex-wrap items-center gap-y-1 gap-x-4 pt-1 text-xs text-body-muted">
+                    <div class="flex flex-wrap items-center gap-y-1 gap-x-4 pt-1 text-xs text-body-muted min-w-0">
                         @if($profile->city || $profile->country)
                             <span class="flex items-center gap-1">
                                 <svg class="size-3.5 text-primary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                                <span>{{ implode(', ', array_filter([$profile->barangay, $profile->city, $profile->country])) }}</span>
+                                <span class="break-words">{{ implode(', ', array_filter([$profile->barangay, $profile->city, $profile->country])) }}</span>
                             </span>
                         @endif
 
-                        <span class="flex items-center gap-1">
+                        <span class="flex items-center gap-1 min-w-0 break-all">
                             <svg class="size-3.5 text-primary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                             <span>{{ $candidateUser->email }}</span>
                         </span>
 
                         @if($profile->phone)
-                            <span class="flex items-center gap-1">
+                            <span class="flex items-center gap-1 shrink-0">
                                 <svg class="size-3.5 text-primary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
                                 <span>{{ $profile->phone }}</span>
                             </span>
@@ -391,14 +430,14 @@
                 "I hereby certify that all information stated herein is true, correct, and complete to the best of my knowledge and belief. Prepared in compliance with Republic Act No. 7277, RA 10524, and the Data Privacy Act of 2012 (RA 10173)."
             </p>
 
-            <div class="flex flex-col sm:flex-row items-end justify-between gap-6 pt-4 text-xs text-primary-dark">
-                <div class="space-y-1 text-center sm:text-left">
+            <div class="flex flex-col sm:flex-row items-center sm:items-end justify-between gap-6 pt-4 text-xs text-primary-dark w-full min-w-0">
+                <div class="space-y-1 text-center sm:text-left min-w-0 flex-1">
                     <p class="text-[11px] text-body-muted">Accredited by PESO &amp; Republic Act No. 10524 Partner</p>
                     <p class="font-bold text-xs">PWD-E Multimodal Employment Platform</p>
                     <p class="text-[10px] text-body-muted">Western Mindanao State University · College of Computing Studies</p>
                 </div>
 
-                <div class="text-center sm:text-right space-y-1">
+                <div class="text-center sm:text-right space-y-1 shrink-0 w-full sm:w-auto flex flex-col items-center sm:items-end">
                     <div class="w-56 border-b border-primary-dark pb-1">
                         <span class="font-bold uppercase tracking-wider text-xs">{{ $candidateUser->name }}</span>
                     </div>
@@ -409,4 +448,5 @@
         </footer>
 
     </article>
+    @endif
 </div>

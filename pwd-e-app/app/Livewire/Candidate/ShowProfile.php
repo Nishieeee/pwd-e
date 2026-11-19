@@ -7,11 +7,15 @@ use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Title;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 
-#[Title('View my Profile — PWD-E')]
+#[Title('Profile — PWD-E')]
 class ShowProfile extends Component
 {
+    #[Url]
+    public string $tab = 'view'; // 'view' or 'edit'
+
     public CandidateProfile $profile;
 
     public ?User $candidateUser = null;
@@ -41,6 +45,7 @@ class ShowProfile extends Component
                 'accommodations',
                 'accessibilityNeeds.accommodation',
             ]);
+            $this->tab = 'view';
         } else {
             // Candidate viewing their own profile
             if (! $user->isCandidate()) {
@@ -63,6 +68,11 @@ class ShowProfile extends Component
         $this->isEmployer = $user->isEmployer();
     }
 
+    public function setTab(string $tab): void
+    {
+        $this->tab = in_array($tab, ['view', 'edit']) ? $tab : 'view';
+    }
+
     public function render(): View
     {
         $layout = $this->isEmployer ? 'layouts.employer' : 'layouts.candidate';
@@ -72,6 +82,7 @@ class ShowProfile extends Component
             'candidateUser' => $this->candidateUser,
             'isOwner' => $this->isOwner,
             'isEmployer' => $this->isEmployer,
+            'tab' => $this->tab,
         ])->layout($layout);
     }
 }

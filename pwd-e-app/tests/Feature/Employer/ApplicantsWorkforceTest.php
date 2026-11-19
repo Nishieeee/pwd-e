@@ -44,6 +44,51 @@ test('employer can view applicants page', function () {
     $this->actingAs($user)->get(route('employer.jobs.applicants', $job))->assertOk();
 });
 
+test('employer can view centralized applicants page across all jobs', function () {
+    [$user, $profile, $job] = makeEmployerWithJob();
+    $candidate = User::factory()->verified()->create(['role' => 'candidate']);
+    $candidate->assignRole('candidate');
+    $cp = \App\Models\CandidateProfile::firstOrCreate(['user_id' => $candidate->id]);
+    Application::create([
+        'candidate_profile_id' => $cp->id,
+        'job_posting_id' => $job->id,
+        'status' => 'applied',
+        'applied_at' => now(),
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('employer.applicants'))
+        ->assertOk()
+        ->assertSee('Applicants')
+        ->assertSee('All Positions')
+        ->assertSee($candidate->name)
+        ->assertSee('Bio-Data');
+});
+
+test('employer dashboard renders live metrics and recent applicants', function () {
+    [$user, $profile, $job] = makeEmployerWithJob();
+    $candidate = User::factory()->verified()->create(['role' => 'candidate']);
+    $candidate->assignRole('candidate');
+    $cp = \App\Models\CandidateProfile::firstOrCreate(['user_id' => $candidate->id]);
+    Application::create([
+        'candidate_profile_id' => $cp->id,
+        'job_posting_id' => $job->id,
+        'status' => 'applied',
+        'applied_at' => now(),
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('dashboard'))
+        ->assertOk()
+        ->assertSee('Welcome back,')
+        ->assertSee('Active Postings')
+        ->assertSee('Total Applicants')
+        ->assertSee('Recent Applicants')
+        ->assertSee($candidate->name)
+        ->assertSee('Bio-Data')
+        ->assertSee('RA 10524');
+});
+
 test('employer can update applicant status', function () {
     [$user, $profile, $job] = makeEmployerWithJob();
     $candidate = User::factory()->verified()->create(['role' => 'candidate']);
