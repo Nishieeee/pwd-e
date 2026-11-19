@@ -6,36 +6,36 @@
     <body class="min-h-screen bg-surface text-dark-neutral antialiased">
         <flux:sidebar sticky collapsible="mobile" class="border-e border-primary-border bg-white text-dark-neutral">
             <flux:sidebar.header>
-                <x-app-logo :sidebar="true" href="{{ route('dashboard') }}" wire:navigate />
+                <x-app-logo :sidebar="true" href="{{ route('dashboard') }}" />
                 <flux:sidebar.collapse class="lg:hidden" />
             </flux:sidebar.header>
 
             <flux:sidebar.nav>
                 <flux:sidebar.group :heading="__('Platform')" class="grid">
-                    <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
+                    <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </flux:sidebar.item>
 
                     @if (auth()->user()?->isEmployer())
-                        <flux:sidebar.item icon="briefcase" :href="route('employer.jobs.index')" :current="request()->routeIs('employer.jobs.*')" wire:navigate>
+                        <flux:sidebar.item icon="briefcase" :href="route('employer.jobs.index')" :current="request()->routeIs('employer.jobs.*')">
                             {{ __('Job Postings') }}
                         </flux:sidebar.item>
                     @endif
 
                     @if (auth()->user()?->isAdmin())
-                        <flux:sidebar.item icon="shield-check" :href="route('admin.dashboard')" :current="request()->routeIs('admin.dashboard')" wire:navigate>
+                        <flux:sidebar.item icon="shield-check" :href="route('admin.dashboard')" :current="request()->routeIs('admin.dashboard')">
                             {{ __('Admin Dashboard') }}
                         </flux:sidebar.item>
-                        <flux:sidebar.item icon="check-badge" :href="route('admin.verifications.index')" :current="request()->routeIs('admin.verifications.*')" wire:navigate>
+                        <flux:sidebar.item icon="check-badge" :href="route('admin.verifications.index')" :current="request()->routeIs('admin.verifications.*')">
                             {{ __('Verification Queue') }}
                         </flux:sidebar.item>
-                        <flux:sidebar.item icon="users" :href="route('admin.users')" :current="request()->routeIs('admin.users')" wire:navigate>
+                        <flux:sidebar.item icon="users" :href="route('admin.users')" :current="request()->routeIs('admin.users')">
                             {{ __('User Management') }}
                         </flux:sidebar.item>
-                        <flux:sidebar.item icon="book-open-text" :href="route('admin.lexicon')" :current="request()->routeIs('admin.lexicon')" wire:navigate>
+                        <flux:sidebar.item icon="book-open-text" :href="route('admin.lexicon')" :current="request()->routeIs('admin.lexicon')">
                             {{ __('Lexicon') }}
                         </flux:sidebar.item>
-                        <flux:sidebar.item icon="clipboard-document-list" :href="route('admin.audit-log')" :current="request()->routeIs('admin.audit-log')" wire:navigate>
+                        <flux:sidebar.item icon="clipboard-document-list" :href="route('admin.audit-log')" :current="request()->routeIs('admin.audit-log')">
                             {{ __('Audit Log') }}
                         </flux:sidebar.item>
                     @endif
@@ -43,16 +43,6 @@
             </flux:sidebar.nav>
 
             <flux:spacer />
-
-            <flux:sidebar.nav>
-                <flux:sidebar.item icon="folder-git-2" href="https://github.com/laravel/livewire-starter-kit" target="_blank">
-                    {{ __('Repository') }}
-                </flux:sidebar.item>
-
-                <flux:sidebar.item icon="book-open-text" href="https://laravel.com/docs/starter-kits#livewire" target="_blank">
-                    {{ __('Documentation') }}
-                </flux:sidebar.item>
-            </flux:sidebar.nav>
 
             <livewire:notification-bell />
 
@@ -97,7 +87,7 @@
                     <flux:menu.separator />
 
                     <flux:menu.radio.group>
-                        <flux:menu.item :href="route('profile.edit')" icon="cog" wire:navigate>
+                        <flux:menu.item :href="route('profile.edit')" icon="cog">
                             {{ __('Settings') }}
                         </flux:menu.item>
                     </flux:menu.radio.group>

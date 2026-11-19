@@ -145,8 +145,7 @@
                     <div class="flex items-start justify-between gap-3">
                         <div class="w-10 h-10 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-[#244F73] shadow-2xs">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 10v2a7 7 0 01-14 0v-2m7 9v4m-4 0h8"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
                             </svg>
                         </div>
                         @if($inputMode === 'voice')
@@ -159,21 +158,21 @@
                             </span>
                         @endif
                     </div>
-                    <h3 class="text-base font-bold text-[#1A2840] mt-5">Voice Dictation</h3>
+                    <h3 class="text-base font-bold text-[#1A2840] mt-5">Voice Dictation &amp; Speech-to-Text</h3>
                     <p class="text-xs text-[#4E5F6E] mt-1.5 leading-relaxed">
-                        Speak your answers and watch them become editable text. You stay in control.
+                        Speak your answers in Tagalog or English and watch them become editable text. You stay in control.
                     </p>
                 </button>
             </div>
 
-            <!-- Microphone Status & Listening Widget -->
+            <!-- Speech-to-Text Status & Listening Widget -->
             <div class="pt-4 border-t border-gray-100 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                 <div class="space-y-1.5">
                     <div class="flex items-center gap-2 text-xs font-bold text-[#176B47]">
                         <svg class="w-4 h-4 text-[#176B47]" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                         </svg>
-                        <span>Microphone connected</span>
+                        <span>Speech input active &amp; ready</span>
                     </div>
                     <p class="text-xs text-[#4E5F6E]">
                         Try saying &ldquo;My name is {{ $firstName }} {{ $lastName }}.&rdquo; Pause whenever you need a moment.
@@ -185,38 +184,46 @@
                     </button>
                 </div>
 
-                <!-- Listening Pill Box -->
+                <!-- Listening Pill Box with WCAG 44px Touch Targets -->
                 <div class="rounded-xl border border-[#244F73]/40 bg-white px-5 py-3.5 shadow-xs flex items-center justify-between gap-6 min-w-[280px]">
                     <div class="flex items-center gap-3.5">
-                        <div class="w-10 h-10 rounded-full bg-[#244F73] text-white flex items-center justify-center ring-4 ring-[#DCEAF4]">
+                        <div class="w-10 h-10 rounded-full bg-[#244F73] text-white flex items-center justify-center ring-4 ring-[#DCEAF4] shrink-0">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 10v2a7 7 0 01-14 0v-2"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
                             </svg>
                         </div>
                         <div>
-                            <div class="text-xs font-bold text-[#244F73]">
-                                {{ $isListening ? 'Listening...' : 'Paused' }}
+                            <div class="text-xs font-bold text-[#244F73]" aria-live="polite">
+                                {{ $isListening ? 'Listening...' : 'Dictation Paused' }}
                             </div>
                             <div class="flex items-center gap-0.5 my-1" aria-hidden="true">
-                                <span class="w-1 h-2.5 bg-[#244F73] rounded-full"></span>
-                                <span class="w-1 h-4 bg-[#244F73] rounded-full"></span>
-                                <span class="w-1 h-2 bg-[#244F73] rounded-full"></span>
-                                <span class="w-1 h-5 bg-[#244F73] rounded-full"></span>
-                                <span class="w-1 h-3 bg-[#244F73] rounded-full"></span>
-                                <span class="w-1 h-4 bg-[#244F73] rounded-full"></span>
-                                <span class="w-1 h-2 bg-[#244F73] rounded-full"></span>
-                                <span class="w-1 h-3.5 bg-[#244F73] rounded-full"></span>
+                                <span class="w-1 h-2.5 bg-[#244F73] rounded-full {{ $isListening ? 'animate-pulse' : 'opacity-40' }}"></span>
+                                <span class="w-1 h-4 bg-[#244F73] rounded-full {{ $isListening ? 'animate-pulse' : 'opacity-40' }}"></span>
+                                <span class="w-1 h-2 bg-[#244F73] rounded-full {{ $isListening ? 'animate-pulse' : 'opacity-40' }}"></span>
+                                <span class="w-1 h-5 bg-[#244F73] rounded-full {{ $isListening ? 'animate-pulse' : 'opacity-40' }}"></span>
+                                <span class="w-1 h-3 bg-[#244F73] rounded-full {{ $isListening ? 'animate-pulse' : 'opacity-40' }}"></span>
+                                <span class="w-1 h-4 bg-[#244F73] rounded-full {{ $isListening ? 'animate-pulse' : 'opacity-40' }}"></span>
+                                <span class="w-1 h-2 bg-[#244F73] rounded-full {{ $isListening ? 'animate-pulse' : 'opacity-40' }}"></span>
+                                <span class="w-1 h-3.5 bg-[#244F73] rounded-full {{ $isListening ? 'animate-pulse' : 'opacity-40' }}"></span>
                             </div>
-                            <div class="text-[11px] text-gray-500">Speak naturally &middot; 00:18</div>
+                            <div class="text-[11px] text-gray-500">Speak naturally &middot; Tagalog / English</div>
                         </div>
                     </div>
 
                     <button type="button"
                             wire:click="toggleListening"
+                            :aria-pressed="{{ $isListening ? 'true' : 'false' }}"
                             aria-label="{{ $isListening ? 'Pause voice dictation' : 'Resume voice dictation' }}"
-                            class="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-100 focus:ring-2 focus:ring-[#244F73]">
-                        <span class="text-xs font-bold">||</span>
+                            class="min-w-[44px] min-h-[44px] w-11 h-11 rounded-full border border-gray-300 flex items-center justify-center text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:ring-2 focus:ring-[#244F73] transition-colors cursor-pointer">
+                        @if($isListening)
+                            <svg class="w-4 h-4 text-[#244F73]" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                            </svg>
+                        @else
+                            <svg class="w-4 h-4 text-[#244F73]" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/>
+                            </svg>
+                        @endif
                     </button>
                 </div>
             </div>
@@ -294,6 +301,18 @@
 
                 <!-- 1. Personal Identification -->
                 <div class="space-y-4 pt-2 border-t border-gray-100">
+                    @if ($errors->any())
+                        <div class="p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs flex items-start gap-3" role="alert" aria-live="assertive">
+                            <svg class="w-5 h-5 text-red-500 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                            </svg>
+                            <div>
+                                <div class="font-bold text-sm">Please complete the required details before continuing</div>
+                                <p class="mt-1 text-red-700">Some required fields (such as your Name, Phone Number, or City) need your attention.</p>
+                            </div>
+                        </div>
+                    @endif
+
                     <h3 class="text-sm font-bold text-[#1A2840]">Personal Identification</h3>
 
                     <!-- Optional 2x2 Photo / Avatar Upload Field -->
@@ -336,11 +355,22 @@
                     <!-- Name Grid -->
                     <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
                         <div>
-                            <label for="first-name" class="block text-xs font-semibold text-[#1A2840] mb-1">First Name</label>
+                            <label for="first-name" class="block text-xs font-semibold text-[#1A2840] mb-1">
+                                First Name <span class="text-red-500" aria-hidden="true">*</span>
+                            </label>
                             <input id="first-name"
                                    type="text"
                                    wire:model.live="firstName"
-                                   class="w-full px-3 py-2 rounded-lg border border-gray-300 text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#244F73]">
+                                   aria-required="true"
+                                   aria-invalid="{{ $errors->has('firstName') ? 'true' : 'false' }}"
+                                   @if($errors->has('firstName')) aria-describedby="first-name-error" @endif
+                                   class="w-full px-3 py-2 rounded-lg border {{ $errors->has('firstName') ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-[#244F73]' }} text-xs text-gray-900 focus:outline-none focus:ring-2">
+                            @error('firstName')
+                                <p id="first-name-error" class="text-xs text-red-600 mt-1 flex items-center gap-1" role="alert">
+                                    <svg class="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                                    <span>{{ $message }}</span>
+                                </p>
+                            @enderror
                         </div>
                         <div>
                             <label for="middle-name" class="block text-xs font-semibold text-[#1A2840] mb-1">Middle Name</label>
@@ -351,11 +381,22 @@
                                    class="w-full px-3 py-2 rounded-lg border border-gray-300 text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#244F73]">
                         </div>
                         <div>
-                            <label for="last-name" class="block text-xs font-semibold text-[#1A2840] mb-1">Last Name</label>
+                            <label for="last-name" class="block text-xs font-semibold text-[#1A2840] mb-1">
+                                Last Name <span class="text-red-500" aria-hidden="true">*</span>
+                            </label>
                             <input id="last-name"
                                    type="text"
                                    wire:model.live="lastName"
-                                   class="w-full px-3 py-2 rounded-lg border border-gray-300 text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#244F73]">
+                                   aria-required="true"
+                                   aria-invalid="{{ $errors->has('lastName') ? 'true' : 'false' }}"
+                                   @if($errors->has('lastName')) aria-describedby="last-name-error" @endif
+                                   class="w-full px-3 py-2 rounded-lg border {{ $errors->has('lastName') ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-[#244F73]' }} text-xs text-gray-900 focus:outline-none focus:ring-2">
+                            @error('lastName')
+                                <p id="last-name-error" class="text-xs text-red-600 mt-1 flex items-center gap-1" role="alert">
+                                    <svg class="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                                    <span>{{ $message }}</span>
+                                </p>
+                            @enderror
                         </div>
                         <div>
                             <label for="name-suffix" class="block text-xs font-semibold text-[#1A2840] mb-1">Suffix</label>
@@ -370,19 +411,41 @@
                     <!-- Email, Phone, PWD ID Number (Auto-filled & Read-only) -->
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div>
-                            <label for="email-address" class="block text-xs font-semibold text-[#1A2840] mb-1">Email Address</label>
+                            <label for="email-address" class="block text-xs font-semibold text-[#1A2840] mb-1">
+                                Email Address <span class="text-red-500" aria-hidden="true">*</span>
+                            </label>
                             <input id="email-address"
                                    type="email"
                                    wire:model.live="email"
-                                   class="w-full px-3 py-2 rounded-lg border border-gray-300 text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#244F73]">
+                                   aria-required="true"
+                                   aria-invalid="{{ $errors->has('email') ? 'true' : 'false' }}"
+                                   @if($errors->has('email')) aria-describedby="email-error" @endif
+                                   class="w-full px-3 py-2 rounded-lg border {{ $errors->has('email') ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-[#244F73]' }} text-xs text-gray-900 focus:outline-none focus:ring-2">
+                            @error('email')
+                                <p id="email-error" class="text-xs text-red-600 mt-1 flex items-center gap-1" role="alert">
+                                    <svg class="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                                    <span>{{ $message }}</span>
+                                </p>
+                            @enderror
                         </div>
                         <div>
-                            <label for="phone-number" class="block text-xs font-semibold text-[#1A2840] mb-1">Phone Number</label>
+                            <label for="phone-number" class="block text-xs font-semibold text-[#1A2840] mb-1">
+                                Phone Number <span class="text-red-500" aria-hidden="true">*</span>
+                            </label>
                             <input id="phone-number"
                                    type="text"
                                    wire:model.live="phone"
                                    placeholder="e.g., +63 917 000 0000"
-                                   class="w-full px-3 py-2 rounded-lg border border-gray-300 text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#244F73]">
+                                   aria-required="true"
+                                   aria-invalid="{{ $errors->has('phone') ? 'true' : 'false' }}"
+                                   @if($errors->has('phone')) aria-describedby="phone-error" @endif
+                                   class="w-full px-3 py-2 rounded-lg border {{ $errors->has('phone') ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-[#244F73]' }} text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2">
+                            @error('phone')
+                                <p id="phone-error" class="text-xs text-red-600 mt-1 flex items-center gap-1" role="alert">
+                                    <svg class="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                                    <span>{{ $message }}</span>
+                                </p>
+                            @enderror
                         </div>
                         <div>
                             <label for="pwd-id-number" class="block text-xs font-semibold text-[#1A2840] mb-1">PWD ID Number</label>
@@ -450,7 +513,9 @@
 
                             <!-- City Searchable Combobox (Single-line clean items: "City Name (ZIP 7000)") -->
                             <div class="relative" x-data="{ openCity: false }">
-                                <label for="city-combobox" class="block text-xs font-semibold text-[#1A2840] mb-1">City / Municipality</label>
+                                <label for="city-combobox" class="block text-xs font-semibold text-[#1A2840] mb-1">
+                                    City / Municipality <span class="text-red-500" aria-hidden="true">*</span>
+                                </label>
                                 <div class="relative">
                                     <input id="city-combobox"
                                            type="text"
@@ -463,7 +528,9 @@
                                            aria-autocomplete="list"
                                            aria-label="City"
                                            placeholder="Search city..."
-                                           class="w-full pl-3 pr-7 py-2 rounded-lg border border-gray-300 text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#244F73]">
+                                           aria-required="true"
+                                           aria-invalid="{{ $errors->has('city') ? 'true' : 'false' }}"
+                                           class="w-full pl-3 pr-7 py-2 rounded-lg border {{ $errors->has('city') ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-[#244F73]' }} text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2">
                                     <button type="button"
                                             @click="openCity = !openCity"
                                             tabindex="-1"
@@ -472,6 +539,12 @@
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                     </button>
                                 </div>
+                                @error('city')
+                                    <p class="text-xs text-red-600 mt-1 flex items-center gap-1" role="alert">
+                                        <svg class="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                                        <span>{{ $message }}</span>
+                                    </p>
+                                @enderror
                                 <ul x-show="openCity"
                                     x-cloak
                                     role="listbox"
@@ -820,33 +893,43 @@
 
             <!-- Right Preview & Voice Column -->
             <aside class="lg:col-span-4 space-y-4">
-                <!-- Voice Listening Widget -->
+                <!-- Voice Listening Widget with WCAG 44px Controls -->
                 <div class="rounded-xl border border-[#244F73]/40 bg-white p-4 shadow-xs flex items-center justify-between gap-4">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-full bg-[#244F73] text-white flex items-center justify-center ring-4 ring-[#DCEAF4] shrink-0">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 10v2a7 7 0 01-14 0v-2"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
                             </svg>
                         </div>
                         <div>
-                            <div class="text-xs font-bold text-[#244F73]">Listening...</div>
+                            <div class="text-xs font-bold text-[#244F73]" aria-live="polite">
+                                {{ $isListening ? 'Listening...' : 'Dictation Paused' }}
+                            </div>
                             <div class="flex items-center gap-0.5 my-1" aria-hidden="true">
-                                <span class="w-1 h-2.5 bg-[#244F73] rounded-full"></span>
-                                <span class="w-1 h-4 bg-[#244F73] rounded-full"></span>
-                                <span class="w-1 h-2 bg-[#244F73] rounded-full"></span>
-                                <span class="w-1 h-5 bg-[#244F73] rounded-full"></span>
-                                <span class="w-1 h-3 bg-[#244F73] rounded-full"></span>
-                                <span class="w-1 h-4 bg-[#244F73] rounded-full"></span>
+                                <span class="w-1 h-2.5 bg-[#244F73] rounded-full {{ $isListening ? 'animate-pulse' : 'opacity-40' }}"></span>
+                                <span class="w-1 h-4 bg-[#244F73] rounded-full {{ $isListening ? 'animate-pulse' : 'opacity-40' }}"></span>
+                                <span class="w-1 h-2 bg-[#244F73] rounded-full {{ $isListening ? 'animate-pulse' : 'opacity-40' }}"></span>
+                                <span class="w-1 h-5 bg-[#244F73] rounded-full {{ $isListening ? 'animate-pulse' : 'opacity-40' }}"></span>
+                                <span class="w-1 h-3 bg-[#244F73] rounded-full {{ $isListening ? 'animate-pulse' : 'opacity-40' }}"></span>
+                                <span class="w-1 h-4 bg-[#244F73] rounded-full {{ $isListening ? 'animate-pulse' : 'opacity-40' }}"></span>
                             </div>
                             <div class="text-[11px] text-gray-500">Speak naturally &middot; 00:18</div>
                         </div>
                     </div>
                     <button type="button"
                             wire:click="toggleListening"
-                            aria-label="Pause dictation"
-                            class="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-100">
-                        <span class="text-xs font-bold">||</span>
+                            :aria-pressed="{{ $isListening ? 'true' : 'false' }}"
+                            aria-label="{{ $isListening ? 'Pause voice dictation' : 'Resume voice dictation' }}"
+                            class="min-w-[44px] min-h-[44px] w-11 h-11 rounded-full border border-gray-300 flex items-center justify-center text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:ring-2 focus:ring-[#244F73] transition-colors cursor-pointer">
+                        @if($isListening)
+                            <svg class="w-4 h-4 text-[#244F73]" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                            </svg>
+                        @else
+                            <svg class="w-4 h-4 text-[#244F73]" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/>
+                            </svg>
+                        @endif
                     </button>
                 </div>
 

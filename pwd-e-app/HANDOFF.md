@@ -1,22 +1,25 @@
 # HANDOFF.md
 
 ## Last session
-- **Date:** 2026-11-18 — branch `dev`
+- **Date:** 2026-11-19 — branch `dev`
 - **Done:**
-  - Employer applicants page: full applicant detail modal (profile, cover letter, skills, experience, education, résumé PDF, FSL video), status update, hire → workforce record.
-  - Workforce & Tax page: summary widget, RA 10524 deduction display, records table (PWD-verified toggle, remove).
-  - ApplicantDocumentController streams private résumé/FSL files gated by employer ownership.
-  - TASKS.md ticked: POST-07–09, TAX-01/02/04/05.
-  - 97 tests passing; Pint clean.
+  - Resolved Vite Tailwind v4 build error in `app.css`.
+  - Implemented role-aware Apply button on public job directory (`/jobs`).
+  - Unified Job Matches CTA to single-page apply review flow.
+  - Upgraded Single-Page Apply (`/jobs/{job}/apply`): profile document re-use toggles, PWD ID gate under RA 10524, Web Speech API voice dictation, starter phrases chips, and formatted reference number receipt (`PWD-APP-2026-XXXXX`).
+  - Upgraded Employer Applicants (`/employer/jobs/{job}/applicants`): status filter tabs, interactive interview scheduling modal, formal hire modal with RA 10524 tax calculation.
+  - Resolved raw starter kit appearance on Settings pages (`/settings/profile`, `/settings/security`, `/settings/appearance`) by wrapping in portal shells (`layouts.candidate`, `layouts.employer`) with branded card layout.
+  - Fixed Profile Builder (`/profile/builder`) step validation flaw: implemented `validateStep()` in `ProfileBuilder.php` on `nextStep()`, `goToStep()`, and `saveProfileAndRedirect()`; added `@error` directives, red borders, and summary error alert banner in `profile-builder.blade.php`.
+  - Stripped remaining `wire:navigate` instances for accessible plain page loads (D-02).
+  - Created `TASKS-PRESENTATION-V2.md` covering all panelist criteria and PWD user-friendliness guidelines.
+  - 102/102 Pest tests passing, 13/13 JS tests passing, asset build verified.
 
 ## State of the code
-- Employer flow end-to-end: post job → view applicants → review full details → update status → hire → workforce record + RA 10524 deduction.
-- Candidate flow: profile builder, job matches, apply (cover letter + docs), applications tracker.
-- Admin: dashboard, users, lexicon, audit-log, verification queue, notifications.
-- Schema and models complete. Seeders run.
+- End-to-end main flow operational: Browse → Job Matches → Single-Page Apply (with voice/predictive/credentials) → Employer Review & Interview Scheduling → Hire → Workforce Record & RA 10524 Tax Incentives.
+- 101 tests passing; build clean.
 
 ## Next concrete action
-**UI/UX polish:** mobile-first audit (320–412px), WCAG/AT pass (axe-core, NVDA), empty states, `prefers-reduced-motion`. See `TASKS-PRESENTATION.md` P1.
+Mobile-first audit (320–412px viewports) and automated axe-core / Pa11y WCAG 2.1 AA verification across the main flow pages. See `TASKS-PRESENTATION-V2.md` Phase 7.
 
 ## Open questions
 - Track ownership: who owns A, B, C, D? (Still TBD)

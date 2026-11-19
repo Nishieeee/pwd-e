@@ -3,15 +3,18 @@
 namespace App\Livewire\Candidate;
 
 use App\Models\Application;
+use App\Models\CandidateProfile;
 use App\Models\JobPosting;
 use App\Notifications\ApplicationReceived;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
 #[Title('Apply for Job')]
+#[Layout('layouts.candidate')]
 class Apply extends Component
 {
     use WithFileUploads;
@@ -26,11 +29,25 @@ class Apply extends Component
 
     public $fslVideoFile = null;
 
+    public bool $useProfileResume = true;
+
+    public bool $useProfilePwdId = true;
+
+    public bool $useProfileFsl = true;
+
     public bool $submitted = false;
 
     public ?int $referenceNumber = null;
 
+    public ?string $formattedReference = null;
+
     public bool $missingPwdId = false;
+
+    public bool $alreadyApplied = false;
+
+    public ?Application $existingApplication = null;
+
+    public ?string $applicationSuccessMessage = null;
 
     public function mount(JobPosting $job): void
     {
@@ -39,12 +56,29 @@ class Apply extends Component
             abort(403, 'Unauthorized. Candidate access required.');
         }
 
-        $this->job = $job->load('employerProfile');
+        $this->job = $job->load(['employerProfile', 'accommodations']);
 
         $profile = $user->candidateProfile;
         if (! $profile || empty($user->pwd_id_number)) {
             $this->missingPwdId = true;
         }
+
+        if ($profile) {
+            $this->existingApplication = Application::where('candidate_profile_id', $profile->id)
+                ->where('job_posting_id', $this->job->id)
+                ->first();
+
+            if ($this->existingApplication) {
+                $this->alreadyApplied = true;
+                $this->referenceNumber = $this->existingApplication->id;
+                $this->formattedReference = 'PWD-APP-' . date('Y') . '-' . str_pad((string) $this->existingApplication->id, 5, '0', STR_PAD_LEFT);
+            }
+        }
+    }
+
+    public function appendPhrase(string $phrase): void
+    {
+        $this->coverLetter = trim($this->coverLetter . ' ' . $phrase);
     }
 
     public function submit(): void
@@ -69,16 +103,31 @@ class Apply extends Component
             ->first();
 
         if ($existing) {
+            $this->alreadyApplied = true;
             $this->applicationSuccessMessage = 'You have already applied to this job.';
             $this->submitted = true;
             $this->referenceNumber = $existing->id;
+            $this->formattedReference = 'PWD-APP-' . date('Y') . '-' . str_pad((string) $existing->id, 5, '0', STR_PAD_LEFT);
 
             return;
         }
 
-        $pwdIdPath = $this->pwdIdFile?->store('applications/pwd_ids', 'private');
-        $resumePath = $this->resumeFile?->store('applications/resumes', 'private');
-        $fslPath = $this->fslVideoFile?->store('applications/fsl', 'private');
+        if ($this->pwdIdFile) {
+            $pwdIdPath = $this->pwdIdFile->store('applications/pwd_ids', 'private');
+            $user->update(['pwd_id_path' => $pwdIdPath]);
+        }
+
+        if ($this->resumeFile) {
+            $resumePath = $this->resumeFile->store('applications/resumes', 'private');
+            $profile->update(['resume_pdf_path' => $resumePath]);
+        }
+
+        $fslPath = null;
+        if ($this->fslVideoFile) {
+            $fslPath = $this->fslVideoFile->store('applications/fsl', 'private');
+        } elseif ($this->useProfileFsl && $profile->fsl_video_path) {
+            $fslPath = $profile->fsl_video_path;
+        }
 
         $match = $profile->jobMatches()->where('job_posting_id', $this->job->id)->first();
         $fitScore = $match ? (float) round($match->total_score * 100, 2) : 95.00;
@@ -105,11 +154,18 @@ class Apply extends Component
         }
 
         $this->referenceNumber = $application->id;
+        $this->formattedReference = 'PWD-APP-' . date('Y') . '-' . str_pad((string) $application->id, 5, '0', STR_PAD_LEFT);
         $this->submitted = true;
     }
 
     public function render(): View
     {
-        return view('livewire.candidate.apply');
+        $user = Auth::user();
+        $candidateProfile = $user?->candidateProfile;
+
+        return view('livewire.candidate.apply', [
+            'candidateProfile' => $candidateProfile,
+            'user' => $user,
+        ]);
     }
 }

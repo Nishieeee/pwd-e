@@ -110,6 +110,11 @@
                                                 Up to ₱{{ number_format($job->salary_max) }} / month
                                             @endif
                                         </span>
+                                        @else
+                                        <span class="inline-flex items-center gap-1 text-xs text-body-muted">
+                                            <svg class="w-4 h-4 text-body-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/></svg>
+                                            Competitive / Disclosed upon interview
+                                        </span>
                                         @endif
                                     </div>
                                     <p class="mt-3 text-body-muted text-sm md:text-base line-clamp-3">{{ $job->description }}</p>
@@ -128,9 +133,15 @@
                                     <div class="bg-surface rounded-xl border border-primary-border p-4 flex flex-col gap-2">
                                         <span class="text-center text-sm font-medium text-primary-dark bg-primary-tint rounded-full px-3 py-1">Inclusive Employer</span>
                                         @auth
-                                            <a href="#" class="block text-center bg-primary-dark text-white font-semibold py-2.5 rounded-lg min-h-[40px] flex items-center justify-center hover:bg-primary">Apply via Portal</a>
+                                            @if(auth()->user()->isCandidate())
+                                                <a href="{{ route('candidate.apply', $job) }}" class="block text-center bg-primary-dark text-white font-semibold py-2.5 rounded-lg min-h-[40px] flex items-center justify-center hover:bg-primary transition-colors">Apply via Portal</a>
+                                            @elseif(auth()->user()->isEmployer())
+                                                <span class="block text-center bg-primary-tint text-primary-dark text-xs font-semibold py-2.5 rounded-lg min-h-[40px] flex items-center justify-center">Employer Account</span>
+                                            @else
+                                                <span class="block text-center bg-primary-tint text-primary-dark text-xs font-semibold py-2.5 rounded-lg min-h-[40px] flex items-center justify-center">Admin View</span>
+                                            @endif
                                         @else
-                                            <a href="{{ route('login') }}" class="block text-center bg-primary-dark text-white font-semibold py-2.5 rounded-lg min-h-[40px] flex items-center justify-center hover:bg-primary">Log in to Apply</a>
+                                            <a href="{{ route('login') }}" class="block text-center bg-primary-dark text-white font-semibold py-2.5 rounded-lg min-h-[40px] flex items-center justify-center hover:bg-primary transition-colors">Log in to Apply</a>
                                         @endauth
                                     </div>
                                     @if($job->published_at)

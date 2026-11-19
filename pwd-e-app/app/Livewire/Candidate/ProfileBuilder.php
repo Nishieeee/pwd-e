@@ -577,10 +577,53 @@ class ProfileBuilder extends Component
         }
     }
 
+    public function validateStep(int $step): void
+    {
+        if ($step === 1) {
+            $this->validate([
+                'inputMode' => ['required', 'in:voice,standard'],
+            ], [
+                'inputMode.required' => 'Please choose an input mode to continue.',
+                'inputMode.in' => 'Please select a valid input mode.',
+            ]);
+        } elseif ($step === 2) {
+            $this->applyHeadlineFallback();
+            $this->validate([
+                'firstName' => ['required', 'string', 'max:100'],
+                'lastName' => ['required', 'string', 'max:100'],
+                'email' => ['required', 'email', 'max:255'],
+                'phone' => ['required', 'string', 'min:7', 'max:50'],
+                'city' => ['required', 'string', 'max:100'],
+                'middleName' => ['nullable', 'string', 'max:100'],
+                'suffix' => ['nullable', 'string', 'max:50'],
+                'country' => ['nullable', 'string', 'max:100'],
+                'barangay' => ['nullable', 'string', 'max:100'],
+                'headline' => ['nullable', 'string', 'max:255'],
+                'bio' => ['nullable', 'string', 'max:2000'],
+                'highestEducation' => ['required', 'string', 'max:255'],
+            ], [
+                'firstName.required' => 'Please enter your first name.',
+                'lastName.required' => 'Please enter your last name.',
+                'email.required' => 'Please enter your email address.',
+                'email.email' => 'Please enter a valid email address.',
+                'phone.required' => 'Please enter your contact phone number.',
+                'phone.min' => 'Please enter a valid phone number (at least 7 digits).',
+                'city.required' => 'Please select or enter your city or municipality.',
+                'highestEducation.required' => 'Please select your educational attainment.',
+            ]);
+        }
+    }
+
     public function goToStep(int $step): void
     {
         if ($step < 1 || $step > 5) {
             return;
+        }
+
+        if ($step > $this->currentStep) {
+            for ($s = $this->currentStep; $s < $step; $s++) {
+                $this->validateStep($s);
+            }
         }
 
         if ($this->currentStep === 2 || $step > 2) {
@@ -596,6 +639,8 @@ class ProfileBuilder extends Component
 
     public function nextStep(): void
     {
+        $this->validateStep($this->currentStep);
+
         if ($this->currentStep === 2) {
             $this->applyHeadlineFallback();
         }
@@ -980,6 +1025,9 @@ class ProfileBuilder extends Component
 
     public function saveProfileAndRedirect()
     {
+        $this->validateStep(1);
+        $this->validateStep(2);
+
         $this->persistProfileData();
 
         session()->flash(

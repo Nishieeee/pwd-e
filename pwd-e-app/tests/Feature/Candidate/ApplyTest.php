@@ -66,5 +66,22 @@ test('candidate without PWD ID sees the gate prompt', function () {
     $this->actingAs($user);
 
     Livewire::test(Apply::class, ['job' => $this->job])
-        ->assertSet('missingPwdId', true);
+        ->assertSet('missingPwdId', true)
+        ->assertSee('PWD Identification Required');
+});
+
+test('candidate can append quick starter phrase and sees formatted reference on submit', function () {
+    $this->actingAs($this->candidate);
+
+    $component = Livewire::test(Apply::class, ['job' => $this->job])
+        ->call('appendPhrase', 'I am excited to apply for this role.')
+        ->assertSet('coverLetter', 'I am excited to apply for this role.')
+        ->call('submit')
+        ->assertHasNoErrors()
+        ->assertSet('submitted', true);
+
+    $ref = $component->get('formattedReference');
+    expect($ref)->toMatch('/^PWD-APP-\d{4}-\d{5}$/');
+    $component->assertSee($ref);
+    $component->assertSee('Application Submitted Successfully!');
 });

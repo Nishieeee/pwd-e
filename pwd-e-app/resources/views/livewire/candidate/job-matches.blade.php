@@ -116,7 +116,7 @@
                 @endforeach
             </div>
 
-            <p class="text-[11px] text-gray-500">
+            <p class="text-xs text-gray-500">
                 Adjust your needs for this search anytime. Your saved profile stays unchanged.
             </p>
         </div>
@@ -131,7 +131,7 @@
                     <h2 class="text-sm font-bold text-[#1A2840]">
                         {{ count($jobs) }} matching jobs
                     </h2>
-                    <p class="text-[11px] text-gray-500">
+                    <p class="text-xs text-gray-500">
                         Based on your skills &amp; {{ count($selectedAccommodations) }} accommodation needs
                     </p>
                 </div>
@@ -168,14 +168,14 @@
                                     <div class="font-bold text-xs text-[#1A2840] group-hover:text-[#244F73] transition-colors leading-snug">
                                         {{ $job->employerProfile->company_name }}
                                     </div>
-                                    <div class="text-[11px] text-gray-500">
+                                    <div class="text-xs text-gray-500">
                                         {{ $job->location }}
                                     </div>
                                 </div>
                             </div>
 
                             @if($isSelected)
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-[#244F73] text-white">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-[#244F73] text-white">
                                     Selected
                                 </span>
                             @endif
@@ -207,7 +207,7 @@
                         <div class="flex flex-wrap gap-1.5 mt-2.5">
                             @if(is_array($job->required_skills))
                                 @foreach(array_slice($job->required_skills, 0, 3) as $skill)
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-[#DCEAF4] text-[#1A2840]">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#DCEAF4] text-[#1A2840]">
                                         {{ $skill }}
                                     </span>
                                 @endforeach
@@ -216,20 +216,20 @@
 
                         <!-- Accommodation Supported Note -->
                         @if($job->all_selected_supported ?? true)
-                            <div class="flex items-center gap-1.5 mt-3 text-[11px] text-[#176B47]">
+                            <div class="flex items-center gap-1.5 mt-3 text-xs text-[#176B47]">
                                 <svg class="w-3.5 h-3.5 text-[#176B47] shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                                 </svg>
                                 <span class="font-medium">All {{ $job->total_selected_accommodations_count ?? count($selectedAccommodations) }} selected accommodation needs supported</span>
                             </div>
                         @else
-                            <div class="flex items-center gap-1.5 mt-3 text-[11px] text-amber-800">
+                            <div class="flex items-center gap-1.5 mt-3 text-xs text-amber-800">
                                 <span class="font-medium">Good for some needs &middot; {{ $job->supported_accommodations_count }}/{{ $job->total_selected_accommodations_count }} from your filters</span>
                             </div>
                         @endif
 
                         <!-- Card Footer -->
-                        <div class="flex items-center justify-between mt-3 pt-2.5 border-t {{ $isSelected ? 'border-[#244F73]/20' : 'border-gray-100' }} text-[11px] text-gray-400">
+                        <div class="flex items-center justify-between mt-3 pt-2.5 border-t {{ $isSelected ? 'border-[#244F73]/20' : 'border-gray-100' }} text-xs text-gray-500">
                             <span>Posted {{ $job->published_at ? $job->published_at->diffForHumans() : '2 days ago' }}</span>
                             <span class="font-semibold text-[#244F73] group-hover:underline flex items-center gap-0.5">
                                 {{ $isSelected ? 'Viewing details' : 'View job' }} &rarr;
@@ -244,7 +244,7 @@
             </div>
 
             <!-- Footer summary note -->
-            <div class="p-3 rounded-lg bg-gray-50 border border-gray-200 text-[11px] text-gray-500 flex items-center justify-between shrink-0">
+            <div class="p-3 rounded-lg bg-gray-50 border border-gray-200 text-xs text-gray-500 flex items-center justify-between shrink-0">
                 <span>About our match score &middot; {{ count($jobs) }} jobs meet your filters</span>
                 <span class="font-semibold text-emerald-700">96-100% Strong accessibility fit</span>
             </div>
@@ -331,14 +331,13 @@
 
                     <!-- Apply Action Box -->
                     <div class="flex flex-col sm:flex-row sm:items-center gap-3 pt-2">
-                        <button type="button"
-                                wire:click="applyForJob({{ $selectedJob->id }})"
-                                class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg bg-[#244F73] text-white text-xs font-bold hover:bg-[#1A2840] shadow-sm transition-colors focus:ring-2 focus:ring-[#244F73]">
+                        <a href="{{ route('candidate.apply', $selectedJob) }}"
+                           class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg bg-[#244F73] text-white text-xs font-bold hover:bg-[#1A2840] shadow-sm transition-colors focus:ring-2 focus:ring-[#244F73]">
                             <span>Apply Now</span>
                             <span aria-hidden="true">&rarr;</span>
-                        </button>
+                        </a>
                         <span class="text-[11px] text-gray-500">
-                            Includes your WMSU profile, requirement ID, introductory video/FSL from your saved profile.
+                            Includes your verified profile, PWD credentials, and accommodations.
                         </span>
                     </div>
                 </div>
@@ -371,7 +370,7 @@
 
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-xs" role="table">
-                            <thead class="text-[11px] font-bold text-gray-500 uppercase tracking-wider border-b border-[#DCFCE7]">
+                            <thead class="text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-[#DCFCE7]">
                                 <tr>
                                     <th scope="col" class="pb-2.5">ACCOMMODATION &amp; SUPPORT</th>
                                     <th scope="col" class="pb-2.5 text-right">AVAILABILITY</th>
@@ -385,12 +384,12 @@
                                                 {{ $jAcc->accommodation->name }}
                                             </div>
                                             @if($jAcc->scope)
-                                                <div class="text-[11px] font-medium text-emerald-800 mt-0.5">
+                                                <div class="text-xs font-medium text-emerald-800 mt-0.5">
                                                     {{ $jAcc->scope }}
                                                 </div>
                                             @endif
                                             @if($jAcc->description)
-                                                <div class="text-[11px] text-gray-600 mt-0.5 leading-snug">
+                                                <div class="text-xs text-gray-600 mt-0.5 leading-snug">
                                                     {{ $jAcc->description }}
                                                 </div>
                                             @endif
@@ -490,7 +489,7 @@
                         Apply Now &rarr;
                     </a>
 
-                    <p class="text-[11px] text-center text-gray-500">
+                    <p class="text-xs text-center text-gray-500">
                         Your profile is shared with the employer only when you apply.
                     </p>
                 </div>

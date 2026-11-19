@@ -1,20 +1,40 @@
 # CURRENT-STATE.md
 
-_Last updated: 2026-11-12 — branch `Nishieee/Auth_Registration`_
+_Last updated: 2026-11-18 — branch `dev`_
 
 ## Phase
-Implementation in progress. **Core features are due December 1, 2026.** 19 days remaining.
+Implementation in progress. **Core demo features target: November 22, 2026. Hard deadline: December 1, 2026.** 13 days remaining.
 
 ---
 
 ## Working ✅
-- PostgreSQL 18 connected: local DB `pwd_e` (role `pwd_e_user`); full profile-completion schema applied (2026-11-12); seeders run (accommodations, lexicon, admin + roles).
-- Home, Jobs, Employers, About pages (static Blade, mobile-first); reusable accessibility panel component.
-- Auth: Fortify scaffold + redesigned login page (1:1 layout, mobile-first, live email validation, SVG icons, a11y error wiring).
-- **Registration redesign**: multi-role picker (Candidate / Employer), conditional fields, PWD ID number + optional upload, business permit number + optional upload, disability type, DOB (candidate), RA 10173 consent. Creates `User` + profile + `VerificationRequest` transactionally. Blocks until admin approval.
-- **Unverified account gate**: `EnsureAccountVerified` middleware redirects pending users to `verification.notice`; admins bypass.
-- **Schema complete for profile/tax/notifications**: name parts on `users`; work experience, education, certifications, profile drafts, notifications, notification preferences, word history, tax snapshots; encrypted casts on PWD ID, disability fields, cover letter.
-- `docs/ERD.md` created; `docs/REQUIREMENTS.md` v1.1 (full SRS from stakeholder interview).
+- **Public & Discovery Flow**: Role-aware "Apply" button on `/jobs` directory (candidates route to apply, guests to login with intended redirect, employers show badge); salary fallback displayed when omitted.
+- **Job Matches & Recommendation**: Transparent match fit percentage with accommodation indicators; unified CTA pointing to the single-page application flow.
+- **Single-Page Application Flow (`/jobs/{job}/apply`)**:
+  - Pre-filled verified profile credentials (saved PDF resume checkbox, verified PWD ID on file, FSL video intro).
+  - Assistive Cover Letter: low-typing starter phrases chips + Web Speech API voice dictation toggle + in-browser predictive text completion.
+  - PWD ID gate under RA 10524: warning banner with direct recovery link to Profile wizard step 4.
+  - Duplicate detection: displays existing reference number and status badge.
+  - Submission receipt: formatted reference number (`PWD-APP-2026-XXXXX`), one-click clipboard copy with a11y announcement, print receipt action, next steps timeline, and employer notification dispatch.
+- **Employer Flow (`/employer/jobs/{job}/applicants`)**:
+  - Filter tabs by application status (`All`, `New`, `Under Review`, `Interviews`, `Hired`, `Declined`).
+  - Applicant review modal with private streaming for PDF resume and FSL video introduction.
+  - Interview scheduling modal: date/time, virtual meeting URL, requested accessibility accommodations, candidate notes.
+  - Formal hire modal: start date, gross wage confirmation, and automated RA 10524 25% tax credit workforce record creation.
+- **Workforce & Statutory Tax Incentives (`/employer/workforce`)**:
+  - 25% gross wage deduction calculator under RA 10524.
+  - PWD-verified compliance toggle with BIR audit safeguards.
+- **Universal Accessibility Settings**:
+  - High contrast (125% contrast + pure background), text scale (100%–150%), dyslexia font (Atkinson Hyperlegible), screen reader polite announcements (`#a11y-announcer`), predictive text toggle.
+- **Profile Builder Step Validation & Accessible Feedback**:
+  - Implemented step validation (`validateStep()`) inside `ProfileBuilder.php` on both `nextStep()` and `goToStep()`, preventing users from advancing past Step 2 if required fields (`firstName`, `lastName`, `email`, `phone`, `city`, `highestEducation`) are incomplete.
+  - Added visual required indicators (`*`), `aria-required`, `aria-invalid`, high-visibility red error outlines, and screen-reader announced `@error` directives to all Step 2 input fields in `profile-builder.blade.php`.
+  - Added top error alert banner on Step 2 summarizing missing required fields.
+- **Settings Layout & Theme Unification**:
+  - Encapsulated Settings within candidate/employer portal shells dynamically based on authenticated role (`layouts.candidate`, `layouts.employer`).
+  - Wrapped settings forms within cohesive card containers matching design tokens, eliminating raw Laravel starter kit styling.
+  - Cleared all `wire:navigate` usage from sidebar, layout, and nav components (Rule D-02 compliance).
+- **Tests & Quality**: 102/102 Pest tests passing, 13/13 JS predictive text tests passing, Tailwind v4 / Vite asset build clean.
 
 ## Done — Docs & Decisions ✅
 - Project proposal (Chapter 1) with features, roles, and workflow.

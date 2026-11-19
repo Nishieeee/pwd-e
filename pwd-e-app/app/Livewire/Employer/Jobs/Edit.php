@@ -157,7 +157,7 @@ class Edit extends Component
 
         Flux::toast(variant: 'success', text: __('Job posting updated successfully!'));
 
-        $this->redirect(route('employer.jobs.index'), navigate: true);
+        $this->redirect(route('employer.jobs.index'));
     }
 
     public function applyReplacement(string $phrase, string $suggestion): void

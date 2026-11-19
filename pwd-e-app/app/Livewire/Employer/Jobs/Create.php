@@ -152,7 +152,7 @@ class Create extends Component
 
         Flux::toast(variant: 'success', text: __('Job draft saved successfully.'));
 
-        $this->redirect(route('employer.jobs.index'), navigate: true);
+        $this->redirect(route('employer.jobs.index'));
     }
 
     public function publish(bool $ignoreScanWarnings = false): void
@@ -201,7 +201,7 @@ class Create extends Component
 
         Flux::toast(variant: 'success', text: __('Job posting published successfully!'));
 
-        $this->redirect(route('employer.jobs.index'), navigate: true);
+        $this->redirect(route('employer.jobs.index'));
     }
 
     public function applyReplacement(string $phrase, string $suggestion): void

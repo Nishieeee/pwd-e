@@ -259,3 +259,56 @@ test('profile builder streamlines onboarding, auto-populates zip code, generates
     $dashboardResponse->assertSee('Profile saved successfully!');
     $dashboardResponse->assertSee('Your details, accommodation needs, and both attachments are saved. Your job matches are ready.');
 });
+
+test('public job directory shows appropriate apply actions based on auth state', function () {
+    // 1. Guest sees Log in to Apply
+    $response = $this->get(route('jobs'));
+    $response->assertOk();
+    $response->assertSee('Log in to Apply');
+
+    // 2. Candidate sees Apply via Portal pointing to candidate.apply
+    $this->actingAs($this->candidate);
+    $response = $this->get(route('jobs'));
+    $response->assertOk();
+    $response->assertSee('Apply via Portal');
+    $response->assertSee(route('candidate.apply', JobPosting::where('status', 'published')->first()));
+
+    // 3. Employer sees Employer Account badge
+    $employer = User::where('role', 'employer')->first();
+    if ($employer) {
+        $this->actingAs($employer);
+        $response = $this->get(route('jobs'));
+        $response->assertOk();
+        $response->assertSee('Employer Account');
+    }
+});
+
+test('profile builder validates required fields before allowing advancing to next step', function () {
+    $this->actingAs($this->candidate);
+
+    Livewire::test(ProfileBuilder::class)
+        ->assertSet('currentStep', 1)
+        ->call('nextStep')
+        ->assertSet('currentStep', 2)
+        // Clear required fields in Step 2
+        ->set('firstName', '')
+        ->set('lastName', '')
+        ->set('phone', '')
+        ->set('city', '')
+        // Attempting to advance to step 3 should fail validation and remain on step 2
+        ->call('nextStep')
+        ->assertHasErrors(['firstName', 'lastName', 'phone', 'city'])
+        ->assertSet('currentStep', 2)
+        // Attempting to jump to step 3 via goToStep should also fail
+        ->call('goToStep', 3)
+        ->assertHasErrors(['firstName', 'lastName', 'phone', 'city'])
+        ->assertSet('currentStep', 2)
+        // Filling required fields allows advancing to Step 3
+        ->set('firstName', 'Maria')
+        ->set('lastName', 'Santos')
+        ->set('phone', '+63 917 123 4567')
+        ->set('city', 'Zamboanga City')
+        ->call('nextStep')
+        ->assertHasNoErrors()
+        ->assertSet('currentStep', 3);
+});
