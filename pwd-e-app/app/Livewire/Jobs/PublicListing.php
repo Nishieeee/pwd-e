@@ -39,18 +39,21 @@ class PublicListing extends Component
             ->with(['employerProfile', 'accommodations'])
             ->latest('published_at');
 
-        if ($this->search) {$term = '%' . $this->search . '\%';$query->where(function ($q) use ($term) {
-                $q->where('title', 'like',$term)
+        if ($this->search) {
+            $term = '%' . $this->search . '%';
+            $query->where(function ($q) use ($term) {
+                $q->where('title', 'like', $term)
                   ->orWhere('location', 'like', $term)
                   ->orWhere('description', 'like', $term)
-                  ->orWhereHas('accommodations', fn ($aq) => $aq->where('name', 'like',$term))
-                  ->orWhereHas('employerProfile', fn ($eq) => $eq->where('company_name', 'like',$term));
+                  ->orWhereHas('accommodations', fn ($aq) => $aq->where('name', 'like', $term))
+                  ->orWhereHas('employerProfile', fn ($eq) => $eq->where('company_name', 'like', $term));
             });
         }
 
         if ($this->accommodationFilter) {
+            $accTerm = '%' . $this->accommodationFilter . '%';
             $query->whereHas('accommodations', fn ($aq) =>
-                $aq->where('name', 'like', '\%' .$this->accommodationFilter . '%')
+                $aq->where('name', 'like', $accTerm)
             );
         }
 

@@ -12,11 +12,15 @@
   - Fixed Profile Builder (`/profile/builder`) step validation flaw: implemented `validateStep()` in `ProfileBuilder.php` on `nextStep()`, `goToStep()`, and `saveProfileAndRedirect()`; added `@error` directives, red borders, and summary error alert banner in `profile-builder.blade.php`.
   - Stripped remaining `wire:navigate` instances for accessible plain page loads (D-02).
   - Created `TASKS-PRESENTATION-V2.md` covering all panelist criteria and PWD user-friendliness guidelines.
-  - 102/102 Pest tests passing, 13/13 JS tests passing, asset build verified.
+  - Fixed SQL like escaping bug in `PublicListing.php` and stripped remaining `wire:navigate` instances in employer job views and desktop user menu for strict D-02 compliance.
+  - Added official printable BIR RA 10524 Statutory Tax Certification summary in `workforce.blade.php`.
+  - Added multi-state verification recovery handling in `verification-pending.blade.php`.
+  - Added comprehensive component integrity suite (`ComponentIntegrityTest.php`).
+  - 108/108 Pest tests passing, 13/13 JS tests passing, asset build verified.
 
 ## State of the code
 - End-to-end main flow operational: Browse → Job Matches → Single-Page Apply (with voice/predictive/credentials) → Employer Review & Interview Scheduling → Hire → Workforce Record & RA 10524 Tax Incentives.
-- 101 tests passing; build clean.
+- 108 tests passing; build clean.
 
 ## Next concrete action
 Mobile-first audit (320–412px viewports) and automated axe-core / Pa11y WCAG 2.1 AA verification across the main flow pages. See `TASKS-PRESENTATION-V2.md` Phase 7.

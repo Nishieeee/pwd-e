@@ -40,26 +40,48 @@
             <section class="p-5 md:p-8 lg:p-16"
                 x-data="{
                     role: '{{ old('role', 'candidate') }}',
-                    step: 0,
+                    step: {{ $errors->hasAny(['date_of_birth']) ? 1 : ($errors->hasAny(['disability_type', 'pwd_id_number', 'pwd_id_file', 'consent']) ? 2 : ($errors->hasAny(['business_permit_number', 'business_permit_file']) ? 1 : 0)) }},
                     candidateSteps: 3,
                     employerSteps: 2,
+                    showCandidatePassword: false,
+                    showEmployerPassword: false,
                     canContinue: false,
                     totalSteps() { return this.role === 'candidate' ? this.candidateSteps : this.employerSteps; },
                     val(id) { const el = document.getElementById(id); return el ? (el.value || '').trim() : ''; },
                     isChecked(name) { const el = document.querySelector('input[name=' + name + ']'); return !!(el && el.checked); },
                     stepValid() {
                         if (this.role === 'candidate') {
-                            if (this.step === 0) return this.val('first_name') !== '' && this.val('last_name') !== '' && this.val('email') !== '' && document.querySelector('input[name=password]').value.length >= 8 && document.querySelector('input[name=password]').value === document.querySelector('input[name=password_confirmation]').value;
+                            if (this.step === 0) {
+                                const p = this.val('candidate_password');
+                                const pc = this.val('candidate_password_confirmation');
+                                return this.val('candidate_first_name') !== '' &&
+                                       this.val('candidate_last_name') !== '' &&
+                                       this.val('candidate_email') !== '' &&
+                                       p.length >= 8 && p === pc;
+                            }
                             if (this.step === 1) {
                                 const d = new Date(this.val('date_of_birth'));
                                 if (isNaN(d.getTime())) return false;
-                                const age = (Date.now() - d.getTime()) / (365.25*24*60*60*1000);
+                                const age = (Date.now() - d.getTime()) / (365.25 * 24 * 60 * 60 * 1000);
                                 return age >= 18;
                             }
-                            if (this.step === 2) return this.val('disability_type') !== '' && this.val('pwd_id_number') !== '' && this.isChecked('consent') && this.isChecked('terms');
+                            if (this.step === 2) {
+                                return this.val('disability_type') !== '' &&
+                                       this.val('pwd_id_number') !== '' &&
+                                       this.isChecked('consent') &&
+                                       this.isChecked('terms');
+                            }
                         } else {
-                            if (this.step === 0) return this.val('company_name') !== '' && this.val('email') !== '' && document.querySelector('input[name=password]').value.length >= 8 && document.querySelector('input[name=password]').value === document.querySelector('input[name=password_confirmation]').value;
-                            if (this.step === 1) return this.val('business_permit_number') !== '' && this.isChecked('terms');
+                            if (this.step === 0) {
+                                const p = this.val('employer_password');
+                                const pc = this.val('employer_password_confirmation');
+                                return this.val('employer_company_name') !== '' &&
+                                       this.val('employer_email') !== '' &&
+                                       p.length >= 8 && p === pc;
+                            }
+                            if (this.step === 1) {
+                                return this.val('business_permit_number') !== '' && this.isChecked('terms');
+                            }
                         }
                         return true;
                     },
@@ -94,11 +116,11 @@
                             <p class="mb-1.5 text-sm font-semibold text-primary-dark">I am registering as <span class="text-[#B3261E]">*</span></p>
                             <div class="flex gap-3" role="radiogroup" aria-label="Registration role">
                                 <label class="flex-1 cursor-pointer">
-                                    <input type="radio" name="role" value="candidate" x-model="role" class="sr-only">
+                                    <input type="radio" value="candidate" x-model="role" @change="updateState()" class="sr-only">
                                     <span class="flex h-12 items-center justify-center rounded-lg border border-[#CBD5E1] text-sm font-semibold text-primary-dark" :class="role === 'candidate' ? 'bg-primary text-white border-primary' : 'bg-white'">Candidate (PWD)</span>
                                 </label>
                                 <label class="flex-1 cursor-pointer">
-                                    <input type="radio" name="role" value="employer" x-model="role" class="sr-only">
+                                    <input type="radio" value="employer" x-model="role" @change="updateState()" class="sr-only">
                                     <span class="flex h-12 items-center justify-center rounded-lg border border-[#CBD5E1] text-sm font-semibold text-primary-dark" :class="role === 'employer' ? 'bg-primary text-white border-primary' : 'bg-white'">Employer</span>
                                 </label>
                             </div>
@@ -109,38 +131,44 @@
                         <fieldset x-show="role === 'candidate'" class="flex flex-col gap-5 border-0 p-0 m-0" :disabled="role !== 'candidate'">
                             <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
                                 <div>
-                                    <label for="first_name" class="mb-1.5 block text-sm font-semibold text-primary-dark">First name <span class="text-[#B3261E]">*</span></label>
-                                    <input id="first_name" name="first_name" type="text" value="{{ old('first_name') }}" :required="role === 'candidate'" autocomplete="given-name" placeholder="First name" :disabled="role !== 'candidate'"
+                                    <label for="candidate_first_name" class="mb-1.5 block text-sm font-semibold text-primary-dark">First name <span class="text-[#B3261E]">*</span></label>
+                                    <input id="candidate_first_name" name="first_name" type="text" value="{{ old('first_name') }}" :required="role === 'candidate'" autocomplete="given-name" placeholder="First name" :disabled="role !== 'candidate'"
                                            class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                                     @error('first_name')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                                 </div>
                                 <div>
-                                    <label for="middle_name" class="mb-1.5 block text-sm font-semibold text-primary-dark">Middle name</label>
-                                    <input id="middle_name" name="middle_name" type="text" value="{{ old('middle_name') }}" autocomplete="additional-name" placeholder="Middle name"
+                                    <label for="candidate_middle_name" class="mb-1.5 block text-sm font-semibold text-primary-dark">Middle name</label>
+                                    <input id="candidate_middle_name" name="middle_name" type="text" value="{{ old('middle_name') }}" autocomplete="additional-name" placeholder="Middle name"
                                            class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                                 </div>
                                 <div>
-                                    <label for="last_name" class="mb-1.5 block text-sm font-semibold text-primary-dark">Last name <span class="text-[#B3261E]">*</span></label>
-                                    <input id="last_name" name="last_name" type="text" value="{{ old('last_name') }}" :required="role === 'candidate'" autocomplete="family-name" placeholder="Last name"
+                                    <label for="candidate_last_name" class="mb-1.5 block text-sm font-semibold text-primary-dark">Last name <span class="text-[#B3261E]">*</span></label>
+                                    <input id="candidate_last_name" name="last_name" type="text" value="{{ old('last_name') }}" :required="role === 'candidate'" autocomplete="family-name" placeholder="Last name"
                                            class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                                     @error('last_name')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                                 </div>
                             </div>
                             <div>
-                                <label for="email" class="mb-1.5 block text-sm font-semibold text-primary-dark">Email address <span class="text-[#B3261E]">*</span></label>
-                                <input id="email" name="email" type="email" value="{{ old('email') }}" :required="role === 'candidate'" autocomplete="email" placeholder="you@example.com"
+                                <label for="candidate_email" class="mb-1.5 block text-sm font-semibold text-primary-dark">Email address <span class="text-[#B3261E]">*</span></label>
+                                <input id="candidate_email" name="email" type="email" value="{{ old('email') }}" :required="role === 'candidate'" autocomplete="email" placeholder="you@example.com"
                                        class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                                 @error('email')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                             </div>
                             <div>
-                                <label for="password" class="mb-1.5 block text-sm font-semibold text-primary-dark">Password <span class="text-[#B3261E]">*</span></label>
-                                <input id="password" name="password" type="password" autocomplete="new-password" placeholder="Password"
-                                       class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                <label for="candidate_password" class="mb-1.5 block text-sm font-semibold text-primary-dark">Password <span class="text-[#B3261E]">*</span></label>
+                                <div class="relative">
+                                    <input id="candidate_password" name="password" :type="showCandidatePassword ? 'text' : 'password'" autocomplete="new-password" placeholder="Password (min. 8 characters)"
+                                           class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 pr-12 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                    <button type="button" @click="showCandidatePassword = !showCandidatePassword" :aria-label="showCandidatePassword ? 'Hide password' : 'Show password'"
+                                            class="absolute right-1 top-1 grid h-10 w-10 place-items-center rounded-md text-body-muted hover:text-primary-dark focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                    </button>
+                                </div>
                                 @error('password')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                             </div>
                             <div>
-                                <label for="password_confirmation" class="mb-1.5 block text-sm font-semibold text-primary-dark">Confirm password <span class="text-[#B3261E]">*</span></label>
-                                <input id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password" placeholder="Confirm password"
+                                <label for="candidate_password_confirmation" class="mb-1.5 block text-sm font-semibold text-primary-dark">Confirm password <span class="text-[#B3261E]">*</span></label>
+                                <input id="candidate_password_confirmation" name="password_confirmation" :type="showCandidatePassword ? 'text' : 'password'" autocomplete="new-password" placeholder="Confirm password"
                                        class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                             </div>
                         </fieldset>
@@ -148,26 +176,48 @@
                         {{-- Employer first inputs --}}
                         <fieldset x-show="role === 'employer'" class="flex flex-col gap-5 border-0 p-0 m-0" :disabled="role !== 'employer'">
                             <div>
-                                <label for="company_name" class="mb-1.5 block text-sm font-semibold text-primary-dark">Company name <span class="text-[#B3261E]">*</span></label>
-                                <input id="company_name" name="company_name" type="text" value="{{ old('company_name') }}" :required="role === 'employer'" placeholder="Company Inc."
+                                <label for="employer_company_name" class="mb-1.5 block text-sm font-semibold text-primary-dark">Company name <span class="text-[#B3261E]">*</span></label>
+                                <input id="employer_company_name" name="company_name" type="text" value="{{ old('company_name') }}" :required="role === 'employer'" placeholder="e.g. Acme Accessibility Corp."
                                        class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                                 @error('company_name')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                             </div>
+
+                            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                <div>
+                                    <label for="employer_first_name" class="mb-1.5 block text-sm font-semibold text-primary-dark">Representative first name</label>
+                                    <input id="employer_first_name" name="first_name" type="text" value="{{ old('first_name') }}" autocomplete="given-name" placeholder="HR / Recruiter first name"
+                                           class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                    @error('first_name')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                                </div>
+                                <div>
+                                    <label for="employer_last_name" class="mb-1.5 block text-sm font-semibold text-primary-dark">Representative last name</label>
+                                    <input id="employer_last_name" name="last_name" type="text" value="{{ old('last_name') }}" autocomplete="family-name" placeholder="HR / Recruiter last name"
+                                           class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                    @error('last_name')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                                </div>
+                            </div>
+
                             <div>
-                                <label for="email" class="mb-1.5 block text-sm font-semibold text-primary-dark">Email address <span class="text-[#B3261E]">*</span></label>
-                                <input id="email" name="email" type="email" value="{{ old('email') }}" :required="role === 'employer'" autocomplete="email" placeholder="you@example.com"
+                                <label for="employer_email" class="mb-1.5 block text-sm font-semibold text-primary-dark">Work email address <span class="text-[#B3261E]">*</span></label>
+                                <input id="employer_email" name="email" type="email" value="{{ old('email') }}" :required="role === 'employer'" autocomplete="email" placeholder="hr@company.com"
                                        class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                                 @error('email')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                             </div>
                             <div>
-                                <label for="password" class="mb-1.5 block text-sm font-semibold text-primary-dark">Password <span class="text-[#B3261E]">*</span></label>
-                                <input id="password" name="password" type="password" autocomplete="new-password" placeholder="Password"
-                                       class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                <label for="employer_password" class="mb-1.5 block text-sm font-semibold text-primary-dark">Password <span class="text-[#B3261E]">*</span></label>
+                                <div class="relative">
+                                    <input id="employer_password" name="password" :type="showEmployerPassword ? 'text' : 'password'" autocomplete="new-password" placeholder="Password (min. 8 characters)"
+                                           class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 pr-12 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                    <button type="button" @click="showEmployerPassword = !showEmployerPassword" :aria-label="showEmployerPassword ? 'Hide password' : 'Show password'"
+                                            class="absolute right-1 top-1 grid h-10 w-10 place-items-center rounded-md text-body-muted hover:text-primary-dark focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                    </button>
+                                </div>
                                 @error('password')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                             </div>
                             <div>
-                                <label for="password_confirmation" class="mb-1.5 block text-sm font-semibold text-primary-dark">Confirm password <span class="text-[#B3261E]">*</span></label>
-                                <input id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password" placeholder="Confirm password"
+                                <label for="employer_password_confirmation" class="mb-1.5 block text-sm font-semibold text-primary-dark">Confirm password <span class="text-[#B3261E]">*</span></label>
+                                <input id="employer_password_confirmation" name="password_confirmation" :type="showEmployerPassword ? 'text' : 'password'" autocomplete="new-password" placeholder="Confirm password"
                                        class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                             </div>
                         </fieldset>
@@ -275,6 +325,11 @@
         (function () {
             const fields = document.querySelectorAll('input[name], select[name]');
             const validate = function (el) {
+                if (el.disabled || el.closest('[disabled]')) {
+                    const existing = el.parentElement.querySelector('.client-error');
+                    if (existing) existing.remove();
+                    return;
+                }
                 const name = el.name;
                 const val = (el.value || '').trim();
                 let msg = '';
@@ -285,7 +340,8 @@
                 } else if (name === 'password' && val && val.length < 8) {
                     msg = 'Password must be at least 8 characters.';
                 } else if (name === 'password_confirmation' && val) {
-                    const pw = document.querySelector('input[name="password"]');
+                    const fieldset = el.closest('fieldset');
+                    const pw = fieldset ? fieldset.querySelector('input[name="password"]') : document.querySelector('input[name="password"]');
                     if (pw && val !== pw.value) msg = 'Passwords do not match.';
                 } else if (name === 'date_of_birth' && val) {
                     const d = new Date(val);
@@ -296,7 +352,7 @@
                     }
                 } else if (name === 'disability_type' && val === '') {
                     msg = 'Please select a disability type.';
-                } else if ((name === 'pwd_id_number' || name === 'business_permit_number' || name === 'company_name' || name === 'first_name' || name === 'last_name') && val === '') {
+                } else if ((name === 'pwd_id_number' || name === 'business_permit_number' || name === 'company_name' || (el.hasAttribute('required') && (name === 'first_name' || name === 'last_name'))) && val === '') {
                     msg = 'This field is required.';
                 }
                 const span = el.parentElement.querySelector('.client-error');
