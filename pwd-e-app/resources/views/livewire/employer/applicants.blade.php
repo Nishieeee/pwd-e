@@ -72,6 +72,23 @@
                                         @endif
                                     </div>
                                     <div class="text-xs text-body-muted truncate">{{ $app->candidateProfile?->headline ?? 'Candidate profile' }}</div>
+                                    <div class="flex items-center gap-1.5 mt-1 text-[11px]">
+                                        @php
+                                            $materials = $app->application_materials ?? [];
+                                            $hasBio = $materials['biodata'] ?? true;
+                                            $hasResume = ($materials['resume'] ?? false) || !empty($app->resume_path) || !empty($app->candidateProfile?->resume_pdf_path);
+                                            $hasFsl = ($materials['fsl_video'] ?? false) || !empty($app->fsl_video_path);
+                                        @endphp
+                                        @if($hasBio)
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-primary-tint text-primary-dark font-medium" title="{{ __('Digital Bio-Data submitted') }}">📋 Bio-Data</span>
+                                        @endif
+                                        @if($hasResume)
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 font-medium" title="{{ __('Résumé PDF submitted') }}">📑 Résumé</span>
+                                        @endif
+                                        @if($hasFsl)
+                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 font-medium" title="{{ __('FSL Video pitch submitted') }}">🤟 FSL</span>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
                         </td>
@@ -198,18 +215,37 @@
 
                 {{-- Document Stream Links --}}
                 <div>
-                    <h3 class="font-semibold text-primary-dark text-sm mb-2">{{ __('Verified Attachments') }}</h3>
+                    <h3 class="font-semibold text-primary-dark text-sm mb-2">{{ __('Submitted Application Materials') }}</h3>
                     <div class="flex flex-wrap gap-3">
-                        @if ($viewing->candidateProfile?->resume_pdf_path)
-                            <a href="{{ route('employer.applicants.document', [$viewing, 'resume']) }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 rounded-lg border border-primary-border bg-white px-4 py-2.5 text-xs font-semibold text-primary-dark hover:bg-primary-tint shadow-xs">
-                                <svg class="size-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                {{ __('Download Résumé (PDF)') }}
+                        @php
+                            $materials = $viewing->application_materials ?? [];
+                            $hasBio = $materials['biodata'] ?? true;
+                            $hasResume = ($materials['resume'] ?? false) || !empty($viewing->resume_path) || !empty($viewing->candidateProfile?->resume_pdf_path);
+                            $hasFsl = ($materials['fsl_video'] ?? false) || !empty($viewing->fsl_video_path);
+                        @endphp
+
+                        @if ($hasBio && $cp)
+                            <a href="{{ route('employer.candidates.show', $cp->id) }}" target="_blank"
+                               class="inline-flex items-center gap-2 rounded-lg border border-primary-border bg-white px-4 py-2.5 text-xs font-semibold text-primary-dark hover:bg-primary-tint shadow-xs">
+                                <svg class="size-4 text-primary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/></svg>
+                                <span>{{ __('View Digital Bio-Data') }}</span>
+                                <span class="text-[10px] bg-secondary-tint text-secondary font-bold px-1.5 py-0.5 rounded">✓ Attached</span>
                             </a>
                         @endif
-                        @if ($viewing->fsl_video_path || $viewing->candidateProfile?->fsl_video_path)
+
+                        @if ($hasResume)
+                            <a href="{{ route('employer.applicants.document', [$viewing, 'resume']) }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 rounded-lg border border-primary-border bg-white px-4 py-2.5 text-xs font-semibold text-primary-dark hover:bg-primary-tint shadow-xs">
+                                <svg class="size-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                <span>{{ __('Download Résumé (PDF)') }}</span>
+                                <span class="text-[10px] bg-secondary-tint text-secondary font-bold px-1.5 py-0.5 rounded">✓ Attached</span>
+                            </a>
+                        @endif
+
+                        @if ($hasFsl)
                             <a href="{{ route('employer.applicants.document', [$viewing, 'fsl']) }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 rounded-lg border border-primary-border bg-white px-4 py-2.5 text-xs font-semibold text-primary-dark hover:bg-primary-tint shadow-xs">
                                 <svg class="size-4 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                {{ __('Play FSL Video Introduction') }}
+                                <span>{{ __('Play FSL Video Pitch') }}</span>
+                                <span class="text-[10px] bg-secondary-tint text-secondary font-bold px-1.5 py-0.5 rounded">✓ Attached</span>
                             </a>
                         @endif
                     </div>

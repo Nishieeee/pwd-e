@@ -85,3 +85,37 @@ test('candidate can append quick starter phrase and sees formatted reference on 
     $component->assertSee($ref);
     $component->assertSee('Application Submitted Successfully!');
 });
+
+test('candidate cannot submit application with zero materials selected', function () {
+    $this->actingAs($this->candidate);
+
+    Livewire::test(Apply::class, ['job' => $this->job])
+        ->set('includeBiodata', false)
+        ->set('includeResume', false)
+        ->set('includeFslVideo', false)
+        ->call('submit')
+        ->assertHasErrors(['materials'])
+        ->assertSet('submitted', false);
+});
+
+test('candidate application stores multi-select application materials', function () {
+    $this->actingAs($this->candidate);
+
+    Livewire::test(Apply::class, ['job' => $this->job])
+        ->set('includeBiodata', true)
+        ->set('includeResume', false)
+        ->set('includeFslVideo', false)
+        ->call('submit')
+        ->assertHasNoErrors()
+        ->assertSet('submitted', true);
+
+    $app = Application::where('candidate_profile_id', $this->candidate->candidateProfile->id)
+        ->where('job_posting_id', $this->job->id)
+        ->first();
+
+    expect($app)->not->toBeNull();
+    expect($app->application_materials)->toBeArray();
+    expect($app->application_materials['biodata'])->toBeTrue();
+    expect($app->application_materials['resume'])->toBeFalse();
+    expect($app->application_materials['fsl_video'])->toBeFalse();
+});

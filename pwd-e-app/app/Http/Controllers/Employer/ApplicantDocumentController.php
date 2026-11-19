@@ -21,7 +21,7 @@ class ApplicantDocumentController
         }
 
         $path = match ($type) {
-            'resume' => $application->candidateProfile?->resume_pdf_path,
+            'resume' => $application->resume_path ?: $application->candidateProfile?->resume_pdf_path,
             'fsl' => $application->fsl_video_path ?: $application->candidateProfile?->fsl_video_path,
             default => null,
         };
