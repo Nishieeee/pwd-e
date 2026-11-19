@@ -315,40 +315,57 @@
 
                     <h3 class="text-sm font-bold text-[#1A2840]">Personal Identification</h3>
 
-                    <!-- Optional 2x2 Photo / Avatar Upload Field -->
-                    <div class="p-4 rounded-xl bg-[#F4F7FA] border border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div class="flex items-center gap-3.5">
-                            <div class="w-14 h-14 rounded-xl bg-[#DCEAF4] text-[#244F73] border border-[#B8D0E2] flex items-center justify-center font-bold text-base overflow-hidden shrink-0">
+                    <!-- 2x2 Photo / Avatar Upload Field for Digital Bio-Data -->
+                    <div class="p-5 rounded-2xl bg-white border border-primary-border shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+                        <div class="flex items-center gap-4">
+                            <div class="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl bg-primary-tint/40 text-primary border-2 border-primary-border flex items-center justify-center font-bold text-lg overflow-hidden shrink-0 shadow-2xs">
+                                <div wire:loading wire:target="avatarUpload" class="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
+                                    <svg class="size-6 animate-spin text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                                </div>
                                 @if($avatarUpload)
                                     <img src="{{ $avatarUpload->temporaryUrl() }}" alt="2x2 Photo Preview" class="w-full h-full object-cover">
                                 @elseif($avatarPath)
                                     <img src="{{ Storage::url($avatarPath) }}" alt="Saved 2x2 Photo" class="w-full h-full object-cover">
                                 @else
-                                    <span>{{ strtoupper(substr($firstName, 0, 1).substr($lastName, 0, 1)) ?: 'MS' }}</span>
+                                    <div class="flex flex-col items-center justify-center text-center p-1">
+                                        <span class="font-heading font-bold text-xl text-primary">{{ strtoupper(substr($firstName, 0, 1).substr($lastName, 0, 1)) ?: 'MS' }}</span>
+                                        <span class="text-[9px] uppercase font-bold text-primary tracking-wider mt-0.5">2x2 Photo</span>
+                                    </div>
                                 @endif
                             </div>
-                            <div>
-                                <label for="avatar-upload-input" class="block text-xs font-bold text-[#1A2840]">
-                                    2x2 Photo / Avatar <span class="font-normal text-gray-500">(Optional)</span>
+                            <div class="space-y-1">
+                                <label for="avatar-upload-input" class="block text-sm font-bold text-primary-dark cursor-pointer">
+                                    2x2 Formal ID Photo <span class="font-normal text-xs text-body-muted">(Recommended for Bio-Data)</span>
                                 </label>
-                                <p class="text-[11px] text-[#4E5F6E] mt-0.5">
-                                    Upload a clear 2x2 ID photo (JPG or PNG, up to 5 MB).
+                                <p class="text-xs text-body-muted leading-relaxed max-w-md">
+                                    Featured on your official Digital Bio-Data. A clear 2x2 photo with a white or plain background is recommended (JPG/PNG, up to 5 MB).
                                 </p>
                             </div>
                         </div>
-                        <div>
-                            <label for="avatar-upload-input" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-gray-300 bg-white text-xs font-semibold text-[#1A2840] hover:bg-gray-50 cursor-pointer focus-within:ring-2 focus-within:ring-[#244F73]">
-                                <svg class="w-4 h-4 text-[#244F73]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+
+                        <div class="flex flex-wrap items-center gap-2 shrink-0">
+                            <label for="avatar-upload-input" class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg border border-primary-border bg-white text-xs font-semibold text-primary-dark hover:bg-primary-tint cursor-pointer shadow-2xs transition-colors focus-within:ring-2 focus-within:ring-primary/40">
+                                <svg class="size-4 text-primary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
                                 </svg>
-                                <span>Upload 2x2 Photo</span>
+                                <span>{{ ($avatarUpload || $avatarPath) ? __('Change 2x2 Photo') : __('Upload 2x2 Photo') }}</span>
                                 <input id="avatar-upload-input"
                                        type="file"
                                        wire:model="avatarUpload"
                                        accept="image/png,image/jpeg"
                                        class="sr-only"
-                                       aria-label="Upload optional 2x2 photo or avatar">
+                                       aria-label="Upload 2x2 ID photo or avatar">
                             </label>
+
+                            @if($avatarUpload || $avatarPath)
+                                <button type="button"
+                                        wire:click="removeAvatar"
+                                        class="inline-flex items-center gap-1 px-3 py-2.5 rounded-lg border border-red-200 text-xs font-semibold text-red-700 hover:bg-red-50 transition-colors"
+                                        aria-label="Remove uploaded 2x2 photo">
+                                    <svg class="size-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                    <span>Remove</span>
+                                </button>
+                            @endif
                         </div>
                     </div>
 

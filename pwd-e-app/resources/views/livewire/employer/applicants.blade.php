@@ -94,6 +94,13 @@
                         </td>
                         <td class="px-4 py-3.5 text-right">
                             <div class="inline-flex flex-wrap items-center justify-end gap-2">
+                                <a href="{{ route('employer.candidates.show', $app->candidate_profile_id) }}" target="_blank"
+                                   class="rounded-lg border border-primary-border bg-white px-2.5 py-1.5 text-xs font-semibold text-primary hover:bg-primary-tint transition-colors inline-flex items-center gap-1"
+                                   title="{{ __('View full candidate bio-data') }}">
+                                    <svg class="size-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/></svg>
+                                    <span>{{ __('Bio-Data') }}</span>
+                                </a>
+
                                 <button type="button"
                                         wire:click="viewDetails({{ $app->id }})"
                                         class="rounded-lg border border-primary-border bg-white px-3 py-1.5 text-xs font-semibold text-primary-dark hover:bg-primary-tint transition-colors">
@@ -151,9 +158,18 @@
                         <p class="text-xs text-body-muted mt-1">{{ $cp?->headline }} · {{ $cp?->location ?? 'Zamboanga City, Philippines' }}</p>
                         <p class="text-xs text-body-muted">{{ $u?->email }} · {{ $cp?->phone ?? 'Phone on file' }}</p>
                     </div>
-                    <button type="button" wire:click="closeDetails" class="rounded-lg border border-primary-border bg-white px-3 py-1.5 text-xs font-semibold text-primary-dark hover:bg-primary-tint">
-                        {{ __('Close') }}
-                    </button>
+                    <div class="flex items-center gap-2">
+                        @if($cp)
+                            <a href="{{ route('employer.candidates.show', $cp->id) }}" target="_blank"
+                               class="inline-flex items-center gap-1.5 rounded-lg bg-primary-dark px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary shadow-xs transition-colors">
+                                <svg class="size-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/></svg>
+                                <span>{{ __('View Full Bio-Data') }}</span>
+                            </a>
+                        @endif
+                        <button type="button" wire:click="closeDetails" class="rounded-lg border border-primary-border bg-white px-3 py-1.5 text-xs font-semibold text-primary-dark hover:bg-primary-tint">
+                            {{ __('Close') }}
+                        </button>
+                    </div>
                 </div>
 
                 {{-- Fit score & status --}}

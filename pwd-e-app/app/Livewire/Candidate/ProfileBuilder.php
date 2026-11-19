@@ -474,6 +474,15 @@ class ProfileBuilder extends Component
         }
     }
 
+    public function removeAvatar(): void
+    {
+        if ($this->avatarPath && Storage::disk('public')->exists($this->avatarPath)) {
+            Storage::disk('public')->delete($this->avatarPath);
+        }
+        $this->avatarUpload = null;
+        $this->avatarPath = null;
+    }
+
     public function removeFslVideo(): void
     {
         if ($this->fslVideoPath && Storage::disk('public')->exists($this->fslVideoPath)) {

@@ -19,6 +19,11 @@
         </div>
         <flux:menu.separator />
         <flux:menu.radio.group>
+            @if(auth()->user()->isCandidate())
+                <flux:menu.item :href="route('candidate.profile.show')" icon="user">
+                    {{ __('View my Profile') }}
+                </flux:menu.item>
+            @endif
             <flux:menu.item :href="route('profile.edit')" icon="cog">
                 {{ __('Settings') }}
             </flux:menu.item>

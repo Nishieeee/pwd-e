@@ -131,30 +131,25 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {{-- Resume PDF Card --}}
-                    <div class="rounded-xl border border-primary-border p-4 bg-surface space-y-3">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-bold text-primary-dark">{{ __('Résumé / CV') }}</span>
-                            <span class="text-xs font-semibold text-secondary bg-secondary-tint px-2.5 py-0.5 rounded-full">{{ __('PDF') }}</span>
-                        </div>
-
-                        @if($candidateProfile?->resume_pdf_path)
+                    {{-- Digital Bio-Data / Profile Resume Card --}}
+                    <div class="rounded-xl border border-primary-border p-4 bg-surface space-y-3 flex flex-col justify-between">
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-primary-dark">{{ __('Digital Bio-Data') }}</span>
+                                <span class="text-xs font-semibold text-secondary bg-secondary-tint px-2.5 py-0.5 rounded-full">{{ __('Active') }}</span>
+                            </div>
                             <div class="flex items-start gap-2 text-xs text-body-muted">
                                 <svg class="size-4 text-secondary shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                                <span class="truncate">{{ basename($candidateProfile->resume_pdf_path) }}</span>
+                                <span>{{ __('Auto-generated from your profile credentials and accommodations.') }}</span>
                             </div>
-                            <label class="flex items-center gap-2 text-xs text-primary-dark cursor-pointer">
-                                <input type="checkbox" wire:model.live="useProfileResume" class="rounded text-primary focus:ring-primary" />
-                                <span>{{ __('Use saved résumé') }}</span>
-                            </label>
-                        @endif
+                        </div>
 
-                        <div>
-                            <label for="resumeFile" class="block text-[11px] font-medium text-body-muted mb-1">
-                                {{ $candidateProfile?->resume_pdf_path ? __('Upload different PDF (optional)') : __('Upload Résumé PDF') }}
-                            </label>
-                            <input id="resumeFile" type="file" wire:model="resumeFile" accept=".pdf" class="w-full text-xs text-body-muted file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-primary-tint file:text-primary-dark hover:file:bg-primary/20" />
-                            @error('resumeFile') <span class="text-xs text-red-600 block mt-1">{{ $message }}</span> @enderror
+                        <div class="pt-2 border-t border-gray-200">
+                            <a href="{{ route('candidate.profile.show') }}" target="_blank"
+                               class="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline">
+                                <svg class="size-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/></svg>
+                                <span>Preview Bio-Data</span>
+                            </a>
                         </div>
                     </div>
 

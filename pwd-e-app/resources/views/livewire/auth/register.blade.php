@@ -321,6 +321,8 @@
         </div>
     </main>
 
+    <x-site-footer />
+
     <script>
         (function () {
             const fields = document.querySelectorAll('input[name], select[name]');

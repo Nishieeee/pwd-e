@@ -312,3 +312,50 @@ test('profile builder validates required fields before allowing advancing to nex
         ->assertHasNoErrors()
         ->assertSet('currentStep', 3);
 });
+
+test('candidate can view their digital bio-data profile', function () {
+    $this->actingAs($this->candidate);
+
+    $response = $this->get(route('candidate.profile.show'));
+    $response->assertOk();
+    $response->assertSee('View my Profile');
+    $response->assertSee('Digital Bio-Data');
+    $response->assertSee('Maria Clara Santos');
+    $response->assertSee('RA 7277 Verified PWD');
+    $response->assertSee('Print / Save Bio-Data');
+    $response->assertSee('Required Workplace Accommodations');
+});
+
+test('employer can view candidate bio-data profile', function () {
+    $employer = User::where('role', 'employer')->first();
+    if (! $employer) {
+        $employer = User::factory()->create([
+            'role' => 'employer',
+            'status' => 'active',
+            'verified_at' => now(),
+        ]);
+        $employer->assignRole('employer');
+    }
+
+    $this->actingAs($employer);
+
+    $response = $this->get(route('employer.candidates.show', $this->candidate->candidateProfile));
+    $response->assertOk();
+    $response->assertSee('Candidate Digital Bio-Data');
+    $response->assertSee('Maria Clara Santos');
+    $response->assertSee('Print / Save Bio-Data');
+});
+
+test('unauthorized candidate cannot view another candidate bio-data', function () {
+    $otherCandidate = User::factory()->create([
+        'role' => 'candidate',
+        'status' => 'active',
+        'verified_at' => now(),
+    ]);
+    $otherCandidate->assignRole('candidate');
+
+    $this->actingAs($otherCandidate);
+
+    $response = $this->get(route('employer.candidates.show', $this->candidate->candidateProfile));
+    $response->assertForbidden();
+});
