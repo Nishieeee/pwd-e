@@ -1,33 +1,35 @@
-<div class="space-y-6 max-w-6xl mx-auto pb-8">
-    <!-- Breadcrumb -->
-    <nav class="flex items-center text-xs text-gray-500 gap-1.5" aria-label="Breadcrumb">
-        <a href="{{ route('dashboard') }}" class="hover:text-gray-900">Dashboard</a>
-        <span aria-hidden="true">/</span>
-        <span class="text-gray-900 font-medium" aria-current="page">Profile Builder</span>
-    </nav>
+<div class="space-y-6 max-w-6xl mx-auto pb-8 w-full min-w-0">
+    @if(!$isEmbedded)
+        <!-- Breadcrumb -->
+        <nav class="flex items-center text-xs text-gray-500 gap-1.5" aria-label="Breadcrumb">
+            <a href="{{ route('dashboard') }}" class="hover:text-gray-900">Dashboard</a>
+            <span aria-hidden="true">/</span>
+            <span class="text-gray-900 font-medium" aria-current="page">Profile Builder</span>
+        </nav>
 
-    <!-- Page Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-            <h1 class="text-2xl lg:text-3xl font-bold text-[#1A2840] tracking-tight">Profile Builder</h1>
-            <p class="text-sm text-[#4E5F6E] mt-1">
-                @if($currentStep === 1)
-                    Your experience, in your own words. Speak or type an answer, then review the text that becomes your employment profile.
-                @elseif($currentStep === 2)
-                    Tell us about your background. All experience counts, including projects, internships, and volunteer work.
-                @elseif($currentStep === 3)
-                    Let employers know what helps you do your best work. Choose the support you need, not a diagnosis.
-                @elseif($currentStep === 4)
-                    Bring your story to life. Add your resume and a Filipino Sign Language introduction to complete your profile.
-                @else
-                    Take one last look, {{ $firstName ?: 'Maria' }}. This is the profile we'll use to find work that fits your skills and support needs.
-                @endif
-            </p>
+        <!-- Page Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+                <h1 class="text-2xl lg:text-3xl font-bold text-[#1A2840] tracking-tight">Profile Builder</h1>
+                <p class="text-sm text-[#4E5F6E] mt-1">
+                    @if($currentStep === 1)
+                        Your experience, in your own words. Speak or type an answer, then review the text that becomes your employment profile.
+                    @elseif($currentStep === 2)
+                        Tell us about your background. All experience counts, including projects, internships, and volunteer work.
+                    @elseif($currentStep === 3)
+                        Let employers know what helps you do your best work. Choose the support you need, not a diagnosis.
+                    @elseif($currentStep === 4)
+                        Bring your story to life. Add your resume and a Filipino Sign Language introduction to complete your profile.
+                    @else
+                        Take one last look, {{ $firstName ?: 'Maria' }}. This is the profile we'll use to find work that fits your skills and support needs.
+                    @endif
+                </p>
+            </div>
+            <span class="inline-flex items-center self-start sm:self-center px-3 py-1 rounded-full text-xs font-semibold bg-[#DCEAF4] text-[#244F73]">
+                Private draft
+            </span>
         </div>
-        <span class="inline-flex items-center self-start sm:self-center px-3 py-1 rounded-full text-xs font-semibold bg-[#DCEAF4] text-[#244F73]">
-            Private draft
-        </span>
-    </div>
+    @endif
 
     <!-- 5-Step Progress Indicator Card -->
     <section class="bg-white rounded-xl border border-gray-200 p-5 shadow-xs space-y-4" aria-label="Profile Builder Progress">
@@ -68,9 +70,9 @@
                         wire:click="goToStep({{ $stepNumber }})"
                         role="listitem"
                         aria-current="{{ $isCurrent ? 'step' : 'false' }}"
-                        class="text-left group focus:outline-none focus:ring-2 focus:ring-[#244F73] rounded-lg p-1 transition-colors">
+                        class="text-left group focus:outline-none focus:ring-2 focus:ring-[#244F73] rounded-lg p-1 transition-colors min-w-0">
                     <div class="h-1 w-full rounded-full mb-2.5 {{ ($isCompleted || $isCurrent) ? 'bg-[#244F73]' : 'bg-gray-200' }}"></div>
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 min-w-0">
                         @if($isCompleted)
                             <span class="w-5 h-5 rounded-full border border-[#244F73] text-[#244F73] bg-sky-50 flex items-center justify-center text-[11px] font-bold shrink-0">
                                 &#10003;
@@ -84,7 +86,7 @@
                                 {{ $stepNumber }}
                             </span>
                         @endif
-                        <span class="text-xs truncate {{ $isCurrent ? 'font-bold text-[#1A2840]' : ($isCompleted ? 'font-medium text-[#1A2840]' : 'text-gray-500') }}">
+                        <span class="text-xs truncate min-w-0 {{ $isCurrent ? 'font-bold text-[#1A2840]' : ($isCompleted ? 'font-medium text-[#1A2840]' : 'text-gray-500') }}">
                             {{ $stepLabel }}
                         </span>
                     </div>
@@ -185,7 +187,7 @@
                 </div>
 
                 <!-- Listening Pill Box with WCAG 44px Touch Targets -->
-                <div class="rounded-xl border border-[#244F73]/40 bg-white px-5 py-3.5 shadow-xs flex items-center justify-between gap-6 min-w-[280px]">
+                <div class="rounded-xl border border-[#244F73]/40 bg-white px-4 py-3 sm:px-5 sm:py-3.5 shadow-xs flex flex-wrap sm:flex-nowrap items-center justify-between gap-4 w-full sm:w-auto min-w-0 max-w-full">
                     <div class="flex items-center gap-3.5">
                         <div class="w-10 h-10 rounded-full bg-[#244F73] text-white flex items-center justify-center ring-4 ring-[#DCEAF4] shrink-0">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -270,9 +272,9 @@
     {{-- STEP 2: PROFESSIONAL DETAILS                                          --}}
     {{-- ===================================================================== --}}
     @if($currentStep === 2)
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start w-full min-w-0">
             <!-- Left Form Column -->
-            <section class="lg:col-span-8 bg-white rounded-xl border border-gray-200 p-6 shadow-xs space-y-6" aria-labelledby="step2-heading">
+            <section class="xl:col-span-8 bg-white rounded-xl border border-gray-200 p-6 shadow-xs space-y-6 min-w-0 w-full" aria-labelledby="step2-heading">
                 <div class="space-y-3">
                     <div>
                         <h2 id="step2-heading" class="text-lg font-bold text-[#1A2840]">Professional details</h2>
@@ -315,46 +317,63 @@
 
                     <h3 class="text-sm font-bold text-[#1A2840]">Personal Identification</h3>
 
-                    <!-- Optional 2x2 Photo / Avatar Upload Field -->
-                    <div class="p-4 rounded-xl bg-[#F4F7FA] border border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div class="flex items-center gap-3.5">
-                            <div class="w-14 h-14 rounded-xl bg-[#DCEAF4] text-[#244F73] border border-[#B8D0E2] flex items-center justify-center font-bold text-base overflow-hidden shrink-0">
+                    <!-- 2x2 Photo / Avatar Upload Field for Digital Bio-Data -->
+                    <div class="p-5 rounded-2xl bg-white border border-primary-border shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+                        <div class="flex items-center gap-4">
+                            <div class="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl bg-primary-tint/40 text-primary border-2 border-primary-border flex items-center justify-center font-bold text-lg overflow-hidden shrink-0 shadow-2xs">
+                                <div wire:loading wire:target="avatarUpload" class="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
+                                    <svg class="size-6 animate-spin text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                                </div>
                                 @if($avatarUpload)
                                     <img src="{{ $avatarUpload->temporaryUrl() }}" alt="2x2 Photo Preview" class="w-full h-full object-cover">
                                 @elseif($avatarPath)
                                     <img src="{{ Storage::url($avatarPath) }}" alt="Saved 2x2 Photo" class="w-full h-full object-cover">
                                 @else
-                                    <span>{{ strtoupper(substr($firstName, 0, 1).substr($lastName, 0, 1)) ?: 'MS' }}</span>
+                                    <div class="flex flex-col items-center justify-center text-center p-1">
+                                        <span class="font-heading font-bold text-xl text-primary">{{ strtoupper(substr($firstName, 0, 1).substr($lastName, 0, 1)) ?: 'MS' }}</span>
+                                        <span class="text-[9px] uppercase font-bold text-primary tracking-wider mt-0.5">2x2 Photo</span>
+                                    </div>
                                 @endif
                             </div>
-                            <div>
-                                <label for="avatar-upload-input" class="block text-xs font-bold text-[#1A2840]">
-                                    2x2 Photo / Avatar <span class="font-normal text-gray-500">(Optional)</span>
+                            <div class="space-y-1">
+                                <label for="avatar-upload-input" class="block text-sm font-bold text-primary-dark cursor-pointer">
+                                    2x2 Formal ID Photo <span class="font-normal text-xs text-body-muted">(Recommended for Bio-Data)</span>
                                 </label>
-                                <p class="text-[11px] text-[#4E5F6E] mt-0.5">
-                                    Upload a clear 2x2 ID photo (JPG or PNG, up to 5 MB).
+                                <p class="text-xs text-body-muted leading-relaxed max-w-md">
+                                    Featured on your official Digital Bio-Data. A clear 2x2 photo with a white or plain background is recommended (JPG/PNG, up to 5 MB).
                                 </p>
                             </div>
                         </div>
-                        <div>
-                            <label for="avatar-upload-input" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-gray-300 bg-white text-xs font-semibold text-[#1A2840] hover:bg-gray-50 cursor-pointer focus-within:ring-2 focus-within:ring-[#244F73]">
-                                <svg class="w-4 h-4 text-[#244F73]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+
+                        <div class="flex flex-wrap items-center gap-2 shrink-0">
+                            <label for="avatar-upload-input" class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg border border-primary-border bg-white text-xs font-semibold text-primary-dark hover:bg-primary-tint cursor-pointer shadow-2xs transition-colors focus-within:ring-2 focus-within:ring-primary/40">
+                                <svg class="size-4 text-primary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
                                 </svg>
-                                <span>Upload 2x2 Photo</span>
+                                <span>{{ ($avatarUpload || $avatarPath) ? __('Change 2x2 Photo') : __('Upload 2x2 Photo') }}</span>
                                 <input id="avatar-upload-input"
                                        type="file"
                                        wire:model="avatarUpload"
                                        accept="image/png,image/jpeg"
                                        class="sr-only"
-                                       aria-label="Upload optional 2x2 photo or avatar">
+                                       aria-label="Upload 2x2 ID photo or avatar">
                             </label>
+
+                            @if($avatarUpload || $avatarPath)
+                                <button type="button"
+                                        wire:click="removeAvatar"
+                                        class="inline-flex items-center gap-1 px-3 py-2.5 rounded-lg border border-red-200 text-xs font-semibold text-red-700 hover:bg-red-50 transition-colors"
+                                        aria-label="Remove uploaded 2x2 photo">
+                                    <svg class="size-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                    <span>Remove</span>
+                                </button>
+                            @endif
                         </div>
                     </div>
 
                     <!-- Name Grid -->
-                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                        <div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-12 gap-3 min-w-0">
+                        <div class="sm:col-span-1 xl:col-span-4 min-w-0">
                             <label for="first-name" class="block text-xs font-semibold text-[#1A2840] mb-1">
                                 First Name <span class="text-red-500" aria-hidden="true">*</span>
                             </label>
@@ -372,7 +391,7 @@
                                 </p>
                             @enderror
                         </div>
-                        <div>
+                        <div class="sm:col-span-1 xl:col-span-3 min-w-0">
                             <label for="middle-name" class="block text-xs font-semibold text-[#1A2840] mb-1">Middle Name</label>
                             <input id="middle-name"
                                    type="text"
@@ -380,7 +399,7 @@
                                    placeholder="Optional"
                                    class="w-full px-3 py-2 rounded-lg border border-gray-300 text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#244F73]">
                         </div>
-                        <div>
+                        <div class="sm:col-span-1 xl:col-span-4 min-w-0">
                             <label for="last-name" class="block text-xs font-semibold text-[#1A2840] mb-1">
                                 Last Name <span class="text-red-500" aria-hidden="true">*</span>
                             </label>
@@ -398,7 +417,7 @@
                                 </p>
                             @enderror
                         </div>
-                        <div>
+                        <div class="sm:col-span-1 xl:col-span-1 min-w-0">
                             <label for="name-suffix" class="block text-xs font-semibold text-[#1A2840] mb-1">Suffix</label>
                             <input id="name-suffix"
                                    type="text"
@@ -409,8 +428,8 @@
                     </div>
 
                     <!-- Email, Phone, PWD ID Number (Auto-filled & Read-only) -->
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 min-w-0">
+                        <div class="min-w-0">
                             <label for="email-address" class="block text-xs font-semibold text-[#1A2840] mb-1">
                                 Email Address <span class="text-red-500" aria-hidden="true">*</span>
                             </label>
@@ -428,7 +447,7 @@
                                 </p>
                             @enderror
                         </div>
-                        <div>
+                        <div class="min-w-0">
                             <label for="phone-number" class="block text-xs font-semibold text-[#1A2840] mb-1">
                                 Phone Number <span class="text-red-500" aria-hidden="true">*</span>
                             </label>
@@ -447,7 +466,7 @@
                                 </p>
                             @enderror
                         </div>
-                        <div>
+                        <div class="sm:col-span-2 xl:col-span-1 min-w-0">
                             <label for="pwd-id-number" class="block text-xs font-semibold text-[#1A2840] mb-1">PWD ID Number</label>
                             <input id="pwd-id-number"
                                    type="text"
@@ -468,9 +487,9 @@
 
                     <!-- Searchable Address / Location Comboboxes + Auto-populated Zip Code (Single-line clean items, PSGC-backed) -->
                     <div class="space-y-1.5 pt-1">
-                        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 min-w-0">
                             <!-- Country Searchable Combobox -->
-                            <div class="relative" x-data="{ openCountry: false }">
+                            <div class="relative min-w-0" x-data="{ openCountry: false }">
                                 <label for="country-combobox" class="block text-xs font-semibold text-[#1A2840] mb-1">Country</label>
                                 <div class="relative">
                                     <input id="country-combobox"
@@ -497,7 +516,7 @@
                                     x-cloak
                                     role="listbox"
                                     aria-label="Countries"
-                                    class="absolute left-0 right-0 mt-1 max-h-48 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg z-30 py-1 text-xs">
+                                    class="absolute left-0 right-0 w-full mt-1 max-h-48 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-xl z-50 py-1 text-xs">
                                     @foreach($countries as $countryName)
                                         <li>
                                             <button type="button"
@@ -512,7 +531,7 @@
                             </div>
 
                             <!-- City Searchable Combobox (Single-line clean items: "City Name (ZIP 7000)") -->
-                            <div class="relative" x-data="{ openCity: false }">
+                            <div class="relative min-w-0" x-data="{ openCity: false }">
                                 <label for="city-combobox" class="block text-xs font-semibold text-[#1A2840] mb-1">
                                     City / Municipality <span class="text-red-500" aria-hidden="true">*</span>
                                 </label>
@@ -549,7 +568,7 @@
                                     x-cloak
                                     role="listbox"
                                     aria-label="Cities"
-                                    class="absolute left-0 min-w-[220px] w-full mt-1 max-h-56 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg z-30 py-1 text-xs">
+                                    class="absolute left-0 right-0 w-full mt-1 max-h-56 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-xl z-50 py-1 text-xs">
                                     @foreach($cities as $cityOption)
                                         <li>
                                             <button type="button"
@@ -564,7 +583,7 @@
                             </div>
 
                             <!-- Barangay Searchable Combobox (Single-line clean items) -->
-                            <div class="relative" x-data="{ openBarangay: false }">
+                            <div class="relative min-w-0" x-data="{ openBarangay: false }">
                                 <label for="barangay-combobox" class="block text-xs font-semibold text-[#1A2840] mb-1">Barangay</label>
                                 <div class="relative">
                                     <input id="barangay-combobox"
@@ -591,7 +610,7 @@
                                     x-cloak
                                     role="listbox"
                                     aria-label="Barangays"
-                                    class="absolute left-0 min-w-[200px] w-full mt-1 max-h-56 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg z-30 py-1 text-xs">
+                                    class="absolute left-0 right-0 w-full mt-1 max-h-56 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-xl z-50 py-1 text-xs">
                                     @foreach($barangays as $brgyOption)
                                         <li>
                                             <button type="button"
@@ -892,17 +911,17 @@
             </section>
 
             <!-- Right Preview & Voice Column -->
-            <aside class="lg:col-span-4 space-y-4">
+            <aside class="xl:col-span-4 space-y-4 min-w-0 w-full">
                 <!-- Voice Listening Widget with WCAG 44px Controls -->
-                <div class="rounded-xl border border-[#244F73]/40 bg-white p-4 shadow-xs flex items-center justify-between gap-4">
-                    <div class="flex items-center gap-3">
+                <div class="rounded-xl border border-[#244F73]/40 bg-white p-4 shadow-xs flex items-center justify-between gap-3 min-w-0">
+                    <div class="flex items-center gap-3 min-w-0 flex-1">
                         <div class="w-10 h-10 rounded-full bg-[#244F73] text-white flex items-center justify-center ring-4 ring-[#DCEAF4] shrink-0">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
                             </svg>
                         </div>
-                        <div>
-                            <div class="text-xs font-bold text-[#244F73]" aria-live="polite">
+                        <div class="min-w-0 flex-1">
+                            <div class="text-xs font-bold text-[#244F73] truncate" aria-live="polite">
                                 {{ $isListening ? 'Listening...' : 'Dictation Paused' }}
                             </div>
                             <div class="flex items-center gap-0.5 my-1" aria-hidden="true">
@@ -913,14 +932,14 @@
                                 <span class="w-1 h-3 bg-[#244F73] rounded-full {{ $isListening ? 'animate-pulse' : 'opacity-40' }}"></span>
                                 <span class="w-1 h-4 bg-[#244F73] rounded-full {{ $isListening ? 'animate-pulse' : 'opacity-40' }}"></span>
                             </div>
-                            <div class="text-[11px] text-gray-500">Speak naturally &middot; 00:18</div>
+                            <div class="text-[11px] text-gray-500 truncate">Speak naturally &middot; 00:18</div>
                         </div>
                     </div>
                     <button type="button"
                             wire:click="toggleListening"
                             :aria-pressed="{{ $isListening ? 'true' : 'false' }}"
                             aria-label="{{ $isListening ? 'Pause voice dictation' : 'Resume voice dictation' }}"
-                            class="min-w-[44px] min-h-[44px] w-11 h-11 rounded-full border border-gray-300 flex items-center justify-center text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:ring-2 focus:ring-[#244F73] transition-colors cursor-pointer">
+                            class="min-w-[44px] min-h-[44px] w-11 h-11 rounded-full border border-gray-300 flex items-center justify-center text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:ring-2 focus:ring-[#244F73] transition-colors cursor-pointer shrink-0">
                         @if($isListening)
                             <svg class="w-4 h-4 text-[#244F73]" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                                 <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/>
@@ -1006,7 +1025,7 @@
             </div>
 
             <!-- 3 Category Columns: Physical, Visual, Auditory -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 min-w-0">
                 <!-- Physical -->
                 <div class="rounded-xl border border-gray-200 p-4 space-y-3 bg-gray-50/30">
                     <div>
@@ -1384,9 +1403,9 @@
     {{-- STEP 5: REVIEW & SAVE (CLEANED PROFILE SUMMARY VIEW)                  --}}
     {{-- ===================================================================== --}}
     @if($currentStep === 5)
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start w-full min-w-0">
             <!-- Left Summary Card -->
-            <section class="lg:col-span-8 bg-white rounded-xl border border-gray-200 p-6 shadow-xs space-y-5" aria-labelledby="step5-heading">
+            <section class="xl:col-span-8 bg-white rounded-xl border border-gray-200 p-6 shadow-xs space-y-5 min-w-0 w-full" aria-labelledby="step5-heading">
                 <h2 id="step5-heading" class="text-base font-bold text-[#1A2840]">Your employment profile</h2>
 
                 <!-- Candidate Identity Banner -->
@@ -1511,7 +1530,7 @@
             </section>
 
             <!-- Right Column: Accommodations + Attachments -->
-            <aside class="lg:col-span-4 space-y-5">
+            <aside class="xl:col-span-4 space-y-5 min-w-0 w-full">
                 <!-- Accommodation Needs Summary -->
                 <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-xs space-y-3">
                     <h3 class="text-sm font-bold text-[#1A2840]">Accommodation needs</h3>
@@ -1605,30 +1624,30 @@
     @endif
 
     <!-- Bottom Step Navigation Bar -->
-    <div class="pt-4 border-t border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div class="flex items-center gap-4">
+    <div class="pt-4 border-t border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 w-full min-w-0">
+        <div class="flex items-center gap-4 min-w-0">
             @if($currentStep === 1)
                 <a href="{{ route('dashboard') }}"
-                   class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-gray-300 bg-white text-xs font-bold text-[#244F73] hover:bg-gray-50">
+                   class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-gray-300 bg-white text-xs font-bold text-[#244F73] hover:bg-gray-50 shrink-0">
                     <span>&larr; Cancel</span>
                 </a>
             @else
                 <button type="button"
                         wire:click="prevStep"
-                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-gray-300 bg-white text-xs font-bold text-[#244F73] hover:bg-gray-50 focus:ring-2 focus:ring-[#244F73]">
+                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-gray-300 bg-white text-xs font-bold text-[#244F73] hover:bg-gray-50 focus:ring-2 focus:ring-[#244F73] shrink-0">
                     <span>&larr; Back</span>
                 </button>
             @endif
 
-            <div>
-                <div class="text-xs font-bold text-[#1A2840]">
+            <div class="min-w-0">
+                <div class="text-xs font-bold text-[#1A2840] truncate">
                     {{ $currentStep === 5 ? 'Ready when you are. You can edit your profile anytime.' : 'Your profile stays private until you finish.' }}
                 </div>
-                <div class="text-[11px] text-gray-500">Save a draft to return to this step later.</div>
+                <div class="text-[11px] text-gray-500 truncate">Save a draft to return to this step later.</div>
             </div>
         </div>
 
-        <div class="flex items-center gap-3">
+        <div class="flex flex-wrap items-center gap-3 shrink-0">
             <button type="button"
                     wire:click="saveDraftAndExit"
                     class="px-4 py-2.5 rounded-lg border border-gray-300 bg-white text-xs font-bold text-[#244F73] hover:bg-gray-50 focus:ring-2 focus:ring-[#244F73]">

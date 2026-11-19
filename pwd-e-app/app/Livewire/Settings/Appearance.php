@@ -12,7 +12,7 @@ class Appearance extends Component
     public function render()
     {
         $user = Auth::user();
-        $layout = $user?->isEmployer() ? 'layouts.employer' : ($user?->isCandidate() ? 'layouts.candidate' : 'layouts.app');
+        $layout = $user?->isEmployer() ? 'layouts.employer' : ($user?->isCandidate() ? 'layouts.candidate' : ($user?->isAdmin() ? 'layouts.admin' : 'layouts.app'));
 
         return view('livewire.settings.appearance')->layout($layout);
     }

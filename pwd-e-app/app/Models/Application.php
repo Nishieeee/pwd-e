@@ -26,6 +26,8 @@ class Application extends Model
         'interview_url',
         'interview_accommodations',
         'offer_details',
+        'application_materials',
+        'resume_path',
     ];
 
     protected $casts = [
@@ -34,6 +36,7 @@ class Application extends Model
         'applied_at' => 'datetime',
         'interview_at' => 'datetime',
         'offer_details' => 'array',
+        'application_materials' => 'array',
     ];
 
     public function candidateProfile(): BelongsTo

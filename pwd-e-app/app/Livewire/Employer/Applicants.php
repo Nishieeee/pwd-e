@@ -10,16 +10,21 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 
 #[Title('Applicants')]
 #[Layout('layouts.employer')]
 class Applicants extends Component
 {
-    public JobPosting $job;
+    public ?JobPosting $job = null;
+
+    #[Url(as: 'job')]
+    public ?int $selectedJobId = null;
 
     public ?int $viewingApplicationId = null;
 
+    #[Url(as: 'status')]
     public string $statusFilter = 'all';
 
     public bool $showInterviewModal = false;
@@ -48,25 +53,55 @@ class Applicants extends Component
 
     public bool $hirePwdVerified = true;
 
-    public function mount(JobPosting $job): void
+    public function mount(?JobPosting $job = null): void
     {
         $user = Auth::user();
         if (! $user || ! $user->isEmployer()) {
             abort(403);
         }
         $profile = $user->employerProfile;
-        if (! $profile || $job->employer_profile_id !== $profile->id) {
+        if (! $profile) {
             abort(403);
         }
-        $this->job = $job->load(['employerProfile', 'accommodations']);
+
+        if ($job && $job->exists) {
+            if ($job->employer_profile_id !== $profile->id) {
+                abort(403);
+            }
+            $this->job = $job->load(['employerProfile', 'accommodations']);
+            $this->selectedJobId = $job->id;
+            $this->hireWage = (float) ($job->salary_max ?? $job->salary_min ?? 35000);
+        } else {
+            $this->job = null;
+            if ($this->selectedJobId) {
+                $jobMatch = JobPosting::where('employer_profile_id', $profile->id)->find($this->selectedJobId);
+                if ($jobMatch) {
+                    $this->job = $jobMatch->load(['employerProfile', 'accommodations']);
+                    $this->hireWage = (float) ($jobMatch->salary_max ?? $jobMatch->salary_min ?? 35000);
+                }
+            } else {
+                $this->hireWage = 35000.0;
+            }
+        }
+
         $this->hireStartDate = now()->format('Y-m-d');
-        $this->hireWage = (float) ($job->salary_max ?? $job->salary_min ?? 35000);
         $this->interviewDate = now()->addDays(2)->format('Y-m-d');
     }
 
     public function setStatusFilter(string $status): void
     {
         $this->statusFilter = $status;
+    }
+
+    public function filterByJob(?int $jobId): void
+    {
+        $this->selectedJobId = $jobId;
+        $profile = Auth::user()?->employerProfile;
+        if ($jobId && $profile) {
+            $this->job = JobPosting::where('employer_profile_id', $profile->id)->find($jobId);
+        } else {
+            $this->job = null;
+        }
     }
 
     public function viewDetails(int $applicationId): void
@@ -81,11 +116,19 @@ class Applicants extends Component
 
     public function openInterviewModal(int $applicationId): void
     {
-        $app = Application::where('job_posting_id', $this->job->id)->findOrFail($applicationId);
+        $profile = Auth::user()?->employerProfile;
+        if (! $profile) {
+            return;
+        }
+
+        $app = Application::whereHas('jobPosting', function ($q) use ($profile) {
+            $q->where('employer_profile_id', $profile->id);
+        })->with('jobPosting')->findOrFail($applicationId);
+
         $this->interviewAppId = $app->id;
         $this->interviewDate = $app->interview_at ? $app->interview_at->format('Y-m-d') : now()->addDays(2)->format('Y-m-d');
         $this->interviewTime = $app->interview_at ? $app->interview_at->format('H:i') : '10:00';
-        $this->interviewLocation = $app->interview_location ?? $this->job->location;
+        $this->interviewLocation = $app->interview_location ?? $app->jobPosting?->location ?? '';
         $this->interviewUrl = $app->interview_url ?? 'https://meet.google.com/new';
         $this->interviewAccommodations = $app->interview_accommodations ?? 'Sign Language Interpreter requested';
         $this->interviewNotes = $app->employer_notes ?? '';
@@ -104,7 +147,14 @@ class Applicants extends Component
             return;
         }
 
-        $app = Application::where('job_posting_id', $this->job->id)->findOrFail($this->interviewAppId);
+        $profile = Auth::user()?->employerProfile;
+        if (! $profile) {
+            return;
+        }
+
+        $app = Application::whereHas('jobPosting', function ($q) use ($profile) {
+            $q->where('employer_profile_id', $profile->id);
+        })->findOrFail($this->interviewAppId);
 
         $dateTimeString = trim($this->interviewDate . ' ' . $this->interviewTime);
         $interviewAt = ! empty($this->interviewDate) ? \Carbon\Carbon::parse($dateTimeString) : now()->addDays(2);
@@ -126,9 +176,17 @@ class Applicants extends Component
 
     public function openHireModal(int $applicationId): void
     {
-        $app = Application::with('candidateProfile.user')->where('job_posting_id', $this->job->id)->findOrFail($applicationId);
+        $profile = Auth::user()?->employerProfile;
+        if (! $profile) {
+            return;
+        }
+
+        $app = Application::with(['candidateProfile.user', 'jobPosting'])->whereHas('jobPosting', function ($q) use ($profile) {
+            $q->where('employer_profile_id', $profile->id);
+        })->findOrFail($applicationId);
+
         $this->hiringAppId = $app->id;
-        $this->hireWage = (float) ($this->job->salary_max ?? $this->job->salary_min ?? 35000);
+        $this->hireWage = (float) ($app->jobPosting?->salary_max ?? $app->jobPosting?->salary_min ?? 35000);
         $this->hireStartDate = now()->format('Y-m-d');
         $this->hirePwdVerified = ! empty($app->candidateProfile?->user?->pwd_id_number);
         $this->showHireModal = true;
@@ -153,7 +211,15 @@ class Applicants extends Component
 
     public function updateStatus(int $applicationId, string $status): void
     {
-        $app = Application::where('job_posting_id', $this->job->id)->findOrFail($applicationId);
+        $profile = Auth::user()?->employerProfile;
+        if (! $profile) {
+            return;
+        }
+
+        $app = Application::whereHas('jobPosting', function ($q) use ($profile) {
+            $q->where('employer_profile_id', $profile->id);
+        })->findOrFail($applicationId);
+
         $app->update(['status' => $status, 'status_subtext' => ucfirst(str_replace('_', ' ', $status))]);
 
         if ($status === 'interview') {
@@ -171,21 +237,28 @@ class Applicants extends Component
 
     public function hire(int $applicationId): void
     {
-        $app = Application::with('candidateProfile.user')->where('job_posting_id', $this->job->id)->findOrFail($applicationId);
+        $profile = Auth::user()?->employerProfile;
+        if (! $profile) {
+            return;
+        }
+
+        $app = Application::with(['candidateProfile.user', 'jobPosting'])->whereHas('jobPosting', function ($q) use ($profile) {
+            $q->where('employer_profile_id', $profile->id);
+        })->findOrFail($applicationId);
 
         $app->update([
             'status' => 'hired',
             'status_subtext' => 'Offer accepted and hired',
         ]);
 
-        $wage = $this->hireWage ?: ($this->job->salary_max ?? $this->job->salary_min ?? 35000);
+        $wage = $this->hireWage ?: ($app->jobPosting?->salary_max ?? $app->jobPosting?->salary_min ?? 35000);
         $hiredAt = ! empty($this->hireStartDate) ? \Carbon\Carbon::parse($this->hireStartDate) : now();
         $isPwdVerified = ! empty($app->candidateProfile?->user?->pwd_id_number);
 
         WorkforceRecord::firstOrCreate(
             ['application_id' => $app->id],
             [
-                'employer_profile_id' => $this->job->employer_profile_id,
+                'employer_profile_id' => $profile->id,
                 'candidate_profile_id' => $app->candidate_profile_id,
                 'hired_at' => $hiredAt,
                 'pwd_verified' => $isPwdVerified,
@@ -198,35 +271,61 @@ class Applicants extends Component
 
     public function render(): View
     {
-        $query = Application::with(['candidateProfile.user', 'candidateProfile.education', 'candidateProfile.workExperiences', 'candidateProfile.certifications'])
-            ->where('job_posting_id', $this->job->id)
-            ->orderByDesc('fit_score_at_apply');
+        $profile = Auth::user()?->employerProfile;
+        $employerJobs = $profile
+            ? JobPosting::where('employer_profile_id', $profile->id)->orderBy('title')->get()
+            : collect();
+
+        $query = Application::with([
+            'candidateProfile.user',
+            'candidateProfile.education',
+            'candidateProfile.workExperiences',
+            'candidateProfile.certifications',
+            'jobPosting.employerProfile',
+        ])->whereHas('jobPosting', function ($q) use ($profile) {
+            $q->where('employer_profile_id', $profile?->id ?? 0);
+        });
+
+        if ($this->job) {
+            $query->where('job_posting_id', $this->job->id);
+        } elseif ($this->selectedJobId) {
+            $query->where('job_posting_id', $this->selectedJobId);
+        }
+
+        $baseCountQuery = clone $query;
+        $allCounts = [
+            'all' => (clone $baseCountQuery)->count(),
+            'applied' => (clone $baseCountQuery)->where('status', 'applied')->count(),
+            'under_review' => (clone $baseCountQuery)->where('status', 'under_review')->count(),
+            'interview' => (clone $baseCountQuery)->where('status', 'interview')->count(),
+            'hired' => (clone $baseCountQuery)->where('status', 'hired')->count(),
+            'rejected' => (clone $baseCountQuery)->where('status', 'rejected')->count(),
+        ];
 
         if ($this->statusFilter !== 'all') {
             $query->where('status', $this->statusFilter);
         }
 
-        $applications = $query->get();
-
-        $allCounts = [
-            'all' => Application::where('job_posting_id', $this->job->id)->count(),
-            'applied' => Application::where('job_posting_id', $this->job->id)->where('status', 'applied')->count(),
-            'under_review' => Application::where('job_posting_id', $this->job->id)->where('status', 'under_review')->count(),
-            'interview' => Application::where('job_posting_id', $this->job->id)->where('status', 'interview')->count(),
-            'hired' => Application::where('job_posting_id', $this->job->id)->where('status', 'hired')->count(),
-            'rejected' => Application::where('job_posting_id', $this->job->id)->where('status', 'rejected')->count(),
-        ];
+        $applications = $query->orderByDesc('fit_score_at_apply')->get();
 
         $viewing = $this->viewingApplicationId
-            ? $applications->firstWhere('id', $this->viewingApplicationId) ?? Application::with(['candidateProfile.user', 'candidateProfile.education', 'candidateProfile.workExperiences', 'candidateProfile.certifications'])->find($this->viewingApplicationId)
+            ? Application::with([
+                'candidateProfile.user',
+                'candidateProfile.education',
+                'candidateProfile.workExperiences',
+                'candidateProfile.certifications',
+                'jobPosting',
+            ])->whereHas('jobPosting', function ($q) use ($profile) {
+                $q->where('employer_profile_id', $profile?->id ?? 0);
+            })->find($this->viewingApplicationId)
             : null;
 
         $interviewingApp = $this->interviewAppId
-            ? Application::with('candidateProfile.user')->find($this->interviewAppId)
+            ? Application::with(['candidateProfile.user', 'jobPosting'])->find($this->interviewAppId)
             : null;
 
         $hiringApp = $this->hiringAppId
-            ? Application::with('candidateProfile.user')->find($this->hiringAppId)
+            ? Application::with(['candidateProfile.user', 'jobPosting'])->find($this->hiringAppId)
             : null;
 
         return view('livewire.employer.applicants', [
@@ -235,6 +334,7 @@ class Applicants extends Component
             'viewing' => $viewing,
             'interviewingApp' => $interviewingApp,
             'hiringApp' => $hiringApp,
+            'employerJobs' => $employerJobs,
         ]);
     }
 }

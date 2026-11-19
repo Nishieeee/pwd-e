@@ -35,6 +35,12 @@ class Apply extends Component
 
     public bool $useProfileFsl = true;
 
+    public bool $includeBiodata = true;
+
+    public bool $includeResume = false;
+
+    public bool $includeFslVideo = false;
+
     public bool $submitted = false;
 
     public ?int $referenceNumber = null;
@@ -64,6 +70,14 @@ class Apply extends Component
         }
 
         if ($profile) {
+            $this->includeBiodata = true;
+            if ($profile->resume_pdf_path) {
+                $this->includeResume = true;
+            }
+            if ($profile->fsl_video_path) {
+                $this->includeFslVideo = true;
+            }
+
             $this->existingApplication = Application::where('candidate_profile_id', $profile->id)
                 ->where('job_posting_id', $this->job->id)
                 ->first();
@@ -74,6 +88,36 @@ class Apply extends Component
                 $this->formattedReference = 'PWD-APP-' . date('Y') . '-' . str_pad((string) $this->existingApplication->id, 5, '0', STR_PAD_LEFT);
             }
         }
+    }
+
+    public function toggleBiodata(): void
+    {
+        if ($this->includeBiodata && ! $this->includeResume && ! $this->includeFslVideo) {
+            $this->addError('materials', 'You must include at least one application format (Bio-Data, Résumé, or FSL Video).');
+            return;
+        }
+        $this->resetErrorBag('materials');
+        $this->includeBiodata = ! $this->includeBiodata;
+    }
+
+    public function toggleResume(): void
+    {
+        if ($this->includeResume && ! $this->includeBiodata && ! $this->includeFslVideo) {
+            $this->addError('materials', 'You must include at least one application format (Bio-Data, Résumé, or FSL Video).');
+            return;
+        }
+        $this->resetErrorBag('materials');
+        $this->includeResume = ! $this->includeResume;
+    }
+
+    public function toggleFslVideo(): void
+    {
+        if ($this->includeFslVideo && ! $this->includeBiodata && ! $this->includeResume) {
+            $this->addError('materials', 'You must include at least one application format (Bio-Data, Résumé, or FSL Video).');
+            return;
+        }
+        $this->resetErrorBag('materials');
+        $this->includeFslVideo = ! $this->includeFslVideo;
     }
 
     public function appendPhrase(string $phrase): void
@@ -87,6 +131,11 @@ class Apply extends Component
             return;
         }
 
+        if (! $this->includeBiodata && ! $this->includeResume && ! $this->includeFslVideo) {
+            $this->addError('materials', 'Please select at least one application format (Bio-Data, Résumé, or FSL Video).');
+            return;
+        }
+
         $this->validate([
             'coverLetter' => ['nullable', 'string', 'max:5000'],
             'pwdIdFile' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
@@ -96,6 +145,16 @@ class Apply extends Component
 
         $user = Auth::user();
         $profile = $user->candidateProfile;
+
+        if ($this->includeResume && ! $this->resumeFile && ! $profile->resume_pdf_path) {
+            $this->addError('resumeFile', 'Please upload a PDF résumé or uncheck the Résumé option.');
+            return;
+        }
+
+        if ($this->includeFslVideo && ! $this->fslVideoFile && ! $profile->fsl_video_path) {
+            $this->addError('fslVideoFile', 'Please upload an FSL video introduction or uncheck the FSL option.');
+            return;
+        }
 
         // Check duplicate
         $existing = Application::where('candidate_profile_id', $profile->id)
@@ -117,20 +176,34 @@ class Apply extends Component
             $user->update(['pwd_id_path' => $pwdIdPath]);
         }
 
-        if ($this->resumeFile) {
-            $resumePath = $this->resumeFile->store('applications/resumes', 'private');
-            $profile->update(['resume_pdf_path' => $resumePath]);
+        $resumePath = null;
+        if ($this->includeResume) {
+            if ($this->resumeFile) {
+                $resumePath = $this->resumeFile->store('applications/resumes', 'private');
+                $profile->update(['resume_pdf_path' => $resumePath]);
+            } else {
+                $resumePath = $profile->resume_pdf_path;
+            }
         }
 
         $fslPath = null;
-        if ($this->fslVideoFile) {
-            $fslPath = $this->fslVideoFile->store('applications/fsl', 'private');
-        } elseif ($this->useProfileFsl && $profile->fsl_video_path) {
-            $fslPath = $profile->fsl_video_path;
+        if ($this->includeFslVideo) {
+            if ($this->fslVideoFile) {
+                $fslPath = $this->fslVideoFile->store('applications/fsl', 'private');
+                $profile->update(['fsl_video_path' => $fslPath]);
+            } else {
+                $fslPath = $profile->fsl_video_path;
+            }
         }
 
         $match = $profile->jobMatches()->where('job_posting_id', $this->job->id)->first();
         $fitScore = $match ? (float) round($match->total_score * 100, 2) : 95.00;
+
+        $materials = [
+            'biodata' => $this->includeBiodata,
+            'resume' => $this->includeResume,
+            'fsl_video' => $this->includeFslVideo,
+        ];
 
         $application = Application::create([
             'candidate_profile_id' => $profile->id,
@@ -139,6 +212,8 @@ class Apply extends Component
             'status_subtext' => 'Application submitted and under review',
             'cover_letter' => $this->coverLetter ?: null,
             'fsl_video_path' => $fslPath,
+            'resume_path' => $resumePath,
+            'application_materials' => $materials,
             'fit_score_at_apply' => $fitScore,
             'applied_at' => now(),
         ]);

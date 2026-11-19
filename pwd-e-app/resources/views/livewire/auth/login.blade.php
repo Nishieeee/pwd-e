@@ -183,29 +183,7 @@
         </p>
     </main>
 
-    <footer class="bg-[#20272F] px-4 py-8 text-white">
-        <div class="mx-auto max-w-[1200px]">
-            <div class="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
-                <div>
-                    <p class="font-heading text-xl font-bold">PWD-E</p>
-                    <p class="mt-1 text-sm text-white/70">Connecting talent to a barrier-free future.</p>
-                </div>
-                <nav class="flex flex-wrap gap-x-6 gap-y-2 text-sm">
-                    <a href="#" class="hover:underline">Contact Us</a>
-                    <a href="#" class="hover:underline">FAQ / Help Center</a>
-                    <a href="#" class="hover:underline">Accessibility Statement</a>
-                </nav>
-            </div>
-            <hr class="my-6 border-white/10">
-            <div class="flex flex-col gap-2 text-xs text-white/60 sm:flex-row sm:items-center sm:justify-between">
-                <span>© 2026 PWD-E. All rights reserved.</span>
-                <div class="flex gap-4">
-                    <a href="#" class="hover:underline">Privacy Policy (RA 10173)</a>
-                    <a href="#" class="hover:underline">Terms of Service</a>
-                </div>
-            </div>
-        </div>
-    </footer>
+    <x-site-footer />
 
     <script>
         (function () {

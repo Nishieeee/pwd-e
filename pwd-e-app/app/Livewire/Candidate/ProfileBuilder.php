@@ -29,6 +29,8 @@ class ProfileBuilder extends Component
 {
     use WithFileUploads;
 
+    public bool $isEmbedded = false;
+
     public int $currentStep = 1;
 
     // Step 1: Input Mode
@@ -187,8 +189,9 @@ class ProfileBuilder extends Component
         }
     }
 
-    public function mount(?int $step = null): void
+    public function mount(?int $step = null, bool $isEmbedded = false): void
     {
+        $this->isEmbedded = $isEmbedded;
         $this->ensureLocationTablesAndData();
 
         $user = Auth::user();
@@ -472,6 +475,15 @@ class ProfileBuilder extends Component
             $sizeMb = max(0.1, round($this->fslVideoUpload->getSize() / 1048576, 1));
             $this->fslVideoSize = $sizeMb.' MB';
         }
+    }
+
+    public function removeAvatar(): void
+    {
+        if ($this->avatarPath && Storage::disk('public')->exists($this->avatarPath)) {
+            Storage::disk('public')->delete($this->avatarPath);
+        }
+        $this->avatarUpload = null;
+        $this->avatarPath = null;
     }
 
     public function removeFslVideo(): void
@@ -1020,6 +1032,12 @@ class ProfileBuilder extends Component
         $this->persistProfileData();
         $this->draftMessage = 'Your profile draft has been saved.';
 
+        if ($this->isEmbedded) {
+            session()->flash('profile_saved_banner', 'Draft saved successfully.');
+
+            return $this->redirect(route('candidate.profile.show'));
+        }
+
         return $this->redirect(route('dashboard'));
     }
 
@@ -1034,6 +1052,10 @@ class ProfileBuilder extends Component
             'profile_saved_banner',
             'Profile saved successfully! Your details, accommodation needs, and both attachments are saved. Your job matches are ready.'
         );
+
+        if ($this->isEmbedded) {
+            return $this->redirect(route('candidate.profile.show'));
+        }
 
         return $this->redirect(route('dashboard'));
     }

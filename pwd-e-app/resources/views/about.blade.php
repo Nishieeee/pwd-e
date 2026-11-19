@@ -233,7 +233,7 @@
                 <p class="text-body-muted mt-3 max-w-2xl mx-auto">Accessibility and privacy are parts of the same commitment: helping people participate without giving up their dignity or control.</p>
             </div>
             <div class="grid md:grid-cols-2 gap-6 mt-10">
-                <article class="bg-white rounded-2xl border border-primary-border shadow-sm p-6">
+                <article id="accessibility" class="bg-white rounded-2xl border border-primary-border shadow-sm p-6 scroll-mt-24">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-lg bg-primary-tint flex items-center justify-center" aria-hidden="true">
                             <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="4" r="2"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0l-3 6m3-6l3 6M9 9h6"/></svg>
@@ -247,9 +247,9 @@
                         <span class="text-xs font-medium bg-primary-tint text-primary-dark px-3 py-1 rounded-full">RA 10524</span>
                         <span class="text-xs font-medium bg-primary-tint text-primary-dark px-3 py-1 rounded-full">RA 11106</span>
                     </div>
-                    <a href="/accessibility" class="inline-block mt-4 text-sm font-semibold text-primary hover:underline">Read the Accessibility Statement →</a>
+                    <span class="inline-block mt-4 text-xs font-semibold text-secondary">✓ Verified WCAG 2.1 AA &amp; RA 11106 Accessible Standards</span>
                 </article>
-                <article class="bg-white rounded-2xl border border-primary-border shadow-sm p-6">
+                <article id="privacy" class="bg-white rounded-2xl border border-primary-border shadow-sm p-6 scroll-mt-24">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-lg bg-primary-tint flex items-center justify-center" aria-hidden="true">
                             <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
@@ -261,7 +261,7 @@
                         <p class="font-semibold text-primary-dark text-sm">Disclose accommodations, not a medical history</p>
                         <p class="text-body-muted text-xs mt-1">You choose what accommodation details to share and sensitive details in hiring conversations should focus on the support relevant to the job.</p>
                     </div>
-                    <a href="/privacy" class="inline-block mt-4 text-sm font-semibold text-primary hover:underline">Read the Privacy Policy (RA 10173) →</a>
+                    <span class="inline-block mt-4 text-xs font-semibold text-secondary">✓ RA 10173 Sensitive Personal Information Protection (AES-256 Encrypted)</span>
                 </article>
             </div>
         </section>

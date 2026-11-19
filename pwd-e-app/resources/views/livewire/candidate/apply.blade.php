@@ -123,83 +123,221 @@
     {{-- State C: Application Form --}}
     @else
         <form wire:submit="submit" class="space-y-6">
-            {{-- Section 1: Verified Profile Credentials (Low-Typing Design) --}}
-            <div class="rounded-2xl border border-primary-border bg-white p-6 sm:p-8 shadow-sm space-y-5">
-                <div>
-                    <h2 class="font-heading text-lg font-bold text-primary-dark">{{ __('1. Verified Profile & Documents') }}</h2>
-                    <p class="text-xs text-body-muted mt-1">{{ __('These documents will be securely attached to your application. You can use your saved profile records or supply custom files.') }}</p>
+            {{-- Section 1: Choose Application Formats (Multi-Send Selection) --}}
+            <div class="rounded-2xl border border-primary-border bg-white p-6 sm:p-8 shadow-sm space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-gray-100 pb-4">
+                    <div>
+                        <h2 class="font-heading text-lg font-bold text-primary-dark">{{ __('1. Choose Application Formats') }}</h2>
+                        <p class="text-xs text-body-muted mt-0.5">{{ __('Select which formats to send to the employer. You can select one, two, or all three.') }}</p>
+                    </div>
+                    <span class="text-xs font-semibold text-body-muted bg-surface px-3 py-1.5 rounded-full border border-primary-border">
+                        {{ __('Multi-send supported') }}
+                    </span>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {{-- Resume PDF Card --}}
-                    <div class="rounded-xl border border-primary-border p-4 bg-surface space-y-3">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-bold text-primary-dark">{{ __('Résumé / CV') }}</span>
-                            <span class="text-xs font-semibold text-secondary bg-secondary-tint px-2.5 py-0.5 rounded-full">{{ __('PDF') }}</span>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    {{-- Option 1: Digital Bio-Data Card --}}
+                    <div class="rounded-2xl transition-all duration-200 flex flex-col justify-between p-5 {{ $includeBiodata ? 'border-2 border-primary bg-primary-tint/20 ring-1 ring-primary/20 shadow-sm' : 'border border-gray-200 bg-gray-50/50 hover:border-gray-300' }}">
+                        <div class="space-y-3.5">
+                            <div class="flex items-center justify-between">
+                                <span class="size-8 rounded-lg {{ $includeBiodata ? 'bg-primary text-white' : 'bg-gray-200 text-gray-600' }} flex items-center justify-center font-bold text-xs">
+                                    <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                </span>
+                                <button type="button"
+                                        wire:click="toggleBiodata"
+                                        class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full transition-colors {{ $includeBiodata ? 'bg-secondary text-white shadow-xs' : 'bg-white border border-gray-300 text-body-muted hover:text-primary-dark' }}"
+                                        role="checkbox"
+                                        aria-checked="{{ $includeBiodata ? 'true' : 'false' }}">
+                                    <span>{{ $includeBiodata ? '✓ Selected' : '+ Add Option' }}</span>
+                                </button>
+                            </div>
+
+                            <div>
+                                <h3 class="font-bold text-sm text-primary-dark">{{ __('Digital Bio-Data') }}</h3>
+                                <p class="text-xs text-body-muted mt-1 leading-relaxed">
+                                    {{ __('Official Philippine Bio-Data compiled from your profile, skills, work history, and RA 7277 accommodation specifications.') }}
+                                </p>
+                            </div>
+
+                            <div class="rounded-lg bg-white/80 p-3 border border-primary-border/60 text-xs text-body-muted space-y-1.5">
+                                <div class="flex items-center gap-1.5 text-primary-dark font-semibold">
+                                    <svg class="size-3.5 text-secondary shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                                    <span>{{ __('Zero upload required') }}</span>
+                                </div>
+                                <p class="text-[11px] text-body-muted">{{ __('Instantly ready from your saved profile credentials.') }}</p>
+                            </div>
                         </div>
 
-                        @if($candidateProfile?->resume_pdf_path)
-                            <div class="flex items-start gap-2 text-xs text-body-muted">
-                                <svg class="size-4 text-secondary shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                                <span class="truncate">{{ basename($candidateProfile->resume_pdf_path) }}</span>
-                            </div>
-                            <label class="flex items-center gap-2 text-xs text-primary-dark cursor-pointer">
-                                <input type="checkbox" wire:model.live="useProfileResume" class="rounded text-primary focus:ring-primary" />
-                                <span>{{ __('Use saved résumé') }}</span>
-                            </label>
-                        @endif
-
-                        <div>
-                            <label for="resumeFile" class="block text-[11px] font-medium text-body-muted mb-1">
-                                {{ $candidateProfile?->resume_pdf_path ? __('Upload different PDF (optional)') : __('Upload Résumé PDF') }}
-                            </label>
-                            <input id="resumeFile" type="file" wire:model="resumeFile" accept=".pdf" class="w-full text-xs text-body-muted file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-primary-tint file:text-primary-dark hover:file:bg-primary/20" />
-                            @error('resumeFile') <span class="text-xs text-red-600 block mt-1">{{ $message }}</span> @enderror
+                        <div class="pt-4 mt-4 border-t border-gray-200/80 flex items-center justify-between">
+                            <a href="{{ route('candidate.profile.show') }}" target="_blank"
+                               class="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary-dark underline">
+                                <span>{{ __('Preview Bio-Data') }}</span>
+                                <svg class="size-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                            </a>
+                            <span class="text-[11px] font-semibold text-secondary uppercase">{{ __('Recommended') }}</span>
                         </div>
                     </div>
 
-                    {{-- PWD ID Verification Card --}}
-                    <div class="rounded-xl border border-primary-border p-4 bg-surface space-y-3">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-bold text-primary-dark">{{ __('Government PWD ID') }}</span>
-                            <span class="text-xs font-semibold text-secondary bg-secondary-tint px-2.5 py-0.5 rounded-full">{{ __('Verified') }}</span>
+                    {{-- Option 2: Tailored Résumé (PDF) Card --}}
+                    <div class="rounded-2xl transition-all duration-200 flex flex-col justify-between p-5 {{ $includeResume ? 'border-2 border-primary bg-primary-tint/20 ring-1 ring-primary/20 shadow-sm' : 'border border-gray-200 bg-gray-50/50 hover:border-gray-300' }}">
+                        <div class="space-y-3.5">
+                            <div class="flex items-center justify-between">
+                                <span class="size-8 rounded-lg {{ $includeResume ? 'bg-primary text-white' : 'bg-gray-200 text-gray-600' }} flex items-center justify-center font-bold text-xs">
+                                    <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                                </span>
+                                <button type="button"
+                                        wire:click="toggleResume"
+                                        class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full transition-colors {{ $includeResume ? 'bg-secondary text-white shadow-xs' : 'bg-white border border-gray-300 text-body-muted hover:text-primary-dark' }}"
+                                        role="checkbox"
+                                        aria-checked="{{ $includeResume ? 'true' : 'false' }}">
+                                    <span>{{ $includeResume ? '✓ Selected' : '+ Add Option' }}</span>
+                                </button>
+                            </div>
+
+                            <div>
+                                <h3 class="font-bold text-sm text-primary-dark">{{ __('Tailored Résumé (PDF)') }}</h3>
+                                <p class="text-xs text-body-muted mt-1 leading-relaxed">
+                                    {{ __('Attach your custom formatted PDF curriculum vitae or tailored resume.') }}
+                                </p>
+                            </div>
+
+                            @if($candidateProfile?->resume_pdf_path)
+                                <div class="rounded-lg bg-white/80 p-3 border border-primary-border/60 text-xs text-body-muted space-y-1">
+                                    <div class="flex items-center gap-1.5 text-secondary font-semibold">
+                                        <svg class="size-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                                        <span>{{ __('Profile PDF attached') }}</span>
+                                    </div>
+                                    <p class="text-[11px] text-body-muted">{{ __('Will use your current saved résumé unless you upload a new one below.') }}</p>
+                                </div>
+                            @endif
+
+                            @if($includeResume)
+                                <div class="space-y-1">
+                                    <label for="resumeFile" class="block text-[11px] font-semibold text-primary-dark">
+                                        {{ $candidateProfile?->resume_pdf_path ? __('Replace with custom PDF (optional):') : __('Upload Résumé (PDF required):') }}
+                                    </label>
+                                    <input id="resumeFile" type="file" wire:model="resumeFile" accept=".pdf" class="w-full text-xs text-body-muted file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-primary-tint file:text-primary-dark hover:file:bg-primary/20" />
+                                    @error('resumeFile') <span class="text-xs text-red-600 block mt-1">{{ $message }}</span> @enderror
+                                </div>
+                            @endif
                         </div>
 
-                        <div class="flex items-start gap-2 text-xs text-body-muted">
-                            <svg class="size-4 text-secondary shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                            <span>ID: <strong class="text-primary-dark font-mono">{{ $user->pwd_id_number }}</strong></span>
-                        </div>
-
-                        <div>
-                            <label for="pwdIdFile" class="block text-xs font-medium text-body-muted mb-1">{{ __('Update card scan (optional)') }}</label>
-                            <input id="pwdIdFile" type="file" wire:model="pwdIdFile" accept="image/*,.pdf" class="w-full text-xs text-body-muted file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-primary-tint file:text-primary-dark hover:file:bg-primary/20" />
-                            @error('pwdIdFile') <span class="text-xs text-red-600 block mt-1">{{ $message }}</span> @enderror
+                        <div class="pt-4 mt-4 border-t border-gray-200/80 flex items-center justify-between text-xs text-body-muted">
+                            <span>{{ __('Format: PDF only') }}</span>
+                            <span>{{ __('Max 5 MB') }}</span>
                         </div>
                     </div>
 
-                    {{-- FSL Video Card --}}
-                    <div class="rounded-xl border border-primary-border p-4 bg-surface space-y-3">
-                        <div class="flex items-center justify-between">
-                            <span class="text-xs font-bold text-primary-dark">{{ __('FSL Video Introduction') }}</span>
-                            <span class="text-xs font-semibold text-primary bg-primary-tint px-2.5 py-0.5 rounded-full">{{ __('Optional') }}</span>
-                        </div>
-
-                        @if($candidateProfile?->fsl_video_path)
-                            <div class="flex items-start gap-2 text-xs text-body-muted">
-                                <svg class="size-4 text-secondary shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                                <span>{{ __('Profile FSL video attached') }}</span>
+                    {{-- Option 3: FSL Video Introduction Card --}}
+                    <div class="rounded-2xl transition-all duration-200 flex flex-col justify-between p-5 {{ $includeFslVideo ? 'border-2 border-secondary bg-secondary-tint/20 ring-1 ring-secondary/20 shadow-sm' : 'border border-gray-200 bg-gray-50/50 hover:border-gray-300' }}">
+                        <div class="space-y-3.5">
+                            <div class="flex items-center justify-between">
+                                <span class="size-8 rounded-lg {{ $includeFslVideo ? 'bg-secondary text-white' : 'bg-gray-200 text-gray-600' }} flex items-center justify-center font-bold text-xs">
+                                    <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                </span>
+                                <button type="button"
+                                        wire:click="toggleFslVideo"
+                                        class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full transition-colors {{ $includeFslVideo ? 'bg-secondary text-white shadow-xs' : 'bg-white border border-gray-300 text-body-muted hover:text-primary-dark' }}"
+                                        role="checkbox"
+                                        aria-checked="{{ $includeFslVideo ? 'true' : 'false' }}">
+                                    <span>{{ $includeFslVideo ? '✓ Selected' : '+ Add Option' }}</span>
+                                </button>
                             </div>
-                            <label class="flex items-center gap-2 text-xs text-primary-dark cursor-pointer">
-                                <input type="checkbox" wire:model.live="useProfileFsl" class="rounded text-primary focus:ring-primary" />
-                                <span>{{ __('Include profile FSL video') }}</span>
-                            </label>
-                        @endif
 
-                        <div>
-                            <label for="fslVideoFile" class="block text-xs font-medium text-body-muted mb-1">{{ __('Upload new FSL clip (max 50MB)') }}</label>
-                            <input id="fslVideoFile" type="file" wire:model="fslVideoFile" accept="video/*" class="w-full text-xs text-body-muted file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-primary-tint file:text-primary-dark hover:file:bg-primary/20" />
-                            @error('fslVideoFile') <span class="text-xs text-red-600 block mt-1">{{ $message }}</span> @enderror
+                            <div>
+                                <div class="flex items-center gap-1.5">
+                                    <h3 class="font-bold text-sm text-primary-dark">{{ __('FSL Video Pitch') }}</h3>
+                                    <span class="text-[10px] bg-secondary-tint text-secondary font-bold px-1.5 py-0.5 rounded">RA 11106</span>
+                                </div>
+                                <p class="text-xs text-body-muted mt-1 leading-relaxed">
+                                    {{ __('Filipino Sign Language video self-introduction, giving Deaf candidates a direct voice in the hiring process.') }}
+                                </p>
+                            </div>
+
+                            @if($candidateProfile?->fsl_video_path)
+                                <div class="rounded-lg bg-white/80 p-3 border border-primary-border/60 text-xs text-body-muted space-y-1">
+                                    <div class="flex items-center gap-1.5 text-secondary font-semibold">
+                                        <svg class="size-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                                        <span>{{ __('Profile FSL video attached') }}</span>
+                                    </div>
+                                    <p class="text-[11px] text-body-muted">{{ __('Will use your saved profile pitch unless you upload a new video below.') }}</p>
+                                </div>
+                            @endif
+
+                            @if($includeFslVideo)
+                                <div class="space-y-1">
+                                    <label for="fslVideoFile" class="block text-[11px] font-semibold text-primary-dark">
+                                        {{ $candidateProfile?->fsl_video_path ? __('Replace with new FSL clip (optional):') : __('Upload FSL clip (required):') }}
+                                    </label>
+                                    <input id="fslVideoFile" type="file" wire:model="fslVideoFile" accept="video/mp4,video/webm,video/quicktime" class="w-full text-xs text-body-muted file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-primary-tint file:text-primary-dark hover:file:bg-primary/20" />
+                                    @error('fslVideoFile') <span class="text-xs text-red-600 block mt-1">{{ $message }}</span> @enderror
+                                </div>
+                            @endif
                         </div>
+
+                        <div class="pt-4 mt-4 border-t border-gray-200/80 flex items-center justify-between text-xs text-body-muted">
+                            <span>{{ __('MP4, WebM, MOV') }}</span>
+                            <span>{{ __('Max 50 MB') }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Live Selection Feedback Bar --}}
+                <div class="rounded-xl border border-primary-border bg-surface p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="space-y-0.5">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-primary-dark uppercase tracking-wider">{{ __('Attached to this Application:') }}</span>
+                            <span class="text-xs font-bold px-2 py-0.5 rounded-full {{ ($includeBiodata ? 1 : 0) + ($includeResume ? 1 : 0) + ($includeFslVideo ? 1 : 0) > 0 ? 'bg-secondary text-white' : 'bg-red-100 text-red-700' }}">
+                                {{ ($includeBiodata ? 1 : 0) + ($includeResume ? 1 : 0) + ($includeFslVideo ? 1 : 0) }} of 3 Selected
+                            </span>
+                        </div>
+                        <p class="text-xs text-body-muted">
+                            {{ __('The employer will receive and review all selected formats upon submission.') }}
+                        </p>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2">
+                        @if($includeBiodata)
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-white text-primary-dark border border-primary-border shadow-xs">
+                                <span class="text-secondary font-black">✓</span> {{ __('Bio-Data') }}
+                            </span>
+                        @endif
+                        @if($includeResume)
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-white text-primary-dark border border-primary-border shadow-xs">
+                                <span class="text-secondary font-black">✓</span> {{ __('Résumé (PDF)') }}
+                            </span>
+                        @endif
+                        @if($includeFslVideo)
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-white text-primary-dark border border-primary-border shadow-xs">
+                                <span class="text-secondary font-black">✓</span> {{ __('FSL Video') }}
+                            </span>
+                        @endif
+                    </div>
+                </div>
+
+                @error('materials')
+                    <div class="p-3 bg-red-50 border border-red-200 rounded-lg text-xs font-semibold text-red-700 flex items-center gap-2">
+                        <svg class="size-4 shrink-0 text-red-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                        <span>{{ $message }}</span>
+                    </div>
+                @enderror
+
+                {{-- Compact Verified PWD ID Strip --}}
+                <div class="rounded-xl border border-gray-200 bg-gray-50/60 p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                    <div class="flex items-center gap-2">
+                        <span class="size-5 rounded-full bg-secondary text-white flex items-center justify-center font-bold text-xs shrink-0">✓</span>
+                        <span class="text-body-muted">
+                            {{ __('Government PWD ID:') }}
+                            <strong class="text-primary-dark font-mono font-bold">{{ $user->pwd_id_number }}</strong>
+                            <span class="text-secondary font-semibold ml-1">({{ __('Verified under RA 7277') }})</span>
+                        </span>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <label for="pwdIdFile" class="text-xs text-body-muted hover:text-primary-dark cursor-pointer font-medium">
+                            {{ __('Update card scan (optional):') }}
+                        </label>
+                        <input id="pwdIdFile" type="file" wire:model="pwdIdFile" accept="image/*,.pdf" class="text-xs text-body-muted file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-[11px] file:font-semibold file:bg-white file:border file:border-gray-200 file:text-primary-dark" />
                     </div>
                 </div>
             </div>
@@ -285,21 +423,31 @@
             </div>
 
             {{-- Action Buttons Bar --}}
-            <div class="flex items-center justify-between gap-4 pt-2">
-                <a href="{{ route('candidate.jobs') }}" class="inline-flex items-center gap-2 rounded-lg border border-primary-border bg-white px-5 py-2.5 text-sm font-semibold text-primary-dark hover:bg-primary-tint transition-colors">
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-2">
+                <a href="{{ route('candidate.jobs') }}" class="inline-flex items-center justify-center gap-2 rounded-lg border border-primary-border bg-white px-5 py-2.5 text-sm font-semibold text-primary-dark hover:bg-primary-tint transition-colors">
                     <span aria-hidden="true">&larr;</span>
                     {{ __('Back to Job Matches') }}
                 </a>
 
-                <button type="submit"
-                        class="inline-flex items-center justify-center gap-2 rounded-lg bg-primary-dark px-7 py-3 text-sm font-bold text-white hover:bg-primary shadow-sm transition-colors focus:ring-2 focus:ring-primary min-w-[180px]"
-                        wire:loading.attr="disabled">
-                    <span wire:loading.remove>{{ __('Submit Application') }} &rarr;</span>
-                    <span wire:loading class="inline-flex items-center gap-2">
-                        <svg class="animate-spin size-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
-                        {{ __('Submitting...') }}
-                    </span>
-                </button>
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                    <div class="text-xs text-body-muted text-right hidden sm:block">
+                        <span>{{ __('Attaching:') }}</span>
+                        <strong class="text-primary-dark font-semibold">
+                            {{ implode(', ', array_filter([$includeBiodata ? 'Bio-Data' : null, $includeResume ? 'Résumé' : null, $includeFslVideo ? 'FSL Pitch' : null])) ?: 'None selected' }}
+                        </strong>
+                    </div>
+
+                    <button type="submit"
+                            class="inline-flex items-center justify-center gap-2 rounded-lg bg-primary-dark px-7 py-3 text-sm font-bold text-white hover:bg-primary shadow-sm transition-colors focus:ring-2 focus:ring-primary min-w-[190px] disabled:opacity-50 disabled:cursor-not-allowed"
+                            wire:loading.attr="disabled"
+                            @disabled(! $includeBiodata && ! $includeResume && ! $includeFslVideo)>
+                        <span wire:loading.remove>{{ __('Submit Application') }} &rarr;</span>
+                        <span wire:loading class="inline-flex items-center gap-2">
+                            <svg class="animate-spin size-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                            {{ __('Submitting...') }}
+                        </span>
+                    </button>
+                </div>
             </div>
         </form>
     @endif

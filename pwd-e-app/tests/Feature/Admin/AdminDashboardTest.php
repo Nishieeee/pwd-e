@@ -36,8 +36,18 @@ test('non-admin users cannot access admin pages', function () {
     $this->actingAs($user)->get(route('admin.lexicon'))->assertForbidden();
 });
 
-test('admin can view dashboard with analytics', function () {
-    $this->actingAs(adminUser())->get(route('admin.dashboard'))->assertOk();
+test('admin can view dashboard with analytics and custom admin portal layout', function () {
+    $response = $this->actingAs(adminUser())->get(route('admin.dashboard'));
+
+    $response->assertOk()
+        ->assertSee('Admin portal')
+        ->assertSee('Platform Administrator')
+        ->assertSee('Verification Queue')
+        ->assertSee('User Management')
+        ->assertSee('Inclusive Lexicon')
+        ->assertSee('Audit Log')
+        ->assertSee('Dyslexia-friendly font')
+        ->assertSee('Screen reader');
 });
 
 test('admin can view user management and suspend a user', function () {

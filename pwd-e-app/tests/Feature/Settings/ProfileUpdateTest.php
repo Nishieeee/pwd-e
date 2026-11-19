@@ -3,11 +3,18 @@
 use App\Livewire\Settings\Profile;
 use App\Models\User;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Role;
 
-test('profile page is displayed', function () {
-    $this->actingAs($user = User::factory()->create());
+test('profile page is displayed with role layout for admin', function () {
+    Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+    $admin = User::factory()->create(['role' => 'admin', 'status' => 'active', 'verified_at' => now()]);
+    $admin->assignRole('admin');
 
-    $this->get('/settings/profile')->assertOk();
+    $this->actingAs($admin)
+        ->get('/settings/profile')
+        ->assertOk()
+        ->assertSee('Admin portal')
+        ->assertSee('Platform Administrator');
 });
 
 test('profile information can be updated', function () {

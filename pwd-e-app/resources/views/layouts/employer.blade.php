@@ -31,6 +31,9 @@
     @php
         $employerUser = auth()->user();
         $employerProfile = $employerUser?->employerProfile;
+        $employerApplicantsCount = \App\Models\Application::whereHas('jobPosting', function ($q) use ($employerProfile) {
+            $q->where('employer_profile_id', $employerProfile?->id ?? 0);
+        })->count();
     @endphp
 
     <!-- Mobile Header Bar -->
@@ -105,12 +108,18 @@
                         <span>Job Postings</span>
                     </a>
 
-                    <a href="{{ route('employer.jobs.index') }}"
-                       class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors text-gray-300 hover:text-white hover:bg-white/5">
-                        <svg class="w-4 h-4 shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <a href="{{ route('employer.applicants') }}"
+                       class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('employer.applicants') || request()->routeIs('employer.jobs.applicants') ? 'bg-[#244F73] text-white shadow-sm' : 'text-gray-300 hover:text-white hover:bg-white/5' }}"
+                       @if(request()->routeIs('employer.applicants') || request()->routeIs('employer.jobs.applicants')) aria-current="page" @endif>
+                        <svg class="w-4 h-4 shrink-0 {{ request()->routeIs('employer.applicants') || request()->routeIs('employer.jobs.applicants') ? 'text-white' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
                         </svg>
-                        <span>Applicants</span>
+                        <span class="flex-1">Applicants</span>
+                        @if($employerApplicantsCount > 0)
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-sky-500/20 text-sky-300 border border-sky-500/30">
+                                {{ $employerApplicantsCount }}
+                            </span>
+                        @endif
                     </a>
 
                     <a href="{{ route('employer.workforce') }}"

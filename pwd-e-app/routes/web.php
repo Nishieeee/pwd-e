@@ -12,7 +12,9 @@ use App\Livewire\Candidate\Apply;
 use App\Livewire\Candidate\Dashboard as CandidateDashboard;
 use App\Livewire\Candidate\JobMatches;
 use App\Livewire\Candidate\ProfileBuilder;
+use App\Livewire\Candidate\ShowProfile;
 use App\Livewire\Employer\Applicants;
+use App\Livewire\Employer\Dashboard as EmployerDashboard;
 use App\Livewire\Employer\Jobs\Create;
 use App\Livewire\Employer\Jobs\Edit;
 use App\Livewire\Employer\Jobs\Index;
@@ -49,9 +51,13 @@ Route::middleware(['auth', 'account.verified'])->group(function () {
         if ($user instanceof User && $user->isCandidate()) {
             return app(CandidateDashboard::class)();
         }
+        if ($user instanceof User && $user->isEmployer()) {
+            return app(EmployerDashboard::class)();
+        }
 
         return view('dashboard');
     })->name('dashboard');
+    Route::get('profile', ShowProfile::class)->name('candidate.profile.show');
     Route::get('profile/builder/{step?}', ProfileBuilder::class)->name('candidate.profile.builder');
     Route::get('jobs/matches/{job?}', JobMatches::class)->name('candidate.jobs');
     Route::get('jobs/{job}/apply', Apply::class)->name('candidate.apply');
@@ -63,7 +69,8 @@ Route::middleware(['auth', 'account.verified'])->group(function () {
         Route::get('/jobs/{job}/edit', Edit::class)->name('jobs.edit');
         Route::get('/jobs/{job}/applicants', Applicants::class)->name('jobs.applicants');
         Route::get('/applicants/{application}/document/{type}', [ApplicantDocumentController::class, 'show'])->name('applicants.document');
-        Route::redirect('/applicants', '/employer/jobs')->name('applicants');
+        Route::get('/candidates/{candidateProfile}', ShowProfile::class)->name('candidates.show');
+        Route::get('/applicants', Applicants::class)->name('applicants');
         Route::get('/workforce', Workforce::class)->name('workforce');
     });
 });
