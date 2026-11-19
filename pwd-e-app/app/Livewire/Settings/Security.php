@@ -50,4 +50,12 @@ class Security extends Component
 
         Flux::toast(variant: 'success', text: __('Password updated.'));
     }
+
+    public function render()
+    {
+        $user = Auth::user();
+        $layout = $user?->isEmployer() ? 'layouts.employer' : ($user?->isCandidate() ? 'layouts.candidate' : 'layouts.app');
+
+        return view('livewire.settings.security')->layout($layout);
+    }
 }

@@ -1,29 +1,32 @@
 # HANDOFF.md
 
 ## Last session
-- **Date:** 2026-11-12 — branch `Nishieee/Auth_Registration`
+- **Date:** 2026-11-19 — branch `dev`
 - **Done:**
-  - Applied full profile-completion schema: name parts on `users`; work experience, education, certifications, profile drafts, notifications, notification preferences, word history, tax snapshots; PWD ID / permit / resume / cover-letter columns; encrypted casts.
-  - Added 7 models + relationships; synced `DATABASE.md` and knowledge vault.
-  - Registration redesign merged: role picker, conditional Candidate/Employer fields, PWD ID + permit uploads, disability type, DOB, RA 10173 consent. Transactional `User` + profile + `VerificationRequest`.
-  - Name parts (`first_name`, `middle_name`, `last_name`) persisted; `name` kept as composed display name.
-  - `EnsureAccountVerified` gate; `verification.notice` view; Pest suite green.
+  - Resolved Vite Tailwind v4 build error in `app.css`.
+  - Implemented role-aware Apply button on public job directory (`/jobs`).
+  - Unified Job Matches CTA to single-page apply review flow.
+  - Upgraded Single-Page Apply (`/jobs/{job}/apply`): profile document re-use toggles, PWD ID gate under RA 10524, Web Speech API voice dictation, starter phrases chips, and formatted reference number receipt (`PWD-APP-2026-XXXXX`).
+  - Upgraded Employer Applicants (`/employer/jobs/{job}/applicants`): status filter tabs, interactive interview scheduling modal, formal hire modal with RA 10524 tax calculation.
+  - Resolved raw starter kit appearance on Settings pages (`/settings/profile`, `/settings/security`, `/settings/appearance`) by wrapping in portal shells (`layouts.candidate`, `layouts.employer`) with branded card layout.
+  - Fixed Profile Builder (`/profile/builder`) step validation flaw: implemented `validateStep()` in `ProfileBuilder.php` on `nextStep()`, `goToStep()`, and `saveProfileAndRedirect()`; added `@error` directives, red borders, and summary error alert banner in `profile-builder.blade.php`.
+  - Stripped remaining `wire:navigate` instances for accessible plain page loads (D-02).
+  - Created `TASKS-PRESENTATION-V2.md` covering all panelist criteria and PWD user-friendliness guidelines.
+  - 102/102 Pest tests passing, 13/13 JS tests passing, asset build verified.
 
 ## State of the code
-- Login, registration, verification gate, pending-notice page working (Fortify + Blade, mobile-first).
-- Schema and models complete for profile/tax/notifications modules. Seeders run; `public/hot` present (Vite dev server expected running).
-- Static pages: Home, Jobs, Employers, About + accessibility panel component.
-- Migrations verified up/down; `./vendor/bin/pint` clean.
+- End-to-end main flow operational: Browse → Job Matches → Single-Page Apply (with voice/predictive/credentials) → Employer Review & Interview Scheduling → Hire → Workforce Record & RA 10524 Tax Incentives.
+- 101 tests passing; build clean.
 
 ## Next concrete action
-**Verification admin queue** (ADMIN-01–03, AUTH-04): list pending `verification_requests` with inline document preview, then approve / reject / request-more-docs actions that set `users.status` + `verified_at` and fire notifications. See `TASKS.md` → Verification Queue.
+Mobile-first audit (320–412px viewports) and automated axe-core / Pa11y WCAG 2.1 AA verification across the main flow pages. See `TASKS-PRESENTATION-V2.md` Phase 7.
 
 ## Open questions
 - Track ownership: who owns A, B, C, D? (Still TBD)
-- Predictive text implementation: build a lightweight Alpine.js component in-house, or evaluate an existing library (e.g., `tribute.js`, `awesomplete`)? Add decision D-16 when resolved.
-- Notification driver: database queue (simple) vs. Redis (faster)? Add D-16 or D-17 when resolved.
+- Notification queue driver: database (simple) vs Redis (faster).
 
 ## Notes for the next session
 - Keep navigation as plain page loads (no `wire:navigate`) — D-02.
-- Update `CURRENT-STATE.md`, `TASKS.md`, and `HANDOFF.md` at the end of every session.
-- Read `docs/REQUIREMENTS.md` before building any new feature; map implementation to requirement IDs.
+- Livewire views must have a **single root element** (no `<x-layouts::app>` wrapper — layout is applied automatically for route components).
+- App is light-only; do not reintroduce dark-mode support without updating the design tokens.
+- Update `CURRENT-STATE.md`, `TASKS.md`, and `HANDOFF.md` at end of every session.

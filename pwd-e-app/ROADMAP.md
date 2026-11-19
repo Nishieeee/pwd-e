@@ -81,14 +81,14 @@ Nov 22     D runs full-loop integration once B + C are merged
 | 1 | Voice-activated profile builder | C | PROF-02, ASSIST-06 | 🔲 |
 | 2 | Accessibility-fit matching | D | MATCH-01–08 | 🔲 |
 | 3 | WCAG 2.1 AA + display toggles | D | A11Y-01–10, ASSIST-07–08 | 🔲 |
-| 4 | FSL video résumés | C | PROF-05 | 🔲 |
-| 5 | Exclusionary language detector | B | POST-02–03 | 🔲 |
+| 4 | FSL video résumés | C | PROF-05 | ✅ |
+| 5 | Exclusionary language detector | B | POST-02–03 | ✅ |
 | 6 | Workspace accessibility matrix | B | POST-06 | 🔲 |
 | 7 | RA 10524 tax incentive tracker | B | TAX-01–05 | 🔲 |
-| 8 | Predictive employment analytics | A | ADMIN-04 | 🔲 |
-| 9 | Account verification engine | A | AUTH-04, ADMIN-01–03 | 🔲 |
+| 8 | Predictive employment analytics | A | ADMIN-04 | 🔲 (partial) |
+| 9 | Account verification engine | A | AUTH-04, ADMIN-01–03 | ✅ |
 | 10 | Platform accessibility auditor | A | ADMIN-07, SYS-05 | 🔲 |
-| **New** | **Predictive text / assistive input** | **D** | **ASSIST-01–06** | 🔲 |
+| **New** | **Predictive text / assistive input** | **D** | **ASSIST-01–06** | ✅ |
 | **New** | **Tax incentive reporting** | **B** | **TAX-01–05** | 🔲 |
 
 ---

@@ -45,4 +45,12 @@ class Profile extends Component
 
         Flux::toast(variant: 'success', text: __('Profile updated.'));
     }
+
+    public function render()
+    {
+        $user = Auth::user();
+        $layout = $user?->isEmployer() ? 'layouts.employer' : ($user?->isCandidate() ? 'layouts.candidate' : 'layouts.app');
+
+        return view('livewire.settings.profile')->layout($layout);
+    }
 }

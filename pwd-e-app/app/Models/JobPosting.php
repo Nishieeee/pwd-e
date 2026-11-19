@@ -12,10 +12,33 @@ class JobPosting extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['employer_profile_id', 'title', 'description', 'required_skills', 'location', 'work_arrangement', 'employment_type', 'salary_min', 'salary_max', 'closes_at', 'status', 'scan_result', 'scanned_at', 'published_at'];
+    protected $fillable = [
+        'employer_profile_id',
+        'title',
+        'description',
+        'overview_headline',
+        'experience_level',
+        'what_you_will_do',
+        'what_you_will_bring',
+        'benefits',
+        'required_skills',
+        'location',
+        'work_arrangement',
+        'employment_type',
+        'salary_min',
+        'salary_max',
+        'closes_at',
+        'status',
+        'scan_result',
+        'scanned_at',
+        'published_at',
+    ];
 
     protected $casts = [
         'required_skills' => 'array',
+        'what_you_will_do' => 'array',
+        'what_you_will_bring' => 'array',
+        'benefits' => 'array',
         'scan_result' => 'array',
         'salary_min' => 'decimal:2',
         'salary_max' => 'decimal:2',
