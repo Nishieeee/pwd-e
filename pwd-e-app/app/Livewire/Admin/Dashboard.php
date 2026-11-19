@@ -9,9 +9,11 @@ use App\Models\User;
 use App\Models\VerificationRequest;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
+#[Layout('layouts.admin')]
 #[Title('Admin Dashboard')]
 class Dashboard extends Component
 {

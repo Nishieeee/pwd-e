@@ -6,10 +6,12 @@ use App\Models\ExclusionaryTerm;
 use Flux\Flux;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
 
+#[Layout('layouts.admin')]
 #[Title('Lexicon Management')]
 class Lexicon extends Component
 {
