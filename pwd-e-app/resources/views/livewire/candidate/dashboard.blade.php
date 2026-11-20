@@ -63,6 +63,12 @@
                         @endif
                     </div>
                     <div class="flex items-center gap-2.5 shrink-0">
+                        <button type="button"
+                                wire:click="declineInvitation({{ $invite->id }})"
+                                wire:confirm="{{ __('Are you sure you want to decline this invitation?') }}"
+                                class="inline-flex items-center px-3.5 py-2.5 rounded-xl border border-gray-300 bg-white text-xs font-semibold text-body-muted hover:text-red-600 hover:border-red-200 hover:bg-red-50 transition-colors">
+                            {{ __('Decline') }}
+                        </button>
                         <a href="{{ $actionUrl }}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary-dark text-xs font-bold text-white hover:bg-primary shadow-xs transition-colors">
                             <span>{{ __('Review & Apply') }}</span>
                             <span>&rarr;</span>
