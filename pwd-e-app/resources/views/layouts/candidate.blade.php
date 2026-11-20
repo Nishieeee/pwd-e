@@ -81,7 +81,7 @@
     <!-- Mobile Header Bar -->
     <header class="lg:hidden flex items-center justify-between bg-[#0e1726] text-white px-4 py-3 border-b border-[#1e293b]" role="banner">
         <div class="flex items-center gap-3">
-            <button type="button" @click="mobileMenuOpen = !mobileMenuOpen" class="p-1 rounded-md text-white hover:bg-[#1e293b] focus:outline-none focus:ring-2 focus:ring-white" aria-label="Toggle navigation menu" :aria-expanded="mobileMenuOpen.toString()">
+            <button type="button" @click="mobileMenuOpen = !mobileMenuOpen" class="p-1 rounded-md text-white hover:bg-[#1e293b] focus:outline-none focus:ring-0" aria-label="Toggle navigation menu" :aria-expanded="mobileMenuOpen.toString()">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
             </button>
             <div class="flex items-center gap-2">
@@ -138,7 +138,7 @@
                 <nav class="space-y-1.5" aria-label="Candidate workspace links">
                     <!-- Dashboard -->
                     <a href="{{ route('dashboard') }}"
-                       class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('dashboard') ? 'bg-[#244F73] text-white shadow-sm' : 'text-gray-300 hover:text-white hover:bg-white/5' }}"
+                       class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-0 {{ request()->routeIs('dashboard') ? 'bg-[#244F73] text-white shadow-sm' : 'text-gray-300 hover:text-white hover:bg-white/5' }}"
                        @if(request()->routeIs('dashboard')) aria-current="page" @endif>
                         <svg class="w-4 h-4 shrink-0 {{ request()->routeIs('dashboard') ? 'text-white' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
@@ -159,7 +159,7 @@
 
                     <!-- Job Matches & Search -->
                     <a href="{{ route('candidate.jobs') }}"
-                       class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('candidate.jobs') ? 'bg-[#244F73] text-white shadow-sm' : 'text-gray-300 hover:text-white hover:bg-white/5' }}"
+                       class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-0 {{ request()->routeIs('candidate.jobs') ? 'bg-[#244F73] text-white shadow-sm' : 'text-gray-300 hover:text-white hover:bg-white/5' }}"
                        @if(request()->routeIs('candidate.jobs')) aria-current="page" @endif>
                         <svg class="w-4 h-4 shrink-0 {{ request()->routeIs('candidate.jobs') ? 'text-white' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
@@ -169,7 +169,7 @@
 
                     <!-- Applications -->
                     <a href="{{ route('candidate.applications') }}"
-                       class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('candidate.applications') ? 'bg-[#244F73] text-white shadow-sm' : 'text-gray-300 hover:text-white hover:bg-white/5' }}"
+                       class="flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors focus:outline-none focus:ring-0 {{ request()->routeIs('candidate.applications') ? 'bg-[#244F73] text-white shadow-sm' : 'text-gray-300 hover:text-white hover:bg-white/5' }}"
                        @if(request()->routeIs('candidate.applications')) aria-current="page" @endif>
                         <div class="flex items-center gap-3">
                             <svg class="w-4 h-4 shrink-0 {{ request()->routeIs('candidate.applications') ? 'text-white' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -225,7 +225,7 @@
                 <button type="button"
                         @click="toggleContrast()"
                         :class="a11yContrast ? 'bg-[#1A2840] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
-                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-medium border border-gray-300 transition-colors focus:ring-2 focus:ring-[#244F73]"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-medium border border-gray-300 transition-colors focus:outline-none focus:ring-0"
                         :aria-pressed="a11yContrast.toString()"
                         aria-label="Toggle high contrast mode">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -237,18 +237,18 @@
 
                 <!-- Font Resizing Controls -->
                 <div class="inline-flex items-center rounded-md border border-gray-300 bg-gray-100 p-0.5" role="group" aria-label="Text scaling controls">
-                    <button type="button" @click="decreaseScale()" class="px-2 py-1 rounded text-gray-700 hover:bg-white font-bold text-xs focus:ring-2 focus:ring-[#244F73]" aria-label="Decrease text size">A-</button>
-                    <button type="button" @click="resetScale()" class="px-2 py-1 text-gray-700 font-semibold text-xs hover:bg-white" aria-label="Reset text size to 100%">
+                    <button type="button" @click="decreaseScale()" class="px-2 py-1 rounded text-gray-700 hover:bg-white font-bold text-xs focus:outline-none focus:ring-0" aria-label="Decrease text size">A-</button>
+                    <button type="button" @click="resetScale()" class="px-2 py-1 text-gray-700 font-semibold text-xs hover:bg-white focus:outline-none focus:ring-0" aria-label="Reset text size to 100%">
                         <span x-text="a11yScale + '%'">100%</span>
                     </button>
-                    <button type="button" @click="increaseScale()" class="px-2 py-1 rounded text-gray-700 hover:bg-white font-bold text-xs focus:ring-2 focus:ring-[#244F73]" aria-label="Increase text size">A+</button>
+                    <button type="button" @click="increaseScale()" class="px-2 py-1 rounded text-gray-700 hover:bg-white font-bold text-xs focus:outline-none focus:ring-0" aria-label="Increase text size">A+</button>
                 </div>
 
                 <!-- Dyslexia Font Toggle -->
                 <button type="button"
                         @click="toggleDyslexia()"
                         :class="a11yDyslexia ? 'bg-[#1A2840] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
-                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-medium border border-gray-300 transition-colors focus:ring-2 focus:ring-[#244F73]"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-medium border border-gray-300 transition-colors focus:outline-none focus:ring-0"
                         :aria-pressed="a11yDyslexia.toString()"
                         aria-label="Toggle dyslexia-friendly font">
                     <span class="font-serif font-bold text-xs" aria-hidden="true">T</span>
@@ -259,7 +259,7 @@
                 <button type="button"
                         @click="toggleScreenReader()"
                         :class="a11yScreenReader ? 'bg-[#1A2840] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
-                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-medium border border-gray-300 transition-colors focus:ring-2 focus:ring-[#244F73]"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-medium border border-gray-300 transition-colors focus:outline-none focus:ring-0"
                         :aria-pressed="a11yScreenReader.toString()"
                         aria-label="Toggle screen reader live assistance">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -271,7 +271,7 @@
 
             <!-- Right: Settings, Notifications, Logout -->
             <div class="flex items-center gap-4 text-xs font-medium text-gray-700">
-                <a href="{{ route('profile.edit') }}" class="inline-flex items-center gap-1.5 text-gray-600 hover:text-gray-900 transition-colors focus:ring-2 focus:ring-[#244F73] rounded p-1">
+                <a href="{{ route('profile.edit') }}" class="inline-flex items-center gap-1.5 text-gray-600 hover:text-gray-900 transition-colors focus:outline-none focus:ring-0 rounded p-1">
                     <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -283,7 +283,7 @@
 
                 <form method="POST" action="{{ route('logout') }}" class="inline">
                     @csrf
-                    <button type="submit" class="inline-flex items-center gap-1.5 text-gray-600 hover:text-red-700 transition-colors focus:ring-2 focus:ring-[#244F73] rounded p-1 cursor-pointer">
+                    <button type="submit" class="inline-flex items-center gap-1.5 text-gray-600 hover:text-red-700 transition-colors focus:outline-none focus:ring-0 rounded p-1 cursor-pointer">
                         <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                         </svg>

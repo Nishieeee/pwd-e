@@ -1,18 +1,23 @@
 <x-layouts::auth.full :title="__('Register')">
     <header class="bg-primary-dark">
-        <div class="mx-auto flex max-w-[1200px] items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
-            <a href="{{ route('home') }}" class="flex items-center gap-2 text-white font-heading font-bold text-lg">
-                <span class="grid h-9 w-9 place-items-center rounded-full bg-primary text-white">P</span>
-                PWD-E
+        <div class="mx-auto flex h-16 max-w-[1200px] items-center justify-between px-4 sm:px-6 lg:px-8">
+            <a href="{{ route('home') }}" class="flex items-center gap-2 text-white font-heading font-bold text-lg focus:outline-none focus:ring-0">
+                <img src="{{ asset('assets/Logo.png') }}" alt="PWD-E" class="h-14 w-14 shrink-0 object-contain">
+                <span>PWD-E</span>
             </a>
             <nav class="hidden items-center gap-6 text-sm font-medium text-white md:flex">
-                <a href="{{ route('home') }}" class="hover:underline">Home</a>
-                <a href="{{ route('jobs') }}" class="hover:underline">Jobs</a>
-                <a href="{{ route('employers') }}" class="hover:underline">Employers</a>
-                <a href="{{ route('about') }}" class="hover:underline">About</a>
+                <a href="{{ route('home') }}" class="hover:underline focus:outline-none focus:ring-0">Home</a>
+                <a href="{{ route('jobs') }}" class="hover:underline focus:outline-none focus:ring-0">Jobs</a>
+                <a href="{{ route('employers') }}" class="hover:underline focus:outline-none focus:ring-0">Employers</a>
+                <a href="{{ route('about') }}" class="hover:underline focus:outline-none focus:ring-0">About</a>
             </nav>
             <div class="flex items-center gap-2">
-                <a href="{{ route('login') }}" class="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-primary-dark">Sign In</a>
+                @unless(request()->routeIs('login'))
+                    <a href="{{ route('login') }}" class="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-primary-dark focus:outline-none focus:ring-0">Sign In</a>
+                @endunless
+                @unless(request()->routeIs('register'))
+                    <a href="{{ route('register') }}" class="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-primary-dark focus:outline-none focus:ring-0">Register</a>
+                @endunless
             </div>
         </div>
     </header>
@@ -24,88 +29,258 @@
             <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg> Back to Home
         </a>
 
-        <div class="flex flex-col-reverse overflow-hidden rounded-2xl bg-white shadow-[0_8px_24px_rgba(26,40,64,0.06)] md:grid md:grid-cols-2">
-            <section class="bg-gradient-to-b from-primary-tint to-[#D6E7F3] p-5 md:p-10">
-                <span class="inline-flex items-center gap-1 rounded-full border border-primary-border bg-white px-3.5 py-2 text-xs font-semibold text-primary-dark">
-                    Accessibility-first employment
-                </span>
-                <h1 class="mt-4 font-heading text-3xl font-extrabold leading-tight text-primary-dark md:text-[40px]">
-                    Create your inclusive account.
-                </h1>
-                <p class="mt-3 max-w-[46ch] text-base text-body-muted">
-                    Multi-step registration. Your privacy is protected under RA 10173.
-                </p>
+        <div class="flex flex-col-reverse items-stretch overflow-hidden rounded-2xl bg-white shadow-[0_8px_24px_rgba(26,40,64,0.06)] md:grid md:grid-cols-2"
+             x-data="{
+                 role: '{{ old('role', 'candidate') }}',
+                 step: {{ $errors->hasAny(['date_of_birth']) ? 1 : ($errors->hasAny(['disability_type', 'pwd_id_number', 'pwd_id_file', 'consent']) ? 2 : ($errors->hasAny(['business_permit_number', 'business_permit_file']) ? 1 : 0)) }},
+                 candidateSteps: 3,
+                 employerSteps: 2,
+                 showCandidatePassword: false,
+                 showEmployerPassword: false,
+                 canContinue: false,
+                 totalSteps() { return this.role === 'candidate' ? this.candidateSteps : this.employerSteps; },
+                 val(id) { const el = document.getElementById(id); return el ? (el.value || '').trim() : ''; },
+                 isChecked(name) { const el = document.querySelector('input[name=' + name + ']'); return !!(el && el.checked); },
+                 stepValid() {
+                     if (this.role === 'candidate') {
+                         if (this.step === 0) {
+                             const p = this.val('candidate_password');
+                             const pc = this.val('candidate_password_confirmation');
+                             return this.val('candidate_first_name') !== '' &&
+                                    this.val('candidate_last_name') !== '' &&
+                                    this.val('candidate_email') !== '' &&
+                                    p.length >= 8 && p === pc;
+                         }
+                         if (this.step === 1) {
+                             const d = new Date(this.val('date_of_birth'));
+                             if (isNaN(d.getTime())) return false;
+                             const age = (Date.now() - d.getTime()) / (365.25 * 24 * 60 * 60 * 1000);
+                             return age >= 18;
+                         }
+                         if (this.step === 2) {
+                             return this.val('disability_type') !== '' &&
+                                    this.val('pwd_id_number') !== '' &&
+                                    this.isChecked('consent') &&
+                                    this.isChecked('terms');
+                         }
+                     } else {
+                         if (this.step === 0) {
+                             const p = this.val('employer_password');
+                             const pc = this.val('employer_password_confirmation');
+                             return this.val('employer_company_name') !== '' &&
+                                    this.val('employer_email') !== '' &&
+                                    p.length >= 8 && p === pc;
+                         }
+                         if (this.step === 1) {
+                             return this.val('business_permit_number') !== '' && this.isChecked('terms');
+                         }
+                     }
+                     return true;
+                 },
+                 updateState() { this.canContinue = this.stepValid(); },
+                 next() {
+                     if (!this.stepValid()) return;
+                     if (this.step < this.totalSteps() - 1) this.step++;
+                     this.$nextTick(() => this.updateState());
+                 },
+                 prev() { if (this.step > 0) this.step--; this.$nextTick(() => this.updateState()); },
+             }"
+             x-init="updateState()"
+             @input="updateState()"
+             @change="updateState()">
+            <section class="flex h-full flex-col justify-between bg-gradient-to-b from-primary-tint to-[#D6E7F3] px-5 py-6 md:px-9 md:py-7">
+                <div class="sticky top-0 flex h-full flex-col justify-between gap-4">
+                    {{-- Candidate (PWD) Mode Left Panel --}}
+                    <div x-show="role === 'candidate'" class="flex flex-1 flex-col justify-between gap-3">
+                        <div>
+                            <span class="inline-flex items-center gap-1.5 rounded-full border border-primary-border bg-white px-3 py-1.5 text-xs font-semibold text-primary-dark">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="4" r="2"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0l-3 6m3-6l3 6M9 9h6"/></svg>
+                                <span>Accessibility-first employment</span>
+                            </span>
+
+                            <h1 class="mt-2.5 font-heading text-2xl font-extrabold leading-tight text-primary-dark md:text-[32px] lg:text-[34px]">
+                                Your next chapter starts with inclusion.
+                            </h1>
+                            <p class="mt-1.5 max-w-[46ch] text-sm leading-relaxed text-body-muted">
+                                Join PWD-E and connect with accessible, inclusive workplaces across the Philippines.
+                            </p>
+                        </div>
+
+                        <div class="my-3 flex justify-center">
+                            <img src="{{ asset('assets/inclusive collaboration.png') }}"
+                                 onerror="this.onerror=null;this.src='{{ asset('assets/Inclusive workplace collaboration.png') }}';"
+                                 alt=""
+                                 aria-hidden="true"
+                                 loading="eager"
+                                 decoding="async"
+                                 width="420"
+                                 height="210"
+                                 class="mx-auto w-full max-w-sm md:max-w-md h-auto object-contain">
+                        </div>
+
+                        <div class="space-y-2.5">
+                            {{-- Step 1: Icon User/Account --}}
+                            <div class="flex items-start gap-3">
+                                <span class="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-primary-border bg-white text-primary-dark" aria-hidden="true">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                    </svg>
+                                </span>
+                                <div>
+                                    <p class="text-sm font-semibold leading-snug text-primary-dark">Create Your Account</p>
+                                    <p class="text-xs leading-snug text-body-muted">Unlock access to hundreds of inclusive job opportunities tailored to you.</p>
+                                </div>
+                            </div>
+
+                            {{-- Step 2: Icon ID/Verification --}}
+                            <div class="flex items-start gap-3">
+                                <span class="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-primary-border bg-white text-primary-dark" aria-hidden="true">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/>
+                                    </svg>
+                                </span>
+                                <div>
+                                    <p class="text-sm font-semibold leading-snug text-primary-dark">Verify Your PWD Profile</p>
+                                    <p class="text-xs leading-snug text-body-muted">Complete your profile with accommodations and skills to match with the right employers.</p>
+                                </div>
+                            </div>
+
+                            {{-- Step 3: Icon Chat/Message --}}
+                            <div class="flex items-start gap-3">
+                                <span class="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-primary-border bg-white text-primary-dark" aria-hidden="true">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+                                    </svg>
+                                </span>
+                                <div>
+                                    <p class="text-sm font-semibold leading-snug text-primary-dark">Connect Directly</p>
+                                    <p class="text-xs leading-snug text-body-muted">Message instantly with RA 10524-accredited employers who value your talent.</p>
+                                </div>
+                            </div>
+
+                            {{-- Step 4: Icon Briefcase/Check --}}
+                            <div class="flex items-start gap-3">
+                                <span class="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-primary-border bg-white text-primary-dark" aria-hidden="true">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                    </svg>
+                                </span>
+                                <div>
+                                    <p class="text-sm font-semibold leading-snug text-primary-dark">Start Working!</p>
+                                    <p class="text-xs leading-snug text-body-muted">Find a fulfilling career where you can thrive and be your authentic self.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Employer Mode Left Panel --}}
+                    <div x-show="role === 'employer'" x-cloak class="flex flex-1 flex-col justify-between gap-3">
+                        <div>
+                            <span class="inline-flex items-center gap-1.5 rounded-full border border-primary-border bg-white px-3 py-1.5 text-xs font-semibold text-primary-dark">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                </svg>
+                                <span>For Employers</span>
+                            </span>
+
+                            <h1 class="mt-2.5 font-heading text-2xl font-extrabold leading-tight text-primary-dark md:text-[32px] lg:text-[34px]">
+                                Build a stronger, inclusive workforce.
+                            </h1>
+                            <p class="mt-1.5 max-w-[46ch] text-sm leading-relaxed text-body-muted">
+                                Connect with a dedicated pool of skilled professionals with disabilities and make inclusive hiring seamless.
+                            </p>
+                        </div>
+
+                        <div class="my-3 flex justify-center">
+                            <img src="{{ asset('assets/inclusive collaboration.png') }}"
+                                 onerror="this.onerror=null;this.src='{{ asset('assets/Inclusive workplace collaboration.png') }}';"
+                                 alt=""
+                                 aria-hidden="true"
+                                 loading="eager"
+                                 decoding="async"
+                                 width="420"
+                                 height="210"
+                                 class="mx-auto w-full max-w-sm md:max-w-md h-auto object-contain">
+                        </div>
+
+                        <div class="space-y-2.5">
+                            {{-- Step 1: Icon Building/Setup --}}
+                            <div class="flex items-start gap-3">
+                                <span class="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-primary-border bg-white text-primary-dark" aria-hidden="true">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                    </svg>
+                                </span>
+                                <div>
+                                    <p class="text-sm font-semibold leading-snug text-primary-dark">Company Account Setup</p>
+                                    <p class="text-xs leading-snug text-body-muted">Unlock immediate access to a specialized talent pool of verified professionals with disabilities.</p>
+                                </div>
+                            </div>
+
+                            {{-- Step 2: Icon Document/Permit --}}
+                            <div class="flex items-start gap-3">
+                                <span class="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-primary-border bg-white text-primary-dark" aria-hidden="true">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                </span>
+                                <div>
+                                    <p class="text-sm font-semibold leading-snug text-primary-dark">Business &amp; Permit Verification</p>
+                                    <p class="text-xs leading-snug text-body-muted">Validate your organization to ensure a safe, trusted, and compliant hiring environment.</p>
+                                </div>
+                            </div>
+
+                            {{-- Step 3: Icon Scale/Compliance --}}
+                            <div class="flex items-start gap-3">
+                                <span class="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-primary-border bg-white text-primary-dark" aria-hidden="true">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                                    </svg>
+                                </span>
+                                <div>
+                                    <p class="text-sm font-semibold leading-snug text-primary-dark">Meet RA 10524 Compliance</p>
+                                    <p class="text-xs leading-snug text-body-muted">Seamlessly fulfill legislative requirements for inclusive workplaces and access tax incentives.</p>
+                                </div>
+                            </div>
+
+                            {{-- Step 4: Icon Handshake/Hire --}}
+                            <div class="flex items-start gap-3">
+                                <span class="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-primary-border bg-white text-primary-dark" aria-hidden="true">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    </svg>
+                                </span>
+                                <div>
+                                    <p class="text-sm font-semibold leading-snug text-primary-dark">Connect &amp; Hire</p>
+                                    <p class="text-xs leading-snug text-body-muted">Review candidate accommodation needs and start building a diverse, high-performing team.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Footer Note --}}
+                    <div class="mt-2 flex items-center gap-2 border-t border-primary-border pt-3 text-xs text-body-muted">
+                        <svg class="h-4 w-4 shrink-0 text-primary-dark" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                        </svg>
+                        <span>Your privacy is protected under RA 10173.</span>
+                    </div>
+                </div>
             </section>
 
-            <section class="p-5 md:p-8 lg:p-16"
-                x-data="{
-                    role: '{{ old('role', 'candidate') }}',
-                    step: {{ $errors->hasAny(['date_of_birth']) ? 1 : ($errors->hasAny(['disability_type', 'pwd_id_number', 'pwd_id_file', 'consent']) ? 2 : ($errors->hasAny(['business_permit_number', 'business_permit_file']) ? 1 : 0)) }},
-                    candidateSteps: 3,
-                    employerSteps: 2,
-                    showCandidatePassword: false,
-                    showEmployerPassword: false,
-                    canContinue: false,
-                    totalSteps() { return this.role === 'candidate' ? this.candidateSteps : this.employerSteps; },
-                    val(id) { const el = document.getElementById(id); return el ? (el.value || '').trim() : ''; },
-                    isChecked(name) { const el = document.querySelector('input[name=' + name + ']'); return !!(el && el.checked); },
-                    stepValid() {
-                        if (this.role === 'candidate') {
-                            if (this.step === 0) {
-                                const p = this.val('candidate_password');
-                                const pc = this.val('candidate_password_confirmation');
-                                return this.val('candidate_first_name') !== '' &&
-                                       this.val('candidate_last_name') !== '' &&
-                                       this.val('candidate_email') !== '' &&
-                                       p.length >= 8 && p === pc;
-                            }
-                            if (this.step === 1) {
-                                const d = new Date(this.val('date_of_birth'));
-                                if (isNaN(d.getTime())) return false;
-                                const age = (Date.now() - d.getTime()) / (365.25 * 24 * 60 * 60 * 1000);
-                                return age >= 18;
-                            }
-                            if (this.step === 2) {
-                                return this.val('disability_type') !== '' &&
-                                       this.val('pwd_id_number') !== '' &&
-                                       this.isChecked('consent') &&
-                                       this.isChecked('terms');
-                            }
-                        } else {
-                            if (this.step === 0) {
-                                const p = this.val('employer_password');
-                                const pc = this.val('employer_password_confirmation');
-                                return this.val('employer_company_name') !== '' &&
-                                       this.val('employer_email') !== '' &&
-                                       p.length >= 8 && p === pc;
-                            }
-                            if (this.step === 1) {
-                                return this.val('business_permit_number') !== '' && this.isChecked('terms');
-                            }
-                        }
-                        return true;
-                    },
-                    updateState() { this.canContinue = this.stepValid(); },
-                    next() {
-                        if (!this.stepValid()) return;
-                        if (this.step < this.totalSteps() - 1) this.step++;
-                        this.$nextTick(() => this.updateState());
-                    },
-                    prev() { if (this.step > 0) this.step--; this.$nextTick(() => this.updateState()); },
-                }"
-                x-init="updateState()"
-                @input="updateState()"
-                @change="updateState()">
-                <p class="text-xs font-semibold uppercase tracking-[0.08em] text-primary">New Account</p>
-                <h2 class="mt-2 font-heading text-3xl font-bold text-primary-dark md:text-[34px]">Register</h2>
+            <section class="flex h-full flex-col p-5 md:p-8 lg:px-12 lg:py-8">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-[0.08em] text-primary">New Account</p>
+                    <h2 class="mt-1.5 font-heading text-3xl font-bold text-primary-dark md:text-[34px]">Register</h2>
 
-                <div class="mt-4 flex items-center gap-2" aria-label="Registration progress">
-                    <template x-for="i in totalSteps()" :key="i">
-                        <span class="h-2 flex-1 rounded-full" :class="i-1 <= step ? 'bg-primary' : 'bg-[#CBD5E1]'"></span>
-                    </template>
+                    <div class="mt-3.5 flex items-center gap-2" aria-label="Registration progress">
+                        <template x-for="i in totalSteps()" :key="i">
+                            <span class="h-2 flex-1 rounded-full" :class="i-1 <= step ? 'bg-primary' : 'bg-[#CBD5E1]'"></span>
+                        </template>
+                    </div>
                 </div>
 
-                <form method="POST" action="{{ route('register.store') }}" enctype="multipart/form-data" class="mt-6 flex flex-col gap-5" novalidate
+                <form method="POST" action="{{ route('register.store') }}" enctype="multipart/form-data" class="mt-5 flex flex-1 flex-col justify-between gap-5" novalidate
                       @keydown.enter="if (step < totalSteps() - 1) { $event.preventDefault(); next(); }">
                     @csrf
                     <input type="hidden" name="role" :value="role">
@@ -115,13 +290,13 @@
                         <div>
                             <p class="mb-1.5 text-sm font-semibold text-primary-dark">I am registering as <span class="text-[#B3261E]">*</span></p>
                             <div class="flex gap-3" role="radiogroup" aria-label="Registration role">
-                                <label class="flex-1 cursor-pointer">
-                                    <input type="radio" value="candidate" x-model="role" @change="updateState()" class="sr-only">
-                                    <span class="flex h-12 items-center justify-center rounded-lg border border-[#CBD5E1] text-sm font-semibold text-primary-dark" :class="role === 'candidate' ? 'bg-primary text-white border-primary' : 'bg-white'">Candidate (PWD)</span>
+                                <label class="flex-1 cursor-pointer focus:outline-none focus:ring-0">
+                                    <input type="radio" name="role" value="candidate" x-model="role" @change="updateState()" class="sr-only">
+                                    <span class="flex h-12 items-center justify-center rounded-lg border border-[#CBD5E1] text-sm font-semibold text-primary-dark focus:outline-none focus:ring-0" :class="role === 'candidate' ? 'bg-primary text-white border-primary' : 'bg-white'">Candidate (PWD)</span>
                                 </label>
-                                <label class="flex-1 cursor-pointer">
-                                    <input type="radio" value="employer" x-model="role" @change="updateState()" class="sr-only">
-                                    <span class="flex h-12 items-center justify-center rounded-lg border border-[#CBD5E1] text-sm font-semibold text-primary-dark" :class="role === 'employer' ? 'bg-primary text-white border-primary' : 'bg-white'">Employer</span>
+                                <label class="flex-1 cursor-pointer focus:outline-none focus:ring-0">
+                                    <input type="radio" name="role" value="employer" x-model="role" @change="updateState()" class="sr-only">
+                                    <span class="flex h-12 items-center justify-center rounded-lg border border-[#CBD5E1] text-sm font-semibold text-primary-dark focus:outline-none focus:ring-0" :class="role === 'employer' ? 'bg-primary text-white border-primary' : 'bg-white'">Employer</span>
                                 </label>
                             </div>
                             @error('role')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
