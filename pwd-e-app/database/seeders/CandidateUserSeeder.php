@@ -22,6 +22,8 @@ class CandidateUserSeeder extends Seeder
                 'first_name' => 'Maria',
                 'last_name' => 'Santos',
                 'email' => 'candidate1@pwd-e.local',
+                'pwd_id_number' => '13-3901-0003421-V',
+                'pwd_id_path' => 'documents/pwd_ids/pwd-id-sample.png',
                 'disability_type' => 'Visual',
                 'headline' => 'Accessibility Tester',
                 'skills' => ['WCAG', 'Screen Readers', 'HTML/CSS'],
@@ -31,6 +33,8 @@ class CandidateUserSeeder extends Seeder
                 'first_name' => 'Jose',
                 'last_name' => 'Reyes',
                 'email' => 'candidate2@pwd-e.local',
+                'pwd_id_number' => '07-2217-0005912-M',
+                'pwd_id_path' => 'documents/pwd_ids/pwd-id-sample.png',
                 'disability_type' => 'Mobility',
                 'headline' => 'Customer Support Specialist',
                 'skills' => ['Customer Support', 'Chat Support', 'Data Entry'],
@@ -40,6 +44,8 @@ class CandidateUserSeeder extends Seeder
                 'first_name' => 'Ana',
                 'last_name' => 'Cruz',
                 'email' => 'candidate3@pwd-e.local',
+                'pwd_id_number' => '11-7604-0008123-H',
+                'pwd_id_path' => 'documents/pwd_ids/pwd-id-sample.png',
                 'disability_type' => 'Hearing',
                 'headline' => 'FSL Interpreter',
                 'skills' => ['Filipino Sign Language', 'Communication', 'Training'],
@@ -48,7 +54,7 @@ class CandidateUserSeeder extends Seeder
         ];
 
         foreach ($candidates as $data) {
-            $user = User::firstOrCreate(
+            $user = User::updateOrCreate(
                 ['email' => $data['email']],
                 [
                     'name' => $data['first_name'].' '.$data['last_name'],
@@ -58,8 +64,14 @@ class CandidateUserSeeder extends Seeder
                     'role' => 'candidate',
                     'status' => 'active',
                     'verified_at' => now(),
+                    'pwd_id_number' => $data['pwd_id_number'],
+                    'pwd_id_path' => $data['pwd_id_path'],
                 ]
             );
+            $user->update([
+                'pwd_id_number' => $data['pwd_id_number'],
+                'pwd_id_path' => $data['pwd_id_path'],
+            ]);
 
             $user->assignRole('candidate');
 

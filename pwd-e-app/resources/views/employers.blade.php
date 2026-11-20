@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" x-data="{ readable: false, a11yOpen: false }" :data-readable-font="readable ? 'true' : null">
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -14,7 +14,7 @@
     <main id="main">
         <!-- Hero -->
         <section class="relative" style="background: linear-gradient(180deg, #DCEAF4 0%, #FFFFFF 100%);">
-            <div class="max-w-[1200px] mx-auto px-6 sm:px-10 lg:px-12 pt-24 pb-12 md:grid md:grid-cols-2 md:gap-8 md:items-center">
+            <div class="max-w-[1200px] mx-auto px-6 sm:px-10 lg:px-12 pt-24 pb-12 md:grid md:grid-cols-2 md:gap-10 md:items-center">
                 <div>
                     <span class="inline-flex items-center bg-secondary-tint text-secondary text-sm font-medium px-4 py-1 rounded-full">For Employers</span>
                     <h1 class="font-heading text-primary-dark text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mt-4">Build a Stronger, Inclusive Workforce.</h1>
@@ -24,8 +24,13 @@
                         <a href="/employers/login" class="block text-center border border-primary-border text-secondary font-semibold px-6 py-3 rounded-lg min-h-[48px] flex items-center justify-center hover:bg-primary-tint">Employer Sign In</a>
                     </div>
                 </div>
-                <div class="mt-8 md:mt-0 flex justify-center">
-                    <img src="{{ asset('assets/employers-hero.svg') }}" alt="Illustration of an inclusive office team, including a colleague using a wheelchair, working together at a desk" class="max-w-sm w-full" loading="eager" fetchpriority="high" onerror="this.style.display='none'">
+                <div class="mt-8 md:mt-0 flex justify-center md:justify-end">
+                    <img src="{{ asset('assets/inclusive collaboration.png') }}"
+                         onerror="this.onerror=null;this.src='{{ asset('assets/Inclusive workplace collaboration.png') }}';"
+                         alt="Illustration of an inclusive office team, including a colleague using a wheelchair, working together at a desk"
+                         class="max-w-md lg:max-w-lg w-full h-auto object-contain"
+                         loading="eager"
+                         fetchpriority="high">
                 </div>
             </div>
         </section>

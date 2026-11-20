@@ -154,7 +154,7 @@ class CandidatePortalSeeder extends Seeder
         }
 
         // 3. Candidate: Maria Clara Santos
-        $candidateUser = User::firstOrCreate(
+        $candidateUser = User::updateOrCreate(
             ['email' => 'maria.clara.santos@wmsu.edu.ph'],
             [
                 'name' => 'Maria Clara Santos',
@@ -165,7 +165,7 @@ class CandidatePortalSeeder extends Seeder
                 'status' => 'active',
                 'verified_at' => Carbon::parse('2026-10-01 08:00:00'),
                 'pwd_id_number' => '09-7332-0001842-A',
-                'pwd_id_path' => 'documents/pwd_ids/maria_santos_pwd_id.pdf',
+                'pwd_id_path' => 'documents/pwd_ids/pwd-id-sample.png',
                 'display_settings' => [
                     'contrast' => 'normal',
                     'font_scale' => 100,
@@ -174,6 +174,10 @@ class CandidatePortalSeeder extends Seeder
                 ],
             ]
         );
+        $candidateUser->update([
+            'pwd_id_number' => '09-7332-0001842-A',
+            'pwd_id_path' => 'documents/pwd_ids/pwd-id-sample.png',
+        ]);
         $candidateUser->assignRole('candidate');
 
         $zamboangaCity = LocationCity::where('psgc_code', '0931700000')->orWhere('name', 'Zamboanga City')->first();

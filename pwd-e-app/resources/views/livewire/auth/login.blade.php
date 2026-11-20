@@ -1,21 +1,25 @@
 <x-layouts::auth.full :title="__('Log in')">
     {{-- Navbar --}}
     <header class="bg-primary-dark">
-        <div class="mx-auto flex max-w-[1200px] items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
-            <a href="{{ route('home') }}" class="flex items-center gap-2 text-white font-heading font-bold text-lg">
-                <span class="grid h-9 w-9 place-items-center rounded-full bg-primary text-white">P</span>
-                PWD-E
+        <div class="mx-auto flex h-16 max-w-[1200px] items-center justify-between px-4 sm:px-6 lg:px-8">
+            <a href="{{ route('home') }}" class="flex items-center gap-2 text-white font-heading font-bold text-lg focus:outline-none focus:ring-0">
+                <img src="{{ asset('assets/Logo.png') }}" alt="PWD-E" class="h-14 w-14 shrink-0 object-contain">
+                <span>PWD-E</span>
             </a>
             <nav class="hidden items-center gap-6 text-sm font-medium text-white md:flex">
-                <a href="{{ route('home') }}" class="hover:underline">Home</a>
-                <a href="{{ route('jobs') }}" class="hover:underline">Jobs</a>
-                <a href="{{ route('employers') }}" class="hover:underline">Employers</a>
-                <a href="{{ route('about') }}" class="hover:underline">About</a>
+                <a href="{{ route('home') }}" class="hover:underline focus:outline-none focus:ring-0">Home</a>
+                <a href="{{ route('jobs') }}" class="hover:underline focus:outline-none focus:ring-0">Jobs</a>
+                <a href="{{ route('employers') }}" class="hover:underline focus:outline-none focus:ring-0">Employers</a>
+                <a href="{{ route('about') }}" class="hover:underline focus:outline-none focus:ring-0">About</a>
             </nav>
             <div class="flex items-center gap-2">
-                <a href="{{ route('login') }}" class="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-primary-dark">Sign In</a>
-                <a href="{{ route('register') }}" class="hidden rounded-lg bg-white px-4 py-2 text-sm font-semibold text-primary-dark sm:inline-block">Register</a>
-                <button type="button" class="grid h-11 w-11 place-items-center rounded-lg text-white md:hidden" aria-label="Open menu">
+                @unless(request()->routeIs('login'))
+                    <a href="{{ route('login') }}" class="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-primary-dark focus:outline-none focus:ring-0">Sign In</a>
+                @endunless
+                @unless(request()->routeIs('register'))
+                    <a href="{{ route('register') }}" class="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-primary-dark focus:outline-none focus:ring-0">Register</a>
+                @endunless
+                <button type="button" class="grid h-11 w-11 place-items-center rounded-lg text-white md:hidden focus:outline-none focus:ring-0" aria-label="Open menu">
                     <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
                 </button>
             </div>
@@ -127,7 +131,7 @@
                                    aria-describedby="{{ $errors->has('password') ? 'password-error' : '' }}"
                                    class="h-12 w-full rounded-lg border {{ $errors->has('password') ? 'border-[#B3261E]' : 'border-[#CBD5E1]' }} bg-white px-3.5 pr-12 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                             <button type="button" id="toggle-password" aria-label="Show password" aria-pressed="false"
-                                    class="absolute right-1 top-1 grid h-10 w-10 place-items-center rounded-md text-body-muted hover:text-primary-dark focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                    class="absolute right-1 top-1 grid h-10 w-10 place-items-center rounded-md text-body-muted hover:text-primary-dark focus:outline-none focus:ring-0">
                                 <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                             </button>
                         </div>
@@ -153,7 +157,7 @@
                     </div>
 
                     <button type="submit" id="submit-btn"
-                            class="flex h-[52px] w-full items-center justify-center gap-2 rounded-lg bg-[#2A5D8F] text-base font-semibold text-white transition hover:bg-[#224B73] focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:opacity-60">
+                            class="flex h-[52px] w-full items-center justify-center gap-2 rounded-lg bg-[#2A5D8F] text-base font-semibold text-white transition hover:bg-[#224B73] focus:outline-none focus:ring-0 disabled:opacity-60">
                         <span id="submit-label">Sign In</span>
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                         <svg id="submit-spinner" class="hidden h-5 w-5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/></svg>

@@ -218,6 +218,12 @@ class Apply extends Component
             'applied_at' => now(),
         ]);
 
+        // Auto-accept pending job invitation for this role if one existed
+        \App\Models\JobInvitation::where('candidate_profile_id', $profile->id)
+            ->where('job_posting_id', $this->job->id)
+            ->where('status', 'pending')
+            ->update(['status' => 'accepted']);
+
         // Notify employer
         $employerUser = $this->job->employerProfile?->user;
         if ($employerUser) {

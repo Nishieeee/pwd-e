@@ -235,6 +235,7 @@ test('profile builder streamlines onboarding, auto-populates zip code, generates
         ->assertSee('Preview resume')
         ->assertSee('Not attached')
         ->assertSee('PWD ID Card / Verification Document')
+        ->assertSee('Attached from Registration')
         ->call('previewResume')
         ->assertSet('showResumePreviewModal', true)
         ->assertSee('Auto-Generated Resume Preview')
@@ -314,25 +315,25 @@ test('profile builder validates required fields before allowing advancing to nex
         ->assertSet('currentStep', 3);
 });
 
-test('candidate can view their digital bio-data profile', function () {
+test('candidate can view their digital profile', function () {
     $this->actingAs($this->candidate);
 
     $response = $this->get(route('candidate.profile.show'));
     $response->assertOk();
     $response->assertSee('View my Profile');
-    $response->assertSee('Digital Bio-Data');
+    $response->assertSee('Digital Profile');
     $response->assertSee('Maria Clara Santos');
     $response->assertSee('RA 7277 Verified PWD');
-    $response->assertSee('Print / Save Bio-Data');
+    $response->assertSee('Print / Save Profile');
     $response->assertSee('Required Workplace Accommodations');
 });
 
-test('candidate can toggle between bio-data view and edit profile modes on unified profile page', function () {
+test('candidate can toggle between profile view and edit profile modes on unified profile page', function () {
     $this->actingAs($this->candidate);
 
     Livewire::test(ShowProfile::class)
         ->assertSet('tab', 'view')
-        ->assertSee('Digital Bio-Data')
+        ->assertSee('Digital Profile')
         ->call('setTab', 'edit')
         ->assertSet('tab', 'edit')
         ->assertSee('Edit Profile & Credentials')
@@ -340,7 +341,7 @@ test('candidate can toggle between bio-data view and edit profile modes on unifi
         ->assertSet('tab', 'view');
 });
 
-test('employer can view candidate bio-data profile', function () {
+test('employer can view candidate profile', function () {
     $employer = User::where('role', 'employer')->first();
     if (! $employer) {
         $employer = User::factory()->create([
@@ -355,12 +356,12 @@ test('employer can view candidate bio-data profile', function () {
 
     $response = $this->get(route('employer.candidates.show', $this->candidate->candidateProfile));
     $response->assertOk();
-    $response->assertSee('Candidate Digital Bio-Data');
+    $response->assertSee('Candidate Digital Profile');
     $response->assertSee('Maria Clara Santos');
-    $response->assertSee('Print / Save Bio-Data');
+    $response->assertSee('Print / Save Profile');
 });
 
-test('unauthorized candidate cannot view another candidate bio-data', function () {
+test('unauthorized candidate cannot view another candidate profile', function () {
     $otherCandidate = User::factory()->create([
         'role' => 'candidate',
         'status' => 'active',

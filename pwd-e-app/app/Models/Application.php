@@ -28,6 +28,8 @@ class Application extends Model
         'offer_details',
         'application_materials',
         'resume_path',
+        'rejection_reason',
+        'rejected_at',
     ];
 
     protected $casts = [
@@ -35,6 +37,7 @@ class Application extends Model
         'fit_score_at_apply' => 'decimal:2',
         'applied_at' => 'datetime',
         'interview_at' => 'datetime',
+        'rejected_at' => 'datetime',
         'offer_details' => 'array',
         'application_materials' => 'array',
     ];

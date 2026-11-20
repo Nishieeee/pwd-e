@@ -16,6 +16,11 @@ This document outlines the complete, production-grade workflows of the **PWD-E P
 
 ## 2. Candidate Workflow (Jobseeker with Disability)
 
+![Candidate Workflow](diagrams/candidate-workflow.png)
+
+<details>
+<summary><b>View Mermaid Diagram Source</b></summary>
+
 ```mermaid
 flowchart TD
     A["1. Registration (/register)"] -->|"Capture PWD ID & Consent"| B["2. Verification Gate (/verification/pending)"]
@@ -27,6 +32,8 @@ flowchart TD
     G -->|"Interview Invitation"| H["8. Accept & Add to Calendar (.ics)"]
     G -->|"Formal Offer"| I["9. Accept Offer & Onboarding"]
 ```
+
+</details>
 
 ### Detailed Steps:
 1. **Registration & Statutory KYC:**
@@ -62,6 +69,11 @@ flowchart TD
 
 ## 3. Employer Workflow (Inclusive Workplace & Tax Incentives)
 
+![Employer Workflow](diagrams/employer-workflow.png)
+
+<details>
+<summary><b>View Mermaid Diagram Source</b></summary>
+
 ```mermaid
 flowchart TD
     A["1. Employer Registration (/register)"] -->|"Business Permit & Company Info"| B["2. Verification Gate (/verification/pending)"]
@@ -73,6 +85,8 @@ flowchart TD
     G -->|"Auto-Generates Workforce Record"| H["8. Workforce & Tax Certificate (/employer/workforce)"]
     H -->|"Compute 1% Quota & 25% BIR Deduction"| I["9. 1-Click Print BIR RA 10524 Certificate"]
 ```
+
+</details>
 
 ### Detailed Steps:
 1. **Company Registration & Accreditation:**
@@ -105,6 +119,11 @@ flowchart TD
 
 ## 4. Administrator / PESO Officer Workflow (Regulatory Governance)
 
+![Administrator Workflow](diagrams/admin-workflow.png)
+
+<details>
+<summary><b>View Mermaid Diagram Source</b></summary>
+
 ```mermaid
 flowchart TD
     A["1. Admin Login (/login)"] --> B["2. Admin Dashboard (/admin)"]
@@ -117,6 +136,8 @@ flowchart TD
     B --> I["5. Predictive Lexicon (/admin/lexicon)"]
     B --> J["6. Regulatory Audit Trail (/admin/audit-log)"]
 ```
+
+</details>
 
 ### Detailed Steps:
 1. **Administrative Authentication:**

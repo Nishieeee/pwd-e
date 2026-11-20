@@ -1,27 +1,68 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}"
       x-data="{
-          a11yContrast: localStorage.getItem('pwde_contrast') === 'high',
+          a11yContrastLevel: parseInt(localStorage.getItem('pwde_contrast_level') || (localStorage.getItem('pwde_contrast') === 'high' ? '125' : '100')),
           a11yScale: parseInt(localStorage.getItem('pwde_scale') || '100'),
           a11yDyslexia: localStorage.getItem('pwde_dyslexia') === 'true',
           a11yScreenReader: localStorage.getItem('pwde_screenreader') === 'true',
           mobileMenuOpen: false,
-          toggleContrast() { this.a11yContrast = !this.a11yContrast; localStorage.setItem('pwde_contrast', this.a11yContrast ? 'high' : 'normal'); },
+          setContrast(val) {
+              this.a11yContrastLevel = Math.min(200, Math.max(100, parseInt(val)));
+              localStorage.setItem('pwde_contrast_level', this.a11yContrastLevel);
+              localStorage.setItem('pwde_contrast', this.a11yContrastLevel > 100 ? 'high' : 'normal');
+              this.applyContrast();
+          },
+          increaseContrast() {
+              if (this.a11yContrastLevel < 200) this.setContrast(this.a11yContrastLevel + 25);
+          },
+          decreaseContrast() {
+              if (this.a11yContrastLevel > 100) this.setContrast(this.a11yContrastLevel - 25);
+          },
+          cycleContrast() {
+              const levels = [100, 125, 150, 175];
+              const idx = levels.indexOf(this.a11yContrastLevel);
+              const next = idx === -1 || idx === levels.length - 1 ? levels[0] : levels[idx + 1];
+              this.setContrast(next);
+          },
+          applyContrast() {
+              const isHigh = this.a11yContrastLevel > 100;
+              document.documentElement.classList.toggle('high-contrast-mode', isHigh);
+              document.documentElement.classList.toggle('a11y-high-contrast', isHigh);
+              document.documentElement.classList.toggle('contrast-more', isHigh);
+              if (isHigh) {
+                  document.documentElement.style.setProperty('--pwde-contrast-filter', 'contrast(' + this.a11yContrastLevel + '%)');
+                  document.documentElement.style.filter = 'contrast(' + this.a11yContrastLevel + '%)';
+              } else {
+                  document.documentElement.style.removeProperty('--pwde-contrast-filter');
+                  document.documentElement.style.filter = '';
+              }
+          },
           increaseScale() { if (this.a11yScale < 150) { this.a11yScale += 10; localStorage.setItem('pwde_scale', this.a11yScale); document.documentElement.style.fontSize = this.a11yScale + '%'; } },
           decreaseScale() { if (this.a11yScale > 90) { this.a11yScale -= 10; localStorage.setItem('pwde_scale', this.a11yScale); document.documentElement.style.fontSize = this.a11yScale + '%'; } },
           resetScale() { this.a11yScale = 100; localStorage.setItem('pwde_scale', '100'); document.documentElement.style.fontSize = '100%'; },
           toggleDyslexia() { this.a11yDyslexia = !this.a11yDyslexia; localStorage.setItem('pwde_dyslexia', this.a11yDyslexia ? 'true' : 'false'); },
           toggleScreenReader() { this.a11yScreenReader = !this.a11yScreenReader; localStorage.setItem('pwde_screenreader', this.a11yScreenReader ? 'true' : 'false'); const msg = this.a11yScreenReader ? 'Screen reader assistive enhancements enabled' : 'Screen reader enhancements disabled'; const live = document.getElementById('a11y-announcer'); if (live) live.textContent = msg; }
       }"
-      x-init="if (a11yScale !== 100) document.documentElement.style.fontSize = a11yScale + '%';"
-      :class="{ 'contrast-more': a11yContrast, 'high-contrast-mode': a11yContrast }"
+      x-init="
+          if (a11yScale !== 100) document.documentElement.style.fontSize = a11yScale + '%';
+          if (a11yContrastLevel > 100) {
+              document.documentElement.style.setProperty('--pwde-contrast-filter', 'contrast(' + a11yContrastLevel + '%)');
+              document.documentElement.style.filter = 'contrast(' + a11yContrastLevel + '%)';
+              document.documentElement.classList.add('high-contrast-mode', 'a11y-high-contrast', 'contrast-more');
+          }
+      "
+      :class="{ 'contrast-more': a11yContrastLevel > 100, 'high-contrast-mode': a11yContrastLevel > 100 }"
       :data-readable-font="a11yDyslexia ? 'true' : 'false'">
 <head>
     @include('partials.head')
     <style>
-        .high-contrast-mode { filter: contrast(125%); }
+        .high-contrast-mode { filter: var(--pwde-contrast-filter, contrast(125%)); }
         .high-contrast-mode body { background-color: #ffffff !important; color: #000000 !important; }
         [data-readable-font="true"] body, [data-readable-font="true"] * { font-family: 'Atkinson Hyperlegible Next', 'Lexend', ui-sans-serif, system-ui, sans-serif !important; letter-spacing: 0.02em !important; }
+        aside::-webkit-scrollbar { width: 6px; }
+        aside::-webkit-scrollbar-track { background: transparent; }
+        aside::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 9999px; }
+        aside::-webkit-scrollbar-thumb:hover { background: #334155; }
     </style>
 </head>
 <body class="min-h-screen lg:h-screen lg:overflow-hidden bg-[#F4F7FA] text-[#25313B] antialiased flex flex-col lg:flex-row">
@@ -108,6 +149,15 @@
                         <span>Job Postings</span>
                     </a>
 
+                    <a href="{{ route('employer.talents') }}"
+                       class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('employer.talents') ? 'bg-[#244F73] text-white shadow-sm' : 'text-gray-300 hover:text-white hover:bg-white/5' }}"
+                       @if(request()->routeIs('employer.talents')) aria-current="page" @endif>
+                        <svg class="w-4 h-4 shrink-0 {{ request()->routeIs('employer.talents') ? 'text-white' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/>
+                        </svg>
+                        <span>Talent Discovery</span>
+                    </a>
+
                     <a href="{{ route('employer.applicants') }}"
                        class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium transition-colors {{ request()->routeIs('employer.applicants') || request()->routeIs('employer.jobs.applicants') ? 'bg-[#244F73] text-white shadow-sm' : 'text-gray-300 hover:text-white hover:bg-white/5' }}"
                        @if(request()->routeIs('employer.applicants') || request()->routeIs('employer.jobs.applicants')) aria-current="page" @endif>
@@ -168,10 +218,15 @@
                     <span>Accessibility</span>
                 </div>
 
-                <button type="button" @click="toggleContrast()" :class="a11yContrast ? 'bg-[#1A2840] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-medium border border-gray-300 transition-colors focus:ring-2 focus:ring-[#244F73]" :aria-pressed="a11yContrast.toString()" aria-label="Toggle high contrast mode">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke-width="2"/><path fill="currentColor" d="M12 3a9 9 0 000 18V3z"/></svg>
-                    <span>Contrast</span>
-                </button>
+                <!-- Contrast Level Controls -->
+                <div class="inline-flex items-center rounded-md border border-gray-300 bg-gray-100 p-0.5" role="group" aria-label="Contrast level controls">
+                    <button type="button" @click="decreaseContrast()" class="px-2 py-1 rounded text-gray-700 hover:bg-white font-bold text-xs focus:ring-2 focus:ring-[#244F73]" aria-label="Decrease contrast" title="Decrease contrast">C-</button>
+                    <button type="button" @click="cycleContrast()" class="px-2 py-1 text-gray-700 font-semibold text-xs hover:bg-white inline-flex items-center gap-1" :class="a11yContrastLevel > 100 ? 'font-bold text-[#1A2840]' : ''" aria-label="Contrast level: click to cycle presets">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke-width="2"/><path fill="currentColor" d="M12 3a9 9 0 000 18V3z"/></svg>
+                        <span x-text="a11yContrastLevel > 100 ? a11yContrastLevel + '%' : 'Contrast'">Contrast</span>
+                    </button>
+                    <button type="button" @click="increaseContrast()" class="px-2 py-1 rounded text-gray-700 hover:bg-white font-bold text-xs focus:ring-2 focus:ring-[#244F73]" aria-label="Increase contrast" title="Increase contrast">C+</button>
+                </div>
 
                 <div class="inline-flex items-center rounded-md border border-gray-300 bg-gray-100 p-0.5" role="group" aria-label="Text scaling controls">
                     <button type="button" @click="decreaseScale()" class="px-2 py-1 rounded text-gray-700 hover:bg-white font-bold text-xs focus:ring-2 focus:ring-[#244F73]" aria-label="Decrease text size">A-</button>
@@ -205,8 +260,6 @@
                 </a>
 
                 <livewire:notification-bell />
-
-                <livewire:accessibility-settings />
 
                 <form method="POST" action="{{ route('logout') }}" class="inline">
                     @csrf

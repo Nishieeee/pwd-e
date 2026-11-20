@@ -1,42 +1,43 @@
 <div class="space-y-6">
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-            <div class="flex items-center gap-2 mb-1">
-                <span class="text-xs font-bold text-secondary bg-secondary-tint px-2.5 py-0.5 rounded-full">
+            <div class="flex items-center gap-2 mb-1.5">
+                <span class="inline-flex items-center gap-1.5 text-xs font-bold text-secondary bg-secondary-tint px-3 py-1 rounded-full border border-secondary/20">
+                    <svg class="size-3.5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                     {{ __('RA 10524 Compliant Hiring Pipeline') }}
                 </span>
                 @if($job)
-                    <span class="text-xs text-body-muted">{{ $job->location }}</span>
+                    <span class="text-xs text-body-muted font-medium">{{ $job->location }}</span>
                 @else
-                    <span class="text-xs text-body-muted">{{ __('Across all active opportunities') }}</span>
+                    <span class="text-xs text-body-muted font-medium">{{ __('Across all active opportunities') }}</span>
                 @endif
             </div>
-            <h1 class="font-heading text-2xl font-bold text-primary-dark">
+            <h1 class="font-heading text-2xl lg:text-3xl font-bold text-primary-dark tracking-tight">
                 @if($job)
                     {{ __('Applicants for') }} {{ $job->title }}
                 @else
                     {{ __('Applicants — All Positions') }}
                 @endif
             </h1>
-            <p class="text-sm text-body-muted">
+            <p class="text-xs sm:text-sm text-body-muted mt-1">
                 {{ $allCounts['all'] }} {{ __('total applicants ranked by accessibility accommodations & skills match') }}
             </p>
         </div>
-        <div class="flex items-center gap-2">
-            <a href="{{ route('employer.workforce') }}" class="inline-flex items-center gap-2 rounded-lg border border-primary-border bg-white px-4 py-2.5 text-xs font-semibold text-primary-dark hover:bg-primary-tint transition-colors">
+        <div class="flex items-center gap-2.5 shrink-0">
+            <a href="{{ route('employer.workforce') }}" class="inline-flex items-center gap-2 rounded-xl border border-primary-border bg-white px-4 py-2.5 text-xs font-semibold text-primary-dark hover:bg-primary-tint/60 shadow-2xs transition-colors">
                 <svg class="size-4 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                 {{ __('View Tax Incentives') }}
             </a>
-            <a href="{{ route('employer.jobs.index') }}" class="inline-flex items-center gap-2 rounded-lg bg-primary-dark px-4 py-2.5 text-xs font-semibold text-white hover:bg-primary transition-colors">
+            <a href="{{ route('employer.jobs.index') }}" class="inline-flex items-center gap-2 rounded-xl bg-primary-dark px-4 py-2.5 text-xs font-semibold text-white hover:bg-primary shadow-2xs transition-colors">
                 &larr; {{ __('Job Postings') }}
             </a>
         </div>
     </div>
 
     {{-- Controls & Job Selector Bar --}}
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-primary-border pb-3">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 border-b border-primary-border/80 pb-3">
         {{-- Filter Tabs --}}
-        <div class="flex flex-wrap items-center gap-2">
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full" role="tablist" aria-label="{{ __('Application status filter') }}">
             @foreach ([
                 'all' => 'All Applicants',
                 'applied' => 'New',
@@ -47,9 +48,11 @@
             ] as $key => $label)
                 <button type="button"
                         wire:click="setStatusFilter('{{ $key }}')"
-                        class="inline-flex items-center gap-2 px-3.5 py-2 min-h-[44px] rounded-lg text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary {{ $statusFilter === $key ? 'bg-primary-dark text-white shadow-xs' : 'bg-white text-body-muted border border-primary-border hover:bg-primary-tint hover:text-primary-dark' }}">
+                        role="tab"
+                        aria-selected="{{ $statusFilter === $key ? 'true' : 'false' }}"
+                        class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary shrink-0 {{ $statusFilter === $key ? 'bg-primary-dark text-white shadow-xs' : 'bg-white text-body-muted border border-primary-border/70 hover:bg-primary-tint/50 hover:text-primary-dark' }}">
                     <span>{{ __($label) }}</span>
-                    <span class="px-2 py-0.5 rounded-full text-xs {{ $statusFilter === $key ? 'bg-white/20 text-white font-bold' : 'bg-primary-tint text-primary-dark font-bold' }}">
+                    <span class="px-2 py-0.5 rounded-full text-[11px] font-bold tabular-nums {{ $statusFilter === $key ? 'bg-white/20 text-white' : 'bg-primary-tint text-primary-dark' }}">
                         {{ $allCounts[$key] ?? 0 }}
                     </span>
                 </button>
@@ -62,7 +65,7 @@
                 <label for="filter-job-select" class="text-xs font-semibold text-body-muted whitespace-nowrap">{{ __('Filter by Job:') }}</label>
                 <select id="filter-job-select"
                         wire:change="filterByJob($event.target.value ? $event.target.value : null)"
-                        class="rounded-xl border border-primary-border bg-white px-3 py-2 text-xs font-semibold text-primary-dark focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary">
+                        class="rounded-xl border border-primary-border bg-white px-3 py-2 text-xs font-semibold text-primary-dark focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary shadow-2xs">
                     <option value="" @selected(empty($selectedJobId))>{{ __('All Jobs') }} ({{ $employerJobs->count() }})</option>
                     @foreach($employerJobs as $ej)
                         <option value="{{ $ej->id }}" @selected($selectedJobId == $ej->id)>
@@ -76,134 +79,172 @@
 
     {{-- Applicants Table --}}
     <div class="rounded-2xl border border-primary-border bg-white shadow-sm overflow-hidden">
-        <table class="w-full text-sm">
-            <caption class="sr-only">@if($job){{ __('Applicants for') }} {{ $job->title }}@else{{ __('Applicants') }}@endif</caption>
-            <thead>
-                <tr class="border-b border-primary-border bg-surface text-left text-xs uppercase tracking-wide text-body-muted">
-                    <th scope="col" class="px-4 py-3.5">{{ __('Candidate & Profile') }}</th>
-                    <th scope="col" class="px-4 py-3.5">{{ __('Applied Position') }}</th>
-                    <th scope="col" class="px-4 py-3.5">{{ __('Fit Score') }}</th>
-                    <th scope="col" class="px-4 py-3.5">{{ __('Status') }}</th>
-                    <th scope="col" class="px-4 py-3.5">{{ __('Applied Date') }}</th>
-                    <th scope="col" class="px-4 py-3.5 text-right">{{ __('Actions') }}</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-primary-border/60">
-                @forelse ($applications as $app)
-                    @php
-                        $userCandidate = $app->candidateProfile?->user;
-                        $appliedJob = $app->jobPosting;
-                    @endphp
-                    <tr class="hover:bg-primary-tint/30 transition-colors">
-                        <td class="px-4 py-3.5">
-                            <div class="flex items-center gap-3">
-                                <div class="size-9 rounded-full bg-primary-tint text-primary-dark font-bold flex items-center justify-center text-xs shrink-0">
-                                    {{ $userCandidate ? substr($userCandidate->name, 0, 2) : 'CA' }}
-                                </div>
-                                <div class="min-w-0">
-                                    <div class="font-semibold text-primary-dark truncate flex items-center gap-1.5">
-                                        <span>{{ $userCandidate?->name ?? 'Candidate' }}</span>
-                                        @if(!empty($userCandidate?->pwd_id_number))
-                                            <span class="inline-flex items-center text-xs bg-secondary-tint text-secondary px-2 py-0.5 rounded font-semibold" title="Verified PWD ID">✓ PWD</span>
-                                        @endif
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm divide-y divide-primary-border/60">
+                <caption class="sr-only">@if($job){{ __('Applicants for') }} {{ $job->title }}@else{{ __('Applicants') }}@endif</caption>
+                <thead>
+                    <tr class="bg-surface text-left text-xs uppercase tracking-wide text-body-muted whitespace-nowrap">
+                        <th scope="col" class="px-5 py-3.5">{{ __('Candidate & Profile') }}</th>
+                        <th scope="col" class="px-4 py-3.5">{{ __('Applied Position') }}</th>
+                        <th scope="col" class="px-4 py-3.5">{{ __('Fit Score') }}</th>
+                        <th scope="col" class="px-4 py-3.5">{{ __('Status') }}</th>
+                        <th scope="col" class="px-4 py-3.5">{{ __('Applied Date') }}</th>
+                        <th scope="col" class="px-5 py-3.5 text-right">{{ __('Actions') }}</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-primary-border/60">
+                    @forelse ($applications as $app)
+                        @php
+                            $userCandidate = $app->candidateProfile?->user;
+                            $appliedJob = $app->jobPosting;
+                            $materials = $app->application_materials ?? [];
+                            $hasBio = $materials['biodata'] ?? true;
+                            $hasResume = ($materials['resume'] ?? false) || !empty($app->resume_path) || !empty($app->candidateProfile?->resume_pdf_path);
+                            $hasFsl = ($materials['fsl_video'] ?? false) || !empty($app->fsl_video_path);
+                        @endphp
+                        <tr class="hover:bg-primary-tint/25 transition-colors">
+                            <td class="px-5 py-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="size-10 rounded-full bg-primary-tint text-primary-dark font-bold flex items-center justify-center text-xs shrink-0 border border-primary-border/60 shadow-2xs">
+                                        {{ $userCandidate ? substr($userCandidate->name, 0, 2) : 'CA' }}
                                     </div>
-                                    <div class="text-xs text-body-muted truncate">{{ $app->candidateProfile?->headline ?? 'Candidate profile' }}</div>
-                                    <div class="flex items-center gap-1.5 mt-1 text-[11px]">
-                                        @php
-                                            $materials = $app->application_materials ?? [];
-                                            $hasBio = $materials['biodata'] ?? true;
-                                            $hasResume = ($materials['resume'] ?? false) || !empty($app->resume_path) || !empty($app->candidateProfile?->resume_pdf_path);
-                                            $hasFsl = ($materials['fsl_video'] ?? false) || !empty($app->fsl_video_path);
-                                        @endphp
-                                        @if($hasBio)
-                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-primary-tint text-primary-dark font-medium" title="{{ __('Digital Bio-Data submitted') }}">📋 Bio-Data</span>
-                                        @endif
-                                        @if($hasResume)
-                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 font-medium" title="{{ __('Résumé PDF submitted') }}">📑 Résumé</span>
-                                        @endif
-                                        @if($hasFsl)
-                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 font-medium" title="{{ __('FSL Video pitch submitted') }}">🤟 FSL</span>
-                                        @endif
+                                    <div class="min-w-0">
+                                        <div class="font-bold text-primary-dark truncate flex items-center gap-2">
+                                            <span class="text-sm">{{ $userCandidate?->name ?? 'Candidate' }}</span>
+                                            @if(!empty($userCandidate?->pwd_id_number))
+                                                <span class="inline-flex items-center gap-1 text-[11px] bg-secondary-tint text-secondary px-2 py-0.5 rounded-full font-bold border border-secondary/20 shrink-0" title="Verified PWD ID: {{ $userCandidate->pwd_id_number }}">
+                                                    <svg class="size-3 text-secondary" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                                    <span>PWD</span>
+                                                </span>
+                                            @endif
+                                        </div>
+                                        <div class="text-xs text-body-muted truncate mt-0.5">{{ $app->candidateProfile?->headline ?? 'Candidate profile' }}</div>
+                                        <div class="flex flex-wrap items-center gap-1.5 mt-1.5 text-[11px]">
+                                            @if($hasBio)
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary-tint/80 text-primary-dark font-medium border border-primary-border/50 whitespace-nowrap" title="{{ __('Digital Profile submitted') }}">
+                                                    <svg class="size-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                                    <span>Profile</span>
+                                                </span>
+                                            @endif
+                                            @if($hasResume)
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 font-medium border border-blue-200 whitespace-nowrap" title="{{ __('Résumé PDF submitted') }}">
+                                                    <svg class="size-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                                                    <span>Résumé</span>
+                                                </span>
+                                            @endif
+                                            @if($hasFsl)
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-medium border border-emerald-200 whitespace-nowrap" title="{{ __('FSL Video pitch submitted') }}">
+                                                    <span>🤟 FSL</span>
+                                                </span>
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </td>
-                        <td class="px-4 py-3.5">
-                            <div class="font-semibold text-primary-dark text-xs sm:text-sm">
-                                {{ $appliedJob?->title ?? 'Position' }}
-                            </div>
-                            <div class="text-[11px] text-body-muted">
-                                {{ $appliedJob?->location ?? 'Location' }}
-                            </div>
-                        </td>
-                        <td class="px-4 py-3.5">
-                            <div class="inline-flex items-center gap-1.5">
-                                <span class="font-bold text-primary-dark tabular-nums text-sm">
-                                    {{ $app->fit_score_at_apply !== null ? number_format($app->fit_score_at_apply, 0).'%' : '95%' }}
+                            </td>
+                            <td class="px-4 py-4 whitespace-nowrap">
+                                <div class="font-bold text-primary-dark text-xs sm:text-sm">
+                                    {{ $appliedJob?->title ?? 'Position' }}
+                                </div>
+                                <div class="text-[11px] text-body-muted flex items-center gap-1 mt-0.5">
+                                    <svg class="size-3 text-body-muted/70 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                    <span>{{ $appliedJob?->location ?? 'Location' }}</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 whitespace-nowrap">
+                                @php
+                                    $score = $app->fit_score_at_apply !== null ? (float)$app->fit_score_at_apply : 95.0;
+                                    $scoreConfig = $score >= 90
+                                        ? ['bg' => 'bg-emerald-50 text-emerald-800 border-emerald-200', 'dot' => 'bg-emerald-500']
+                                        : ($score >= 75
+                                            ? ['bg' => 'bg-sky-50 text-sky-800 border-sky-200', 'dot' => 'bg-sky-500']
+                                            : ['bg' => 'bg-amber-50 text-amber-800 border-amber-200', 'dot' => 'bg-amber-500']);
+                                @endphp
+                                <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border {{ $scoreConfig['bg'] }}" title="{{ __('Accessibility & accommodation fit score') }}">
+                                    <span class="size-1.5 rounded-full {{ $scoreConfig['dot'] }}"></span>
+                                    <span class="tabular-nums">{{ number_format($score, 0) }}%</span>
+                                    <span class="font-semibold text-[11px] opacity-80">{{ __('Fit') }}</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-4 whitespace-nowrap">
+                                @php
+                                    $statusConfig = match($app->status) {
+                                        'hired' => ['bg' => 'bg-emerald-50 text-emerald-800 border-emerald-200', 'dot' => 'bg-emerald-500', 'label' => 'Hired'],
+                                        'interview' => ['bg' => 'bg-purple-50 text-purple-800 border-purple-200', 'dot' => 'bg-purple-500', 'label' => 'Interview'],
+                                        'under_review' => ['bg' => 'bg-amber-50 text-amber-800 border-amber-200', 'dot' => 'bg-amber-500', 'label' => 'Under Review'],
+                                        'rejected' => ['bg' => 'bg-red-50 text-red-700 border-red-200', 'dot' => 'bg-red-500', 'label' => 'Declined'],
+                                        default => ['bg' => 'bg-sky-50 text-sky-800 border-sky-200', 'dot' => 'bg-sky-500', 'label' => 'Applied'],
+                                    };
+                                @endphp
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border {{ $statusConfig['bg'] }}">
+                                    <span class="size-1.5 rounded-full {{ $statusConfig['dot'] }}"></span>
+                                    <span>{{ __($statusConfig['label']) }}</span>
                                 </span>
-                                <span class="text-xs text-secondary font-semibold">Fit</span>
-                            </div>
-                        </td>
-                        <td class="px-4 py-3.5">
-                            @php
-                                $badgeClass = match($app->status) {
-                                    'hired' => 'bg-secondary-tint text-secondary border border-emerald-200',
-                                    'interview' => 'bg-purple-100 text-purple-800 border border-purple-200',
-                                    'under_review' => 'bg-amber-100 text-amber-800 border border-amber-200',
-                                    'rejected' => 'bg-red-100 text-red-700 border border-red-200',
-                                    default => 'bg-primary-tint text-primary-dark border border-primary-border',
-                                };
-                            @endphp
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold {{ $badgeClass }}">
-                                {{ ucfirst(str_replace('_', ' ', $app->status)) }}
-                            </span>
-                        </td>
-                        <td class="px-4 py-3.5 text-xs text-body-muted whitespace-nowrap">
-                            {{ $app->created_at?->format('M d, Y') ?? '—' }}
-                        </td>
-                        <td class="px-4 py-3.5 text-right">
-                            <div class="inline-flex items-center justify-end gap-1.5">
-                                @if($app->candidate_profile_id)
-                                    <a href="{{ route('employer.candidates.show', $app->candidate_profile_id) }}" target="_blank"
-                                       class="inline-flex items-center gap-1 rounded-lg bg-primary-dark px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary shadow-2xs transition-colors"
-                                       title="{{ __('Open full digital bio-data with 2x2 photo') }}">
-                                        <svg class="size-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/></svg>
-                                        <span>{{ __('Bio-Data') }}</span>
-                                    </a>
-                                @endif
+                            </td>
+                            <td class="px-4 py-4 text-xs text-body-muted whitespace-nowrap">
+                                {{ $app->created_at?->format('M d, Y') ?? '—' }}
+                            </td>
+                            <td class="px-5 py-4 text-right whitespace-nowrap">
+                                <div class="inline-flex items-center justify-end gap-1.5 shrink-0">
+                                    @if($app->candidate_profile_id)
+                                        <a href="{{ route('employer.candidates.show', $app->candidate_profile_id) }}" target="_blank"
+                                           class="inline-flex items-center gap-1.5 rounded-lg bg-primary-dark px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary shadow-2xs transition-colors whitespace-nowrap shrink-0"
+                                           title="{{ __('Open full candidate profile with 2x2 photo') }}">
+                                            <svg class="size-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/></svg>
+                                            <span class="whitespace-nowrap">{{ __('Profile') }}</span>
+                                        </a>
+                                    @endif
 
-                                <button type="button" wire:click="viewDetails({{ $app->id }})"
-                                        class="rounded-lg border border-primary-border bg-white px-2.5 py-1.5 text-xs font-semibold text-primary-dark hover:bg-primary-tint transition-colors">
-                                    {{ __('Details') }}
-                                </button>
-
-                                @if($app->status !== 'hired')
-                                    <button type="button" wire:click="openInterviewModal({{ $app->id }})"
-                                            class="rounded-lg border border-primary-border bg-white px-2.5 py-1.5 text-xs font-semibold text-primary hover:bg-primary-tint transition-colors">
-                                        {{ __('Interview') }}
+                                    <button type="button" wire:click="viewDetails({{ $app->id }})"
+                                            class="inline-flex items-center rounded-lg border border-primary-border bg-white px-2.5 py-1.5 text-xs font-semibold text-primary-dark hover:bg-primary-tint/60 transition-colors whitespace-nowrap shrink-0">
+                                        {{ __('Details') }}
                                     </button>
 
-                                    <button type="button" wire:click="openHireModal({{ $app->id }})"
-                                            class="rounded-lg bg-secondary px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-secondary/90 transition-colors shadow-2xs">
-                                        {{ __('Hire') }}
-                                    </button>
-                                @endif
-                            </div>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="6" class="px-6 py-12 text-center">
-                            <div class="mx-auto size-12 rounded-full bg-primary-tint text-primary flex items-center justify-center mb-3">
-                                <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-                            </div>
-                            <p class="font-bold text-primary-dark text-base">{{ __('No applicants in this category') }}</p>
-                            <p class="text-xs text-body-muted mt-1">{{ __('Try selecting a different status tab or job filter.') }}</p>
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
+                                    @if($app->status !== 'hired')
+                                        @if($app->status !== 'rejected')
+                                            <button type="button" wire:click="openInterviewModal({{ $app->id }})"
+                                                    class="inline-flex items-center gap-1 rounded-lg border border-primary-border bg-white px-2.5 py-1.5 text-xs font-semibold text-primary hover:bg-primary-tint/60 transition-colors whitespace-nowrap shrink-0">
+                                                <svg class="size-3.5 text-primary/70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                                <span>{{ __('Interview') }}</span>
+                                            </button>
+
+                                            <button type="button" wire:click="openHireModal({{ $app->id }})"
+                                                    class="inline-flex items-center gap-1 rounded-lg bg-secondary px-3 py-1.5 text-xs font-bold text-white hover:bg-secondary/90 transition-colors shadow-2xs whitespace-nowrap shrink-0">
+                                                <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                                <span>{{ __('Hire') }}</span>
+                                            </button>
+
+                                            <button type="button" wire:click="openRejectModal({{ $app->id }})"
+                                                    class="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 hover:border-red-300 transition-colors whitespace-nowrap shrink-0"
+                                                    title="{{ __('Decline candidate application') }}">
+                                                <svg class="size-3.5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                <span>{{ __('Decline') }}</span>
+                                            </button>
+                                        @else
+                                            <button type="button" wire:click="openRejectModal({{ $app->id }})"
+                                                    class="inline-flex items-center gap-1 rounded-lg border border-gray-200 bg-gray-50 px-2.5 py-1.5 text-xs font-medium text-body-muted hover:bg-white transition-colors whitespace-nowrap shrink-0"
+                                                    title="{{ __('View or edit decline remark') }}">
+                                                <svg class="size-3.5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                                <span>{{ __('Decline Note') }}</span>
+                                            </button>
+                                        @endif
+                                    @endif
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="px-6 py-12 text-center">
+                                <div class="mx-auto size-12 rounded-full bg-primary-tint text-primary flex items-center justify-center mb-3">
+                                    <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                                </div>
+                                <p class="font-bold text-primary-dark text-base">{{ __('No applicants in this category') }}</p>
+                                <p class="text-xs text-body-muted mt-1">{{ __('Try selecting a different status tab or job filter.') }}</p>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
 
     {{-- Detail Modal --}}
@@ -230,7 +271,7 @@
                             <a href="{{ route('employer.candidates.show', $cp->id) }}" target="_blank"
                                class="inline-flex items-center gap-1.5 rounded-lg bg-primary-dark px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary shadow-xs transition-colors">
                                 <svg class="size-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/></svg>
-                                <span>{{ __('View Full Bio-Data') }}</span>
+                                <span>{{ __('View Full Profile') }}</span>
                             </a>
                         @endif
                         <button type="button" wire:click="closeDetails" class="rounded-lg border border-primary-border bg-white px-3 py-1.5 text-xs font-semibold text-primary-dark hover:bg-primary-tint">
@@ -247,11 +288,24 @@
                     </div>
                     <div>
                         <span class="text-xs text-body-muted block">{{ __('Current Status') }}</span>
-                        <span class="rounded-full px-2.5 py-0.5 text-xs font-semibold {{ $viewing->status === 'hired' ? 'bg-secondary-tint text-secondary' : 'bg-primary-tint text-primary-dark' }}">
+                        <span class="rounded-full px-2.5 py-0.5 text-xs font-semibold {{ $viewing->status === 'hired' ? 'bg-secondary-tint text-secondary' : ($viewing->status === 'rejected' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-primary-tint text-primary-dark') }}">
                             {{ ucfirst(str_replace('_', ' ', $viewing->status)) }}
                         </span>
                     </div>
                 </div>
+
+                @if($viewing->status === 'rejected' && $viewing->rejection_reason)
+                    <div class="rounded-xl border border-red-200 bg-red-50/60 p-3.5 text-xs text-red-900 space-y-1">
+                        <div class="flex items-center gap-1.5 font-bold text-red-800">
+                            <svg class="size-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                            <span>{{ __('Decline Feedback / Remark') }}</span>
+                            @if($viewing->rejected_at)
+                                <span class="text-[11px] font-normal text-red-700/80">({{ $viewing->rejected_at->format('M d, Y') }})</span>
+                            @endif
+                        </div>
+                        <p class="leading-relaxed text-red-800/90 italic">"{{ $viewing->rejection_reason }}"</p>
+                    </div>
+                @endif
 
                 {{-- Documents Submitted --}}
                 <div class="space-y-3">
@@ -262,8 +316,8 @@
                                class="flex items-center gap-3 p-3 rounded-xl border border-primary-border bg-surface hover:bg-primary-tint/50 transition-colors">
                                 <div class="size-8 rounded-lg bg-primary-tint text-primary-dark flex items-center justify-center font-bold text-xs">📋</div>
                                 <div class="min-w-0">
-                                    <div class="text-xs font-semibold text-primary-dark truncate">{{ __('Digital Bio-Data') }}</div>
-                                    <div class="text-[11px] text-body-muted">{{ __('Executive view + Philippine format') }}</div>
+                                    <div class="text-xs font-semibold text-primary-dark truncate">{{ __('Digital Profile') }}</div>
+                                    <div class="text-[11px] text-body-muted">{{ __('Executive view + credentials') }}</div>
                                 </div>
                             </a>
                         @endif
@@ -296,6 +350,11 @@
                 <div class="pt-4 border-t border-primary-border flex items-center justify-between">
                     <span class="text-xs font-semibold text-body-muted">{{ __('Update application stage:') }}</span>
                     <div class="flex items-center gap-2">
+                        @if($viewing->status !== 'rejected')
+                            <button type="button" wire:click="openRejectModal({{ $viewing->id }})" class="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors">
+                                {{ __('Decline Candidate') }}
+                            </button>
+                        @endif
                         <select wire:change="updateStatus({{ $viewing->id }}, $event.target.value)" class="rounded-lg border border-primary-border px-3 py-1.5 text-xs font-semibold text-primary-dark bg-white">
                             @foreach (['applied' => 'New Application', 'under_review' => 'Under Review', 'interview' => 'Interviewing', 'hired' => 'Hired', 'rejected' => 'Declined'] as $st => $stLabel)
                                 <option value="{{ $st }}" @selected($viewing->status === $st)>{{ $stLabel }}</option>
@@ -421,6 +480,62 @@
                     </button>
                     <button type="button" wire:click="confirmHire" class="rounded-lg bg-secondary px-4 py-2 text-xs font-semibold text-white hover:bg-secondary/90 shadow-xs">
                         {{ __('Confirm Hire & Log RA 10524 Credit') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- Reject / Decline Modal --}}
+    @if ($showRejectModal && $rejectingApp)
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" role="dialog" aria-modal="true" aria-label="{{ __('Decline candidate application') }}">
+            <div class="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 sm:p-8 shadow-xl space-y-5" wire:click.stop>
+                <div class="flex items-start justify-between border-b border-primary-border pb-3">
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-50 text-red-700 border border-red-200 mb-1">
+                            {{ __('Decline Application') }}
+                        </div>
+                        <h2 class="font-heading text-lg font-bold text-primary-dark">{{ __('Decline Candidate Application') }}</h2>
+                        <p class="text-xs text-body-muted mt-0.5">{{ $rejectingApp->candidateProfile?->user?->name }} · {{ $rejectingApp->jobPosting?->title }}</p>
+                    </div>
+                    <button type="button" wire:click="closeRejectModal" class="text-body-muted hover:text-primary-dark text-lg">&times;</button>
+                </div>
+
+                <p class="text-xs text-body-muted leading-relaxed">
+                    {{ __('Politely notify the candidate that they will not be advancing to the next stage. A feedback remark helps candidates improve their accessibility and application materials.') }}
+                </p>
+
+                <div class="space-y-3 text-xs">
+                    <label class="block font-bold text-primary-dark">{{ __('Select a Quick Reason (Click to Fill)') }}</label>
+                    <div class="flex flex-wrap gap-1.5">
+                        @foreach ([
+                            'Position filled by another qualified applicant',
+                            'Skill set or experience level mismatch for this role',
+                            'Requisition currently placed on hold',
+                            'Schedule / shift availability incompatibility'
+                        ] as $quickReason)
+                            <button type="button"
+                                    wire:click="$set('rejectionReason', '{{ $quickReason }}')"
+                                    class="text-[11px] px-2.5 py-1 rounded-md border border-gray-200 bg-gray-50 hover:bg-primary-tint hover:border-primary-border text-primary-dark transition-colors text-left">
+                                {{ $quickReason }}
+                            </button>
+                        @endforeach
+                    </div>
+
+                    <div class="pt-2">
+                        <label class="block font-bold text-primary-dark mb-1">{{ __('Custom Feedback or Remarks (Optional)') }}</label>
+                        <textarea wire:model="rejectionReason" rows="3"
+                                  placeholder="{{ __('e.g., Thank you for your application. Although your profile is strong, we have moved forward with another candidate whose background is a closer fit.') }}"
+                                  class="w-full rounded-lg border border-primary-border px-3 py-2 text-xs focus:ring-2 focus:ring-red-500 focus:outline-none"></textarea>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-3 border-t border-primary-border">
+                    <button type="button" wire:click="closeRejectModal" class="rounded-lg border border-primary-border px-4 py-2 text-xs font-semibold text-primary-dark hover:bg-primary-tint">
+                        {{ __('Cancel') }}
+                    </button>
+                    <button type="button" wire:click="confirmReject" class="rounded-lg bg-red-600 px-4 py-2 text-xs font-semibold text-white hover:bg-red-700 shadow-xs">
+                        {{ __('Confirm & Decline Candidate') }}
                     </button>
                 </div>
             </div>

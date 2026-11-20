@@ -62,7 +62,7 @@ test('employer can view centralized applicants page across all jobs', function (
         ->assertSee('Applicants')
         ->assertSee('All Positions')
         ->assertSee($candidate->name)
-        ->assertSee('Bio-Data');
+        ->assertSee('Profile');
 });
 
 test('employer dashboard renders live metrics and recent applicants', function () {
@@ -85,7 +85,7 @@ test('employer dashboard renders live metrics and recent applicants', function (
         ->assertSee('Total Applicants')
         ->assertSee('Recent Applicants')
         ->assertSee($candidate->name)
-        ->assertSee('Bio-Data')
+        ->assertSee('Profile')
         ->assertSee('RA 10524');
 });
 
@@ -166,6 +166,47 @@ test('employer can filter applicants by status tabs', function () {
         ->assertSee('All Applicants')
         ->call('setStatusFilter', 'interview')
         ->assertSet('statusFilter', 'interview');
+});
+
+test('employer can decline applicant with remark and notify candidate', function () {
+    \Illuminate\Support\Facades\Notification::fake();
+
+    [$user, $profile, $job] = makeEmployerWithJob();
+    $candidate = User::factory()->verified()->create(['role' => 'candidate']);
+    $candidate->assignRole('candidate');
+    $cp = \App\Models\CandidateProfile::firstOrCreate(['user_id' => $candidate->id]);
+    $app = Application::create([
+        'candidate_profile_id' => $cp->id,
+        'job_posting_id' => $job->id,
+        'status' => 'applied',
+        'applied_at' => now(),
+    ]);
+
+    $this->actingAs($user);
+    Livewire::test(Applicants::class, ['job' => $job])
+        ->assertSee('Decline')
+        ->call('openRejectModal', $app->id)
+        ->assertSet('showRejectModal', true)
+        ->assertSet('rejectingAppId', $app->id)
+        ->set('rejectionReason', 'Position filled by another applicant')
+        ->call('confirmReject')
+        ->assertHasNoErrors()
+        ->assertSet('showRejectModal', false);
+
+    $freshApp = $app->fresh();
+    expect($freshApp->status)->toBe('rejected');
+    expect($freshApp->rejection_reason)->toBe('Position filled by another applicant');
+    expect($freshApp->rejected_at)->not->toBeNull();
+
+    \Illuminate\Support\Facades\Notification::assertSentTo(
+        $candidate,
+        \App\Notifications\ApplicationStatusChanged::class,
+        function ($notification) use ($job) {
+            return $notification->status === 'rejected'
+                && $notification->note === 'Position filled by another applicant'
+                && $notification->jobTitle === $job->title;
+        }
+    );
 });
 
 test('employer can view workforce page', function () {

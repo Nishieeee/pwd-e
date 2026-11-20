@@ -62,6 +62,11 @@ class JobPosting extends Model
         return $this->hasMany(JobAccommodation::class);
     }
 
+    public function invitations(): HasMany
+    {
+        return $this->hasMany(JobInvitation::class);
+    }
+
     public function matches(): HasMany
     {
         return $this->hasMany(JobMatch::class);

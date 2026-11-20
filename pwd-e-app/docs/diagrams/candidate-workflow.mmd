@@ -1,0 +1,9 @@
+flowchart TD
+    A["1. Registration (/register)"] -->|"Capture PWD ID & Consent"| B["2. Verification Gate (/verification/pending)"]
+    B -->|"Admin Approval"| C["3. Candidate Dashboard (/dashboard)"]
+    C --> D["4. 5-Step Profile Builder (/profile/builder)"]
+    D -->|"Personal Info, Education, Experience, Accommodations, Video Pitch"| E["5. Job Search & Fit Matches (/jobs/matches)"]
+    E -->|"Filter by Ramps, Screen Reader, FSL, etc."| F["6. Job Application (/jobs/{job}/apply)"]
+    F -->|"STT Voice Dictation, Predictive Text, Resume & FSL Pitch"| G["7. Applications Tracker (/applications)"]
+    G -->|"Interview Invitation"| H["8. Accept & Add to Calendar (.ics)"]
+    G -->|"Formal Offer"| I["9. Accept Offer & Onboarding"]

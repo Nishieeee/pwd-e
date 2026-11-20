@@ -16,7 +16,7 @@
                         class="flex-1 rounded-lg border border-primary-border bg-surface px-4 py-3 text-base min-h-[48px] focus:outline-none focus:ring-2 focus:ring-primary"
                         placeholder="e.g. Accessibility in Manila with Ramp Access or Screen Reader"
                     >
-                    <button type="button" wire:click="$set('search', '')" class="bg-primary-dark text-white font-semibold px-6 py-3 rounded-lg min-h-[48px] hover:bg-primary md:w-auto w-full">
+                    <button type="button" wire:click="$set('search', '')" class="bg-primary-dark text-white font-semibold px-6 py-3 rounded-lg min-h-[48px] hover:bg-primary md:w-auto w-full focus:outline-none focus:ring-0">
                         Clear
                     </button>
                 </div>
@@ -27,11 +27,11 @@
                         <button
                             type="button"
                             wire:click="filterByAccommodation('{{ $pill }}')"
-                            class="text-sm border rounded-full px-3 py-1.5 transition {{ $accommodationFilter === $pill ? 'bg-primary-dark text-white border-primary-dark' : 'border-primary-border text-primary-dark bg-white hover:bg-primary-tint' }}"
+                            class="text-sm border rounded-full px-3 py-1.5 transition focus:outline-none focus:ring-0 {{ $accommodationFilter === $pill ? 'bg-primary-dark text-white border-primary-dark' : 'border-primary-border text-primary-dark bg-white hover:bg-primary-tint' }}"
                         >{{ $pill }}</button>
                     @endforeach
                     @if($accommodationFilter)
-                        <button type="button" wire:click="$set('accommodationFilter', '')" class="text-sm text-secondary underline ml-2">Clear filter</button>
+                        <button type="button" wire:click="$set('accommodationFilter', '')" class="text-sm text-secondary underline ml-2 focus:outline-none focus:ring-0">Clear filter</button>
                     @endif
                 </div>
                 @endif
@@ -134,14 +134,14 @@
                                         <span class="text-center text-sm font-medium text-primary-dark bg-primary-tint rounded-full px-3 py-1">Inclusive Employer</span>
                                         @auth
                                             @if(auth()->user()->isCandidate())
-                                                <a href="{{ route('candidate.apply', $job) }}" class="block text-center bg-primary-dark text-white font-semibold py-2.5 rounded-lg min-h-[40px] flex items-center justify-center hover:bg-primary transition-colors">Apply via Portal</a>
+                                                <a href="{{ route('candidate.apply', $job) }}" class="block text-center bg-primary-dark text-white font-semibold py-2.5 rounded-lg min-h-[40px] flex items-center justify-center hover:bg-primary focus:outline-none focus:ring-0 transition-colors">Apply via Portal</a>
                                             @elseif(auth()->user()->isEmployer())
                                                 <span class="block text-center bg-primary-tint text-primary-dark text-xs font-semibold py-2.5 rounded-lg min-h-[40px] flex items-center justify-center">Employer Account</span>
                                             @else
                                                 <span class="block text-center bg-primary-tint text-primary-dark text-xs font-semibold py-2.5 rounded-lg min-h-[40px] flex items-center justify-center">Admin View</span>
                                             @endif
                                         @else
-                                            <a href="{{ route('login') }}" class="block text-center bg-primary-dark text-white font-semibold py-2.5 rounded-lg min-h-[40px] flex items-center justify-center hover:bg-primary transition-colors">Log in to Apply</a>
+                                            <a href="{{ route('login') }}" class="block text-center bg-primary-dark text-white font-semibold py-2.5 rounded-lg min-h-[40px] flex items-center justify-center hover:bg-primary focus:outline-none focus:ring-0 transition-colors">Log in to Apply</a>
                                         @endauth
                                     </div>
                                     @if($job->published_at)

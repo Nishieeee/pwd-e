@@ -1,0 +1,9 @@
+flowchart TD
+    A["1. Employer Registration (/register)"] -->|"Business Permit & Company Info"| B["2. Verification Gate (/verification/pending)"]
+    B -->|"Admin Accreditation"| C["3. Employer Dashboard (/dashboard)"]
+    C --> D["4. Post Barrier-Free Job (/employer/jobs/create)"]
+    D -->|"Specify Workplace Accommodations & Salary"| E["5. Review Applicants (/employer/jobs/{job}/applicants)"]
+    E -->|"Inspect Resume, Fit Score & FSL Video"| F["6. Schedule Accessible Interview"]
+    F -->|"Note Accommodations: Interpreter, Ground Floor Room"| G["7. Mark as Hired"]
+    G -->|"Auto-Generates Workforce Record"| H["8. Workforce & Tax Certificate (/employer/workforce)"]
+    H -->|"Compute 1% Quota & 25% BIR Deduction"| I["9. 1-Click Print BIR RA 10524 Certificate"]

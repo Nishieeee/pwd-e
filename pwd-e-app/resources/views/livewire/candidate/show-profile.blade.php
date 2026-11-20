@@ -50,7 +50,7 @@
                 @if($isEmployer)
                     <a href="{{ route('employer.jobs.index') }}" class="hover:text-primary transition-colors">Employer Portal</a>
                     <span>/</span>
-                    <span class="text-primary-dark font-medium">Candidate Bio-Data</span>
+                    <span class="text-primary-dark font-medium">Candidate Profile</span>
                 @else
                     <a href="{{ route('dashboard') }}" class="hover:text-primary transition-colors">Dashboard</a>
                     <span>/</span>
@@ -58,10 +58,10 @@
                 @endif
             </div>
             <h1 class="font-heading text-2xl font-bold text-primary-dark mt-1">
-                {{ $isOwner ? __('Profile') : __('Candidate Digital Bio-Data') }}
+                {{ $isOwner ? __('Profile') : __('Candidate Digital Profile') }}
             </h1>
             <p class="text-xs text-body-muted mt-0.5">
-                {{ __('Official multimodal employment profile and Philippine Bio-Data format under RA 10524.') }}
+                {{ __('Official multimodal employment profile and Philippine Digital Profile format under RA 10524.') }}
             </p>
         </div>
 
@@ -75,7 +75,7 @@
                             aria-selected="{{ $tab === 'view' ? 'true' : 'false' }}"
                             class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all {{ $tab === 'view' ? 'bg-primary-dark text-white shadow-xs' : 'text-body-muted hover:text-primary-dark hover:bg-white/60' }}">
                         <svg class="size-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                        <span>{{ __('View Bio-Data') }}</span>
+                        <span>{{ __('View Profile') }}</span>
                     </button>
                     <button type="button"
                             wire:click="setTab('edit')"
@@ -93,7 +93,7 @@
                         <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
                         </svg>
-                        <span>{{ __('Print / Save Bio-Data') }}</span>
+                        <span>{{ __('Print / Save Profile') }}</span>
                     </button>
                 @endif
             @else
@@ -107,7 +107,7 @@
                     <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
                     </svg>
-                    <span>{{ __('Print / Save Bio-Data') }}</span>
+                    <span>{{ __('Print / Save Profile') }}</span>
                 </button>
             @endif
         </div>
@@ -123,7 +123,7 @@
                 </div>
                 <button type="button" wire:click="setTab('view')"
                         class="text-xs font-semibold text-primary hover:underline inline-flex items-center gap-1">
-                    <span>{{ __('View Bio-Data Preview') }}</span>
+                    <span>{{ __('View Profile Preview') }}</span>
                     <span>&rarr;</span>
                 </button>
             </div>
@@ -131,10 +131,10 @@
             <livewire:candidate.profile-builder :is-embedded="true" wire:key="embedded-profile-builder-{{ $profile->id }}" />
         </div>
     @else
-        {{-- Main Hybrid Bio-Data Card --}}
-        <article class="print-container bg-white rounded-2xl border border-primary-border shadow-sm p-6 sm:p-10 space-y-8 w-full min-w-0 overflow-hidden" aria-label="{{ __('Candidate Employment Bio-Data') }}">
+        {{-- Main Hybrid Profile Card --}}
+        <article class="print-container bg-white rounded-2xl border border-primary-border shadow-sm p-6 sm:p-10 space-y-8 w-full min-w-0 overflow-hidden" aria-label="{{ __('Candidate Employment Profile') }}">
 
-        {{-- Bio-Data Official Header --}}
+        {{-- Profile Official Header --}}
         <header class="flex flex-col sm:flex-row items-start justify-between gap-6 pb-6 border-b-2 border-primary-dark/20 page-break-inside-avoid w-full min-w-0">
             <div class="flex flex-col sm:flex-row items-start gap-6 min-w-0 flex-1">
                 {{-- 2x2 Photo Frame --}}
@@ -200,7 +200,7 @@
             {{-- Document Stamp / Meta --}}
             <div class="sm:text-right space-y-1 text-xs shrink-0 pt-2 sm:pt-0">
                 <span class="inline-block uppercase tracking-wider text-[10px] font-bold text-primary bg-primary-tint px-2.5 py-1 rounded">
-                    Digital Bio-Data
+                    Digital Profile
                 </span>
                 <p class="font-mono text-[11px] text-body-muted">
                     ID: PWD-{{ str_pad((string) $candidateUser->id, 5, '0', STR_PAD_LEFT) }}

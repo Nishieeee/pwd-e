@@ -53,6 +53,12 @@ class Applicants extends Component
 
     public bool $hirePwdVerified = true;
 
+    public bool $showRejectModal = false;
+
+    public ?int $rejectingAppId = null;
+
+    public string $rejectionReason = '';
+
     public function mount(?JobPosting $job = null): void
     {
         $user = Auth::user();
@@ -209,10 +215,77 @@ class Applicants extends Component
         $this->hiringAppId = null;
     }
 
+    public function openRejectModal(int $applicationId): void
+    {
+        $profile = Auth::user()?->employerProfile;
+        if (! $profile) {
+            return;
+        }
+
+        $app = Application::with(['candidateProfile.user', 'jobPosting'])->whereHas('jobPosting', function ($q) use ($profile) {
+            $q->where('employer_profile_id', $profile->id);
+        })->findOrFail($applicationId);
+
+        $this->rejectingAppId = $app->id;
+        $this->rejectionReason = $app->rejection_reason ?? '';
+        $this->showRejectModal = true;
+    }
+
+    public function closeRejectModal(): void
+    {
+        $this->showRejectModal = false;
+        $this->rejectingAppId = null;
+        $this->rejectionReason = '';
+    }
+
+    public function confirmReject(): void
+    {
+        if (! $this->rejectingAppId) {
+            return;
+        }
+
+        $profile = Auth::user()?->employerProfile;
+        if (! $profile) {
+            return;
+        }
+
+        $app = Application::with(['candidateProfile.user', 'jobPosting'])->whereHas('jobPosting', function ($q) use ($profile) {
+            $q->where('employer_profile_id', $profile->id);
+        })->findOrFail($this->rejectingAppId);
+
+        $app->update([
+            'status' => 'rejected',
+            'status_subtext' => 'Application declined',
+            'rejection_reason' => $this->rejectionReason ?: null,
+            'rejected_at' => now(),
+        ]);
+
+        if ($app->candidateProfile?->user) {
+            $app->candidateProfile->user->notify(
+                new \App\Notifications\ApplicationStatusChanged(
+                    $app->jobPosting?->title ?? 'Position',
+                    'rejected',
+                    $this->rejectionReason ?: null
+                )
+            );
+        }
+
+        $this->showRejectModal = false;
+        $this->rejectingAppId = null;
+        $this->rejectionReason = '';
+
+        Flux::toast(variant: 'success', text: __('Applicant declined. Candidate notified politely.'));
+    }
+
     public function updateStatus(int $applicationId, string $status): void
     {
         $profile = Auth::user()?->employerProfile;
         if (! $profile) {
+            return;
+        }
+
+        if ($status === 'rejected') {
+            $this->openRejectModal($applicationId);
             return;
         }
 
@@ -328,12 +401,17 @@ class Applicants extends Component
             ? Application::with(['candidateProfile.user', 'jobPosting'])->find($this->hiringAppId)
             : null;
 
+        $rejectingApp = $this->rejectingAppId
+            ? Application::with(['candidateProfile.user', 'jobPosting'])->find($this->rejectingAppId)
+            : null;
+
         return view('livewire.employer.applicants', [
             'applications' => $applications,
             'allCounts' => $allCounts,
             'viewing' => $viewing,
             'interviewingApp' => $interviewingApp,
             'hiringApp' => $hiringApp,
+            'rejectingApp' => $rejectingApp,
             'employerJobs' => $employerJobs,
         ]);
     }
