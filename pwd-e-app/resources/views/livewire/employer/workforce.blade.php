@@ -71,6 +71,7 @@
             <thead>
                 <tr class="border-b border-primary-border text-left text-xs uppercase tracking-wide text-body-muted">
                     <th scope="col" class="px-4 py-3">{{ __('Employee') }}</th>
+                    <th scope="col" class="px-4 py-3">{{ __('DOLE / PWD ID No.') }}</th>
                     <th scope="col" class="px-4 py-3">{{ __('Hired') }}</th>
                     <th scope="col" class="px-4 py-3">{{ __('Annual wage') }}</th>
                     <th scope="col" class="px-4 py-3">{{ __('PWD verified') }}</th>
@@ -81,6 +82,9 @@
                 @forelse ($records as $record)
                     <tr>
                         <td class="px-4 py-3 font-semibold text-primary-dark">{{ $record->candidateProfile?->user?->name ?? '—' }}</td>
+                        <td class="px-4 py-3 text-xs font-mono text-body-muted">
+                            {{ $record->candidateProfile?->user?->pwd_id_number ?? __('DOLE Verified') }}
+                        </td>
                         <td class="px-4 py-3 text-body-muted">{{ $record->hired_at?->format('M d, Y') ?? '—' }}</td>
                         <td class="px-4 py-3 tabular-nums">₱{{ number_format($record->annual_wage, 2) }}</td>
                         <td class="px-4 py-3">
@@ -96,7 +100,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="px-4 py-6 text-center text-body-muted">{{ __('No workforce records yet. Records are created when you hire an applicant.') }}</td>
+                        <td colspan="6" class="px-4 py-6 text-center text-body-muted">{{ __('No workforce records yet. Records are created when you hire an applicant.') }}</td>
                     </tr>
                 @endforelse
             </tbody>
