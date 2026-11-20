@@ -232,3 +232,32 @@ test('employer can withdraw invitation with a reason remark', function () {
         }
     );
 });
+
+test('talents page displays applied badge if candidate already applied to employer job', function () {
+    [$employer, $employerProfile, $job] = createEmployerUserWithProfile();
+
+    $candidateUser = User::factory()->verified()->create([
+        'role' => 'candidate',
+        'name' => 'Sarah Applicant',
+    ]);
+    $candidateUser->assignRole('candidate');
+
+    $candidateProfile = CandidateProfile::create([
+        'user_id' => $candidateUser->id,
+        'headline' => 'Senior Developer',
+    ]);
+
+    \App\Models\Application::create([
+        'candidate_profile_id' => $candidateProfile->id,
+        'job_posting_id' => $job->id,
+        'status' => 'applied',
+        'applied_at' => now(),
+    ]);
+
+    $this->actingAs($employer);
+
+    Livewire::test(Talents::class)
+        ->assertSee('Sarah Applicant')
+        ->assertSee('Applied')
+        ->assertSee('Applicant');
+});
