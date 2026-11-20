@@ -176,10 +176,28 @@
                                         default => ['bg' => 'bg-sky-50 text-sky-800 border-sky-200', 'dot' => 'bg-sky-500', 'label' => 'Applied'],
                                     };
                                 @endphp
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border {{ $statusConfig['bg'] }}">
-                                    <span class="size-1.5 rounded-full {{ $statusConfig['dot'] }}"></span>
-                                    <span>{{ __($statusConfig['label']) }}</span>
-                                </span>
+                                <div class="space-y-1">
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border {{ $statusConfig['bg'] }}">
+                                        <span class="size-1.5 rounded-full {{ $statusConfig['dot'] }}"></span>
+                                        <span>{{ __($statusConfig['label']) }}</span>
+                                    </span>
+                                    @if($app->status === 'interview')
+                                        @if($app->isInterviewChecklistComplete())
+                                            <div>
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300" title="{{ __('Candidate verified all pre-interview assistive tech accommodations') }}">
+                                                    <svg class="size-3 text-emerald-700" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                                    <span>{{ __('Tech Ready') }}</span>
+                                                </span>
+                                            </div>
+                                        @elseif($app->interview_checklist && $app->interviewChecklistProgress()['completed'] > 0)
+                                            <div>
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium bg-amber-50 text-amber-800 border border-amber-200">
+                                                    <span>{{ $app->interviewChecklistProgress()['completed'] }}/4 {{ __('Tech items') }}</span>
+                                                </span>
+                                            </div>
+                                        @endif
+                                    @endif
+                                </div>
                             </td>
                             <td class="px-4 py-4 text-xs text-body-muted whitespace-nowrap">
                                 {{ $app->created_at?->format('M d, Y') ?? '—' }}
@@ -316,6 +334,42 @@
                         </span>
                     </div>
                 </div>
+
+                @if($viewing->status === 'interview')
+                    <div class="rounded-xl border border-primary-border bg-surface p-4 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="size-2 rounded-full {{ $viewing->isInterviewChecklistComplete() ? 'bg-emerald-500' : 'bg-amber-500' }}"></span>
+                                <span class="text-xs font-bold text-primary-dark">{{ __('Pre-Interview Assistive Tech Status') }}</span>
+                            </div>
+                            @if($viewing->isInterviewChecklistComplete())
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                    <svg class="size-3 text-emerald-700" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                    {{ __('All 4 items verified') }}
+                                </span>
+                            @else
+                                <span class="text-[11px] font-semibold text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                                    {{ $viewing->interviewChecklistProgress()['completed'] }}/4 {{ __('items verified by candidate') }}
+                                </span>
+                            @endif
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                            @foreach($viewing->checklist_status as $chk)
+                                <div class="flex items-start gap-2 p-2 rounded-lg border {{ $chk['checked'] ? 'bg-emerald-50/50 border-emerald-200 text-emerald-950' : 'bg-white border-gray-200 text-gray-500' }}">
+                                    <span class="mt-0.5 size-3.5 rounded flex items-center justify-center shrink-0 {{ $chk['checked'] ? 'bg-emerald-600 text-white' : 'border border-gray-300' }}">
+                                        @if($chk['checked'])
+                                            <svg class="size-2.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                        @endif
+                                    </span>
+                                    <div>
+                                        <div class="font-bold text-[11px]">{{ $chk['label'] }}</div>
+                                        <div class="text-[10px] text-body-muted">{{ $chk['desc'] }}</div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
 
                 @if($viewing->status === 'rejected' && $viewing->rejection_reason)
                     <div class="rounded-xl border border-red-200 bg-red-50/60 p-3.5 text-xs text-red-900 space-y-1">

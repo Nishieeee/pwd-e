@@ -215,6 +215,96 @@ class ApplicationsTracker extends Component
         }
     }
 
+    public function toggleChecklistItem(int $appId, string $itemKey): void
+    {
+        $user = Auth::user();
+        $candidateProfile = $user?->candidateProfile;
+        if (! $candidateProfile) {
+            return;
+        }
+
+        $app = Application::where('id', $appId)
+            ->where('candidate_profile_id', $candidateProfile->id)
+            ->first();
+
+        if (! $app || $app->status !== 'interview') {
+            return;
+        }
+
+        if (! array_key_exists($itemKey, Application::CHECKLIST_ITEMS)) {
+            return;
+        }
+
+        $checklist = $app->interview_checklist ?? [];
+        $wasChecked = ! empty($checklist[$itemKey]['checked']);
+        $nowChecked = ! $wasChecked;
+
+        $checklist[$itemKey] = [
+            'checked' => $nowChecked,
+            'checked_at' => $nowChecked ? now()->toIso8601String() : null,
+        ];
+
+        $app->update(['interview_checklist' => $checklist]);
+
+        if ($app->fresh()->isInterviewChecklistComplete()) {
+            ApplicationMessage::create([
+                'application_id' => $app->id,
+                'sender_id' => $user->id,
+                'body' => 'Assistive Tech Verified: Candidate completed the pre-interview readiness checklist.',
+                'type' => 'system',
+                'metadata' => [
+                    'event' => 'checklist_completed',
+                    'completed_at' => now()->toIso8601String(),
+                ],
+            ]);
+            $this->actionNotification = 'All 4 assistive tech readiness items verified! The employer has been notified.';
+        } else {
+            $label = Application::CHECKLIST_ITEMS[$itemKey]['label'] ?? 'Item';
+            $this->actionNotification = $nowChecked ? "{$label} marked as ready." : "{$label} unchecked.";
+        }
+    }
+
+    public function markChecklistReady(int $appId): void
+    {
+        $user = Auth::user();
+        $candidateProfile = $user?->candidateProfile;
+        if (! $candidateProfile) {
+            return;
+        }
+
+        $app = Application::where('id', $appId)
+            ->where('candidate_profile_id', $candidateProfile->id)
+            ->first();
+
+        if (! $app || $app->status !== 'interview') {
+            return;
+        }
+
+        $checklist = [];
+        $now = now()->toIso8601String();
+        foreach (Application::CHECKLIST_ITEMS as $key => $meta) {
+            $checklist[$key] = [
+                'checked' => true,
+                'checked_at' => $now,
+            ];
+        }
+
+        $app->update(['interview_checklist' => $checklist]);
+
+        ApplicationMessage::create([
+            'application_id' => $app->id,
+            'sender_id' => $user->id,
+            'body' => 'Assistive Tech Verified: Candidate completed the pre-interview readiness checklist.',
+            'type' => 'system',
+            'metadata' => [
+                'event' => 'checklist_completed',
+                'completed_at' => $now,
+            ],
+        ]);
+
+        $this->actionNotification = 'All pre-interview assistive tech items confirmed ready! Employer notified.';
+    }
+
     public function render()
     {
         $user = Auth::user();

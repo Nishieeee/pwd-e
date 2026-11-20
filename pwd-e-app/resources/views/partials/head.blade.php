@@ -8,6 +8,11 @@
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#244F73">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="PWD-E">
 
 @fonts
 
@@ -31,4 +36,11 @@
         if (s.reduced_motion) h.classList.add('a11y-reduced-motion');
         if (s.predictive_text === false) h.classList.add('a11y-no-predictive');
     })();
+
+    // Service Worker Registration for PWA / Low-Bandwidth Resilience
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+            navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+    }
 </script>

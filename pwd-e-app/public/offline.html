@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline Mode · PWD-E</title>
+    <style>
+        :root {
+            --primary: #244F73;
+            --primary-dark: #1A2840;
+            --surface: #F8FAFC;
+            --text: #1E293B;
+            --muted: #64748B;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 2rem 1rem;
+            background-color: var(--surface);
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        .card {
+            background: #ffffff;
+            border: 1px solid #E2E8F0;
+            border-radius: 1rem;
+            padding: 2rem;
+            max-width: 480px;
+            width: 100%;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+        .icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 4rem;
+            height: 4rem;
+            border-radius: 9999px;
+            background: #EFF6FF;
+            color: var(--primary);
+            margin-bottom: 1.25rem;
+        }
+        h1 {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--primary-dark);
+            margin: 0 0 0.5rem 0;
+        }
+        p {
+            font-size: 0.875rem;
+            line-height: 1.5;
+            color: var(--muted);
+            margin: 0 0 1.5rem 0;
+        }
+        .help-box {
+            background: #F1F5F9;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            text-align: left;
+            font-size: 0.8125rem;
+        }
+        .help-box strong {
+            display: block;
+            color: var(--primary-dark);
+            margin-bottom: 0.25rem;
+        }
+        .btn {
+            display: inline-block;
+            background: var(--primary);
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 0.875rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.625rem;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.15s ease;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .btn:hover, .btn:focus {
+            background: var(--primary-dark);
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+    <main class="card" role="main" aria-labelledby="offline-title">
+        <div class="icon" aria-hidden="true">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 00-9.78 2.096A4.001 4.001 0 003 15z" />
+                <line x1="2" y1="2" x2="22" y2="22" stroke-linecap="round" />
+            </svg>
+        </div>
+        <h1 id="offline-title">You're Currently Offline</h1>
+        <p>PWD-E requires an active internet connection to submit applications, update interview checklists, and message employers.</p>
+
+        <div class="help-box" role="note" aria-label="Support contacts">
+            <strong>National Council on Disability Affairs (NCDA)</strong>
+            <span>Direct Hotline: (02) 8951-5013 / (02) 8951-6033</span>
+            <div style="margin-top: 0.5rem;">
+                <strong>DOLE Bureau of Workers with Special Concerns</strong>
+                <span>Hotline: 1349</span>
+            </div>
+        </div>
+
+        <button type="button" class="btn" onclick="window.location.reload()">Retry Connection</button>
+    </main>
+</body>
+</html>

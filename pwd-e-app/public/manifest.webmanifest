@@ -1,0 +1,45 @@
+{
+  "name": "PWD-E | Accessible Employment Ecosystem",
+  "short_name": "PWD-E",
+  "description": "Philippine barrier-free job platform for Persons with Disabilities (PWDs)",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F8FAFC",
+  "theme_color": "#244F73",
+  "lang": "en-PH",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": [
+    "business",
+    "social",
+    "productivity"
+  ],
+  "shortcuts": [
+    {
+      "name": "Candidate Jobs",
+      "short_name": "Jobs",
+      "description": "Find accessible jobs and accommodations",
+      "url": "/candidate/jobs"
+    },
+    {
+      "name": "My Applications",
+      "short_name": "Applications",
+      "description": "Track your job applications and interviews",
+      "url": "/candidate/applications"
+    }
+  ]
+}

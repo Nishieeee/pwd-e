@@ -148,98 +148,112 @@
     <section class="bg-white rounded-xl border border-gray-200 shadow-xs overflow-hidden" aria-label="Applications table">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-xs" role="table">
-                <thead class="bg-gray-50/75 text-gray-500 font-semibold border-b border-gray-200">
+                <thead class="bg-[#F8FAFC] text-gray-500 font-bold border-b border-gray-200/80 text-[11px] uppercase tracking-wider">
                     <tr>
-                        <th scope="col" class="py-3 px-6">Job Title</th>
-                        <th scope="col" class="py-3 px-6">Employer Name</th>
-                        <th scope="col" class="py-3 px-6">Application Date</th>
-                        <th scope="col" class="py-3 px-6">Accessibility-Fit</th>
-                        <th scope="col" class="py-3 px-6">Application Status</th>
-                        <th scope="col" class="py-3 px-6">Actions</th>
+                        <th scope="col" class="py-3.5 px-6 whitespace-nowrap">Job Title</th>
+                        <th scope="col" class="py-3.5 px-6 whitespace-nowrap">Employer Name</th>
+                        <th scope="col" class="py-3.5 px-6 whitespace-nowrap">Application Date</th>
+                        <th scope="col" class="py-3.5 px-6 whitespace-nowrap text-center">Accessibility-Fit</th>
+                        <th scope="col" class="py-3.5 px-6 whitespace-nowrap">Application Status</th>
+                        <th scope="col" class="py-3.5 px-6 whitespace-nowrap text-center">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                     @forelse($applications as $app)
-                        <tr class="hover:bg-gray-50/50 transition-colors {{ $app->status === 'interview' ? 'bg-emerald-50/15' : '' }}">
+                        <tr class="hover:bg-slate-50/70 transition-colors {{ $app->status === 'interview' ? 'bg-emerald-50/20' : '' }}">
                             <!-- Job Title -->
-                            <td class="py-4 px-6 align-top">
-                                <div class="font-bold text-sm text-[#1A2840]">
+                            <td class="py-4 px-6 align-middle">
+                                <div class="font-bold text-sm text-[#1A2840] hover:text-[#244F73] transition-colors leading-snug">
                                     {{ $app->jobPosting->title }}
                                 </div>
-                                <div class="text-[11px] text-gray-400 mt-0.5">
-                                    Updated {{ $app->updated_at ? $app->updated_at->format('M j, Y') : 'Nov 1, 2026' }}
+                                <div class="text-[11px] text-gray-400 mt-1 flex items-center gap-1.5 whitespace-nowrap">
+                                    <span class="size-1.5 rounded-full bg-gray-300"></span>
+                                    <span>Updated {{ $app->updated_at ? $app->updated_at->format('M j, Y') : 'Nov 1, 2026' }}</span>
                                 </div>
                             </td>
 
                             <!-- Employer Name -->
-                            <td class="py-4 px-6 align-top">
-                                <div class="font-semibold text-xs text-gray-800">
+                            <td class="py-4 px-6 align-middle">
+                                <div class="font-semibold text-xs text-gray-900 leading-snug">
                                     {{ $app->jobPosting->employerProfile->company_name }}
                                 </div>
-                                <div class="text-[11px] text-gray-500 mt-0.5">
-                                    {{ $app->jobPosting->location ?? 'Taguig / Remote' }}
+                                <div class="text-[11px] text-gray-500 mt-1 flex items-center gap-1 whitespace-nowrap">
+                                    <svg class="size-3 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                    <span>{{ $app->jobPosting->location ?? 'Taguig / Remote' }}</span>
                                 </div>
                             </td>
 
                             <!-- Application Date -->
-                            <td class="py-4 px-6 align-top text-gray-600 tabular-nums">
-                                {{ $app->applied_at ? $app->applied_at->format('Y-m-d') : '2026-10-25' }}
+                            <td class="py-4 px-6 align-middle tabular-nums whitespace-nowrap">
+                                <div class="font-medium text-xs text-gray-800">
+                                    {{ $app->applied_at ? $app->applied_at->format('M j, Y') : 'Oct 25, 2026' }}
+                                </div>
+                                <div class="text-[11px] text-gray-400 mt-0.5">
+                                    {{ $app->applied_at ? $app->applied_at->diffForHumans() : 'Recently' }}
+                                </div>
                             </td>
 
                             <!-- Accessibility-Fit Score -->
-                            <td class="py-4 px-6 align-top">
+                            <td class="py-4 px-6 align-middle text-center whitespace-nowrap">
                                 @php
                                     $score = (int) ($app->fit_score_at_apply ?? 95);
                                     $fitBadgeClass = $score >= 90
-                                        ? 'bg-[#E8F5E9] text-[#176B47] border-[#A5D6A7]'
-                                        : ($score >= 80 ? 'bg-sky-50 text-[#1A2840] border-sky-200' : 'bg-amber-50 text-amber-800 border-amber-200');
+                                        ? 'bg-[#E8F5E9] text-[#176B47] border-[#A5D6A7] hover:bg-emerald-100/70 hover:border-emerald-300'
+                                        : ($score >= 80 ? 'bg-sky-50 text-[#1A2840] border-sky-200 hover:bg-sky-100' : 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100');
                                 @endphp
                                 <button type="button"
                                         wire:click="viewFitBreakdown({{ $app->id }})"
-                                        class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold border tabular-nums transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#244F73]/30 cursor-pointer {{ $fitBadgeClass }}"
+                                        class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border tabular-nums transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#244F73]/30 cursor-pointer shadow-2xs {{ $fitBadgeClass }}"
                                         title="{{ $score }}% Composite Fit (Click to view breakdown)"
                                         aria-label="{{ $score }}% Composite Fit">
-                                    <span class="size-1.5 rounded-full {{ $score >= 90 ? 'bg-[#176B47]' : ($score >= 80 ? 'bg-[#244F73]' : 'bg-amber-600') }}"></span>
-                                    <span>{{ $score }}%</span>
+                                    <span class="relative flex size-2 shrink-0">
+                                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full {{ $score >= 90 ? 'bg-emerald-400' : ($score >= 80 ? 'bg-sky-400' : 'bg-amber-400') }} opacity-75"></span>
+                                        <span class="relative inline-flex rounded-full size-2 {{ $score >= 90 ? 'bg-[#176B47]' : ($score >= 80 ? 'bg-[#244F73]' : 'bg-amber-600') }}"></span>
+                                    </span>
+                                    <span>{{ $score }}% Fit</span>
                                     <span class="sr-only">Composite Fit</span>
                                 </button>
                             </td>
 
                             <!-- Application Status -->
-                            <td class="py-4 px-6 align-top">
+                            <td class="py-4 px-6 align-middle">
                                 <div>
                                     @if($app->status === 'interview')
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full font-medium bg-[#E8F5E9] text-[#176B47] border border-[#A5D6A7]">
-                                            Interview Scheduled
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#E8F5E9] text-[#176B47] border border-[#A5D6A7] shadow-2xs">
+                                            <svg class="size-3.5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                            <span>Interview Scheduled</span>
                                         </span>
                                     @elseif($app->status === 'under_review')
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full font-medium bg-amber-50 text-amber-800 border border-amber-200">
-                                            Under Review
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200 shadow-2xs">
+                                            <svg class="size-3.5 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                            <span>Under Review</span>
                                         </span>
                                     @elseif($app->status === 'closed')
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full font-medium bg-gray-100 text-gray-700">
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
                                             Closed
                                         </span>
                                     @elseif($app->status === 'rejected')
                                         <div class="inline-flex flex-col items-start gap-1">
-                                            <span class="inline-flex items-center px-2.5 py-1 rounded-full font-medium bg-red-50 text-red-700 border border-red-200">
-                                                Declined
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-800 border border-rose-200 shadow-2xs">
+                                                <svg class="size-3.5 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                <span>Declined</span>
                                             </span>
                                             @if($app->rejection_reason)
-                                                <div class="text-[11px] text-red-800 bg-red-50/70 p-2 rounded-lg border border-red-100 max-w-xs leading-relaxed">
-                                                    <span class="font-bold text-[10px] uppercase tracking-wider text-red-600 block">{{ __('Employer Remark:') }}</span>
+                                                <div class="text-[11px] text-rose-800 bg-rose-50/70 p-2.5 rounded-xl border border-rose-200 max-w-xs leading-relaxed shadow-2xs">
+                                                    <span class="font-bold text-[10px] uppercase tracking-wider text-rose-700 block mb-0.5">{{ __('Employer Remark:') }}</span>
                                                     "{{ $app->rejection_reason }}"
                                                 </div>
                                             @endif
                                         </div>
                                     @else
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full font-medium bg-gray-100 text-gray-700">
-                                            {{ ucfirst($app->status) }}
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-sky-50 text-[#1A2840] border border-sky-200 shadow-2xs">
+                                            <svg class="size-3.5 text-[#244F73] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                            <span>{{ ucfirst($app->status) }}</span>
                                         </span>
                                     @endif
 
                                     @if($app->status_subtext)
-                                        <div class="text-[11px] text-gray-500 mt-1">
+                                        <div class="text-[11px] text-gray-500 mt-1.5 max-w-[200px] leading-tight">
                                             {{ $app->status_subtext }}
                                         </div>
                                     @endif
@@ -247,49 +261,44 @@
                             </td>
 
                             <!-- Actions -->
-                            <td class="py-4 px-6 align-top">
-                                <div class="space-y-1.5">
+                            <td class="py-4 px-6 align-middle">
+                                <div class="flex flex-col gap-1.5 w-44">
                                     @if($app->offer_details)
-                                        <div>
-                                            <button type="button"
-                                                    wire:click="viewOffer({{ $app->id }})"
-                                                    class="inline-flex items-center px-3 py-1.5 rounded-md bg-[#244F73] text-white text-xs font-semibold hover:bg-[#1A2840] shadow-xs focus:ring-2 focus:ring-[#244F73]">
-                                                View Offer
-                                            </button>
-                                        </div>
+                                        <button type="button"
+                                                wire:click="viewOffer({{ $app->id }})"
+                                                class="w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#176B47] text-white text-xs font-bold hover:bg-[#125437] shadow-xs hover:shadow transition-all focus:ring-2 focus:ring-[#176B47]/40">
+                                            <svg class="size-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                            <span>View Offer</span>
+                                        </button>
                                     @endif
 
-                                    <div>
-                                        <button type="button"
-                                                wire:click="viewFitBreakdown({{ $app->id }})"
-                                                class="inline-flex items-center px-3 py-1.5 rounded-md border border-gray-300 text-xs font-semibold text-[#1A2840] bg-white hover:bg-gray-50 transition-colors focus:ring-2 focus:ring-[#244F73]">
-                                            View Fit Breakdown
-                                        </button>
-                                    </div>
+                                    <button type="button"
+                                            wire:click="viewFitBreakdown({{ $app->id }})"
+                                            class="w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl border border-gray-200 bg-white hover:bg-slate-50 hover:border-gray-300 text-xs font-semibold text-gray-700 hover:text-gray-900 transition-all shadow-2xs hover:shadow-xs focus:ring-2 focus:ring-[#244F73]/30 group">
+                                        <svg class="size-3.5 text-emerald-600 group-hover:scale-105 transition-transform shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                                        <span>View Fit Breakdown</span>
+                                    </button>
 
                                     @php
                                         $unreadChatCount = $app->unreadMessagesFor($user);
                                     @endphp
-                                    <div>
-                                        <button type="button"
-                                                wire:click="openChatModal({{ $app->id }})"
-                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-[#B8D0E2] text-xs font-semibold text-[#1A2840] bg-white hover:bg-[#DCEAF4]/40 transition-colors focus:ring-2 focus:ring-[#244F73] relative">
-                                            <svg class="size-3.5 text-[#244F73] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
-                                            <span>{{ __('Accommodation Q&A') }}</span>
-                                            @if($unreadChatCount > 0)
-                                                <span class="inline-flex items-center justify-center size-4 rounded-full bg-red-600 text-white text-[10px] font-bold">{{ $unreadChatCount }}</span>
-                                            @endif
-                                        </button>
-                                    </div>
+                                    <button type="button"
+                                            wire:click="openChatModal({{ $app->id }})"
+                                            class="w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#B8D0E2] bg-gradient-to-r from-sky-50/80 to-[#E8F4F8]/60 hover:from-sky-100 hover:to-[#DCEAF4] text-xs font-semibold text-[#1A2840] transition-all shadow-2xs hover:shadow-xs focus:ring-2 focus:ring-[#244F73]/30 relative group">
+                                        <svg class="size-3.5 text-[#244F73] group-hover:scale-105 transition-transform shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+                                        <span>{{ __('Accommodation Q&A') }}</span>
+                                        @if($unreadChatCount > 0)
+                                            <span class="inline-flex items-center justify-center size-4 rounded-full bg-red-600 text-white text-[10px] font-bold shadow-2xs animate-pulse">{{ $unreadChatCount }}</span>
+                                        @endif
+                                    </button>
 
                                     @if(in_array($app->status, ['interview', 'under_review', 'applied', 'submitted']))
-                                        <div>
-                                            <button type="button"
-                                                    wire:click="promptWithdraw({{ $app->id }})"
-                                                    class="text-[11px] text-gray-500 hover:text-red-600 underline transition-colors focus:outline-none focus:ring-1 focus:ring-red-500 rounded">
-                                                Withdraw Application
-                                            </button>
-                                        </div>
+                                        <button type="button"
+                                                wire:click="promptWithdraw({{ $app->id }})"
+                                                class="w-full inline-flex items-center justify-center gap-1 py-1 rounded-lg text-[11px] font-medium text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-all focus:outline-none focus:ring-1 focus:ring-rose-400 group">
+                                            <svg class="size-3 text-gray-400 group-hover:text-rose-500 transition-colors shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                            <span>Withdraw Application</span>
+                                        </button>
                                     @endif
                                 </div>
                             </td>
@@ -297,36 +306,102 @@
 
                         <!-- Nested Scheduled Interview Card (Exact Figma match under Interview row) -->
                         @if($app->status === 'interview')
+                            @php
+                                $progress = $app->interviewChecklistProgress();
+                                $checklist = $app->checklist_status;
+                                $isAllComplete = $app->isInterviewChecklistComplete();
+                            @endphp
                             <tr class="bg-[#F0FDF4]/60">
                                 <td colspan="6" class="px-6 py-4 border-t border-[#DCFCE7]">
-                                    <div class="rounded-xl bg-[#F0FDF4] border border-[#BBF7D0] p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                        <div class="space-y-1.5">
-                                            <div class="flex items-center gap-2 text-xs font-bold text-gray-900">
-                                                <svg class="w-4 h-4 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                                </svg>
-                                                <span>{{ $app->interview_at ? $app->interview_at->format('F j, Y \· g:i A \P\H\T \(U\T\C+08:00\)') : 'November 4, 2026 · 2:00 PM PHT (UTC+08:00)' }}</span>
+                                    <div class="rounded-xl bg-[#F0FDF4] border border-[#BBF7D0] p-4 space-y-4">
+                                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                            <div class="space-y-1.5">
+                                                <div class="flex items-center gap-2 text-xs font-bold text-gray-900">
+                                                    <svg class="w-4 h-4 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                                    </svg>
+                                                    <span>{{ $app->interview_at ? $app->interview_at->format('F j, Y \· g:i A \P\H\T \(U\T\C+08:00\)') : 'November 4, 2026 · 2:00 PM PHT (UTC+08:00)' }}</span>
+                                                </div>
+
+                                                <div class="text-xs">
+                                                    <a href="{{ $app->interview_url ?? 'https://meet.google.com' }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 font-semibold text-[#244F73] hover:underline">
+                                                        <span>{{ $app->interview_location ?? 'Accessible Virtual Room · Google Meet' }}</span>
+                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                                    </a>
+                                                </div>
+
+                                                <div class="flex items-start gap-1.5 text-xs text-emerald-800 pt-1">
+                                                    <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                                                    <span><strong class="font-semibold">Accommodations confirmed:</strong> {{ $app->interview_accommodations ?? 'Screen reader test files, wheelchair ramp access at BGC office, quiet interview room.' }}</span>
+                                                </div>
                                             </div>
 
-                                            <div class="text-xs">
-                                                <a href="{{ $app->interview_url ?? 'https://meet.google.com' }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 font-semibold text-[#244F73] hover:underline">
-                                                    <span>{{ $app->interview_location ?? 'Accessible Virtual Room · Google Meet' }}</span>
-                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                                                </a>
-                                            </div>
-
-                                            <div class="flex items-start gap-1.5 text-xs text-emerald-800 pt-1">
-                                                <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                                                <span><strong class="font-semibold">Accommodations confirmed:</strong> {{ $app->interview_accommodations ?? 'Screen reader test files, wheelchair ramp access at BGC office, quiet interview room.' }}</span>
+                                            <div class="flex items-center gap-2">
+                                                <button type="button"
+                                                        wire:click="acceptAndAddToCalendar({{ $app->id }})"
+                                                        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#244F73] text-white text-xs font-semibold hover:bg-[#1A2840] transition-colors focus:ring-2 focus:ring-[#244F73] shrink-0">
+                                                    <span>Accept &amp; Add to Calendar</span>
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                                </button>
                                             </div>
                                         </div>
 
-                                        <button type="button"
-                                                wire:click="acceptAndAddToCalendar({{ $app->id }})"
-                                                class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#244F73] text-white text-xs font-semibold hover:bg-[#1A2840] transition-colors focus:ring-2 focus:ring-[#244F73] shrink-0">
-                                            <span>Accept &amp; Add to Calendar</span>
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                        </button>
+                                        {{-- Pre-Interview Assistive Tech Checklist Accordion / Card --}}
+                                        <div class="pt-3 border-t border-[#BBF7D0]/80">
+                                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+                                                <div class="flex items-center gap-2">
+                                                    <span class="text-xs font-bold text-gray-900 tracking-tight flex items-center gap-1.5">
+                                                        <svg class="size-4 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                        Pre-Interview Assistive Tech Checklist
+                                                    </span>
+                                                    @if($isAllComplete)
+                                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-600 text-white shadow-2xs">
+                                                            <svg class="size-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                                            Verified &amp; Ready
+                                                        </span>
+                                                    @else
+                                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-900 border border-amber-300">
+                                                            {{ $progress['completed'] }}/{{ $progress['total'] }} Ready ({{ $progress['percent'] }}%)
+                                                        </span>
+                                                    @endif
+                                                </div>
+
+                                                @if(! $isAllComplete)
+                                                    <button type="button"
+                                                            wire:click="markChecklistReady({{ $app->id }})"
+                                                            class="inline-flex items-center gap-1 text-[11px] font-semibold text-[#244F73] hover:text-[#1A2840] hover:underline self-start sm:self-auto">
+                                                        <span>Confirm all 4 ready &rarr;</span>
+                                                    </button>
+                                                @endif
+                                            </div>
+
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                                                @foreach($checklist as $itemKey => $item)
+                                                    <button type="button"
+                                                            wire:click="toggleChecklistItem({{ $app->id }}, '{{ $itemKey }}')"
+                                                            role="checkbox"
+                                                            aria-checked="{{ $item['checked'] ? 'true' : 'false' }}"
+                                                            class="text-left flex items-start gap-3 p-2.5 rounded-lg border transition-all {{ $item['checked'] ? 'bg-white border-emerald-400 shadow-2xs' : 'bg-white/80 border-gray-200 hover:border-emerald-300' }}">
+                                                        <div class="mt-0.5 size-4 rounded flex items-center justify-center shrink-0 {{ $item['checked'] ? 'bg-emerald-600 text-white' : 'border border-gray-400 bg-white' }}">
+                                                            @if($item['checked'])
+                                                                <svg class="size-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                                            @endif
+                                                        </div>
+                                                        <div class="min-w-0">
+                                                            <div class="text-xs font-bold text-gray-900 {{ $item['checked'] ? 'text-emerald-950' : '' }} flex items-center gap-1.5">
+                                                                <span>{{ $item['label'] }}</span>
+                                                                @if($item['checked'])
+                                                                    <span class="text-[10px] font-normal text-emerald-700">✓ Done</span>
+                                                                @endif
+                                                            </div>
+                                                            <div class="text-[11px] text-gray-600 leading-snug mt-0.5">
+                                                                {{ $item['desc'] }}
+                                                            </div>
+                                                        </div>
+                                                    </button>
+                                                @endforeach
+                                            </div>
+                                        </div>
                                     </div>
                                 </td>
                             </tr>
