@@ -54,6 +54,24 @@ class Dashboard extends Component
         }
     }
 
+    public function declineInvitation(int $invitationId): void
+    {
+        $user = Auth::user();
+        $candidateProfile = $user?->candidateProfile;
+        if (! $candidateProfile) {
+            return;
+        }
+
+        $invitation = JobInvitation::where('candidate_profile_id', $candidateProfile->id)
+            ->where('id', $invitationId)
+            ->first();
+
+        if ($invitation) {
+            $invitation->update(['status' => 'declined']);
+            \Flux\Flux::toast(variant: 'success', text: __('Invitation declined.'));
+        }
+    }
+
     public function render()
     {
         $user = Auth::user();
