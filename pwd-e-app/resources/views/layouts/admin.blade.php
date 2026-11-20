@@ -1,14 +1,41 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}"
       x-data="{
-          a11yContrast: localStorage.getItem('pwde_contrast') === 'high',
+          a11yContrastLevel: parseInt(localStorage.getItem('pwde_contrast_level') || (localStorage.getItem('pwde_contrast') === 'high' ? '125' : '100')),
           a11yScale: parseInt(localStorage.getItem('pwde_scale') || '100'),
           a11yDyslexia: localStorage.getItem('pwde_dyslexia') === 'true',
           a11yScreenReader: localStorage.getItem('pwde_screenreader') === 'true',
           mobileMenuOpen: false,
-          toggleContrast() {
-              this.a11yContrast = !this.a11yContrast;
-              localStorage.setItem('pwde_contrast', this.a11yContrast ? 'high' : 'normal');
+          setContrast(val) {
+              this.a11yContrastLevel = Math.min(200, Math.max(100, parseInt(val)));
+              localStorage.setItem('pwde_contrast_level', this.a11yContrastLevel);
+              localStorage.setItem('pwde_contrast', this.a11yContrastLevel > 100 ? 'high' : 'normal');
+              this.applyContrast();
+          },
+          increaseContrast() {
+              if (this.a11yContrastLevel < 200) this.setContrast(this.a11yContrastLevel + 25);
+          },
+          decreaseContrast() {
+              if (this.a11yContrastLevel > 100) this.setContrast(this.a11yContrastLevel - 25);
+          },
+          cycleContrast() {
+              const levels = [100, 125, 150, 175];
+              const idx = levels.indexOf(this.a11yContrastLevel);
+              const next = idx === -1 || idx === levels.length - 1 ? levels[0] : levels[idx + 1];
+              this.setContrast(next);
+          },
+          applyContrast() {
+              const isHigh = this.a11yContrastLevel > 100;
+              document.documentElement.classList.toggle('high-contrast-mode', isHigh);
+              document.documentElement.classList.toggle('a11y-high-contrast', isHigh);
+              document.documentElement.classList.toggle('contrast-more', isHigh);
+              if (isHigh) {
+                  document.documentElement.style.setProperty('--pwde-contrast-filter', 'contrast(' + this.a11yContrastLevel + '%)');
+                  document.documentElement.style.filter = 'contrast(' + this.a11yContrastLevel + '%)';
+              } else {
+                  document.documentElement.style.removeProperty('--pwde-contrast-filter');
+                  document.documentElement.style.filter = '';
+              }
           },
           increaseScale() {
               if (this.a11yScale < 150) {
@@ -41,13 +68,20 @@
               if (live) live.textContent = msg;
           }
       }"
-      x-init="if (a11yScale !== 100) document.documentElement.style.fontSize = a11yScale + '%';"
-      :class="{ 'contrast-more': a11yContrast, 'high-contrast-mode': a11yContrast }"
+      x-init="
+          if (a11yScale !== 100) document.documentElement.style.fontSize = a11yScale + '%';
+          if (a11yContrastLevel > 100) {
+              document.documentElement.style.setProperty('--pwde-contrast-filter', 'contrast(' + a11yContrastLevel + '%)');
+              document.documentElement.style.filter = 'contrast(' + a11yContrastLevel + '%)';
+              document.documentElement.classList.add('high-contrast-mode', 'a11y-high-contrast', 'contrast-more');
+          }
+      "
+      :class="{ 'contrast-more': a11yContrastLevel > 100, 'high-contrast-mode': a11yContrastLevel > 100 }"
       :data-readable-font="a11yDyslexia ? 'true' : 'false'">
 <head>
     @include('partials.head')
     <style>
-        .high-contrast-mode { filter: contrast(125%); }
+        .high-contrast-mode { filter: var(--pwde-contrast-filter, contrast(125%)); }
         .high-contrast-mode body { background-color: #ffffff !important; color: #000000 !important; }
         [data-readable-font="true"] body, [data-readable-font="true"] * { font-family: 'Atkinson Hyperlegible Next', 'Lexend', ui-sans-serif, system-ui, sans-serif !important; letter-spacing: 0.02em !important; }
     </style>
@@ -219,19 +253,15 @@
                     <span>Accessibility</span>
                 </div>
 
-                <!-- High Contrast Toggle -->
-                <button type="button"
-                        @click="toggleContrast()"
-                        :class="a11yContrast ? 'bg-[#1A2840] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
-                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md font-medium border border-gray-300 transition-colors focus:ring-2 focus:ring-[#244F73]"
-                        :aria-pressed="a11yContrast.toString()"
-                        aria-label="Toggle high contrast mode">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <circle cx="12" cy="12" r="9" stroke-width="2"/>
-                        <path fill="currentColor" d="M12 3a9 9 0 000 18V3z"/>
-                    </svg>
-                    <span>Contrast</span>
-                </button>
+                <!-- Contrast Level Controls -->
+                <div class="inline-flex items-center rounded-md border border-gray-300 bg-gray-100 p-0.5" role="group" aria-label="Contrast level controls">
+                    <button type="button" @click="decreaseContrast()" class="px-2 py-1 rounded text-gray-700 hover:bg-white font-bold text-xs focus:ring-2 focus:ring-[#244F73]" aria-label="Decrease contrast" title="Decrease contrast">C-</button>
+                    <button type="button" @click="cycleContrast()" class="px-2 py-1 text-gray-700 font-semibold text-xs hover:bg-white inline-flex items-center gap-1" :class="a11yContrastLevel > 100 ? 'font-bold text-[#1A2840]' : ''" aria-label="Contrast level: click to cycle presets">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke-width="2"/><path fill="currentColor" d="M12 3a9 9 0 000 18V3z"/></svg>
+                        <span x-text="a11yContrastLevel > 100 ? a11yContrastLevel + '%' : 'Contrast'">Contrast</span>
+                    </button>
+                    <button type="button" @click="increaseContrast()" class="px-2 py-1 rounded text-gray-700 hover:bg-white font-bold text-xs focus:ring-2 focus:ring-[#244F73]" aria-label="Increase contrast" title="Increase contrast">C+</button>
+                </div>
 
                 <!-- Font Resizing Controls -->
                 <div class="inline-flex items-center rounded-md border border-gray-300 bg-gray-100 p-0.5" role="group" aria-label="Text scaling controls">

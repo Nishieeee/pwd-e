@@ -1,55 +1,56 @@
 <div class="space-y-6">
     <!-- Employer Hero Banner -->
-    <div class="relative overflow-hidden rounded-2xl border border-primary-border bg-white p-6 sm:p-8 shadow-sm" style="background: linear-gradient(135deg, #DCEAF4 0%, #FFFFFF 100%); box-shadow: 0 4px 20px rgba(26,40,64,0.06);">
-        <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-            <div class="space-y-3 max-w-2xl">
+    <div class="relative overflow-hidden rounded-2xl border border-primary-border bg-white p-6 lg:p-7 shadow-sm" style="background: linear-gradient(135deg, #DCEAF4 0%, #FFFFFF 100%); box-shadow: 0 4px 20px rgba(26,40,64,0.06);">
+        <div class="flex flex-col 2xl:flex-row 2xl:items-end 2xl:justify-between gap-6">
+            <div class="space-y-3 max-w-3xl">
                 <div class="flex flex-wrap items-center gap-2">
-                    <span class="inline-flex items-center gap-1.5 rounded-full border border-primary-border bg-white px-3 py-1 text-xs font-bold text-secondary shadow-xs">
-                        <svg class="size-3.5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                        {{ __('Republic Act No. 10524 Accredited Partner') }}
+                    <span class="inline-flex items-center gap-1.5 rounded-full border border-primary-border bg-white px-3 py-1 text-xs font-bold text-secondary shadow-2xs" title="{{ __('Republic Act No. 10524 Accredited Partner') }}">
+                        <svg class="size-3.5 text-secondary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                        <span>{{ __('Republic Act No. 10524 Accredited Partner') }}</span>
                     </span>
                     @if (auth()->user()->employerProfile?->matrix_completed_at)
-                        <span class="rounded-full bg-secondary-tint px-3 py-1 text-xs font-semibold text-secondary">
-                            {{ __('Accessibility Matrix Verified') }}
+                        <span class="inline-flex items-center gap-1.5 rounded-full border border-secondary/30 bg-secondary-tint px-3 py-1 text-xs font-bold text-secondary shadow-2xs">
+                            <svg class="size-3.5 text-secondary shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                            <span>{{ __('Accessibility Matrix Verified') }}</span>
                         </span>
                     @endif
                 </div>
 
-                <h1 class="font-heading text-2xl sm:text-3xl font-bold text-primary-dark">
+                <h1 class="font-heading text-2xl sm:text-3xl font-bold text-primary-dark tracking-tight">
                     {{ __('Welcome back,') }} {{ auth()->user()->employerProfile?->company_name ?? auth()->user()->name }}!
                 </h1>
 
-                <p class="text-sm sm:text-base text-body-muted leading-relaxed">
+                <p class="text-xs sm:text-sm text-body-muted leading-relaxed max-w-2xl">
                     {{ __('Connect with skilled PWD talent across the Philippines, review candidate bio-data, manage barrier-free accommodations, and track RA 10524 employment incentives.') }}
                 </p>
             </div>
 
             <!-- Quick Action Links -->
-            <div class="flex flex-wrap items-center gap-3 shrink-0">
+            <div class="flex flex-wrap items-center gap-2.5 shrink-0 pt-1">
                 <a
                     href="{{ route('employer.jobs.create') }}"
-                    class="inline-flex items-center gap-2 rounded-lg bg-primary-dark px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                    class="inline-flex items-center gap-2 rounded-xl bg-primary-dark px-4 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-xs transition hover:bg-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 whitespace-nowrap"
                 >
-                    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                    {{ __('Post a New Job') }}
+                    <svg class="size-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    <span>{{ __('Post a New Job') }}</span>
                 </a>
 
                 <a
                     href="{{ route('employer.talents') }}"
-                    class="inline-flex items-center gap-2 rounded-lg border border-primary-border bg-white px-5 py-3 text-sm font-semibold text-primary-dark shadow-xs transition hover:bg-primary-tint focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                    class="inline-flex items-center gap-2 rounded-xl border border-primary-border bg-white px-4 py-2.5 text-xs sm:text-sm font-semibold text-primary-dark shadow-2xs transition hover:bg-primary-tint/60 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 whitespace-nowrap"
                 >
-                    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg>
-                    {{ __('Discover Talents') }}
+                    <svg class="size-4 text-primary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg>
+                    <span>{{ __('Discover Talents') }}</span>
                 </a>
 
                 <a
                     href="{{ route('employer.applicants') }}"
-                    class="inline-flex items-center gap-2 rounded-lg border border-primary-border bg-white px-5 py-3 text-sm font-semibold text-primary-dark shadow-xs transition hover:bg-primary-tint focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                    class="inline-flex items-center gap-2 rounded-xl border border-primary-border bg-white px-4 py-2.5 text-xs sm:text-sm font-semibold text-primary-dark shadow-2xs transition hover:bg-primary-tint/60 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 whitespace-nowrap"
                 >
-                    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                    {{ __('All Applicants') }}
+                    <svg class="size-4 text-primary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <span>{{ __('All Applicants') }}</span>
                     @if($needsReviewCount > 0)
-                        <span class="ml-1 rounded-full bg-primary-tint px-2 py-0.5 text-xs font-bold text-primary-dark">{{ $needsReviewCount }}</span>
+                        <span class="rounded-full bg-primary-tint px-2 py-0.5 text-xs font-bold text-primary-dark">{{ $needsReviewCount }}</span>
                     @endif
                 </a>
             </div>

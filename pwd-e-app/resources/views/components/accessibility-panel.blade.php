@@ -2,7 +2,7 @@
 
 <style>
     .high-contrast-mode {
-        filter: contrast(125%) !important;
+        filter: var(--pwde-contrast-filter, contrast(125%)) !important;
     }
     .high-contrast-mode body {
         background-color: #ffffff !important;
@@ -25,7 +25,7 @@
 <!-- Floating Accessibility Widget -->
 <div x-data="{
         open: false,
-        contrast: localStorage.getItem('pwde_contrast') === 'high',
+        contrastLevel: parseInt(localStorage.getItem('pwde_contrast_level') || (localStorage.getItem('pwde_contrast') === 'high' ? '125' : '100')),
         scale: parseInt(localStorage.getItem('pwde_scale') || '100'),
         dyslexia: localStorage.getItem('pwde_dyslexia') === 'true',
         screenReader: localStorage.getItem('pwde_screenreader') === 'true',
@@ -34,16 +34,38 @@
             this.applyAll();
         },
 
-        toggleContrast() {
-            this.contrast = !this.contrast;
-            localStorage.setItem('pwde_contrast', this.contrast ? 'high' : 'normal');
+        setContrast(val) {
+            this.contrastLevel = Math.min(200, Math.max(100, parseInt(val)));
+            localStorage.setItem('pwde_contrast_level', this.contrastLevel);
+            localStorage.setItem('pwde_contrast', this.contrastLevel > 100 ? 'high' : 'normal');
             this.applyContrast();
-            this.announce(this.contrast ? 'High contrast enabled' : 'High contrast disabled');
+            this.announce('Contrast set to ' + this.contrastLevel + ' percent');
+        },
+
+        increaseContrast() {
+            if (this.contrastLevel < 200) this.setContrast(this.contrastLevel + 25);
+        },
+
+        decreaseContrast() {
+            if (this.contrastLevel > 100) this.setContrast(this.contrastLevel - 25);
+        },
+
+        resetContrast() {
+            this.setContrast(100);
         },
 
         applyContrast() {
-            document.documentElement.classList.toggle('high-contrast-mode', this.contrast);
-            document.documentElement.classList.toggle('a11y-high-contrast', this.contrast);
+            const isHigh = this.contrastLevel > 100;
+            document.documentElement.classList.toggle('high-contrast-mode', isHigh);
+            document.documentElement.classList.toggle('a11y-high-contrast', isHigh);
+            document.documentElement.classList.toggle('contrast-more', isHigh);
+            if (isHigh) {
+                document.documentElement.style.setProperty('--pwde-contrast-filter', 'contrast(' + this.contrastLevel + '%)');
+                document.documentElement.style.filter = 'contrast(' + this.contrastLevel + '%)';
+            } else {
+                document.documentElement.style.removeProperty('--pwde-contrast-filter');
+                document.documentElement.style.filter = '';
+            }
         },
 
         setScale(val) {
@@ -97,10 +119,11 @@
         },
 
         resetAll() {
-            this.contrast = false;
+            this.contrastLevel = 100;
             this.scale = 100;
             this.dyslexia = false;
             this.screenReader = false;
+            localStorage.removeItem('pwde_contrast_level');
             localStorage.removeItem('pwde_contrast');
             localStorage.removeItem('pwde_scale');
             localStorage.removeItem('pwde_dyslexia');
@@ -182,27 +205,62 @@
             </button>
         </div>
 
-        <!-- 1. High Contrast Option -->
-        <div class="flex items-center justify-between p-3 rounded-xl border border-gray-200 hover:border-[#244F73]/40 transition-colors">
-            <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-700">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <circle cx="12" cy="12" r="9" stroke-width="2"/>
-                        <path fill="currentColor" d="M12 3a9 9 0 000 18V3z"/>
-                    </svg>
+        <!-- 1. Contrast Adjustment -->
+        <div class="p-3 rounded-xl border border-gray-200 space-y-2.5">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <div class="w-6 h-6 rounded-md bg-gray-100 flex items-center justify-center text-gray-700">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <circle cx="12" cy="12" r="9" stroke-width="2"/>
+                            <path fill="currentColor" d="M12 3a9 9 0 000 18V3z"/>
+                        </svg>
+                    </div>
+                    <div class="text-xs font-bold text-[#1A2840]">Contrast Level</div>
                 </div>
-                <div>
-                    <div class="text-xs font-bold text-[#1A2840]">High Contrast</div>
-                    <div class="text-[11px] text-gray-500">125% contrast &amp; crisp borders</div>
-                </div>
+                <span class="text-xs font-bold text-[#244F73]" x-text="contrastLevel + '%'">100%</span>
             </div>
-            <button type="button"
-                    @click="toggleContrast()"
-                    :class="contrast ? 'bg-[#176B47] text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'"
-                    class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all focus:outline-none focus:ring-2 focus:ring-[#244F73] cursor-pointer"
-                    :aria-pressed="contrast.toString()">
-                <span x-text="contrast ? 'ON' : 'OFF'">OFF</span>
-            </button>
+
+            <!-- Contrast Slider -->
+            <input type="range"
+                   min="100"
+                   max="200"
+                   step="5"
+                   :value="contrastLevel"
+                   @input="setContrast($event.target.value)"
+                   class="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#244F73]"
+                   aria-label="Contrast level slider">
+
+            <!-- Quick Action Preset Buttons -->
+            <div class="grid grid-cols-4 gap-1.5 pt-1">
+                <button type="button"
+                        @click="setContrast(100)"
+                        class="px-1.5 py-1 rounded-lg border border-gray-300 hover:bg-gray-50 font-bold text-xs text-gray-700 transition-colors focus:ring-2 focus:ring-[#244F73] cursor-pointer"
+                        :class="contrastLevel === 100 ? 'bg-[#244F73] text-white border-[#244F73]' : ''"
+                        aria-label="Set contrast to 100% (Normal)">
+                    100%
+                </button>
+                <button type="button"
+                        @click="setContrast(125)"
+                        class="px-1.5 py-1 rounded-lg border border-gray-300 hover:bg-gray-50 font-bold text-xs text-gray-700 transition-colors focus:ring-2 focus:ring-[#244F73] cursor-pointer"
+                        :class="contrastLevel === 125 ? 'bg-[#244F73] text-white border-[#244F73]' : ''"
+                        aria-label="Set contrast to 125% (Medium)">
+                    125%
+                </button>
+                <button type="button"
+                        @click="setContrast(150)"
+                        class="px-1.5 py-1 rounded-lg border border-gray-300 hover:bg-gray-50 font-bold text-xs text-gray-700 transition-colors focus:ring-2 focus:ring-[#244F73] cursor-pointer"
+                        :class="contrastLevel === 150 ? 'bg-[#244F73] text-white border-[#244F73]' : ''"
+                        aria-label="Set contrast to 150% (High)">
+                    150%
+                </button>
+                <button type="button"
+                        @click="setContrast(175)"
+                        class="px-1.5 py-1 rounded-lg border border-gray-300 hover:bg-gray-50 font-bold text-xs text-gray-700 transition-colors focus:ring-2 focus:ring-[#244F73] cursor-pointer"
+                        :class="contrastLevel >= 175 ? 'bg-[#244F73] text-white border-[#244F73]' : ''"
+                        aria-label="Set contrast to 175% (Maximum)">
+                    175%
+                </button>
+            </div>
         </div>
 
         <!-- 2. Text Resizing / Font Scaling -->
