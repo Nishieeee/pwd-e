@@ -266,6 +266,12 @@
                                     {{ $workCount }} {{ Str::plural('Experience', $workCount) }}
                                 </span>
                             @endif
+
+                            @if($existingApp = $candidate->applications?->first())
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-50 text-blue-800 border border-blue-200" title="{{ __('Candidate applied for: ') . ($existingApp->jobPosting?->title ?? 'Position') }}">
+                                    ✓ {{ __('Applied') }}
+                                </span>
+                            @endif
                         </div>
 
                         {{-- Location & Education Metadata --}}
@@ -330,8 +336,17 @@
 
                         @php
                             $pendingInvite = $candidate->jobInvitations?->first();
+                            $existingApp = $candidate->applications?->first();
                         @endphp
-                        @if($pendingInvite)
+                        @if($existingApp)
+                            <div class="flex-1 flex items-center gap-1.5">
+                                <a href="{{ route('employer.applicants', ['job' => $existingApp->job_posting_id]) }}"
+                                   class="flex-1 inline-flex items-center justify-center gap-1 px-2.5 py-2 rounded-xl bg-blue-50 text-blue-800 border border-blue-200 text-xs font-semibold truncate hover:bg-blue-100 transition-colors"
+                                   title="{{ __('Applied for: ') . ($existingApp->jobPosting?->title ?? 'Position') }}">
+                                    <span>✓ {{ __('Applicant') }}</span>
+                                </a>
+                            </div>
+                        @elseif($pendingInvite)
                             <div class="flex-1 flex items-center gap-1.5">
                                 <span class="flex-1 inline-flex items-center justify-center gap-1 px-2.5 py-2 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 text-xs font-semibold truncate" title="{{ __('Invited for :job', ['job' => $pendingInvite->jobPosting?->title]) }}">
                                     <span>✉️ {{ __('Invited') }}</span>
