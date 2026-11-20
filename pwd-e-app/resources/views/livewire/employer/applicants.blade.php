@@ -134,7 +134,8 @@
                                             @endif
                                             @if($hasFsl)
                                                 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-medium border border-emerald-200 whitespace-nowrap" title="{{ __('FSL Video pitch submitted') }}">
-                                                    <span>🤟 FSL</span>
+                                                    <svg class="size-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                                    <span>FSL</span>
                                                 </span>
                                             @endif
                                         </div>
@@ -197,6 +198,19 @@
                                     <button type="button" wire:click="viewDetails({{ $app->id }})"
                                             class="inline-flex items-center rounded-lg border border-primary-border bg-white px-2.5 py-1.5 text-xs font-semibold text-primary-dark hover:bg-primary-tint/60 transition-colors whitespace-nowrap shrink-0">
                                         {{ __('Details') }}
+                                    </button>
+
+                                    @php
+                                        $unreadChatCount = $app->unreadMessagesFor(auth()->user());
+                                    @endphp
+                                    <button type="button" wire:click="openChatModal({{ $app->id }})"
+                                            class="inline-flex items-center gap-1 rounded-lg border border-primary-border bg-white px-2.5 py-1.5 text-xs font-semibold text-primary-dark hover:bg-primary-tint/60 transition-colors whitespace-nowrap shrink-0 relative"
+                                            title="{{ __('Accommodation inquiries and messages') }}">
+                                        <svg class="size-3.5 text-primary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+                                        <span>{{ __('Q&A') }}</span>
+                                        @if($unreadChatCount > 0)
+                                            <span class="inline-flex items-center justify-center size-4 rounded-full bg-red-600 text-white text-[10px] font-bold">{{ $unreadChatCount }}</span>
+                                        @endif
                                     </button>
 
                                     @if($app->status !== 'hired')
@@ -267,6 +281,15 @@
                         </div>
                     </div>
                     <div class="flex items-center gap-2">
+                        <button type="button"
+                                wire:click="openChatModal({{ $viewing->id }})"
+                                class="inline-flex items-center gap-1.5 rounded-lg border border-primary-border bg-white px-3 py-1.5 text-xs font-semibold text-primary-dark hover:bg-primary-tint transition-colors">
+                            <svg class="size-3.5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+                            <span>{{ __('Accommodation Q&A') }}</span>
+                            @if($viewing->unreadMessagesFor(auth()->user()) > 0)
+                                <span class="size-2 rounded-full bg-red-600"></span>
+                            @endif
+                        </button>
                         @if($cp)
                             <a href="{{ route('employer.candidates.show', $cp->id) }}" target="_blank"
                                class="inline-flex items-center gap-1.5 rounded-lg bg-primary-dark px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary shadow-xs transition-colors">
@@ -314,7 +337,9 @@
                         @if($cp)
                             <a href="{{ route('employer.candidates.show', $cp->id) }}" target="_blank"
                                class="flex items-center gap-3 p-3 rounded-xl border border-primary-border bg-surface hover:bg-primary-tint/50 transition-colors">
-                                <div class="size-8 rounded-lg bg-primary-tint text-primary-dark flex items-center justify-center font-bold text-xs">📋</div>
+                                <div class="size-8 rounded-lg bg-primary-tint text-primary-dark flex items-center justify-center font-bold text-xs">
+                                    <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                </div>
                                 <div class="min-w-0">
                                     <div class="text-xs font-semibold text-primary-dark truncate">{{ __('Digital Profile') }}</div>
                                     <div class="text-[11px] text-body-muted">{{ __('Executive view + credentials') }}</div>
@@ -325,7 +350,9 @@
                         @if ($viewing->resume_path || $cp?->resume_pdf_path)
                             <a href="{{ route('employer.applicants.document', ['application' => $viewing->id, 'type' => 'resume']) }}" target="_blank"
                                class="flex items-center gap-3 p-3 rounded-xl border border-primary-border bg-surface hover:bg-primary-tint/50 transition-colors">
-                                <div class="size-8 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center font-bold text-xs">📑</div>
+                                <div class="size-8 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center font-bold text-xs">
+                                    <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                                </div>
                                 <div class="min-w-0">
                                     <div class="text-xs font-semibold text-primary-dark truncate">{{ __('Résumé / CV (PDF)') }}</div>
                                     <div class="text-[11px] text-body-muted">{{ __('Download uploaded document') }}</div>
@@ -336,7 +363,9 @@
                         @if ($viewing->fsl_video_path)
                             <a href="{{ route('employer.applicants.document', ['application' => $viewing->id, 'type' => 'fsl']) }}" target="_blank"
                                class="flex items-center gap-3 p-3 rounded-xl border border-primary-border bg-surface hover:bg-primary-tint/50 transition-colors">
-                                <div class="size-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold text-xs">🤟</div>
+                                <div class="size-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold text-xs">
+                                    <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                </div>
                                 <div class="min-w-0">
                                     <div class="text-xs font-semibold text-primary-dark truncate">{{ __('FSL Video Pitch') }}</div>
                                     <div class="text-[11px] text-body-muted">{{ __('Filipino Sign Language recording') }}</div>
@@ -439,7 +468,10 @@
                 </div>
 
                 <div class="rounded-xl border border-secondary/30 bg-secondary-tint/40 p-4 text-xs text-secondary-dark space-y-1.5">
-                    <div class="font-bold text-secondary text-sm">💡 {{ __('25% Additional Gross Deduction on Annual Wages') }}</div>
+                    <div class="font-bold text-secondary text-sm flex items-center gap-1.5">
+                        <svg class="size-4 shrink-0 text-secondary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                        <span>{{ __('25% Additional Gross Deduction on Annual Wages') }}</span>
+                    </div>
                     <p class="leading-relaxed text-secondary/90">
                         {{ __('Under RA 10524, private entities that employ qualified PWDs who meet the required terms of employment are entitled to an additional deduction from their gross income equivalent to 25% of the total amount paid as salaries.') }}
                     </p>
@@ -459,8 +491,10 @@
                         <input type="date" wire:model="hireStartDate" class="w-full rounded-lg border border-primary-border px-3 py-2 text-xs focus:ring-2 focus:ring-primary focus:outline-none" />
                     </div>
 
-                    <div class="flex items-center gap-2 p-3 rounded-lg border border-primary-border bg-surface">
-                        <span class="text-sm">🪪</span>
+                    <div class="flex items-center gap-2.5 p-3 rounded-lg border border-primary-border bg-surface">
+                        <div class="size-8 rounded-lg bg-primary-tint text-primary-dark flex items-center justify-center shrink-0">
+                            <svg class="size-4 text-primary-dark" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/></svg>
+                        </div>
                         <div class="flex-1 min-w-0">
                             <span class="font-bold text-primary-dark block">{{ __('PWD Identification Document') }}</span>
                             <span class="text-[11px] text-body-muted">
@@ -537,6 +571,103 @@
                     <button type="button" wire:click="confirmReject" class="rounded-lg bg-red-600 px-4 py-2 text-xs font-semibold text-white hover:bg-red-700 shadow-xs">
                         {{ __('Confirm & Decline Candidate') }}
                     </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- Accommodation Chat Modal --}}
+    @if ($showChatModal && $chatApp)
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" role="dialog" aria-modal="true" aria-label="{{ __('Accommodation inquiries and chat') }}">
+            <div class="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-2xl bg-white p-6 shadow-xl space-y-4" wire:click.stop>
+                <div class="flex items-start justify-between border-b border-primary-border pb-3">
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-secondary-tint text-secondary mb-1">
+                            <svg class="size-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                            <span>{{ __('Accommodation & Logistics Q&A') }}</span>
+                        </div>
+                        <h2 class="font-heading text-lg font-bold text-primary-dark">
+                            {{ $chatApp->candidateProfile?->user?->name ?? __('Candidate') }}
+                        </h2>
+                        <p class="text-xs text-body-muted">
+                            {{ __('Applied for:') }} {{ $chatApp->jobPosting?->title }}
+                        </p>
+                    </div>
+                    <button type="button" wire:click="closeChatModal" class="text-body-muted hover:text-primary-dark text-lg">&times;</button>
+                </div>
+
+                <!-- Messages Log -->
+                <div class="h-64 overflow-y-auto space-y-3 p-3.5 bg-surface rounded-xl border border-primary-border/60" role="log" aria-live="polite">
+                    @forelse($chatApp->messages as $msg)
+                        @php
+                            $isMe = $msg->sender_id === auth()->id();
+                            $isSystem = $msg->type === 'system';
+                            $isInquiry = $msg->type === 'accommodation_inquiry';
+                            $resolved = $msg->metadata['resolved'] ?? false;
+                        @endphp
+
+                        @if($isSystem)
+                            <div class="p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs text-center font-medium">
+                                <span>{{ $msg->body }}</span>
+                                <span class="block text-[10px] text-emerald-700/80 mt-0.5">{{ $msg->created_at?->diffForHumans() }}</span>
+                            </div>
+                        @else
+                            <div class="flex flex-col {{ $isMe ? 'items-end' : 'items-start' }}">
+                                <div class="max-w-[85%] rounded-2xl px-3.5 py-2.5 text-xs shadow-2xs {{ $isMe ? 'bg-primary-dark text-white rounded-br-xs' : 'bg-white text-dark-neutral border border-primary-border rounded-bl-xs' }}">
+                                    @if($isInquiry)
+                                        <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider mb-1 {{ $isMe ? 'text-sky-300' : 'text-primary' }}">
+                                            <svg class="size-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                            <span>{{ __('Accommodation Question') }}</span>
+                                            @if($resolved)
+                                                <span class="inline-flex items-center px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 font-bold text-[9px]">✓ Confirmed</span>
+                                            @endif
+                                        </div>
+                                    @endif
+                                    <p class="leading-relaxed whitespace-pre-wrap">{{ $msg->body }}</p>
+
+                                    @if(!$isMe && $isInquiry && !$resolved)
+                                        <div class="pt-2 border-t border-gray-100 mt-2">
+                                            <button type="button"
+                                                    wire:click="confirmAccommodation({{ $msg->id }})"
+                                                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-secondary text-white font-bold text-[11px] hover:bg-secondary/90 transition-colors shadow-2xs">
+                                                <svg class="size-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                                <span>{{ __('Confirm We Provide This Accommodation') }}</span>
+                                            </button>
+                                        </div>
+                                    @endif
+                                </div>
+                                <span class="text-[10px] text-body-muted mt-1 px-1">
+                                    {{ $isMe ? __('You') : ($msg->sender?->name ?? __('Candidate')) }} · {{ $msg->created_at?->format('M d, g:i A') }}
+                                </span>
+                            </div>
+                        @endif
+                    @empty
+                        <div class="h-full flex flex-col items-center justify-center text-center p-6 text-body-muted">
+                            <svg class="size-8 text-body-muted/40 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                            <p class="text-xs font-semibold text-primary-dark">{{ __('No messages yet') }}</p>
+                            <p class="text-[11px] text-body-muted mt-0.5">{{ __('Candidate questions regarding workplace access and arrangements will appear here.') }}</p>
+                        </div>
+                    @endforelse
+                </div>
+
+                <!-- Reply Input -->
+                <div class="space-y-2">
+                    <textarea wire:model="chatMessageText"
+                              wire:keydown.ctrl.enter="sendChatMessage"
+                              rows="2"
+                              placeholder="{{ __('Type your reply to the candidate (Ctrl+Enter to send)...') }}"
+                              class="w-full rounded-xl border border-primary-border px-3.5 py-2.5 text-xs text-dark-neutral placeholder:text-body-muted focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"></textarea>
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] text-body-muted">
+                            {{ __('Press Ctrl+Enter to send') }}
+                        </span>
+                        <button type="button"
+                                wire:click="sendChatMessage"
+                                class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary-dark text-white text-xs font-bold hover:bg-primary transition-colors shadow-2xs">
+                            <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                            <span>{{ __('Send Reply') }}</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

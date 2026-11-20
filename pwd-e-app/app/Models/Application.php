@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Application extends Model
@@ -50,5 +51,22 @@ class Application extends Model
     public function jobPosting(): BelongsTo
     {
         return $this->belongsTo(JobPosting::class);
+    }
+
+    public function messages(): HasMany
+    {
+        return $this->hasMany(ApplicationMessage::class)->orderBy('created_at', 'asc');
+    }
+
+    public function unreadMessagesFor(?User $user): int
+    {
+        if (! $user) {
+            return 0;
+        }
+
+        return $this->messages()
+            ->where('sender_id', '!=', $user->id)
+            ->whereNull('read_at')
+            ->count();
     }
 }

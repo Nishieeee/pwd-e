@@ -267,6 +267,21 @@
                                         </button>
                                     </div>
 
+                                    @php
+                                        $unreadChatCount = $app->unreadMessagesFor($user);
+                                    @endphp
+                                    <div>
+                                        <button type="button"
+                                                wire:click="openChatModal({{ $app->id }})"
+                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-[#B8D0E2] text-xs font-semibold text-[#1A2840] bg-white hover:bg-[#DCEAF4]/40 transition-colors focus:ring-2 focus:ring-[#244F73] relative">
+                                            <svg class="size-3.5 text-[#244F73] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+                                            <span>{{ __('Accommodation Q&A') }}</span>
+                                            @if($unreadChatCount > 0)
+                                                <span class="inline-flex items-center justify-center size-4 rounded-full bg-red-600 text-white text-[10px] font-bold">{{ $unreadChatCount }}</span>
+                                            @endif
+                                        </button>
+                                    </div>
+
                                     @if(in_array($app->status, ['interview', 'under_review', 'applied', 'submitted']))
                                         <div>
                                             <button type="button"
@@ -511,6 +526,132 @@
                             class="px-4 py-2 rounded-lg bg-red-600 text-white text-xs font-semibold hover:bg-red-700 focus:ring-2 focus:ring-red-500">
                         Withdraw
                     </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- 4. Accommodation Inquiries Chat Modal -->
+    @if($showChatModal && $chatApp)
+        <div class="fixed inset-0 z-50 overflow-y-auto bg-black/50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="modal-chat-title">
+            <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-xl border border-gray-200 space-y-4" wire:click.stop>
+                <!-- Modal Header -->
+                <div class="flex items-start justify-between pb-3 border-b border-gray-100">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="inline-flex items-center gap-1.5 text-[11px] font-bold bg-[#E8F5E9] text-[#176B47] px-2.5 py-0.5 rounded-full border border-emerald-200">
+                                <svg class="size-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                                <span>{{ __('Accommodation & Logistics') }}</span>
+                            </span>
+                        </div>
+                        <h3 id="modal-chat-title" class="text-base font-bold text-[#1A2840] mt-1">
+                            {{ $chatApp->jobPosting->title }}
+                        </h3>
+                        <p class="text-xs text-gray-500">
+                            {{ $chatApp->jobPosting->employerProfile->company_name }}
+                        </p>
+                    </div>
+                    <button type="button" wire:click="closeChatModal" class="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 focus:ring-2 focus:ring-[#244F73]" aria-label="Close modal">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <!-- 1-Click Accommodation Inquiry Chips -->
+                <div class="space-y-1.5 bg-[#F4F7FA] p-3 rounded-xl border border-[#B8D0E2]/60">
+                    <span class="text-[11px] font-bold text-[#1A2840] block">
+                        {{ __('Quick Accommodation Inquiries (Click to ask):') }}
+                    </span>
+                    <div class="flex flex-wrap gap-1.5">
+                        <button type="button"
+                                wire:click="sendChatMessage('wheelchair')"
+                                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-white text-[#1A2840] border border-gray-300 hover:border-[#244F73] hover:bg-gray-50 transition-colors shadow-2xs">
+                            <svg class="size-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19 13v-2a2 2 0 00-2-2h-3l-1.5 4h3.5a1 1 0 011 1v4m-9-2a4 4 0 104 4"/></svg>
+                            <span>{{ __('Step-Free Access') }}</span>
+                        </button>
+                        <button type="button"
+                                wire:click="sendChatMessage('fsl')"
+                                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-white text-[#1A2840] border border-gray-300 hover:border-[#244F73] hover:bg-gray-50 transition-colors shadow-2xs">
+                            <svg class="size-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            <span>{{ __('FSL Interpreter') }}</span>
+                        </button>
+                        <button type="button"
+                                wire:click="sendChatMessage('screen_reader')"
+                                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-white text-[#1A2840] border border-gray-300 hover:border-[#244F73] hover:bg-gray-50 transition-colors shadow-2xs">
+                            <svg class="size-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                            <span>{{ __('Screen Reader Test Tasks') }}</span>
+                        </button>
+                        <button type="button"
+                                wire:click="sendChatMessage('schedule')"
+                                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-white text-[#1A2840] border border-gray-300 hover:border-[#244F73] hover:bg-gray-50 transition-colors shadow-2xs">
+                            <svg class="size-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 3"/></svg>
+                            <span>{{ __('Rest Breaks / Flex Time') }}</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Messages Log -->
+                <div class="h-64 overflow-y-auto space-y-3 p-3.5 bg-gray-50 rounded-xl border border-gray-200" role="log" aria-live="polite" aria-label="Message log">
+                    @forelse($chatApp->messages as $msg)
+                        @php
+                            $isMe = $msg->sender_id === $user->id;
+                            $isSystem = $msg->type === 'system';
+                            $isInquiry = $msg->type === 'accommodation_inquiry';
+                            $resolved = $msg->metadata['resolved'] ?? false;
+                        @endphp
+
+                        @if($isSystem)
+                            <div class="p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs text-center font-medium">
+                                <span>{{ $msg->body }}</span>
+                                <span class="block text-[10px] text-emerald-700/80 mt-0.5">{{ $msg->created_at?->diffForHumans() }}</span>
+                            </div>
+                        @else
+                            <div class="flex flex-col {{ $isMe ? 'items-end' : 'items-start' }}">
+                                <div class="max-w-[85%] rounded-2xl px-3.5 py-2.5 text-xs shadow-2xs {{ $isMe ? 'bg-[#1A2840] text-white rounded-br-xs' : 'bg-white text-gray-800 border border-gray-200 rounded-bl-xs' }}">
+                                    @if($isInquiry)
+                                        <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider mb-1 {{ $isMe ? 'text-sky-300' : 'text-[#244F73]' }}">
+                                            <svg class="size-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                            <span>{{ __('Accommodation Question') }}</span>
+                                            @if($resolved)
+                                                <span class="inline-flex items-center px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 font-bold text-[9px]">✓ Confirmed</span>
+                                            @endif
+                                        </div>
+                                    @endif
+                                    <p class="leading-relaxed whitespace-pre-wrap">{{ $msg->body }}</p>
+                                </div>
+                                <span class="text-[10px] text-gray-400 mt-1 px-1">
+                                    {{ $isMe ? __('You') : ($msg->sender?->name ?? __('Employer')) }} · {{ $msg->created_at?->format('M d, g:i A') }}
+                                </span>
+                            </div>
+                        @endif
+                    @empty
+                        <div class="h-full flex flex-col items-center justify-center text-center p-6 text-gray-400">
+                            <svg class="size-8 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                            <p class="text-xs font-semibold text-gray-600">{{ __('No messages yet') }}</p>
+                            <p class="text-[11px] text-gray-400 mt-0.5">{{ __('Ask about venue accessibility, interpreter setups, or interview format.') }}</p>
+                        </div>
+                    @endforelse
+                </div>
+
+                <!-- Compose Input -->
+                <div class="space-y-2">
+                    <div class="relative">
+                        <textarea wire:model="chatMessageText"
+                                  wire:keydown.ctrl.enter="sendChatMessage"
+                                  rows="2"
+                                  placeholder="{{ __('Type your question about accommodations or interview logistics (Ctrl+Enter to send)...') }}"
+                                  class="w-full rounded-xl border border-gray-300 px-3.5 py-2.5 text-xs text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#244F73] focus:border-transparent"></textarea>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-[11px] text-gray-400">
+                            {{ __('Press Ctrl+Enter to send') }}
+                        </span>
+                        <button type="button"
+                                wire:click="sendChatMessage"
+                                class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#1A2840] text-white text-xs font-bold hover:bg-[#244F73] transition-colors shadow-2xs">
+                            <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                            <span>{{ __('Send Message') }}</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

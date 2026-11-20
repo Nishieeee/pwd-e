@@ -3,7 +3,9 @@
 namespace App\Livewire\Candidate;
 
 use App\Models\Application;
+use App\Models\ApplicationMessage;
 use App\Models\CandidateProfile;
+use App\Notifications\AccommodationMessageReceived;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
@@ -34,7 +36,101 @@ class ApplicationsTracker extends Component
 
     public bool $showWithdrawConfirmModal = false;
 
+    public ?int $selectedChatAppId = null;
+
+    public bool $showChatModal = false;
+
+    public string $chatMessageText = '';
+
     public ?string $actionNotification = null;
+
+    public function openChatModal(int $appId): void
+    {
+        $user = Auth::user();
+        $candidateProfile = $user?->candidateProfile;
+
+        $app = Application::where('id', $appId)
+            ->where('candidate_profile_id', $candidateProfile?->id)
+            ->first();
+
+        if (! $app) {
+            return;
+        }
+
+        $this->selectedChatAppId = $appId;
+        $this->showChatModal = true;
+        $this->chatMessageText = '';
+
+        // Mark unread messages from employer as read
+        ApplicationMessage::where('application_id', $appId)
+            ->where('sender_id', '!=', $user->id)
+            ->whereNull('read_at')
+            ->update(['read_at' => now()]);
+    }
+
+    public function closeChatModal(): void
+    {
+        $this->showChatModal = false;
+        $this->selectedChatAppId = null;
+        $this->chatMessageText = '';
+    }
+
+    public function sendChatMessage(?string $chipTopic = null): void
+    {
+        $user = Auth::user();
+        $candidateProfile = $user?->candidateProfile;
+
+        if (! $user || ! $this->selectedChatAppId) {
+            return;
+        }
+
+        $app = Application::with('jobPosting.employerProfile.user')
+            ->where('id', $this->selectedChatAppId)
+            ->where('candidate_profile_id', $candidateProfile?->id)
+            ->first();
+
+        if (! $app) {
+            return;
+        }
+
+        $body = trim($this->chatMessageText);
+
+        if ($chipTopic) {
+            $body = match ($chipTopic) {
+                'wheelchair' => 'Inquiry: Does your workplace or interview venue have step-free entrance and wheelchair ramp access?',
+                'fsl' => 'Inquiry: Will there be a Filipino Sign Language (FSL) interpreter provided for the interview, or should I arrange one?',
+                'screen_reader' => 'Inquiry: Could interview test tasks and materials be provided in accessible digital format (screen-reader compatible plain text or HTML)?',
+                'schedule' => 'Inquiry: Is it possible to request a flexible schedule or scheduled rest breaks during the interview process?',
+                default => $chipTopic,
+            };
+            $type = 'accommodation_inquiry';
+            $metadata = ['topic' => $chipTopic, 'resolved' => false];
+        } else {
+            if (empty($body)) {
+                return;
+            }
+            $type = 'message';
+            $metadata = null;
+        }
+
+        $msg = ApplicationMessage::create([
+            'application_id' => $app->id,
+            'sender_id' => $user->id,
+            'body' => $body,
+            'type' => $type,
+            'metadata' => $metadata,
+        ]);
+
+        $this->chatMessageText = '';
+
+        // Notify employer
+        $employerUser = $app->jobPosting?->employerProfile?->user;
+        if ($employerUser) {
+            $employerUser->notify(new AccommodationMessageReceived($msg, $app->jobPosting, $user));
+        }
+
+        \Flux\Flux::toast(variant: 'success', text: __('Message sent to employer.'));
+    }
 
     public function setTab(string $tab): void
     {
@@ -207,6 +303,10 @@ class ApplicationsTracker extends Component
             ? Application::with(['jobPosting.employerProfile'])->find($this->selectedOfferAppId)
             : null;
 
+        $chatApp = $this->selectedChatAppId
+            ? Application::with(['jobPosting.employerProfile', 'messages.sender'])->find($this->selectedChatAppId)
+            : null;
+
         return view('livewire.candidate.applications-tracker', [
             'user' => $user,
             'candidateProfile' => $candidateProfile,
@@ -218,6 +318,8 @@ class ApplicationsTracker extends Component
             'archivedCount' => $archivedCount,
             'breakdownApp' => $breakdownApp,
             'offerApp' => $offerApp,
+            'chatApp' => $chatApp,
+            'showChatModal' => $this->showChatModal,
             'activeTab' => $this->activeTab,
             'search' => $this->search,
             'statusFilter' => $this->statusFilter,

@@ -55,6 +55,23 @@
                             </span>
                             <span class="text-[11px] text-body-muted pt-0.5">{{ $notification->created_at?->diffForHumans() }}</span>
                         </div>
+                    @elseif($type === 'accommodation_message' && $actionUrl)
+                        <a href="{{ $actionUrl }}" class="flex flex-col gap-1 w-full text-left">
+                            <div class="flex items-center gap-1.5 text-xs font-bold text-sky-700">
+                                <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+                                <span>{{ __('Accommodation Inquiry') }}</span>
+                            </div>
+                            <span class="text-sm font-semibold text-primary-dark">
+                                {{ $notification->data['job_title'] ?? __('Job Position') }}
+                            </span>
+                            <span class="text-xs text-body-muted">
+                                {{ $notification->data['sender_name'] ?? __('User') }}: "{{ $notification->data['message_snippet'] ?? '' }}"
+                            </span>
+                            <div class="flex items-center justify-between pt-1 text-[11px]">
+                                <span class="text-body-muted">{{ $notification->created_at?->diffForHumans() }}</span>
+                                <span class="font-bold text-primary hover:underline">{{ __('View Message &rarr;') }}</span>
+                            </div>
+                        </a>
                     @elseif(($notification->data['status'] ?? '') === 'rejected')
                         <div class="flex flex-col gap-1 w-full text-left">
                             <div class="flex items-center gap-1.5 text-xs font-bold text-red-600">
