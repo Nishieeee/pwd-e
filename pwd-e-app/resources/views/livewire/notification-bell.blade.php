@@ -17,11 +17,67 @@
             <flux:menu.separator />
 
             @forelse ($notifications as $notification)
+                @php
+                    $type = $notification->data['type'] ?? '';
+                    $isInvite = $type === 'job_invitation';
+                    $isWithdrawn = $type === 'job_invitation_withdrawn';
+                    $actionUrl = $notification->data['action_url'] ?? null;
+                @endphp
                 <flux:menu.item>
-                    <div class="flex flex-col gap-0.5">
-                        <span class="text-sm font-medium text-primary-dark">{{ $notification->data['status'] ?? $notification->data['job_title'] ?? __('Update') }}</span>
-                        <span class="text-xs text-body-muted">{{ $notification->created_at?->diffForHumans() }}</span>
-                    </div>
+                    @if($isInvite && $actionUrl)
+                        <a href="{{ $actionUrl }}" class="flex flex-col gap-1 w-full text-left">
+                            <div class="flex items-center gap-1.5 text-xs font-bold text-secondary">
+                                <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                <span>{{ __('Job Invitation') }}</span>
+                            </div>
+                            <span class="text-sm font-semibold text-primary-dark">
+                                {{ $notification->data['job_title'] ?? __('Job Position') }}
+                            </span>
+                            <span class="text-xs text-body-muted">
+                                {{ $notification->data['employer_name'] ?? __('Verified Employer') }}
+                            </span>
+                            <div class="flex items-center justify-between pt-1 text-[11px]">
+                                <span class="text-body-muted">{{ $notification->created_at?->diffForHumans() }}</span>
+                                <span class="font-bold text-primary hover:underline">{{ __('Apply &rarr;') }}</span>
+                            </div>
+                        </a>
+                    @elseif($isWithdrawn)
+                        <div class="flex flex-col gap-1 w-full text-left">
+                            <div class="flex items-center gap-1.5 text-xs font-bold text-amber-700">
+                                <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                <span>{{ __('Invitation Withdrawn') }}</span>
+                            </div>
+                            <span class="text-sm font-semibold text-primary-dark">
+                                {{ $notification->data['job_title'] ?? __('Position') }}
+                            </span>
+                            <span class="text-xs text-body-muted">
+                                {{ $notification->data['employer_name'] ?? __('Employer') }}: "{{ $notification->data['withdrawn_reason'] ?? 'Requisition updated' }}"
+                            </span>
+                            <span class="text-[11px] text-body-muted pt-0.5">{{ $notification->created_at?->diffForHumans() }}</span>
+                        </div>
+                    @elseif(($notification->data['status'] ?? '') === 'rejected')
+                        <div class="flex flex-col gap-1 w-full text-left">
+                            <div class="flex items-center gap-1.5 text-xs font-bold text-red-600">
+                                <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                <span>{{ __('Application Status') }}</span>
+                            </div>
+                            <span class="text-sm font-semibold text-primary-dark">
+                                {{ $notification->data['job_title'] ?? __('Application') }}
+                            </span>
+                            <span class="text-xs text-body-muted">
+                                {{ __('Status: Declined') }}
+                                @if(!empty($notification->data['note']))
+                                    — "{{ $notification->data['note'] }}"
+                                @endif
+                            </span>
+                            <span class="text-[11px] text-body-muted pt-0.5">{{ $notification->created_at?->diffForHumans() }}</span>
+                        </div>
+                    @else
+                        <div class="flex flex-col gap-0.5">
+                            <span class="text-sm font-medium text-primary-dark">{{ $notification->data['status'] ?? $notification->data['job_title'] ?? __('Update') }}</span>
+                            <span class="text-xs text-body-muted">{{ $notification->created_at?->diffForHumans() }}</span>
+                        </div>
+                    @endif
                 </flux:menu.item>
             @empty
                 <div class="px-3 py-4 text-center text-sm text-body-muted">{{ __('No notifications yet.') }}</div>

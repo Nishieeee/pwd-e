@@ -42,6 +42,11 @@ class EmployerProfile extends Model
         return $this->hasMany(TaxIncentiveSnapshot::class)->orderByDesc('snapshot_date');
     }
 
+    public function jobInvitations(): HasMany
+    {
+        return $this->hasMany(JobInvitation::class);
+    }
+
     public function isMatrixComplete(): bool
     {
         return $this->matrix_completed_at !== null;

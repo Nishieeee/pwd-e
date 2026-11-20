@@ -15,6 +15,7 @@ class JobInvitationReceived extends Notification
         public JobPosting $jobPosting,
         public string $employerCompanyName,
         public ?string $personalMessage = null,
+        public ?int $jobInvitationId = null,
     ) {}
 
     public function via(object $notifiable): array
@@ -40,6 +41,7 @@ class JobInvitationReceived extends Notification
     {
         return [
             'type' => 'job_invitation',
+            'job_invitation_id' => $this->jobInvitationId,
             'job_posting_id' => $this->jobPosting->id,
             'job_title' => $this->jobPosting->title,
             'employer_name' => $this->employerCompanyName,

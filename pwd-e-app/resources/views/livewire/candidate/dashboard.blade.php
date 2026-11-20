@@ -35,6 +35,44 @@
         </div>
     @endif
 
+    {{-- Direct Employer Job Invitations --}}
+    @if(isset($jobInvitations) && $jobInvitations->isNotEmpty())
+        <div class="space-y-3">
+            @foreach($jobInvitations as $invite)
+                @php
+                    $jobTitle = $invite->jobPosting?->title ?? $invite->data['job_title'] ?? 'Open Position';
+                    $employerName = $invite->employerProfile?->company_name ?? $invite->data['employer_name'] ?? 'Verified Employer';
+                    $actionUrl = $invite->jobPosting ? route('candidate.apply', $invite->jobPosting) : ($invite->data['action_url'] ?? '#');
+                    $personalMsg = $invite->personal_message ?? $invite->data['personal_message'] ?? null;
+                @endphp
+                <div class="p-5 rounded-2xl bg-gradient-to-r from-sky-50 to-indigo-50/40 border border-sky-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2">
+                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-secondary text-white shadow-2xs">
+                                ✉️ {{ __('Direct Job Invitation') }}
+                            </span>
+                            <span class="text-xs text-body-muted">{{ $invite->created_at?->diffForHumans() }}</span>
+                        </div>
+                        <h2 class="font-heading text-lg font-bold text-primary-dark">
+                            {{ $employerName }} {{ __('invited you to apply for') }} <span class="text-primary">{{ $jobTitle }}</span>
+                        </h2>
+                        @if($personalMsg)
+                            <p class="text-xs text-body-muted italic bg-white/70 rounded-lg p-2.5 border border-sky-100 max-w-2xl">
+                                "{{ $personalMsg }}"
+                            </p>
+                        @endif
+                    </div>
+                    <div class="flex items-center gap-2.5 shrink-0">
+                        <a href="{{ $actionUrl }}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary-dark text-xs font-bold text-white hover:bg-primary shadow-xs transition-colors">
+                            <span>{{ __('Review & Apply') }}</span>
+                            <span>&rarr;</span>
+                        </a>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    @endif
+
     <!-- Dashboard Header -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -243,6 +281,17 @@
                                     <span class="inline-flex items-center px-2.5 py-1 rounded-full font-medium bg-amber-50 text-amber-800 border border-amber-200">
                                         Under Review
                                     </span>
+                                @elseif($app->status === 'rejected')
+                                    <div class="inline-flex flex-col items-start gap-0.5">
+                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full font-medium bg-red-50 text-red-700 border border-red-200">
+                                            Declined
+                                        </span>
+                                        @if($app->rejection_reason)
+                                            <span class="text-[10px] text-gray-500 max-w-[180px] truncate" title="{{ $app->rejection_reason }}">
+                                                "{{ $app->rejection_reason }}"
+                                            </span>
+                                        @endif
+                                    </div>
                                 @else
                                     <span class="inline-flex items-center px-2.5 py-1 rounded-full font-medium bg-gray-100 text-gray-700">
                                         {{ ucfirst($app->status) }}

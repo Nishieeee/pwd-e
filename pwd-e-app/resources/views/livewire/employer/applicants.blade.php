@@ -200,17 +200,33 @@
                                     </button>
 
                                     @if($app->status !== 'hired')
-                                        <button type="button" wire:click="openInterviewModal({{ $app->id }})"
-                                                class="inline-flex items-center gap-1 rounded-lg border border-primary-border bg-white px-2.5 py-1.5 text-xs font-semibold text-primary hover:bg-primary-tint/60 transition-colors whitespace-nowrap shrink-0">
-                                            <svg class="size-3.5 text-primary/70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                            <span>{{ __('Interview') }}</span>
-                                        </button>
+                                        @if($app->status !== 'rejected')
+                                            <button type="button" wire:click="openInterviewModal({{ $app->id }})"
+                                                    class="inline-flex items-center gap-1 rounded-lg border border-primary-border bg-white px-2.5 py-1.5 text-xs font-semibold text-primary hover:bg-primary-tint/60 transition-colors whitespace-nowrap shrink-0">
+                                                <svg class="size-3.5 text-primary/70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                                <span>{{ __('Interview') }}</span>
+                                            </button>
 
-                                        <button type="button" wire:click="openHireModal({{ $app->id }})"
-                                                class="inline-flex items-center gap-1 rounded-lg bg-secondary px-3 py-1.5 text-xs font-bold text-white hover:bg-secondary/90 transition-colors shadow-2xs whitespace-nowrap shrink-0">
-                                            <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                                            <span>{{ __('Hire') }}</span>
-                                        </button>
+                                            <button type="button" wire:click="openHireModal({{ $app->id }})"
+                                                    class="inline-flex items-center gap-1 rounded-lg bg-secondary px-3 py-1.5 text-xs font-bold text-white hover:bg-secondary/90 transition-colors shadow-2xs whitespace-nowrap shrink-0">
+                                                <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                                <span>{{ __('Hire') }}</span>
+                                            </button>
+
+                                            <button type="button" wire:click="openRejectModal({{ $app->id }})"
+                                                    class="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 hover:border-red-300 transition-colors whitespace-nowrap shrink-0"
+                                                    title="{{ __('Decline candidate application') }}">
+                                                <svg class="size-3.5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                <span>{{ __('Decline') }}</span>
+                                            </button>
+                                        @else
+                                            <button type="button" wire:click="openRejectModal({{ $app->id }})"
+                                                    class="inline-flex items-center gap-1 rounded-lg border border-gray-200 bg-gray-50 px-2.5 py-1.5 text-xs font-medium text-body-muted hover:bg-white transition-colors whitespace-nowrap shrink-0"
+                                                    title="{{ __('View or edit decline remark') }}">
+                                                <svg class="size-3.5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                                <span>{{ __('Decline Note') }}</span>
+                                            </button>
+                                        @endif
                                     @endif
                                 </div>
                             </td>
@@ -272,11 +288,24 @@
                     </div>
                     <div>
                         <span class="text-xs text-body-muted block">{{ __('Current Status') }}</span>
-                        <span class="rounded-full px-2.5 py-0.5 text-xs font-semibold {{ $viewing->status === 'hired' ? 'bg-secondary-tint text-secondary' : 'bg-primary-tint text-primary-dark' }}">
+                        <span class="rounded-full px-2.5 py-0.5 text-xs font-semibold {{ $viewing->status === 'hired' ? 'bg-secondary-tint text-secondary' : ($viewing->status === 'rejected' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-primary-tint text-primary-dark') }}">
                             {{ ucfirst(str_replace('_', ' ', $viewing->status)) }}
                         </span>
                     </div>
                 </div>
+
+                @if($viewing->status === 'rejected' && $viewing->rejection_reason)
+                    <div class="rounded-xl border border-red-200 bg-red-50/60 p-3.5 text-xs text-red-900 space-y-1">
+                        <div class="flex items-center gap-1.5 font-bold text-red-800">
+                            <svg class="size-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                            <span>{{ __('Decline Feedback / Remark') }}</span>
+                            @if($viewing->rejected_at)
+                                <span class="text-[11px] font-normal text-red-700/80">({{ $viewing->rejected_at->format('M d, Y') }})</span>
+                            @endif
+                        </div>
+                        <p class="leading-relaxed text-red-800/90 italic">"{{ $viewing->rejection_reason }}"</p>
+                    </div>
+                @endif
 
                 {{-- Documents Submitted --}}
                 <div class="space-y-3">
@@ -321,6 +350,11 @@
                 <div class="pt-4 border-t border-primary-border flex items-center justify-between">
                     <span class="text-xs font-semibold text-body-muted">{{ __('Update application stage:') }}</span>
                     <div class="flex items-center gap-2">
+                        @if($viewing->status !== 'rejected')
+                            <button type="button" wire:click="openRejectModal({{ $viewing->id }})" class="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors">
+                                {{ __('Decline Candidate') }}
+                            </button>
+                        @endif
                         <select wire:change="updateStatus({{ $viewing->id }}, $event.target.value)" class="rounded-lg border border-primary-border px-3 py-1.5 text-xs font-semibold text-primary-dark bg-white">
                             @foreach (['applied' => 'New Application', 'under_review' => 'Under Review', 'interview' => 'Interviewing', 'hired' => 'Hired', 'rejected' => 'Declined'] as $st => $stLabel)
                                 <option value="{{ $st }}" @selected($viewing->status === $st)>{{ $stLabel }}</option>
@@ -446,6 +480,62 @@
                     </button>
                     <button type="button" wire:click="confirmHire" class="rounded-lg bg-secondary px-4 py-2 text-xs font-semibold text-white hover:bg-secondary/90 shadow-xs">
                         {{ __('Confirm Hire & Log RA 10524 Credit') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- Reject / Decline Modal --}}
+    @if ($showRejectModal && $rejectingApp)
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" role="dialog" aria-modal="true" aria-label="{{ __('Decline candidate application') }}">
+            <div class="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 sm:p-8 shadow-xl space-y-5" wire:click.stop>
+                <div class="flex items-start justify-between border-b border-primary-border pb-3">
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-50 text-red-700 border border-red-200 mb-1">
+                            {{ __('Decline Application') }}
+                        </div>
+                        <h2 class="font-heading text-lg font-bold text-primary-dark">{{ __('Decline Candidate Application') }}</h2>
+                        <p class="text-xs text-body-muted mt-0.5">{{ $rejectingApp->candidateProfile?->user?->name }} · {{ $rejectingApp->jobPosting?->title }}</p>
+                    </div>
+                    <button type="button" wire:click="closeRejectModal" class="text-body-muted hover:text-primary-dark text-lg">&times;</button>
+                </div>
+
+                <p class="text-xs text-body-muted leading-relaxed">
+                    {{ __('Politely notify the candidate that they will not be advancing to the next stage. A feedback remark helps candidates improve their accessibility and application materials.') }}
+                </p>
+
+                <div class="space-y-3 text-xs">
+                    <label class="block font-bold text-primary-dark">{{ __('Select a Quick Reason (Click to Fill)') }}</label>
+                    <div class="flex flex-wrap gap-1.5">
+                        @foreach ([
+                            'Position filled by another qualified applicant',
+                            'Skill set or experience level mismatch for this role',
+                            'Requisition currently placed on hold',
+                            'Schedule / shift availability incompatibility'
+                        ] as $quickReason)
+                            <button type="button"
+                                    wire:click="$set('rejectionReason', '{{ $quickReason }}')"
+                                    class="text-[11px] px-2.5 py-1 rounded-md border border-gray-200 bg-gray-50 hover:bg-primary-tint hover:border-primary-border text-primary-dark transition-colors text-left">
+                                {{ $quickReason }}
+                            </button>
+                        @endforeach
+                    </div>
+
+                    <div class="pt-2">
+                        <label class="block font-bold text-primary-dark mb-1">{{ __('Custom Feedback or Remarks (Optional)') }}</label>
+                        <textarea wire:model="rejectionReason" rows="3"
+                                  placeholder="{{ __('e.g., Thank you for your application. Although your profile is strong, we have moved forward with another candidate whose background is a closer fit.') }}"
+                                  class="w-full rounded-lg border border-primary-border px-3 py-2 text-xs focus:ring-2 focus:ring-red-500 focus:outline-none"></textarea>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-3 border-t border-primary-border">
+                    <button type="button" wire:click="closeRejectModal" class="rounded-lg border border-primary-border px-4 py-2 text-xs font-semibold text-primary-dark hover:bg-primary-tint">
+                        {{ __('Cancel') }}
+                    </button>
+                    <button type="button" wire:click="confirmReject" class="rounded-lg bg-red-600 px-4 py-2 text-xs font-semibold text-white hover:bg-red-700 shadow-xs">
+                        {{ __('Confirm & Decline Candidate') }}
                     </button>
                 </div>
             </div>

@@ -99,4 +99,9 @@ class CandidateProfile extends Model
         return $this->belongsToMany(Accommodation::class, 'accessibility_needs')
             ->withPivot('is_required', 'visible_to_employers');
     }
+
+    public function jobInvitations(): HasMany
+    {
+        return $this->hasMany(JobInvitation::class);
+    }
 }

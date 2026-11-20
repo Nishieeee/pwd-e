@@ -4,10 +4,13 @@ namespace App\Livewire\Employer;
 
 use App\Models\Accommodation;
 use App\Models\CandidateProfile;
+use App\Models\JobInvitation;
 use App\Models\JobPosting;
 use App\Notifications\JobInvitationReceived;
+use App\Notifications\JobInvitationWithdrawn;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -21,7 +24,7 @@ class Talents extends Component
 
     public string $search = '';
 
-    public string $selectedAccommodation = '';
+    public array $selectedAccommodations = [];
 
     public string $selectedEducation = '';
 
@@ -43,9 +46,19 @@ class Talents extends Component
 
     public string $invitationMessage = '';
 
+    public bool $showWithdrawModal = false;
+
+    public ?int $withdrawingInvitationId = null;
+
+    public string $withdrawalCandidateName = '';
+
+    public string $withdrawalJobTitle = '';
+
+    public string $withdrawalReason = '';
+
     protected $queryString = [
         'search' => ['except' => ''],
-        'selectedAccommodation' => ['except' => ''],
+        'selectedAccommodations' => ['except' => []],
         'selectedEducation' => ['except' => ''],
         'verifiedOnly' => ['except' => false],
         'sort' => ['except' => 'recent'],
@@ -65,8 +78,23 @@ class Talents extends Component
         $this->resetPage();
     }
 
-    public function updatingSelectedAccommodation(): void
+    public function updatingSelectedAccommodations(): void
     {
+        $this->resetPage();
+    }
+
+    public function removeAccommodation(string $name): void
+    {
+        $this->selectedAccommodations = array_values(array_filter(
+            $this->selectedAccommodations,
+            fn ($item) => $item !== $name
+        ));
+        $this->resetPage();
+    }
+
+    public function clearAccommodations(): void
+    {
+        $this->selectedAccommodations = [];
         $this->resetPage();
     }
 
@@ -87,7 +115,7 @@ class Talents extends Component
 
     public function resetFilters(): void
     {
-        $this->reset(['search', 'selectedAccommodation', 'selectedEducation', 'verifiedOnly', 'sort']);
+        $this->reset(['search', 'selectedAccommodations', 'selectedEducation', 'verifiedOnly', 'sort']);
         $this->resetPage();
     }
 
@@ -130,18 +158,73 @@ class Talents extends Component
 
         $candidateProfile = CandidateProfile::with('user')->findOrFail($this->invitingCandidateProfileId);
 
+        $invitation = JobInvitation::create([
+            'employer_profile_id' => $employerProfile->id,
+            'job_posting_id' => $job->id,
+            'candidate_profile_id' => $candidateProfile->id,
+            'status' => 'pending',
+            'personal_message' => $this->invitationMessage,
+        ]);
+
         $candidateUser = $candidateProfile->user;
         if ($candidateUser) {
             $candidateUser->notify(new JobInvitationReceived(
                 $job,
                 $employerProfile?->company_name ?? Auth::user()->name,
-                $this->invitationMessage
+                $this->invitationMessage,
+                $invitation->id
             ));
         }
 
         session()->flash('invitation_success', "Invitation successfully sent to {$candidateUser?->name} for {$job->title}!");
 
         $this->closeInviteModal();
+    }
+
+    public function openWithdrawModal(int $invitationId): void
+    {
+        $employerProfile = Auth::user()?->employerProfile;
+        $invitation = JobInvitation::where('employer_profile_id', $employerProfile?->id)
+            ->with(['candidateProfile.user', 'jobPosting'])
+            ->findOrFail($invitationId);
+
+        $this->withdrawingInvitationId = $invitation->id;
+        $this->withdrawalCandidateName = $invitation->candidateProfile?->user?->name ?? 'Candidate';
+        $this->withdrawalJobTitle = $invitation->jobPosting?->title ?? 'Position';
+        $this->withdrawalReason = '';
+        $this->showWithdrawModal = true;
+    }
+
+    public function closeWithdrawModal(): void
+    {
+        $this->showWithdrawModal = false;
+        $this->reset(['withdrawingInvitationId', 'withdrawalCandidateName', 'withdrawalJobTitle', 'withdrawalReason']);
+    }
+
+    public function confirmWithdrawInvitation(): void
+    {
+        $this->validate([
+            'withdrawalReason' => 'required|string|min:3|max:500',
+        ]);
+
+        $employerProfile = Auth::user()?->employerProfile;
+        $invitation = JobInvitation::where('employer_profile_id', $employerProfile?->id)
+            ->with(['candidateProfile.user', 'jobPosting'])
+            ->findOrFail($this->withdrawingInvitationId);
+
+        $invitation->withdraw($this->withdrawalReason);
+
+        $candidateUser = $invitation->candidateProfile?->user;
+        if ($candidateUser && $invitation->jobPosting) {
+            $candidateUser->notify(new JobInvitationWithdrawn(
+                $invitation->jobPosting,
+                $employerProfile?->company_name ?? Auth::user()->name,
+                $this->withdrawalReason
+            ));
+        }
+
+        session()->flash('invitation_success', "Invitation for {$this->withdrawalCandidateName} was withdrawn successfully.");
+        $this->closeWithdrawModal();
     }
 
     public function render(): View
@@ -154,32 +237,57 @@ class Talents extends Component
             })
             ->where(function ($sub) {
                 $sub->whereNull('visibility_settings')
-                    ->orWhereRaw("visibility_settings NOT LIKE '%\"is_discoverable\":false%'");
+                    ->orWhere('visibility_settings->is_discoverable', '!=', 'false')
+                    ->orWhereNull('visibility_settings->is_discoverable');
             })
-            ->with(['user', 'accommodations', 'workExperiences', 'education']);
+            ->with([
+                'user',
+                'accommodations',
+                'workExperiences',
+                'education',
+                'jobInvitations' => fn ($iq) => $iq->where('employer_profile_id', $employerProfile?->id)->where('status', 'pending')->with('jobPosting'),
+            ]);
 
         if (! empty(trim($this->search))) {
             $term = trim($this->search);
-            $query->where(function ($q) use ($term) {
+            $driver = DB::connection()->getDriverName();
+            $query->where(function ($q) use ($term, $driver) {
                 $q->where('headline', 'like', "%{$term}%")
                     ->orWhere('bio', 'like', "%{$term}%")
                     ->orWhere('city', 'like', "%{$term}%")
                     ->orWhere('location', 'like', "%{$term}%")
-                    ->orWhere('skills', 'like', "%{$term}%")
                     ->orWhere('highest_education', 'like', "%{$term}%")
                     ->orWhereHas('user', function ($uq) use ($term) {
                         $uq->where('name', 'like', "%{$term}%")
                             ->orWhere('first_name', 'like', "%{$term}%")
                             ->orWhere('last_name', 'like', "%{$term}%");
                     });
+
+                if ($driver === 'pgsql') {
+                    $q->orWhereRaw('CAST(skills AS text) ILIKE ?', ["%{$term}%"]);
+                } else {
+                    $q->orWhere('skills', 'like', "%{$term}%");
+                }
             });
         }
 
-        if (! empty($this->selectedAccommodation)) {
-            $query->whereHas('accommodations', function ($aq) {
-                $aq->where('accommodations.name', 'like', "%{$this->selectedAccommodation}%")
-                    ->orWhere('accommodations.category', $this->selectedAccommodation);
-            });
+        if (! empty($this->selectedAccommodations)) {
+            $selected = array_values(array_filter($this->selectedAccommodations));
+            if (! empty($selected)) {
+                $driver = DB::connection()->getDriverName();
+                $query->whereHas('accommodations', function ($aq) use ($selected, $driver) {
+                    $aq->where(function ($sub) use ($selected, $driver) {
+                        foreach ($selected as $accName) {
+                            $term = strtolower(trim($accName));
+                            if ($driver === 'pgsql') {
+                                $sub->orWhereRaw('LOWER(accommodations.name) LIKE ?', ["%{$term}%"]);
+                            } else {
+                                $sub->orWhere('accommodations.name', 'like', "%{$accName}%");
+                            }
+                        }
+                    });
+                });
+            }
         }
 
         if (! empty($this->selectedEducation)) {
@@ -204,7 +312,10 @@ class Talents extends Component
 
         $candidates = $query->paginate($this->perPage);
 
-        $accommodations = Accommodation::orderBy('name')->get();
+        $accommodations = Accommodation::all()
+            ->unique(fn ($item) => strtolower(trim($item->name)))
+            ->sortBy('name', SORT_NATURAL | SORT_FLAG_CASE)
+            ->values();
 
         $activeJobs = JobPosting::where('employer_profile_id', $employerProfile?->id)
             ->where('status', 'published')

@@ -60,15 +60,98 @@
                 @endif
             </div>
 
-            {{-- Accommodation Filter --}}
-            <div class="md:col-span-3">
-                <select wire:model.live="selectedAccommodation"
-                        class="w-full py-2 px-3 text-xs rounded-xl border border-primary-border bg-surface text-primary-dark focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all">
-                    <option value="">{{ __('All Accommodations') }}</option>
-                    @foreach($accommodations as $acc)
-                        <option value="{{ $acc->name }}">{{ $acc->name }}</option>
-                    @endforeach
-                </select>
+            {{-- Accommodation Checklist Filter --}}
+            <div class="md:col-span-3 relative" x-data="{ open: false, filterText: '' }">
+                <button type="button"
+                        @click="open = !open"
+                        class="w-full py-2 px-3 text-xs rounded-xl border border-primary-border bg-surface text-primary-dark flex items-center justify-between gap-2 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all text-left"
+                        :class="{ 'ring-2 ring-primary/40 border-primary bg-white': open || {{ count($selectedAccommodations) > 0 ? 'true' : 'false' }} }"
+                        aria-haspopup="true"
+                        :aria-expanded="open.toString()">
+                    <span class="truncate">
+                        @if(count($selectedAccommodations) === 0)
+                            <span class="text-primary-dark">{{ __('All Accommodations') }}</span>
+                        @elseif(count($selectedAccommodations) === 1)
+                            <span class="font-bold text-primary-dark truncate">{{ $selectedAccommodations[0] }}</span>
+                        @else
+                            <span class="font-bold text-primary-dark">{{ count($selectedAccommodations) }} {{ __('Accommodations') }}</span>
+                        @endif
+                    </span>
+                    <div class="flex items-center gap-1.5 shrink-0 text-body-muted">
+                        @if(count($selectedAccommodations) > 0)
+                            <span class="size-4 rounded-full bg-secondary text-white text-[10px] font-bold flex items-center justify-center">
+                                {{ count($selectedAccommodations) }}
+                            </span>
+                        @endif
+                        <svg class="size-3.5 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </div>
+                </button>
+
+                {{-- Checklist Popover Dropdown Panel --}}
+                <div x-show="open"
+                     @click.outside="open = false"
+                     @keydown.escape.window="open = false"
+                     x-transition:enter="transition ease-out duration-150"
+                     x-transition:enter-start="opacity-0 translate-y-1 scale-95"
+                     x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                     x-transition:leave="transition ease-in duration-100"
+                     x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                     x-transition:leave-end="opacity-0 translate-y-1 scale-95"
+                     class="absolute left-0 right-0 z-50 mt-1.5 bg-white rounded-2xl border border-primary-border shadow-xl p-3 space-y-2 min-w-[280px]"
+                     style="display: none;">
+
+                    {{-- Search inside checklist --}}
+                    <div class="relative">
+                        <input type="text"
+                               x-model="filterText"
+                               placeholder="{{ __('Filter accommodations...') }}"
+                               class="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary">
+                        <svg class="size-3.5 text-gray-400 absolute left-2.5 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </div>
+
+                    {{-- Header bar inside checklist --}}
+                    <div class="flex items-center justify-between text-[11px] text-body-muted px-1 pt-1 border-b border-gray-100 pb-1.5">
+                        <span>{{ __('Select required accommodations') }}</span>
+                        @if(count($selectedAccommodations) > 0)
+                            <button type="button" wire:click="clearAccommodations" class="text-xs font-semibold text-secondary hover:underline">
+                                {{ __('Clear all') }}
+                            </button>
+                        @endif
+                    </div>
+
+                    {{-- Checkbox List Items --}}
+                    <div class="max-h-60 overflow-y-auto space-y-1 pr-1">
+                        @foreach($accommodations as $acc)
+                            <label x-show="!filterText || '{{ strtolower(addslashes($acc->name)) }}'.includes(filterText.toLowerCase())"
+                                   class="flex items-start gap-2.5 p-2 rounded-lg hover:bg-surface cursor-pointer text-xs transition-colors select-none">
+                                <input type="checkbox"
+                                       wire:model.live="selectedAccommodations"
+                                       value="{{ $acc->name }}"
+                                       class="mt-0.5 size-4 rounded text-secondary focus:ring-secondary border-gray-300">
+                                <div class="min-w-0 flex-1">
+                                    <span class="font-medium text-primary-dark block leading-snug">{{ $acc->name }}</span>
+                                    @if($acc->category)
+                                        <span class="text-[10px] text-body-muted capitalize">{{ str_replace('_', ' ', $acc->category) }}</span>
+                                    @endif
+                                </div>
+                            </label>
+                        @endforeach
+                    </div>
+
+                    {{-- Bottom Action --}}
+                    <div class="pt-2 border-t border-gray-100 flex items-center justify-between">
+                        <span class="text-[11px] text-body-muted">
+                            {{ count($selectedAccommodations) }} {{ __('selected') }}
+                        </span>
+                        <button type="button" @click="open = false" class="px-3 py-1 bg-primary-dark text-white rounded-lg text-xs font-semibold hover:bg-primary transition-colors">
+                            {{ __('Done') }}
+                        </button>
+                    </div>
+                </div>
             </div>
 
             {{-- Education Filter --}}
@@ -93,6 +176,22 @@
             </div>
         </div>
 
+        {{-- Selected Accommodation Tag Chips --}}
+        @if(count($selectedAccommodations) > 0)
+            <div class="flex flex-wrap items-center gap-1.5 pt-2 border-t border-primary-border/30">
+                <span class="text-[11px] font-semibold text-body-muted uppercase tracking-wider mr-1">{{ __('Active Accommodations:') }}</span>
+                @foreach($selectedAccommodations as $accName)
+                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-sky-50 text-sky-800 border border-sky-200 shadow-2xs">
+                        <span>{{ $accName }}</span>
+                        <button type="button" wire:click="removeAccommodation('{{ addslashes($accName) }}')" class="hover:text-red-600 font-bold ml-0.5 focus:outline-none" aria-label="Remove {{ $accName }}">&times;</button>
+                    </span>
+                @endforeach
+                <button type="button" wire:click="clearAccommodations" class="text-xs font-semibold text-secondary hover:underline ml-1">
+                    {{ __('Clear all') }}
+                </button>
+            </div>
+        @endif
+
         {{-- Second Row: Verified PWD filter & active reset --}}
         <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-primary-border/40 text-xs">
             <label class="inline-flex items-center gap-2 cursor-pointer select-none">
@@ -103,7 +202,7 @@
                 <span class="text-[11px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 font-bold">Tax-deductible hire</span>
             </label>
 
-            @if($search || $selectedAccommodation || $selectedEducation || $verifiedOnly || $sort !== 'recent')
+            @if($search || count($selectedAccommodations) > 0 || $selectedEducation || $verifiedOnly || $sort !== 'recent')
                 <button type="button"
                         wire:click="resetFilters"
                         class="inline-flex items-center gap-1.5 text-xs font-semibold text-secondary hover:underline">
@@ -221,7 +320,7 @@
                         @endif
                     </div>
 
-                    {{-- Actions: View Profile & Invite to Apply --}}
+                    {{-- Actions: View Profile & Invite to Apply / Withdraw --}}
                     <div class="pt-3 border-t border-primary-border/60 flex items-center gap-2">
                         <a href="{{ route('employer.candidates.show', $candidate) }}"
                            class="flex-1 inline-flex items-center justify-center gap-1 px-3 py-2 rounded-xl border border-primary-border bg-white text-xs font-bold text-primary-dark hover:bg-primary-tint hover:border-primary/50 transition-colors shadow-2xs">
@@ -229,12 +328,29 @@
                             <span>{{ __('View Profile') }}</span>
                         </a>
 
-                        <button type="button"
-                                wire:click="openInviteModal({{ $candidate->id }})"
-                                class="flex-1 inline-flex items-center justify-center gap-1 px-3 py-2 rounded-xl bg-primary-dark text-xs font-bold text-white hover:bg-primary transition-colors shadow-2xs">
-                            <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                            <span>{{ __('Invite to Apply') }}</span>
-                        </button>
+                        @php
+                            $pendingInvite = $candidate->jobInvitations?->first();
+                        @endphp
+                        @if($pendingInvite)
+                            <div class="flex-1 flex items-center gap-1.5">
+                                <span class="flex-1 inline-flex items-center justify-center gap-1 px-2.5 py-2 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 text-xs font-semibold truncate" title="{{ __('Invited for :job', ['job' => $pendingInvite->jobPosting?->title]) }}">
+                                    <span>✉️ {{ __('Invited') }}</span>
+                                </span>
+                                <button type="button"
+                                        wire:click="openWithdrawModal({{ $pendingInvite->id }})"
+                                        class="px-2.5 py-2 rounded-xl border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 text-xs font-bold transition-colors"
+                                        title="{{ __('Withdraw invitation with remarks') }}">
+                                    {{ __('Withdraw') }}
+                                </button>
+                            </div>
+                        @else
+                            <button type="button"
+                                    wire:click="openInviteModal({{ $candidate->id }})"
+                                    class="flex-1 inline-flex items-center justify-center gap-1 px-3 py-2 rounded-xl bg-primary-dark text-xs font-bold text-white hover:bg-primary transition-colors shadow-2xs">
+                                <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                <span>{{ __('Invite to Apply') }}</span>
+                            </button>
+                        @endif
                     </div>
                 </div>
             @endforeach
@@ -338,6 +454,62 @@
                         </button>
                     </div>
                 @endif
+            </div>
+        </div>
+    @endif
+
+    {{-- Withdraw Invitation Modal --}}
+    @if($showWithdrawModal)
+        <div class="fixed inset-0 z-50 overflow-y-auto bg-black/50 backdrop-blur-xs flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="withdraw-modal-title">
+            <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-5 border border-primary-border shadow-xl">
+                <div class="flex items-start justify-between gap-4 pb-3 border-b border-primary-border">
+                    <div>
+                        <h2 id="withdraw-modal-title" class="font-heading text-lg font-bold text-red-700 flex items-center gap-2">
+                            <svg class="size-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                            <span>{{ __('Withdraw Job Invitation') }}</span>
+                        </h2>
+                        <p class="text-xs text-body-muted mt-0.5">
+                            {{ __('Withdraw invitation for') }} <strong class="text-primary-dark">{{ $withdrawalCandidateName }}</strong> {{ __('for') }} <strong class="text-primary-dark">{{ $withdrawalJobTitle }}</strong>.
+                        </p>
+                    </div>
+                    <button type="button" wire:click="closeWithdrawModal" class="text-body-muted hover:text-primary-dark text-lg font-bold" aria-label="Close modal">&times;</button>
+                </div>
+
+                <form wire:submit="confirmWithdrawInvitation" class="space-y-4">
+                    <div>
+                        <label for="withdraw-reason" class="block text-xs font-bold text-primary-dark mb-1">
+                            {{ __('Reason for Withdrawal / Remarks') }} <span class="text-red-500">*</span>
+                        </label>
+                        <textarea id="withdraw-reason"
+                                  wire:model="withdrawalReason"
+                                  rows="3"
+                                  class="w-full p-3 text-xs rounded-xl border border-primary-border bg-surface text-primary-dark focus:ring-2 focus:ring-red-400 focus:border-red-500 placeholder:text-body-muted/70"
+                                  placeholder="{{ __('e.g., Position has been filled internally, role qualifications updated, or requisition closed...') }}"></textarea>
+                        @error('withdrawalReason')
+                            <p class="text-red-600 text-[11px] mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    {{-- Quick preset remark buttons --}}
+                    <div>
+                        <span class="text-[11px] text-body-muted block mb-1.5">{{ __('Quick reasons:') }}</span>
+                        <div class="flex flex-wrap gap-1.5">
+                            <button type="button" wire:click="$set('withdrawalReason', 'Position filled internally')" class="text-[11px] px-2.5 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium">Position filled</button>
+                            <button type="button" wire:click="$set('withdrawalReason', 'Role requirements / specifications changed')" class="text-[11px] px-2.5 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium">Requirements changed</button>
+                            <button type="button" wire:click="$set('withdrawalReason', 'Job opening paused or closed')" class="text-[11px] px-2.5 py-1 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium">Opening paused</button>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-primary-border">
+                        <button type="button" wire:click="closeWithdrawModal" class="px-4 py-2 rounded-xl border border-primary-border text-xs font-semibold text-primary-dark hover:bg-gray-50 transition-colors">
+                            {{ __('Cancel') }}
+                        </button>
+                        <button type="submit" class="px-5 py-2 rounded-xl bg-red-600 text-xs font-bold text-white hover:bg-red-700 shadow-xs transition-colors inline-flex items-center gap-1.5">
+                            <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            <span>{{ __('Confirm Withdrawal') }}</span>
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     @endif

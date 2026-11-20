@@ -4,9 +4,11 @@ use App\Livewire\Employer\Talents;
 use App\Models\Accommodation;
 use App\Models\CandidateProfile;
 use App\Models\EmployerProfile;
+use App\Models\JobInvitation;
 use App\Models\JobPosting;
 use App\Models\User;
 use App\Notifications\JobInvitationReceived;
+use App\Notifications\JobInvitationWithdrawn;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
 
@@ -103,6 +105,38 @@ test('employer can search talents by keyword or skill', function () {
         ->assertDontSee('Bob Finance');
 });
 
+test('employer can filter talents using accommodations checklist', function () {
+    [$employer] = createEmployerUserWithProfile();
+
+    $accRamp = Accommodation::firstOrCreate(['name' => 'Wheelchair Ramp Access', 'category' => 'mobility']);
+    $accReader = Accommodation::firstOrCreate(['name' => 'Screen Reader Compatibility', 'category' => 'visual']);
+
+    $candidate1 = User::factory()->verified()->create(['name' => 'Wheelchair Candidate', 'role' => 'candidate']);
+    $candidate1->assignRole('candidate');
+    $cp1 = CandidateProfile::create(['user_id' => $candidate1->id, 'headline' => 'QA Analyst']);
+    $cp1->accommodations()->attach($accRamp->id);
+
+    $candidate2 = User::factory()->verified()->create(['name' => 'Screen Reader Candidate', 'role' => 'candidate']);
+    $candidate2->assignRole('candidate');
+    $cp2 = CandidateProfile::create(['user_id' => $candidate2->id, 'headline' => 'Writer']);
+    $cp2->accommodations()->attach($accReader->id);
+
+    $this->actingAs($employer);
+
+    Livewire::test(Talents::class)
+        ->set('selectedAccommodations', ['Wheelchair Ramp Access'])
+        ->assertSee('Wheelchair Candidate')
+        ->assertDontSee('Screen Reader Candidate')
+        ->call('removeAccommodation', 'Wheelchair Ramp Access')
+        ->assertSee('Screen Reader Candidate')
+        ->set('selectedAccommodations', ['Screen Reader Compatibility'])
+        ->assertSee('Screen Reader Candidate')
+        ->assertDontSee('Wheelchair Candidate')
+        ->call('clearAccommodations')
+        ->assertSee('Wheelchair Candidate')
+        ->assertSee('Screen Reader Candidate');
+});
+
 test('employer can invite candidate to apply for active job posting', function () {
     Notification::fake();
 
@@ -129,8 +163,9 @@ test('employer can invite candidate to apply for active job posting', function (
         ->set('selectedJobId', $job->id)
         ->set('invitationMessage', 'We think you would be a great fit for our Software Engineer opening!')
         ->call('sendInvitation')
+        ->assertHasNoErrors()
         ->assertSet('showInviteModal', false)
-        ->assertSessionHas('invitation_success');
+        ->assertSee('Invitation successfully sent');
 
     Notification::assertSentTo(
         $candidateUser,
@@ -138,6 +173,62 @@ test('employer can invite candidate to apply for active job posting', function (
         function ($notification) use ($job) {
             return $notification->jobPosting->id === $job->id
                 && $notification->employerCompanyName === 'Tech Inclusion Corp';
+        }
+    );
+
+    $invitation = JobInvitation::where('candidate_profile_id', $candidateProfile->id)->first();
+    expect($invitation)->not->toBeNull();
+    expect($invitation->status)->toBe('pending');
+});
+
+test('employer can withdraw invitation with a reason remark', function () {
+    Notification::fake();
+
+    [$employer, $employerProfile, $job] = createEmployerUserWithProfile();
+
+    $candidateUser = User::factory()->verified()->create([
+        'name' => 'Michael Candidate',
+        'role' => 'candidate',
+    ]);
+    $candidateUser->assignRole('candidate');
+
+    $candidateProfile = CandidateProfile::create([
+        'user_id' => $candidateUser->id,
+        'headline' => 'Database Administrator',
+    ]);
+
+    $invitation = JobInvitation::create([
+        'employer_profile_id' => $employerProfile->id,
+        'job_posting_id' => $job->id,
+        'candidate_profile_id' => $candidateProfile->id,
+        'status' => 'pending',
+    ]);
+
+    $this->actingAs($employer);
+
+    Livewire::test(Talents::class)
+        ->assertSee('Invited')
+        ->assertSee('Withdraw')
+        ->call('openWithdrawModal', $invitation->id)
+        ->assertSet('showWithdrawModal', true)
+        ->assertSet('withdrawalCandidateName', 'Michael Candidate')
+        ->assertSet('withdrawalJobTitle', 'Software Engineer')
+        ->set('withdrawalReason', 'Role filled by internal transfer')
+        ->call('confirmWithdrawInvitation')
+        ->assertHasNoErrors()
+        ->assertSet('showWithdrawModal', false)
+        ->assertSee('withdrawn successfully');
+
+    $invitation->refresh();
+    expect($invitation->status)->toBe('withdrawn');
+    expect($invitation->withdrawn_reason)->toBe('Role filled by internal transfer');
+    expect($invitation->withdrawn_at)->not->toBeNull();
+
+    Notification::assertSentTo(
+        $candidateUser,
+        JobInvitationWithdrawn::class,
+        function ($notification) {
+            return $notification->withdrawnReason === 'Role filled by internal transfer';
         }
     );
 });

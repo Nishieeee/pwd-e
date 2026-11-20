@@ -4,6 +4,7 @@ namespace App\Livewire\Candidate;
 
 use App\Models\Application;
 use App\Models\CandidateProfile;
+use App\Models\JobInvitation;
 use App\Models\JobPosting;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
@@ -105,6 +106,14 @@ class Dashboard extends Component
             ? Application::with(['jobPosting.employerProfile', 'jobPosting.accommodations'])->find($this->selectedApplicationId)
             : null;
 
+        // 5. Active Direct Job Invitations from Employers
+        $jobInvitations = JobInvitation::where('candidate_profile_id', $candidateProfile->id)
+            ->where('status', 'pending')
+            ->with(['jobPosting.employerProfile'])
+            ->latest()
+            ->take(5)
+            ->get();
+
         return view('livewire.candidate.dashboard', [
             'user' => $user,
             'candidateProfile' => $candidateProfile,
@@ -119,6 +128,7 @@ class Dashboard extends Component
             'calendarDownloadSuccess' => $this->calendarDownloadSuccess,
             'profileSavedMessage' => $this->profileSavedMessage,
             'showBreakdownModal' => $this->showBreakdownModal,
+            'jobInvitations' => $jobInvitations,
         ]);
     }
 }

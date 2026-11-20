@@ -279,8 +279,6 @@
 
                 <livewire:notification-bell />
 
-                <livewire:accessibility-settings />
-
                 <form method="POST" action="{{ route('logout') }}" class="inline">
                     @csrf
                     <button type="submit" class="inline-flex items-center gap-1.5 text-gray-600 hover:text-red-700 transition-colors focus:ring-2 focus:ring-[#244F73] rounded p-1 cursor-pointer">
