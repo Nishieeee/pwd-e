@@ -311,11 +311,20 @@ class ProfileBuilder extends Component
             $this->fslVideoSize = '';
         }
 
-        if (! empty($user->pwd_id_path) && Storage::disk('public')->exists($user->pwd_id_path)) {
+        if (! empty($user->pwd_id_path)) {
             $this->pwdIdPath = $user->pwd_id_path;
             $this->pwdIdFilename = basename($user->pwd_id_path);
-            $bytes = Storage::disk('public')->size($user->pwd_id_path);
-            $this->pwdIdFileSize = max(1, (int) round($bytes / 1024)).' KB';
+            $bytes = 0;
+            if (Storage::disk('private')->exists($user->pwd_id_path)) {
+                $bytes = Storage::disk('private')->size($user->pwd_id_path);
+            } elseif (Storage::disk('public')->exists($user->pwd_id_path)) {
+                $bytes = Storage::disk('public')->size($user->pwd_id_path);
+            }
+            $this->pwdIdFileSize = $bytes > 0 ? max(1, (int) round($bytes / 1024)).' KB' : 'On File';
+        } elseif (! empty($user->pwd_id_number)) {
+            $this->pwdIdPath = null;
+            $this->pwdIdFilename = 'Verified PWD ID (' . $user->pwd_id_number . ')';
+            $this->pwdIdFileSize = 'Verified on Registration';
         } else {
             $this->pwdIdPath = null;
             $this->pwdIdFilename = '';
@@ -501,7 +510,7 @@ class ProfileBuilder extends Component
     {
         if ($this->pwdIdUpload) {
             $filename = $this->pwdIdUpload->getClientOriginalName();
-            $this->pwdIdPath = $this->pwdIdUpload->storeAs('documents/pwd_ids', $filename, 'public');
+            $this->pwdIdPath = $this->pwdIdUpload->storeAs('documents/pwd_ids', $filename, 'private');
             $this->pwdIdFilename = $filename;
             $sizeKb = max(1, (int) round($this->pwdIdUpload->getSize() / 1024));
             $this->pwdIdFileSize = $sizeKb.' KB';
@@ -510,8 +519,12 @@ class ProfileBuilder extends Component
 
     public function removePwdIdDocument(): void
     {
-        if ($this->pwdIdPath && Storage::disk('public')->exists($this->pwdIdPath)) {
-            Storage::disk('public')->delete($this->pwdIdPath);
+        if ($this->pwdIdPath) {
+            if (Storage::disk('private')->exists($this->pwdIdPath)) {
+                Storage::disk('private')->delete($this->pwdIdPath);
+            } elseif (Storage::disk('public')->exists($this->pwdIdPath)) {
+                Storage::disk('public')->delete($this->pwdIdPath);
+            }
         }
         $this->pwdIdUpload = null;
         $this->pwdIdPath = null;
@@ -531,13 +544,17 @@ class ProfileBuilder extends Component
     public function hasFslVideoAttached(): bool
     {
         return $this->fslVideoUpload !== null
-            || (! empty($this->fslVideoPath) && Storage::disk('public')->exists($this->fslVideoPath));
+            || (! empty($this->fslVideoPath) && (Storage::disk('private')->exists($this->fslVideoPath) || Storage::disk('public')->exists($this->fslVideoPath)));
     }
 
     public function hasPwdIdAttached(): bool
     {
+        $user = Auth::user();
+
         return $this->pwdIdUpload !== null
-            || (! empty($this->pwdIdPath) && Storage::disk('public')->exists($this->pwdIdPath));
+            || ! empty($this->pwdIdPath)
+            || ! empty($user?->pwd_id_path)
+            || ! empty($user?->pwd_id_number);
     }
 
     public function getValidExperiences(): array
@@ -633,8 +650,13 @@ class ProfileBuilder extends Component
         }
 
         if ($step > $this->currentStep) {
-            for ($s = $this->currentStep; $s < $step; $s++) {
-                $this->validateStep($s);
+            try {
+                for ($s = $this->currentStep; $s < $step; $s++) {
+                    $this->validateStep($s);
+                }
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                $this->dispatch('profile-step-changed');
+                throw $e;
             }
         }
 
@@ -647,11 +669,18 @@ class ProfileBuilder extends Component
         if ($this->currentStep === 4) {
             $this->generateResumePdf();
         }
+
+        $this->dispatch('profile-step-changed');
     }
 
     public function nextStep(): void
     {
-        $this->validateStep($this->currentStep);
+        try {
+            $this->validateStep($this->currentStep);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->dispatch('profile-step-changed');
+            throw $e;
+        }
 
         if ($this->currentStep === 2) {
             $this->applyHeadlineFallback();
@@ -664,6 +693,8 @@ class ProfileBuilder extends Component
         if ($this->currentStep === 4) {
             $this->generateResumePdf();
         }
+
+        $this->dispatch('profile-step-changed');
     }
 
     public function prevStep(): void
@@ -671,6 +702,8 @@ class ProfileBuilder extends Component
         if ($this->currentStep > 1) {
             $this->currentStep--;
         }
+
+        $this->dispatch('profile-step-changed');
     }
 
     public function generateResumePdf(): void

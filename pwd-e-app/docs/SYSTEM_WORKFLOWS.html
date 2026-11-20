@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PWD-E System Workflows & End-to-End User Journeys</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 18mm 16mm 18mm 16mm;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: #1a2840;
+      line-height: 1.5;
+      font-size: 13px;
+      margin: 0;
+      padding: 24px;
+      background: #ffffff;
+    }
+    .no-print {
+      margin-bottom: 24px;
+      padding: 12px 16px;
+      background: #ebf3fa;
+      border: 1px solid #b8d0e2;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .print-btn {
+      background: #244f73;
+      color: #ffffff;
+      border: none;
+      padding: 8px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .print-btn:hover {
+      background: #1a2840;
+    }
+    h1 {
+      font-size: 24px;
+      color: #0e1726;
+      border-bottom: 2px solid #244f73;
+      padding-bottom: 8px;
+      margin-top: 0;
+    }
+    h2 {
+      font-size: 18px;
+      color: #1a2840;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 6px;
+      margin-top: 28px;
+      page-break-after: avoid;
+    }
+    h3 {
+      font-size: 14px;
+      color: #244f73;
+      margin-top: 16px;
+      page-break-after: avoid;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 12px;
+      page-break-inside: avoid;
+    }
+    th, td {
+      border: 1px solid #cbd5e1;
+      padding: 8px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: #f1f5f9;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    tr:nth-child(even) {
+      background: #f8fafc;
+    }
+    .diagram-container {
+      text-align: center;
+      margin: 20px 0;
+      padding: 16px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      page-break-inside: avoid;
+    }
+    .diagram-container img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
+    .diagram-caption {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 8px;
+      font-style: italic;
+    }
+    ol, ul {
+      padding-left: 20px;
+    }
+    li {
+      margin-bottom: 6px;
+    }
+    code {
+      background: #f1f5f9;
+      padding: 2px 5px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      color: #0f172a;
+    }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      font-size: 10px;
+      font-weight: 700;
+      background: #e8f5e9;
+      color: #176b47;
+    }
+    .page-break {
+      page-break-before: always;
+    }
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+      body {
+        padding: 0;
+      }
+      .diagram-container {
+        border: none;
+        padding: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="no-print">
+    <div>
+      <strong>Export / Print Documentation:</strong> Use the button on the right to export this workflow manual with rendered vector diagrams directly to PDF.
+    </div>
+    <button class="print-btn" onclick="window.print()">Export to PDF / Print</button>
+  </div>
+
+  <h1>PWD-E System Workflows & End-to-End User Journeys</h1>
+  <p>This document outlines the complete, production-grade workflows of the <strong>PWD-E Platform</strong> across all three core user roles: <strong>Candidate (Persons with Disabilities)</strong>, <strong>Employer</strong>, and <strong>System Administrator (PESO / LGU Compliance Officer)</strong>.</p>
+
+  <h2>1. System Persona & Access Matrix</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Role</th>
+        <th>Primary Objectives</th>
+        <th>Key Routes & Components</th>
+        <th>Regulatory Authority</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Candidate (PWD)</strong></td>
+        <td>Register with PWD ID, build accessible profile, search accommodation-filtered jobs, apply via STT/FSL, track hiring status.</td>
+        <td><code>/register</code><br><code>/profile/builder</code><br><code>/jobs/matches</code><br><code>/jobs/{job}/apply</code><br><code>/applications</code></td>
+        <td><strong>RA 7277</strong> (Magna Carta for Disabled Persons)<br><strong>RA 10754</strong> (PWD Benefits)<br><strong>RA 11106</strong> (Filipino Sign Language Act)<br><strong>RA 10173</strong> (Data Privacy Act)</td>
+      </tr>
+      <tr>
+        <td><strong>Employer</strong></td>
+        <td>Register business entity, post accessible opportunities, review applicants, schedule accommodations, hire talent, claim statutory tax incentives.</td>
+        <td><code>/register</code><br><code>/employer/jobs</code><br><code>/employer/jobs/create</code><br><code>/employer/jobs/{job}/applicants</code><br><code>/employer/workforce</code></td>
+        <td><strong>RA 10524</strong> (Positions Reserved for PWDs)<br><strong>BIR RA 10524 / RA 7277 §8</strong> (25% gross wage deduction & 50% accessibility deduction)</td>
+      </tr>
+      <tr>
+        <td><strong>Administrator (PESO / LGU)</strong></td>
+        <td>Review statutory KYC credentials (PWD ID & Business Permit), monitor compliance, manage predictive assistive lexicon, inspect audit logs.</td>
+        <td><code>/admin</code><br><code>/admin/verifications</code><br><code>/admin/users</code><br><code>/admin/lexicon</code><br><code>/admin/audit-log</code></td>
+        <td><strong>DOLE PESO Accreditation</strong><br><strong>NCDA / PDAO Guidelines</strong></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="page-break"></div>
+
+  <h2>2. Candidate Workflow (Jobseeker with Disability)</h2>
+  
+  <div class="diagram-container">
+    <img src="diagrams/candidate-workflow.png" alt="Candidate Workflow Diagram">
+    <div class="diagram-caption">Figure 1: Complete end-to-end Candidate journey from registration to hire.</div>
+  </div>
+
+  <h3>Detailed Steps:</h3>
+  <ol>
+    <li><strong>Registration & Statutory KYC:</strong>
+      <ul>
+        <li>Navigates to <code>/register</code> and selects <strong>Candidate (PWD)</strong>.</li>
+        <li>Enters Full Name, Email, Password, and Date of Birth (must be &ge; 18 years old per DOLE Labor Code).</li>
+        <li>Selects Disability Type (Visual, Hearing, Motor/Physical, Speech, Cerebral Palsy, Psychosocial, Intellectual, Multiple).</li>
+        <li>Enters LGU/PDAO-issued PWD ID Number and uploads PWD ID Document.</li>
+        <li>Agrees to explicit RA 10173 Data Privacy sensitive personal information consent.</li>
+      </ul>
+    </li>
+    <li><strong>Account Verification Gate:</strong>
+      <ul>
+        <li>Account created in <code>pending</code> status. Intercepted by <code>EnsureAccountVerified</code> middleware.</li>
+        <li>Displays real-time status banner (<code>pending</code>, <code>needs_more_docs</code>, <code>rejected</code>) with administrative reviewer feedback.</li>
+      </ul>
+    </li>
+    <li><strong>Candidate Dashboard:</strong>
+      <ul>
+        <li>Overview of profile strength, recommended jobs sorted by AI Fit Score (%), upcoming interview appointments, and application counters.</li>
+      </ul>
+    </li>
+    <li><strong>Accessible Profile Wizard (<code>/profile/builder</code>):</strong>
+      <ul>
+        <li>Step 1: Personal Identification & Contact Details.</li>
+        <li>Step 2: Educational Background.</li>
+        <li>Step 3: Work Experience & History.</li>
+        <li>Step 4: Skills, Tools, and Specific Workplace Accommodations Needed (e.g. Wheelchair Ramp, FSL Interpreter, Screen Reader Support, Quiet Room, Flexible Hours).</li>
+        <li>Step 5: Document Uploads & Optional FSL Sign Language Pitch Video.</li>
+        <li>Enforced by server-side <code>validateStep()</code> to prevent incomplete profiles.</li>
+      </ul>
+    </li>
+    <li><strong>Smart Job Discovery (<code>/jobs</code> & <code>/jobs/matches</code>):</strong>
+      <ul>
+        <li>Candidate filters jobs by accommodation tags and keyword/location.</li>
+        <li>Algorithm calculates compatibility score based on candidate's disability needs and employer's listed accommodations.</li>
+      </ul>
+    </li>
+    <li><strong>Accessible Application Process (<code>/jobs/{job}/apply</code>):</strong>
+      <ul>
+        <li>Candidate drafts cover letter using standard keyboard, <strong>Speech-to-Text Voice Dictation</strong>, or Filipino/English predictive text suggestions.</li>
+        <li>Attaches Resume PDF (reused from profile or uploaded fresh) and optional FSL video.</li>
+        <li>Generates formal tracking code (<code>PWD-APP-2026-XXXXX</code>) and notifies employer.</li>
+      </ul>
+    </li>
+    <li><strong>Application Lifecycle Tracking (<code>/applications</code>):</strong>
+      <ul>
+        <li>Tracks real-time stage: <code>Applied</code> &rarr; <code>Under Review</code> &rarr; <code>Interview</code> &rarr; <code>Offered</code> &rarr; <code>Hired</code>.</li>
+        <li>Candidate can review interview logistics, requested accommodations, export <code>.ics</code> calendar events, and formally accept or decline employment offers.</li>
+      </ul>
+    </li>
+  </ol>
+
+  <div class="page-break"></div>
+
+  <h2>3. Employer Workflow (Inclusive Workplace & Tax Incentives)</h2>
+
+  <div class="diagram-container">
+    <img src="diagrams/employer-workflow.png" alt="Employer Workflow Diagram">
+    <div class="diagram-caption">Figure 2: Complete Employer workflow from job creation to statutory tax certificate export.</div>
+  </div>
+
+  <h3>Detailed Steps:</h3>
+  <ol>
+    <li><strong>Company Registration & Accreditation:</strong>
+      <ul>
+        <li>Navigates to <code>/register</code> and selects <strong>Employer</strong>.</li>
+        <li>Enters Registered Company Name, Authorized HR Representative Name, Work Email, and Password.</li>
+        <li>Enters LGU Business Permit Number and uploads business accreditation permit under RA 10524.</li>
+      </ul>
+    </li>
+    <li><strong>Administrative Accreditation:</strong>
+      <ul>
+        <li>Company profile is gated until verified by PESO/LGU administrator. Gating prevents unverified entities from publishing jobs or contacting PWD candidates.</li>
+      </ul>
+    </li>
+    <li><strong>Employer Dashboard:</strong>
+      <ul>
+        <li>Displays RA 10524 Accredited Partner badge, active postings summary, applicant activity, and workforce PWD ratio.</li>
+      </ul>
+    </li>
+    <li><strong>Inclusive Job Creation (<code>/employer/jobs/create</code>):</strong>
+      <ul>
+        <li>Defines Title, Department, Employment Type (Full-time, Part-time, Remote, Hybrid, On-site), and Salary Range.</li>
+        <li>Selects <strong>Workplace Accommodations Provided</strong> (e.g., Physical ramps, Braille signage, Screen-reader friendly software, Filipino Sign Language interpreter, Adaptive hardware).</li>
+      </ul>
+    </li>
+    <li><strong>Applicant Pipeline Review (<code>/employer/jobs/{job}/applicants</code>):</strong>
+      <ul>
+        <li>Interactive pipeline with status tabs: <code>All</code>, <code>Applied</code>, <code>Under Review</code>, <code>Interview</code>, <code>Hired</code>, <code>Rejected</code>.</li>
+        <li>Inspects candidate profile, education, certifications, and cover letter.</li>
+        <li>Streams FSL sign language pitch video directly in browser and accesses resume documents via secure private controller.</li>
+      </ul>
+    </li>
+    <li><strong>Accessible Interview Scheduling:</strong>
+      <ul>
+        <li>Sets date, time, location or Google Meet URL.</li>
+        <li>Specifically records <strong>Accessibility Accommodations Provided</strong> to ensure barrier-free candidate evaluation.</li>
+      </ul>
+    </li>
+    <li><strong>Candidate Hiring & Workforce Integration:</strong>
+      <ul>
+        <li>Employer confirms hire with start date and agreed annual wage.</li>
+        <li>System automatically generates a <code>WorkforceRecord</code> tied to the verified PWD employee.</li>
+      </ul>
+    </li>
+    <li><strong>Statutory Tax Incentives & Quota Tracking (<code>/employer/workforce</code>):</strong>
+      <ul>
+        <li>Monitors corporate compliance with the <strong>1% PWD Employment Mandate</strong> (RA 10524).</li>
+        <li>Automatically computes the <strong>25% additional gross wage deduction</strong> under Section 8 of RA 7277 / RA 10524 for annual corporate income tax filing.</li>
+        <li>Features a <strong>1-click printable DOLE / BIR Statutory Certification</strong> with official regulatory print headers.</li>
+      </ul>
+    </li>
+  </ol>
+
+  <div class="page-break"></div>
+
+  <h2>4. Administrator / PESO Officer Workflow (Regulatory Governance)</h2>
+
+  <div class="diagram-container">
+    <img src="diagrams/admin-workflow.png" alt="Admin Workflow Diagram">
+    <div class="diagram-caption">Figure 3: Statutory administrative review, compliance auditing, and lexicon management.</div>
+  </div>
+
+  <h3>Detailed Steps:</h3>
+  <ol>
+    <li><strong>Administrative Authentication:</strong>
+      <ul>
+        <li>Log in using designated administrator credentials with elevated Spatie role <code>admin</code>.</li>
+      </ul>
+    </li>
+    <li><strong>Administrative Dashboard (<code>/admin</code>):</strong>
+      <ul>
+        <li>Centralized KPIs tracking pending statutory verifications, published postings, candidate application volume, and registered users.</li>
+      </ul>
+    </li>
+    <li><strong>KYC Verification Queue (<code>/admin/verifications</code>):</strong>
+      <ul>
+        <li>Central compliance hub for inspecting submitted PWD ID cards and Business Permits.</li>
+        <li>Documents are securely streamed from private storage via <code>VerificationDocumentController</code>.</li>
+        <li>Review actions:
+          <ul>
+            <li><strong>Approve</strong>: Immediately transitions user to <code>active</code>, sets <code>verified_at</code>, and dispatches notification.</li>
+            <li><strong>Request More Docs</strong>: Logs reviewer remarks (e.g. "Uploaded PWD ID card is expired or unreadable"), setting status to <code>needs_more_docs</code>.</li>
+            <li><strong>Reject</strong>: Logs reason for statutory rejection and sets status to <code>rejected</code>.</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><strong>User & Entity Management (<code>/admin/users</code>):</strong>
+      <ul>
+        <li>Real-time search and filtering across candidates, employers, and admins.</li>
+        <li>Capability to suspend abusive accounts or reactivate restored entities.</li>
+      </ul>
+    </li>
+    <li><strong>Predictive Lexicon Management (<code>/admin/lexicon</code>):</strong>
+      <ul>
+        <li>Manages terminology for assistive typing, Filipino Sign Language glosses, and accessibility vocabulary used in predictive text engines.</li>
+      </ul>
+    </li>
+    <li><strong>Immutable Audit Trail (<code>/admin/audit-log</code>):</strong>
+      <ul>
+        <li>Detailed regulatory activity log recording timestamp, actor, event, and IP address for all approvals, rejections, and profile modifications.</li>
+      </ul>
+    </li>
+  </ol>
+
+  <h2>5. Defense Alignment & Legal Compliance Standards</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Statutory Mandate</th>
+        <th>System Implementation</th>
+        <th>Verification / Evidence</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>RA 7277</strong> (Magna Carta for Disabled Persons)</td>
+        <td>LGU PDAO PWD ID capture, disability categorization, accommodation matching, and private document storage.</td>
+        <td><code>CreateNewUser.php</code><br><code>VerificationQueue.php</code></td>
+      </tr>
+      <tr>
+        <td><strong>RA 10524</strong> (Positions Reserved for PWDs)</td>
+        <td>LGU Business Permit validation, 1% workforce quota tracking, and automatic 25% additional gross wage deduction calculation.</td>
+        <td><code>Workforce.php</code><br><code>workforce.blade.php</code></td>
+      </tr>
+      <tr>
+        <td><strong>RA 10173</strong> (Data Privacy Act of 2012)</td>
+        <td>AES-256 encrypted casts for sensitive PWD ID numbers and health data; private disk document streaming; affirmative consent check.</td>
+        <td><code>VerificationRequest.php</code><br><code>VerificationDocumentController.php</code></td>
+      </tr>
+      <tr>
+        <td><strong>RA 11106</strong> (Filipino Sign Language Act)</td>
+        <td>Native FSL video pitch uploads, FSL accommodation filtering, and accessible video review for employers.</td>
+        <td><code>Apply.php</code><br><code>ProfileBuilder.php</code></td>
+      </tr>
+      <tr>
+        <td><strong>WCAG 2.1 AA</strong></td>
+        <td>High-contrast palette, &ge; 44px touch targets, zero raw icons, dyslexic font toggle, full keyboard navigation, plain page loads (zero <code>wire:navigate</code>).</td>
+        <td><code>accessibility-panel.blade.php</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+</body>
+</html>

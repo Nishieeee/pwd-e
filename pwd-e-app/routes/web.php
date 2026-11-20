@@ -18,6 +18,7 @@ use App\Livewire\Employer\Dashboard as EmployerDashboard;
 use App\Livewire\Employer\Jobs\Create;
 use App\Livewire\Employer\Jobs\Edit;
 use App\Livewire\Employer\Jobs\Index;
+use App\Livewire\Employer\Talents;
 use App\Livewire\Employer\Workforce;
 use App\Livewire\Jobs\PublicListing;
 use App\Models\User;
@@ -68,6 +69,7 @@ Route::middleware(['auth', 'account.verified'])->group(function () {
         Route::get('/jobs/create', Create::class)->name('jobs.create');
         Route::get('/jobs/{job}/edit', Edit::class)->name('jobs.edit');
         Route::get('/jobs/{job}/applicants', Applicants::class)->name('jobs.applicants');
+        Route::get('/talents', Talents::class)->name('talents');
         Route::get('/applicants/{application}/document/{type}', [ApplicantDocumentController::class, 'show'])->name('applicants.document');
         Route::get('/candidates/{candidateProfile}', ShowProfile::class)->name('candidates.show');
         Route::get('/applicants', Applicants::class)->name('applicants');

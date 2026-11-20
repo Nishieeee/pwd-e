@@ -1,0 +1,10 @@
+flowchart TD
+    A["1. Admin Login (/login)"] --> B["2. Admin Dashboard (/admin)"]
+    B --> C["3. Verification Queue (/admin/verifications)"]
+    C -->|"Preview Private Documents"| D{"Review Decision"}
+    D -->|"Valid"| E["Approve (Activate User)"]
+    D -->|"Blurry / Missing"| F["Request More Docs (Send Note)"]
+    D -->|"Invalid / Fraudulent"| G["Reject (Lock Access)"]
+    B --> H["4. User Directory (/admin/users)"]
+    B --> I["5. Predictive Lexicon (/admin/lexicon)"]
+    B --> J["6. Regulatory Audit Trail (/admin/audit-log)"]

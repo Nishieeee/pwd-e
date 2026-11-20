@@ -136,7 +136,7 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                    {{-- Option 1: Digital Bio-Data Card --}}
+                    {{-- Option 1: Digital Profile Card --}}
                     <div class="rounded-2xl transition-all duration-200 flex flex-col justify-between p-5 {{ $includeBiodata ? 'border-2 border-primary bg-primary-tint/20 ring-1 ring-primary/20 shadow-sm' : 'border border-gray-200 bg-gray-50/50 hover:border-gray-300' }}">
                         <div class="space-y-3.5">
                             <div class="flex items-center justify-between">
@@ -153,9 +153,9 @@
                             </div>
 
                             <div>
-                                <h3 class="font-bold text-sm text-primary-dark">{{ __('Digital Bio-Data') }}</h3>
+                                <h3 class="font-bold text-sm text-primary-dark">{{ __('Digital Profile') }}</h3>
                                 <p class="text-xs text-body-muted mt-1 leading-relaxed">
-                                    {{ __('Official Philippine Bio-Data compiled from your profile, skills, work history, and RA 7277 accommodation specifications.') }}
+                                    {{ __('Comprehensive profile compiled from your credentials, skills, work history, and RA 7277 accommodation specifications.') }}
                                 </p>
                             </div>
 
@@ -171,7 +171,7 @@
                         <div class="pt-4 mt-4 border-t border-gray-200/80 flex items-center justify-between">
                             <a href="{{ route('candidate.profile.show') }}" target="_blank"
                                class="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary-dark underline">
-                                <span>{{ __('Preview Bio-Data') }}</span>
+                                <span>{{ __('Preview Profile') }}</span>
                                 <svg class="size-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                             </a>
                             <span class="text-[11px] font-semibold text-secondary uppercase">{{ __('Recommended') }}</span>
@@ -299,7 +299,7 @@
                     <div class="flex flex-wrap items-center gap-2">
                         @if($includeBiodata)
                             <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-white text-primary-dark border border-primary-border shadow-xs">
-                                <span class="text-secondary font-black">✓</span> {{ __('Bio-Data') }}
+                                <span class="text-secondary font-black">✓</span> {{ __('Digital Profile') }}
                             </span>
                         @endif
                         @if($includeResume)
@@ -433,7 +433,7 @@
                     <div class="text-xs text-body-muted text-right hidden sm:block">
                         <span>{{ __('Attaching:') }}</span>
                         <strong class="text-primary-dark font-semibold">
-                            {{ implode(', ', array_filter([$includeBiodata ? 'Bio-Data' : null, $includeResume ? 'Résumé' : null, $includeFslVideo ? 'FSL Pitch' : null])) ?: 'None selected' }}
+                            {{ implode(', ', array_filter([$includeBiodata ? 'Digital Profile' : null, $includeResume ? 'Résumé' : null, $includeFslVideo ? 'FSL Pitch' : null])) ?: 'None selected' }}
                         </strong>
                     </div>
 

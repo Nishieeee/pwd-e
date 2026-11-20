@@ -1,4 +1,23 @@
-<div class="space-y-6 max-w-6xl mx-auto pb-8 w-full min-w-0">
+<div id="profile-builder-top"
+     x-data="{
+         scrollToTop() {
+             this.$nextTick(() => {
+                 const el = document.getElementById('profile-builder-top') || document.getElementById('main-content');
+                 if (el) {
+                     el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                 }
+                 const scrollable = el?.closest('.overflow-y-auto') || document.querySelector('.lg\\:overflow-y-auto');
+                 if (scrollable) {
+                     scrollable.scrollTo({ top: 0, behavior: 'smooth' });
+                 }
+                 window.scrollTo({ top: 0, behavior: 'smooth' });
+             });
+         }
+     }"
+     x-init="
+         $wire.on('profile-step-changed', () => scrollToTop());
+     "
+     class="space-y-6 max-w-6xl mx-auto pb-8 w-full min-w-0">
     @if(!$isEmbedded)
         <!-- Breadcrumb -->
         <nav class="flex items-center text-xs text-gray-500 gap-1.5" aria-label="Breadcrumb">
@@ -337,10 +356,10 @@
                             </div>
                             <div class="space-y-1">
                                 <label for="avatar-upload-input" class="block text-sm font-bold text-primary-dark cursor-pointer">
-                                    2x2 Formal ID Photo <span class="font-normal text-xs text-body-muted">(Recommended for Bio-Data)</span>
+                                    2x2 Formal ID Photo <span class="font-normal text-xs text-body-muted">(Recommended for Profile)</span>
                                 </label>
                                 <p class="text-xs text-body-muted leading-relaxed max-w-md">
-                                    Featured on your official Digital Bio-Data. A clear 2x2 photo with a white or plain background is recommended (JPG/PNG, up to 5 MB).
+                                    Featured on your official Digital Profile. A clear 2x2 photo with a white or plain background is recommended (JPG/PNG, up to 5 MB).
                                 </p>
                             </div>
                         </div>
@@ -1163,7 +1182,7 @@
             <div>
                 <h2 id="step4-heading" class="text-lg font-bold text-[#1A2840]">Add your supporting files</h2>
                 <p class="text-xs text-[#4E5F6E] mt-1">
-                    Your professional resume is auto-generated from your profile. You can also upload an optional FSL video introduction and your official PWD ID document.
+                    Your professional resume is auto-generated from your profile, and your verified PWD ID from registration is already attached. You can optionally add a Filipino Sign Language (FSL) video introduction.
                 </p>
             </div>
 
@@ -1311,11 +1330,11 @@
                 </div>
             </div>
 
-            <!-- Dedicated Secure Upload Card for PWD ID Card / Document -->
-            <div class="rounded-xl border-2 border-dashed {{ $hasPwdIdAttached ? 'border-[#244F73]/50 bg-[#F4F7FA]/70' : 'border-gray-300 bg-gray-50/50' }} p-5 space-y-4">
+            <!-- Dedicated Secure Card for PWD ID Card / Verification Document -->
+            <div class="rounded-xl border {{ $hasPwdIdAttached ? 'border-[#A5D6A7] bg-[#F4FAF5]' : 'border-dashed border-gray-300 bg-gray-50/50' }} p-5 space-y-4">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div class="flex items-start gap-3.5">
-                        <div class="w-10 h-10 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-[#244F73] shrink-0">
+                        <div class="w-10 h-10 rounded-lg {{ $hasPwdIdAttached ? 'bg-[#E8F5E9] text-[#176B47] border border-[#A5D6A7]' : 'bg-white text-[#244F73] border border-gray-200' }} flex items-center justify-center shrink-0">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/>
                             </svg>
@@ -1325,51 +1344,57 @@
                                 <h3 class="text-base font-bold text-[#1A2840]">PWD ID Card / Verification Document</h3>
                                 @if($hasPwdIdAttached)
                                     <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#E8F5E9] text-[#176B47]">
-                                        &#10003; Attached
+                                        &#10003; Attached from Registration
                                     </span>
                                 @else
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#DCEAF4] text-[#244F73]">
-                                        Secure Verification Upload
+                                        Verification Document
                                     </span>
                                 @endif
                             </div>
                             <p class="text-xs text-[#4E5F6E] mt-1">
-                                Upload a clear photo or scan of your official Persons with Disability (PWD) ID card (PDF, JPG, or PNG, up to 10 MB) for credential verification.
+                                @if($hasPwdIdAttached)
+                                    Your official PWD ID (ID: <strong class="text-primary-dark font-mono font-bold">{{ $pwdIdNumber ?: auth()->user()->pwd_id_number }}</strong>) was verified during registration and is automatically linked to your employment credentials. No re-upload needed.
+                                @else
+                                    Upload a clear photo or scan of your official Persons with Disability (PWD) ID card (PDF, JPG, or PNG, up to 10 MB) for credential verification.
+                                @endif
                             </p>
                         </div>
                     </div>
 
                     <div class="flex items-center gap-2 shrink-0">
-                        <label class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg border border-[#244F73] bg-white text-xs font-bold text-[#244F73] hover:bg-[#EBF3FA] cursor-pointer focus-within:ring-2 focus-within:ring-[#244F73]">
-                            <span>{{ $hasPwdIdAttached ? 'Replace PWD ID' : 'Upload PWD ID Document' }}</span>
+                        <label class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg border border-gray-300 bg-white text-xs font-semibold text-[#1A2840] hover:bg-gray-50 cursor-pointer focus-within:ring-2 focus-within:ring-[#244F73]">
+                            <span>{{ $hasPwdIdAttached ? 'Update scan (optional)' : 'Upload PWD ID Document' }}</span>
                             <input type="file"
                                    wire:model="pwdIdUpload"
                                    accept=".pdf,.jpg,.jpeg,.png"
                                    class="sr-only"
                                    aria-label="Upload official PWD ID document">
                         </label>
-                        @if($hasPwdIdAttached)
+                        @if($pwdIdUpload)
                             <button type="button"
                                     wire:click="removePwdIdDocument"
                                     class="text-xs font-semibold text-red-600 hover:underline px-2">
-                                Remove
+                                Cancel
                             </button>
                         @endif
                     </div>
                 </div>
 
                 @if($hasPwdIdAttached)
-                    <div class="bg-white rounded-xl border border-gray-200 p-3 flex items-center justify-between gap-3">
+                    <div class="bg-white rounded-xl border border-gray-200 p-3 flex items-center justify-between gap-3 shadow-2xs">
                         <div class="flex items-center gap-2.5 min-w-0">
                             <svg class="w-4 h-4 text-[#176B47] shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                             </svg>
-                            <span class="text-xs font-bold text-[#1A2840] truncate">{{ $pwdIdFilename }}</span>
+                            <span class="text-xs font-bold text-[#1A2840] truncate">
+                                {{ $pwdIdFilename ?: 'PWD ID Registration Record (' . ($pwdIdNumber ?: auth()->user()->pwd_id_number) . ')' }}
+                            </span>
                             @if($pwdIdFileSize)
                                 <span class="text-[11px] text-gray-500">&middot; {{ $pwdIdFileSize }}</span>
                             @endif
                         </div>
-                        <span class="text-[11px] font-semibold text-[#176B47]">Encrypted &amp; Protected</span>
+                        <span class="text-[11px] font-semibold text-[#176B47]">RA 10173 Encrypted &amp; Protected</span>
                     </div>
                 @endif
             </div>

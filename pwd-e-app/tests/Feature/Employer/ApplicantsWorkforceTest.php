@@ -62,7 +62,7 @@ test('employer can view centralized applicants page across all jobs', function (
         ->assertSee('Applicants')
         ->assertSee('All Positions')
         ->assertSee($candidate->name)
-        ->assertSee('Bio-Data');
+        ->assertSee('Profile');
 });
 
 test('employer dashboard renders live metrics and recent applicants', function () {
@@ -85,7 +85,7 @@ test('employer dashboard renders live metrics and recent applicants', function (
         ->assertSee('Total Applicants')
         ->assertSee('Recent Applicants')
         ->assertSee($candidate->name)
-        ->assertSee('Bio-Data')
+        ->assertSee('Profile')
         ->assertSee('RA 10524');
 });
 
