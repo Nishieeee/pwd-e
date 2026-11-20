@@ -221,9 +221,17 @@
                                             Closed
                                         </span>
                                     @elseif($app->status === 'rejected')
-                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full font-medium bg-gray-100 text-gray-700">
-                                            Rejected
-                                        </span>
+                                        <div class="inline-flex flex-col items-start gap-1">
+                                            <span class="inline-flex items-center px-2.5 py-1 rounded-full font-medium bg-red-50 text-red-700 border border-red-200">
+                                                Declined
+                                            </span>
+                                            @if($app->rejection_reason)
+                                                <div class="text-[11px] text-red-800 bg-red-50/70 p-2 rounded-lg border border-red-100 max-w-xs leading-relaxed">
+                                                    <span class="font-bold text-[10px] uppercase tracking-wider text-red-600 block">{{ __('Employer Remark:') }}</span>
+                                                    "{{ $app->rejection_reason }}"
+                                                </div>
+                                            @endif
+                                        </div>
                                     @else
                                         <span class="inline-flex items-center px-2.5 py-1 rounded-full font-medium bg-gray-100 text-gray-700">
                                             {{ ucfirst($app->status) }}

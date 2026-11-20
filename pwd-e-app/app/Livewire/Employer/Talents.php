@@ -246,6 +246,7 @@ class Talents extends Component
                 'workExperiences',
                 'education',
                 'jobInvitations' => fn ($iq) => $iq->where('employer_profile_id', $employerProfile?->id)->where('status', 'pending')->with('jobPosting'),
+                'applications' => fn ($aq) => $aq->whereHas('jobPosting', fn ($jq) => $jq->where('employer_profile_id', $employerProfile?->id))->with('jobPosting'),
             ]);
 
         if (! empty(trim($this->search))) {
