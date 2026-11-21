@@ -1,10 +1,47 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    {{-- Own Company Preview Mode Banner --}}
+    @if(!empty($isOwnProfile))
+        <div class="rounded-2xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-300 p-4 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-2xs">
+                    <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                </div>
+                <div>
+                    <div class="text-sm font-bold text-amber-950 flex items-center gap-2">
+                        <span>{{ __('Viewing in Candidate / Visitor Preview Mode') }}</span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-200 text-amber-900 uppercase tracking-wider">{{ __('Public View') }}</span>
+                    </div>
+                    <p class="text-xs text-amber-800">
+                        {{ __('This is exactly how job applicants and candidates view your company page on PWD-E.') }}
+                    </p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+                <a href="{{ route('employer.profile') }}?tab=edit" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#244F73] text-white text-xs font-semibold hover:bg-[#1A2840] shadow-2xs transition-colors">
+                    <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                    <span>{{ __('Edit Company Profile') }}</span>
+                </a>
+                <a href="{{ route('employer.profile') }}" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-amber-300 text-amber-900 text-xs font-semibold hover:bg-amber-100/60 shadow-2xs transition-colors">
+                    <span>{{ __('Return to Workspace') }}</span>
+                    <span aria-hidden="true">&rarr;</span>
+                </a>
+            </div>
+        </div>
+    @endif
+
     {{-- Back Navigation --}}
     <div class="flex items-center justify-between">
-        <a href="{{ route('candidate.jobs') }}" class="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-primary hover:text-primary-dark transition-colors">
-            <span aria-hidden="true">&larr;</span>
-            <span>{{ __('Back to Job Matches') }}</span>
-        </a>
+        @if(!empty($isOwnProfile))
+            <a href="{{ route('employer.profile') }}" class="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-primary hover:text-primary-dark transition-colors">
+                <span aria-hidden="true">&larr;</span>
+                <span>{{ __('Back to Company Profile Workspace') }}</span>
+            </a>
+        @else
+            <a href="{{ route('candidate.jobs') }}" class="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-primary hover:text-primary-dark transition-colors">
+                <span aria-hidden="true">&larr;</span>
+                <span>{{ __('Back to Job Matches') }}</span>
+            </a>
+        @endif
     </div>
 
     {{-- Employer Hero Banner --}}

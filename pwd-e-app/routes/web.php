@@ -76,6 +76,7 @@ Route::middleware(['auth', 'account.verified'])->group(function () {
         Route::get('/candidates/{candidateProfile}', ShowProfile::class)->name('candidates.show');
         Route::get('/applicants', Applicants::class)->name('applicants');
         Route::get('/workforce', Workforce::class)->name('workforce');
+        Route::get('/profile', \App\Livewire\Employer\Profile::class)->name('profile');
     });
 });
 
