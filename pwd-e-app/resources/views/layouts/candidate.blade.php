@@ -240,7 +240,7 @@
     </aside>
 
     <!-- Main Content Area -->
-    <div class="flex-1 flex flex-col min-w-0 lg:h-screen lg:overflow-y-auto">
+    <div class="flex-1 flex flex-col min-w-0 lg:h-screen lg:overflow-y-auto overflow-x-hidden">
         <!-- Top Accessibility & Navigation Header -->
         <header class="bg-white border-b border-gray-200 px-4 py-2 sm:px-6 sm:py-2.5 flex flex-wrap items-center justify-between gap-3 sm:gap-4 sticky top-0 z-20 shadow-xs" role="region" aria-label="Accessibility settings and profile controls">
             <!-- Left: Accessibility Tools -->

@@ -355,9 +355,9 @@
                                 @endif
                             </div>
                             <div class="space-y-1">
-                                <label for="avatar-upload-input" class="block text-sm font-bold text-primary-dark cursor-pointer">
+                                <span class="block text-sm font-bold text-primary-dark">
                                     2x2 Formal ID Photo <span class="font-normal text-xs text-body-muted">(Recommended for Profile)</span>
-                                </label>
+                                </span>
                                 <p class="text-xs text-body-muted leading-relaxed max-w-md">
                                     Featured on your official Digital Profile. A clear 2x2 photo with a white or plain background is recommended (JPG/PNG, up to 5 MB).
                                 </p>
@@ -370,13 +370,13 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
                                 </svg>
                                 <span>{{ ($avatarUpload || $avatarPath) ? __('Change 2x2 Photo') : __('Upload 2x2 Photo') }}</span>
-                                <input id="avatar-upload-input"
-                                       type="file"
-                                       wire:model="avatarUpload"
-                                       accept="image/png,image/jpeg"
-                                       class="sr-only"
-                                       aria-label="Upload 2x2 ID photo or avatar">
                             </label>
+                            <input id="avatar-upload-input"
+                                   type="file"
+                                   wire:model="avatarUpload"
+                                   accept="image/png,image/jpeg"
+                                   class="hidden"
+                                   aria-label="Upload 2x2 ID photo or avatar">
 
                             @if($avatarUpload || $avatarPath)
                                 <button type="button"
@@ -870,7 +870,7 @@
                             <input type="file"
                                    wire:model="educationCertificateUpload"
                                    accept=".pdf,.jpg,.jpeg,.png"
-                                   class="sr-only"
+                                   class="hidden"
                                    aria-label="Upload optional education certificate or diploma">
                         </label>
                     </div>
@@ -1247,7 +1247,7 @@
 
                         <label class="text-xs font-bold text-[#244F73] hover:underline cursor-pointer">
                             <span>Replace file</span>
-                            <input type="file" wire:model="customResumeUpload" accept=".pdf,.doc,.docx" class="sr-only">
+                            <input type="file" wire:model="customResumeUpload" accept=".pdf,.doc,.docx" class="hidden">
                         </label>
                     </div>
                 </div>
@@ -1307,7 +1307,7 @@
                             <div class="flex items-center gap-3">
                                 <label class="text-xs font-bold text-[#244F73] hover:underline cursor-pointer">
                                     <span>Replace file</span>
-                                    <input type="file" wire:model="fslVideoUpload" accept="video/mp4" class="sr-only">
+                                    <input type="file" wire:model="fslVideoUpload" accept="video/mp4" class="hidden">
                                 </label>
                                 <button type="button"
                                         wire:click="removeFslVideo"
@@ -1323,7 +1323,7 @@
                             </div>
                             <label class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg border border-[#244F73] bg-white text-xs font-bold text-[#244F73] hover:bg-[#EBF3FA] cursor-pointer shrink-0 focus-within:ring-2 focus-within:ring-[#244F73]">
                                 <span>Upload FSL Video</span>
-                                <input type="file" wire:model="fslVideoUpload" accept="video/mp4" class="sr-only" aria-label="Upload optional FSL video introduction">
+                                <input type="file" wire:model="fslVideoUpload" accept="video/mp4" class="hidden" aria-label="Upload optional FSL video introduction">
                             </label>
                         </div>
                     @endif
@@ -1368,7 +1368,7 @@
                             <input type="file"
                                    wire:model="pwdIdUpload"
                                    accept=".pdf,.jpg,.jpeg,.png"
-                                   class="sr-only"
+                                   class="hidden"
                                    aria-label="Upload official PWD ID document">
                         </label>
                         @if($pwdIdUpload)

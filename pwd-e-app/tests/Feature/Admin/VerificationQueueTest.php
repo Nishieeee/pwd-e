@@ -146,3 +146,75 @@ test('admin can stream a verification document', function () {
         ->get(route('admin.verifications.document', $vr))
         ->assertOk();
 });
+
+test('admin can categorize verification requests by pwd and employer in queue', function () {
+    $admin = User::factory()->create(['role' => 'admin', 'status' => 'active', 'verified_at' => now()]);
+    $admin->assignRole('admin');
+
+    [$pwdUser, $pwdVr] = makePendingRequest('pwd_id');
+    [$empUser, $empVr] = makePendingRequest('business_permit');
+
+    Livewire::actingAs($admin)
+        ->test(VerificationQueue::class)
+        ->assertSee('Categorize:')
+        ->assertSee('PWD Candidates')
+        ->assertSee('Employers')
+        ->call('setCategory', 'pwd')
+        ->assertSee($pwdUser->name)
+        ->assertDontSee($empUser->name)
+        ->call('setCategory', 'employer')
+        ->assertSee($empUser->name)
+        ->assertDontSee($pwdUser->name);
+});
+
+test('admin can multi approve verification requests in queue', function () {
+    Notification::fake();
+
+    $admin = User::factory()->create(['role' => 'admin', 'status' => 'active', 'verified_at' => now()]);
+    $admin->assignRole('admin');
+
+    [$user1, $vr1] = makePendingRequest('pwd_id');
+    [$user2, $vr2] = makePendingRequest('business_permit');
+
+    Livewire::actingAs($admin)
+        ->test(VerificationQueue::class)
+        ->set('selectedIds', [$vr1->id, $vr2->id])
+        ->call('bulkApprove')
+        ->assertHasNoErrors();
+
+    expect($vr1->fresh()->status)->toBe('approved');
+    expect($user1->fresh()->status)->toBe('active');
+    expect($vr2->fresh()->status)->toBe('approved');
+    expect($user2->fresh()->status)->toBe('active');
+
+    Notification::assertSentTo($user1, VerificationStatusUpdated::class);
+    Notification::assertSentTo($user2, VerificationStatusUpdated::class);
+});
+
+test('admin can multi reject verification requests with feedback reason in queue', function () {
+    Notification::fake();
+
+    $admin = User::factory()->create(['role' => 'admin', 'status' => 'active', 'verified_at' => now()]);
+    $admin->assignRole('admin');
+
+    [$user1, $vr1] = makePendingRequest('pwd_id');
+    [$user2, $vr2] = makePendingRequest('business_permit');
+
+    Livewire::actingAs($admin)
+        ->test(VerificationQueue::class)
+        ->set('selectedIds', [$vr1->id, $vr2->id])
+        ->set('bulkRejectReason', 'Expired IDs provided')
+        ->call('bulkReject')
+        ->assertHasNoErrors();
+
+    expect($vr1->fresh()->status)->toBe('rejected');
+    expect($vr1->fresh()->rejection_reason)->toBe('Expired IDs provided');
+    expect($user1->fresh()->status)->toBe('rejected');
+
+    expect($vr2->fresh()->status)->toBe('rejected');
+    expect($vr2->fresh()->rejection_reason)->toBe('Expired IDs provided');
+    expect($user2->fresh()->status)->toBe('rejected');
+
+    Notification::assertSentTo($user1, VerificationStatusUpdated::class);
+    Notification::assertSentTo($user2, VerificationStatusUpdated::class);
+});

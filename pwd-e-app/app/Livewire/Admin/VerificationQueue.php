@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Admin\Concerns\HandlesVerificationApprovals;
 use App\Models\VerificationRequest;
 use App\Notifications\VerificationStatusUpdated;
 use Flux\Flux;
@@ -17,10 +18,14 @@ use Livewire\WithPagination;
 #[Title('Verification Queue')]
 class VerificationQueue extends Component
 {
+    use HandlesVerificationApprovals;
     use WithPagination;
 
     #[Url(as: 'status')]
     public string $status = 'pending';
+
+    #[Url(as: 'category')]
+    public string $category = 'all';
 
     public ?string $reviewNote = null;
 
@@ -37,12 +42,34 @@ class VerificationQueue extends Component
     public function updatingStatus(): void
     {
         $this->resetPage();
+        $this->selectedIds = [];
+        $this->selectAll = false;
     }
 
     public function setStatusFilter(string $status): void
     {
         $this->status = $status;
         $this->resetPage();
+        $this->selectedIds = [];
+        $this->selectAll = false;
+    }
+
+    public function getSelectableRequestIds(): array
+    {
+        $query = VerificationRequest::query();
+        if ($this->status !== 'all') {
+            $query->where('status', $this->status);
+        } else {
+            $query->whereIn('status', ['pending', 'needs_more_docs']);
+        }
+
+        if ($this->category === 'pwd') {
+            $query->whereHas('user', fn ($q) => $q->where('role', 'candidate'));
+        } elseif ($this->category === 'employer') {
+            $query->whereHas('user', fn ($q) => $q->where('role', 'employer'));
+        }
+
+        return $query->pluck('id')->all();
     }
 
     public function openReview(int $id): void
@@ -134,10 +161,16 @@ class VerificationQueue extends Component
 
     public function render(): View
     {
-        $baseQuery = VerificationRequest::with('user')->latest();
+        $baseQuery = VerificationRequest::with(['user.candidateProfile', 'user.employerProfile'])->latest();
 
         if ($this->status !== 'all') {
             $baseQuery->where('status', $this->status);
+        }
+
+        if ($this->category === 'pwd') {
+            $baseQuery->whereHas('user', fn ($q) => $q->where('role', 'candidate'));
+        } elseif ($this->category === 'employer') {
+            $baseQuery->whereHas('user', fn ($q) => $q->where('role', 'employer'));
         }
 
         $counts = [
@@ -148,11 +181,23 @@ class VerificationQueue extends Component
             'needs_more_docs' => VerificationRequest::where('status', 'needs_more_docs')->count(),
         ];
 
+        $catBase = VerificationRequest::query();
+        if ($this->status !== 'all') {
+            $catBase->where('status', $this->status);
+        }
+
+        $categoryCounts = [
+            'all' => (clone $catBase)->count(),
+            'pwd' => (clone $catBase)->whereHas('user', fn ($q) => $q->where('role', 'candidate'))->count(),
+            'employer' => (clone $catBase)->whereHas('user', fn ($q) => $q->where('role', 'employer'))->count(),
+        ];
+
         $requests = $baseQuery->paginate(15);
 
         return view('livewire.admin.verification-queue', [
             'requests' => $requests,
             'counts' => $counts,
+            'categoryCounts' => $categoryCounts,
         ]);
     }
 }
