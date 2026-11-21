@@ -175,7 +175,16 @@
                             <!-- Employer Name -->
                             <td class="py-4 px-6 align-middle">
                                 <div class="font-semibold text-xs text-gray-900 leading-snug">
-                                    {{ $app->jobPosting->employerProfile->company_name }}
+                                    @if($app->jobPosting?->employerProfile)
+                                        <a href="{{ route('candidate.employers.show', $app->jobPosting->employerProfile) }}"
+                                           class="text-[#1A2840] hover:text-[#244F73] hover:underline inline-flex items-center gap-1 group font-bold"
+                                           title="View {{ $app->jobPosting->employerProfile->company_name }} Profile">
+                                            <span>{{ $app->jobPosting->employerProfile->company_name }}</span>
+                                            <svg class="size-3 text-gray-400 group-hover:text-[#244F73] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                        </a>
+                                    @else
+                                        {{ $app->jobPosting?->employerProfile?->company_name ?? 'Employer' }}
+                                    @endif
                                 </div>
                                 <div class="text-[11px] text-gray-500 mt-1 flex items-center gap-1 whitespace-nowrap">
                                     <svg class="size-3 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -320,7 +329,7 @@
                                                     <svg class="w-4 h-4 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                                     </svg>
-                                                    <span>{{ $app->interview_at ? $app->interview_at->format('F j, Y \· g:i A \P\H\T \(U\T\C+08:00\)') : 'November 4, 2026 · 2:00 PM PHT (UTC+08:00)' }}</span>
+                                                    <span>{{ $app->interview_at ? $app->interview_at->format('F j, Y · g:i A') . ' PHT (UTC+08:00)' : 'November 4, 2026 · 2:00 PM PHT (UTC+08:00)' }}</span>
                                                 </div>
 
                                                 <div class="text-xs">
@@ -336,13 +345,35 @@
                                                 </div>
                                             </div>
 
-                                            <div class="flex items-center gap-2">
-                                                <button type="button"
-                                                        wire:click="acceptAndAddToCalendar({{ $app->id }})"
-                                                        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#244F73] text-white text-xs font-semibold hover:bg-[#1A2840] transition-colors focus:ring-2 focus:ring-[#244F73] shrink-0">
-                                                    <span>Accept &amp; Add to Calendar</span>
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                                </button>
+                                            <div class="flex flex-wrap items-center gap-2">
+                                                @if($app->isInterviewAccepted())
+                                                    <span class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-700 text-white text-xs font-bold shadow-2xs">
+                                                        <svg class="size-4 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                                        <span>{{ __('Interview Accepted') }}</span>
+                                                    </span>
+
+                                                    <a href="{{ $app->googleCalendarUrl() }}" target="_blank" rel="noopener noreferrer"
+                                                       class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-[#244F73] text-[#244F73] bg-white text-xs font-semibold hover:bg-[#244F73]/10 transition-colors shadow-2xs"
+                                                       title="{{ __('Open Google Calendar Event') }}">
+                                                        <svg class="w-3.5 h-3.5 text-[#244F73]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                                        <span>{{ __('Google Calendar') }}</span>
+                                                    </a>
+
+                                                    <button type="button"
+                                                            wire:click="downloadIcs({{ $app->id }})"
+                                                            class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-gray-300 text-gray-700 bg-white text-xs font-semibold hover:bg-gray-50 transition-colors shadow-2xs"
+                                                            title="{{ __('Download .ics Calendar File') }}">
+                                                        <svg class="w-3.5 h-3.5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                                        <span>{{ __('Download .ICS') }}</span>
+                                                    </button>
+                                                @else
+                                                    <button type="button"
+                                                            wire:click="acceptAndAddToCalendar({{ $app->id }})"
+                                                            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#244F73] text-white text-xs font-semibold hover:bg-[#1A2840] transition-colors focus:ring-2 focus:ring-[#244F73] shrink-0 shadow-2xs">
+                                                        <span>{{ __('Accept & Add to Calendar') }}</span>
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                                    </button>
+                                                @endif
                                             </div>
                                         </div>
 

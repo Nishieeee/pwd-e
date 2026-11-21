@@ -55,7 +55,14 @@
                             <span class="text-xs text-body-muted">{{ $invite->created_at?->diffForHumans() }}</span>
                         </div>
                         <h2 class="font-heading text-lg font-bold text-primary-dark">
-                            {{ $employerName }} {{ __('invited you to apply for') }} <span class="text-primary">{{ $jobTitle }}</span>
+                            @if($invite->employerProfile)
+                                <a href="{{ route('candidate.employers.show', $invite->employerProfile) }}" class="hover:underline text-primary-dark hover:text-[#244F73]">
+                                    {{ $employerName }}
+                                </a>
+                            @else
+                                {{ $employerName }}
+                            @endif
+                            {{ __('invited you to apply for') }} <span class="text-primary">{{ $jobTitle }}</span>
                         </h2>
                         @if($personalMsg)
                             <p class="text-xs text-body-muted italic bg-white/70 rounded-lg p-2.5 border border-sky-100 max-w-2xl">
@@ -193,7 +200,14 @@
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 py-4">
                 <div>
                     <h2 class="text-base font-bold text-[#1A2840]">
-                        {{ $upcomingInterviewApplication->jobPosting->title }} &mdash; {{ $upcomingInterviewApplication->jobPosting->employerProfile->company_name }}
+                        {{ $upcomingInterviewApplication->jobPosting->title }} &mdash;
+                        @if($upcomingInterviewApplication->jobPosting?->employerProfile)
+                            <a href="{{ route('candidate.employers.show', $upcomingInterviewApplication->jobPosting->employerProfile) }}" class="hover:underline text-[#244F73]">
+                                {{ $upcomingInterviewApplication->jobPosting->employerProfile->company_name }}
+                            </a>
+                        @else
+                            {{ $upcomingInterviewApplication->jobPosting?->employerProfile?->company_name ?? 'Employer' }}
+                        @endif
                     </h2>
                     <p class="text-xs text-[#4E5F6E] mt-1">
                         <span class="font-medium">Date &amp; Time:</span> {{ $upcomingInterviewApplication->interview_at ? $upcomingInterviewApplication->interview_at->format('F j, Y \a\t g:i A') : 'November 4, 2026 at 2:00 PM' }} (Accessible Virtual Room / Google Meet)
@@ -253,9 +267,16 @@
                                     {{ $app->jobPosting->title }}
                                 </div>
                                 <div class="text-gray-500 text-xs mt-0.5">
-                                    {{ $app->jobPosting->employerProfile->company_name }}
-                                    @if($app->jobPosting->location)
-                                        ({{ $app->jobPosting->location }})
+                                    @if($app->jobPosting?->employerProfile)
+                                        <a href="{{ route('candidate.employers.show', $app->jobPosting->employerProfile) }}" class="font-medium text-[#244F73] hover:underline inline-flex items-center gap-1 group">
+                                            <span>{{ $app->jobPosting->employerProfile->company_name }}</span>
+                                            <svg class="size-3 text-gray-400 group-hover:text-[#244F73] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                        </a>
+                                    @else
+                                        {{ $app->jobPosting?->employerProfile?->company_name }}
+                                    @endif
+                                    @if($app->jobPosting?->location)
+                                        <span class="text-gray-400">({{ $app->jobPosting->location }})</span>
                                     @endif
                                 </div>
                             </td>
@@ -348,16 +369,29 @@
                     <div>
                         <div class="flex items-center justify-between mb-4">
                             <!-- Company Logo Initials Box -->
-                            <div class="w-10 h-10 rounded-lg bg-[#E0E7FF] text-[#1E1B4B] flex items-center justify-center font-bold text-xs uppercase">
-                                {{ substr($rJob->employerProfile->company_name ?? 'CO', 0, 2) }}
-                            </div>
+                            @if($rJob->employerProfile)
+                                <a href="{{ route('candidate.employers.show', $rJob->employerProfile) }}" class="w-10 h-10 rounded-lg bg-[#E0E7FF] text-[#1E1B4B] flex items-center justify-center font-bold text-xs uppercase hover:bg-[#C7D2FE] transition-colors" title="View {{ $rJob->employerProfile->company_name }} profile">
+                                    {{ substr($rJob->employerProfile->company_name ?? 'CO', 0, 2) }}
+                                </a>
+                            @else
+                                <div class="w-10 h-10 rounded-lg bg-[#E0E7FF] text-[#1E1B4B] flex items-center justify-center font-bold text-xs uppercase">
+                                    {{ substr($rJob->employerProfile->company_name ?? 'CO', 0, 2) }}
+                                </div>
+                            @endif
                             <div class="text-base font-bold text-[#176B47]">
                                 {{ $rJob->fit_score ?? 96 }}% <span class="text-xs font-semibold text-gray-500">FIT</span>
                             </div>
                         </div>
 
                         <div class="font-bold text-sm text-[#1A2840]">
-                            {{ $rJob->employerProfile->company_name }}
+                            @if($rJob->employerProfile)
+                                <a href="{{ route('candidate.employers.show', $rJob->employerProfile) }}" class="hover:text-[#244F73] hover:underline inline-flex items-center gap-1 group">
+                                    <span>{{ $rJob->employerProfile->company_name }}</span>
+                                    <svg class="size-3 text-gray-400 group-hover:text-[#244F73] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                </a>
+                            @else
+                                {{ $rJob->employerProfile->company_name }}
+                            @endif
                         </div>
                         <div class="text-xs text-gray-500 mt-0.5">
                             {{ $rJob->title }}

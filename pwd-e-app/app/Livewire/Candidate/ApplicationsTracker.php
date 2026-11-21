@@ -209,10 +209,86 @@ class ApplicationsTracker extends Component
 
     public function acceptAndAddToCalendar(int $appId): void
     {
-        $app = Application::with('jobPosting.employerProfile')->find($appId);
-        if ($app) {
-            $this->actionNotification = "Interview with {$app->jobPosting->employerProfile->company_name} accepted and synced to your schedule!";
+        $user = Auth::user();
+        $candidateProfile = $user?->candidateProfile;
+        if (! $candidateProfile) {
+            return;
         }
+
+        $app = Application::where('id', $appId)
+            ->where('candidate_profile_id', $candidateProfile->id)
+            ->with('jobPosting.employerProfile')
+            ->first();
+
+        if (! $app || $app->status !== 'interview') {
+            return;
+        }
+
+        $app->update([
+            'interview_accepted_at' => now(),
+            'status_subtext' => 'Interview accepted · Scheduled for ' . ($app->interview_at ? $app->interview_at->format('M j, g:i A') : 'upcoming session'),
+        ]);
+
+        ApplicationMessage::create([
+            'application_id' => $app->id,
+            'sender_id' => $user->id,
+            'type' => 'system',
+            'body' => 'Interview Confirmed: Candidate accepted the scheduled interview for ' . ($app->interview_at ? $app->interview_at->format('F j, Y \a\t g:i A') : 'upcoming session') . '.',
+            'metadata' => [
+                'event' => 'interview_accepted',
+                'accepted_at' => now()->toIso8601String(),
+            ],
+        ]);
+
+        $company = $app->jobPosting?->employerProfile?->company_name ?? 'the employer';
+        $this->actionNotification = "Interview with {$company} accepted and confirmed on your schedule!";
+    }
+
+    public function downloadIcs(int $appId)
+    {
+        $user = Auth::user();
+        $candidateProfile = $user?->candidateProfile;
+        if (! $candidateProfile) {
+            return;
+        }
+
+        $app = Application::where('id', $appId)
+            ->where('candidate_profile_id', $candidateProfile->id)
+            ->with('jobPosting.employerProfile')
+            ->first();
+
+        if (! $app) {
+            return;
+        }
+
+        $start = $app->interview_at ?? now()->addDay();
+        $end = (clone $start)->addHour();
+        $summary = "Interview: " . ($app->jobPosting?->title ?? 'Position') . " with " . ($app->jobPosting?->employerProfile?->company_name ?? 'Company');
+        $description = "Accessible Interview for " . ($app->jobPosting?->title ?? 'Position') . "\\nMeeting URL: " . ($app->interview_url ?? '') . "\\nAccommodations: " . ($app->interview_accommodations ?? '');
+        $location = $app->interview_url ?: ($app->interview_location ?: 'Online');
+
+        $ics = "BEGIN:VCALENDAR\r\n"
+            . "VERSION:2.0\r\n"
+            . "PRODID:-//PWD-E Ecosystem//EN\r\n"
+            . "CALSCALE:GREGORIAN\r\n"
+            . "METHOD:PUBLISH\r\n"
+            . "BEGIN:VEVENT\r\n"
+            . "UID:pwde-interview-{$app->id}@pwd-e.local\r\n"
+            . "DTSTAMP:" . gmdate('Ymd\THis\Z') . "\r\n"
+            . "DTSTART:" . $start->format('Ymd\THis\Z') . "\r\n"
+            . "DTEND:" . $end->format('Ymd\THis\Z') . "\r\n"
+            . "SUMMARY:" . $summary . "\r\n"
+            . "DESCRIPTION:" . $description . "\r\n"
+            . "LOCATION:" . $location . "\r\n"
+            . "STATUS:CONFIRMED\r\n"
+            . "END:VEVENT\r\n"
+            . "END:VCALENDAR\r\n";
+
+        return response()->streamDownload(function () use ($ics) {
+            echo $ics;
+        }, "interview-{$app->id}.ics", [
+            'Content-Type' => 'text/calendar; charset=utf-8',
+        ]);
     }
 
     public function toggleChecklistItem(int $appId, string $itemKey): void

@@ -152,3 +152,34 @@ test('pwa webmanifest and offline html are valid and accessible', function () {
         ->and($manifestJson['name'])->toBe('PWD-E | Accessible Employment Ecosystem')
         ->and($manifestJson['display'])->toBe('standalone');
 });
+
+test('candidate can accept interview schedule and download calendar event', function () {
+    [$candidateUser, $employerUser, $application, $job] = createInterviewSetup();
+
+    expect($application->isInterviewAccepted())->toBeFalse();
+
+    Livewire::actingAs($candidateUser)
+        ->test(ApplicationsTracker::class)
+        ->call('acceptAndAddToCalendar', $application->id)
+        ->assertSee('Interview Accepted')
+        ->assertSee('Google Calendar')
+        ->assertSee('Download .ICS');
+
+    $fresh = $application->fresh();
+    expect($fresh->isInterviewAccepted())->toBeTrue();
+    expect($fresh->interview_accepted_at)->not->toBeNull();
+
+    // Verify system notification message created
+    $sysMsg = ApplicationMessage::where('application_id', $application->id)
+        ->where('type', 'system')
+        ->where('body', 'like', '%Interview Confirmed%')
+        ->first();
+
+    expect($sysMsg)->not->toBeNull();
+
+    // Verify ICS download
+    Livewire::actingAs($candidateUser)
+        ->test(ApplicationsTracker::class)
+        ->call('downloadIcs', $application->id)
+        ->assertFileDownloaded("interview-{$application->id}.ics");
+});

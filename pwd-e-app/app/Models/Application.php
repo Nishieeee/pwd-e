@@ -28,6 +28,7 @@ class Application extends Model
         'interview_url',
         'interview_accommodations',
         'interview_checklist',
+        'interview_accepted_at',
         'offer_details',
         'application_materials',
         'resume_path',
@@ -40,6 +41,7 @@ class Application extends Model
         'fit_score_at_apply' => 'decimal:2',
         'applied_at' => 'datetime',
         'interview_at' => 'datetime',
+        'interview_accepted_at' => 'datetime',
         'rejected_at' => 'datetime',
         'offer_details' => 'array',
         'application_materials' => 'array',
@@ -92,6 +94,24 @@ class Application extends Model
         }
 
         return count($status) > 0;
+    }
+
+    public function isInterviewAccepted(): bool
+    {
+        return $this->interview_accepted_at !== null;
+    }
+
+    public function googleCalendarUrl(): string
+    {
+        $start = $this->interview_at ?? now()->addDay();
+        $end = (clone $start)->addHour();
+
+        $title = urlencode("Interview: {$this->jobPosting?->title} with {$this->jobPosting?->employerProfile?->company_name}");
+        $dates = $start->format('Ymd\THis\Z') . '/' . $end->format('Ymd\THis\Z');
+        $details = urlencode("Accessible Interview for {$this->jobPosting?->title}.\nMeeting URL: {$this->interview_url}\nAccommodations: {$this->interview_accommodations}");
+        $location = urlencode($this->interview_url ?: ($this->interview_location ?: 'Accessible Virtual Room'));
+
+        return "https://calendar.google.com/calendar/render?action=TEMPLATE&text={$title}&dates={$dates}&details={$details}&location={$location}";
     }
 
     public function interviewChecklistProgress(): array
