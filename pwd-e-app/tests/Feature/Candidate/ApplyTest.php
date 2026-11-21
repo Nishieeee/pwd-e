@@ -5,6 +5,8 @@ use App\Models\Application;
 use App\Models\CandidateProfile;
 use App\Models\JobPosting;
 use App\Models\User;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
 beforeEach(function () {
@@ -118,4 +120,34 @@ test('candidate application stores multi-select application materials', function
     expect($app->application_materials['biodata'])->toBeTrue();
     expect($app->application_materials['resume'])->toBeFalse();
     expect($app->application_materials['fsl_video'])->toBeFalse();
+});
+
+test('candidate can upload a pdf cover letter and employer can view it', function () {
+    Storage::fake('private');
+    $this->actingAs($this->candidate);
+
+    $fakePdf = UploadedFile::fake()->create('maria-cover-letter.pdf', 120, 'application/pdf');
+
+    Livewire::test(Apply::class, ['job' => $this->job])
+        ->call('setCoverLetterType', 'upload')
+        ->assertSet('coverLetterType', 'upload')
+        ->set('coverLetterFile', $fakePdf)
+        ->call('submit')
+        ->assertHasNoErrors()
+        ->assertSet('submitted', true);
+
+    $app = Application::where('candidate_profile_id', $this->candidate->candidateProfile->id)
+        ->where('job_posting_id', $this->job->id)
+        ->first();
+
+    expect($app)->not->toBeNull();
+    expect($app->cover_letter_pdf_path)->not->toBeNull();
+    Storage::disk('private')->assertExists($app->cover_letter_pdf_path);
+
+    // Verify employer can view the document
+    $employerUser = $this->job->employerProfile->user;
+    $response = $this->actingAs($employerUser)
+        ->get(route('employer.applicants.document', ['application' => $app->id, 'type' => 'cover_letter']));
+
+    $response->assertOk();
 });

@@ -3,8 +3,10 @@
 namespace App\Livewire\Employer;
 
 use App\Models\Application;
+use App\Models\ApplicationMessage;
 use App\Models\JobPosting;
 use App\Models\WorkforceRecord;
+use App\Notifications\AccommodationMessageReceived;
 use Flux\Flux;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -58,6 +60,119 @@ class Applicants extends Component
     public ?int $rejectingAppId = null;
 
     public string $rejectionReason = '';
+
+    public ?int $selectedChatAppId = null;
+
+    public bool $showChatModal = false;
+
+    public string $chatMessageText = '';
+
+    public function openChatModal(int $appId): void
+    {
+        $user = Auth::user();
+        $employerProfile = $user?->employerProfile;
+
+        $app = Application::whereHas('jobPosting', function ($q) use ($employerProfile) {
+            $q->where('employer_profile_id', $employerProfile?->id);
+        })->where('id', $appId)->first();
+
+        if (! $app) {
+            return;
+        }
+
+        $this->selectedChatAppId = $appId;
+        $this->showChatModal = true;
+        $this->chatMessageText = '';
+
+        // Mark unread messages from candidate as read
+        ApplicationMessage::where('application_id', $appId)
+            ->where('sender_id', '!=', $user->id)
+            ->whereNull('read_at')
+            ->update(['read_at' => now()]);
+    }
+
+    public function closeChatModal(): void
+    {
+        $this->showChatModal = false;
+        $this->selectedChatAppId = null;
+        $this->chatMessageText = '';
+    }
+
+    public function sendChatMessage(): void
+    {
+        $user = Auth::user();
+        $employerProfile = $user?->employerProfile;
+        $body = trim($this->chatMessageText);
+
+        if (! $user || ! $this->selectedChatAppId || empty($body)) {
+            return;
+        }
+
+        $app = Application::with(['jobPosting', 'candidateProfile.user'])
+            ->whereHas('jobPosting', function ($q) use ($employerProfile) {
+                $q->where('employer_profile_id', $employerProfile?->id);
+            })->where('id', $this->selectedChatAppId)->first();
+
+        if (! $app) {
+            return;
+        }
+
+        $msg = ApplicationMessage::create([
+            'application_id' => $app->id,
+            'sender_id' => $user->id,
+            'body' => $body,
+            'type' => 'message',
+        ]);
+
+        $this->chatMessageText = '';
+
+        // Notify candidate
+        $candidateUser = $app->candidateProfile?->user;
+        if ($candidateUser) {
+            $candidateUser->notify(new AccommodationMessageReceived($msg, $app->jobPosting, $user));
+        }
+
+        \Flux\Flux::toast(variant: 'success', text: __('Reply sent to candidate.'));
+    }
+
+    public function confirmAccommodation(int $messageId): void
+    {
+        $user = Auth::user();
+        $employerProfile = $user?->employerProfile;
+
+        $message = ApplicationMessage::where('id', $messageId)
+            ->whereHas('application.jobPosting', function ($q) use ($employerProfile) {
+                $q->where('employer_profile_id', $employerProfile?->id);
+            })->first();
+
+        if (! $message) {
+            return;
+        }
+
+        $metadata = $message->metadata ?? [];
+        $metadata['resolved'] = true;
+        $metadata['resolved_at'] = now()->toIso8601String();
+        $metadata['resolved_by'] = $user->id;
+        $message->update(['metadata' => $metadata]);
+
+        // Post confirmation system message
+        $app = $message->application;
+        $sysMsg = ApplicationMessage::create([
+            'application_id' => $app->id,
+            'sender_id' => $user->id,
+            'body' => 'Accommodation Confirmed: ' . ($metadata['topic'] ?? 'Requested accommodation') . ' is confirmed and will be provided for this candidate.',
+            'type' => 'system',
+            'metadata' => ['resolved' => true, 'topic' => $metadata['topic'] ?? null],
+        ]);
+
+        // Notify candidate
+        $candidateUser = $app->candidateProfile?->user;
+        if ($candidateUser) {
+            $candidateUser->notify(new AccommodationMessageReceived($sysMsg, $app->jobPosting, $user));
+        }
+
+        \Flux\Flux::toast(variant: 'success', text: __('Accommodation marked as confirmed.'));
+    }
 
     public function mount(?JobPosting $job = null): void
     {
@@ -355,6 +470,7 @@ class Applicants extends Component
             'candidateProfile.workExperiences',
             'candidateProfile.certifications',
             'jobPosting.employerProfile',
+            'messages',
         ])->whereHas('jobPosting', function ($q) use ($profile) {
             $q->where('employer_profile_id', $profile?->id ?? 0);
         });
@@ -405,6 +521,10 @@ class Applicants extends Component
             ? Application::with(['candidateProfile.user', 'jobPosting'])->find($this->rejectingAppId)
             : null;
 
+        $chatApp = $this->selectedChatAppId
+            ? Application::with(['candidateProfile.user', 'jobPosting', 'messages.sender'])->find($this->selectedChatAppId)
+            : null;
+
         return view('livewire.employer.applicants', [
             'applications' => $applications,
             'allCounts' => $allCounts,
@@ -412,6 +532,8 @@ class Applicants extends Component
             'interviewingApp' => $interviewingApp,
             'hiringApp' => $hiringApp,
             'rejectingApp' => $rejectingApp,
+            'chatApp' => $chatApp,
+            'showChatModal' => $this->showChatModal,
             'employerJobs' => $employerJobs,
         ]);
     }

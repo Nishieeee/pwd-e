@@ -446,11 +446,17 @@
 
                 <!-- About Employer -->
                 <div class="mt-6 space-y-2">
-                    <h3 class="text-sm font-bold text-[#1A2840]">
-                        About {{ $selectedJob->employerProfile->company_name }}
-                    </h3>
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-sm font-bold text-[#1A2840]">
+                            About {{ $selectedJob->employerProfile->company_name }}
+                        </h3>
+                        <a href="{{ route('candidate.employers.show', $selectedJob->employerProfile) }}" class="text-xs font-semibold text-primary hover:underline inline-flex items-center gap-1">
+                            <span>{{ __('View Company Profile & Accessibility') }}</span>
+                            <span aria-hidden="true">&rarr;</span>
+                        </a>
+                    </div>
                     <p class="text-xs text-gray-600 leading-relaxed">
-                        A Philippine digital product studio building practical, modern web experiences. Our remote-first team values clear communication, accessible tools, and equal opportunities for early-career talent.
+                        {{ $selectedJob->employerProfile->about_summary }}
                     </p>
                 </div>
 

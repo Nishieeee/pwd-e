@@ -187,10 +187,25 @@
                                                             <span class="text-[10px] bg-secondary-tint text-secondary px-1.5 py-0.2 rounded font-semibold" title="Verified PWD ID">✓ PWD</span>
                                                         @endif
                                                     </div>
-                                                    <div class="flex items-center gap-1 mt-0.5 text-[10px] text-body-muted">
-                                                        @if($hasBio) <span title="Bio-Data">📋 Bio-Data</span> @endif
-                                                        @if($hasResume) <span title="Résumé">📑 CV</span> @endif
-                                                        @if($hasFsl) <span title="FSL">🤟 FSL</span> @endif
+                                                    <div class="flex items-center gap-1.5 mt-0.5 text-[10px] text-body-muted">
+                                                        @if($hasBio)
+                                                            <span class="inline-flex items-center gap-0.5" title="Profile / Bio-Data">
+                                                                <svg class="size-3 text-primary/80" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                                                <span>Profile</span>
+                                                            </span>
+                                                        @endif
+                                                        @if($hasResume)
+                                                            <span class="inline-flex items-center gap-0.5" title="Résumé / CV">
+                                                                <svg class="size-3 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                                                                <span>CV</span>
+                                                            </span>
+                                                        @endif
+                                                        @if($hasFsl)
+                                                            <span class="inline-flex items-center gap-0.5" title="Filipino Sign Language Video">
+                                                                <svg class="size-3 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                                                <span>FSL</span>
+                                                            </span>
+                                                        @endif
                                                     </div>
                                                 </div>
                                             </div>
@@ -371,7 +386,9 @@
                         @if($cp)
                             <a href="{{ route('employer.candidates.show', $cp->id) }}" target="_blank"
                                class="flex items-center gap-3 p-3 rounded-xl border border-primary-border bg-surface hover:bg-primary-tint/50 transition-colors">
-                                <div class="size-8 rounded-lg bg-primary-tint text-primary-dark flex items-center justify-center font-bold text-xs">📋</div>
+                                <div class="size-8 rounded-lg bg-primary-tint text-primary-dark flex items-center justify-center font-bold text-xs">
+                                    <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                </div>
                                 <div class="min-w-0">
                                     <div class="text-xs font-semibold text-primary-dark truncate">{{ __('Digital Bio-Data') }}</div>
                                     <div class="text-[11px] text-body-muted">{{ __('Executive view + Philippine format') }}</div>
@@ -382,7 +399,9 @@
                         @if ($viewing->resume_path || $cp?->resume_pdf_path)
                             <a href="{{ route('employer.applicants.document', ['application' => $viewing->id, 'type' => 'resume']) }}" target="_blank"
                                class="flex items-center gap-3 p-3 rounded-xl border border-primary-border bg-surface hover:bg-primary-tint/50 transition-colors">
-                                <div class="size-8 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center font-bold text-xs">📑</div>
+                                <div class="size-8 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center font-bold text-xs">
+                                    <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                                </div>
                                 <div class="min-w-0">
                                     <div class="text-xs font-semibold text-primary-dark truncate">{{ __('Résumé / CV (PDF)') }}</div>
                                     <div class="text-[11px] text-body-muted">{{ __('Download uploaded document') }}</div>
@@ -393,7 +412,9 @@
                         @if ($viewing->fsl_video_path)
                             <a href="{{ route('employer.applicants.document', ['application' => $viewing->id, 'type' => 'fsl']) }}" target="_blank"
                                class="flex items-center gap-3 p-3 rounded-xl border border-primary-border bg-surface hover:bg-primary-tint/50 transition-colors">
-                                <div class="size-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold text-xs">🤟</div>
+                                <div class="size-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold text-xs">
+                                    <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                </div>
                                 <div class="min-w-0">
                                     <div class="text-xs font-semibold text-primary-dark truncate">{{ __('FSL Video Pitch') }}</div>
                                     <div class="text-[11px] text-body-muted">{{ __('Filipino Sign Language recording') }}</div>
@@ -491,7 +512,10 @@
                 </div>
 
                 <div class="rounded-xl border border-secondary/30 bg-secondary-tint/40 p-4 text-xs text-secondary-dark space-y-1.5">
-                    <div class="font-bold text-secondary text-sm">💡 {{ __('25% Additional Gross Deduction on Annual Wages') }}</div>
+                    <div class="font-bold text-secondary text-sm flex items-center gap-1.5">
+                        <svg class="size-4 shrink-0 text-secondary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                        <span>{{ __('25% Additional Gross Deduction on Annual Wages') }}</span>
+                    </div>
                     <p class="leading-relaxed text-secondary/90">
                         {{ __('Under RA 10524, private entities that employ qualified PWDs who meet the required terms of employment are entitled to an additional deduction from their gross income equivalent to 25% of the total amount paid as salaries.') }}
                     </p>
@@ -511,8 +535,10 @@
                         <input type="date" wire:model="hireStartDate" class="w-full rounded-lg border border-primary-border px-3 py-2 text-xs focus:ring-2 focus:ring-primary focus:outline-none" />
                     </div>
 
-                    <div class="flex items-center gap-2 p-3 rounded-lg border border-primary-border bg-surface">
-                        <span class="text-sm">🪪</span>
+                    <div class="flex items-center gap-2.5 p-3 rounded-lg border border-primary-border bg-surface">
+                        <div class="size-8 rounded-lg bg-primary-tint text-primary-dark flex items-center justify-center shrink-0">
+                            <svg class="size-4 text-primary-dark" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/></svg>
+                        </div>
                         <div class="flex-1 min-w-0">
                             <span class="font-bold text-primary-dark block">{{ __('PWD Identification Document') }}</span>
                             <span class="text-[11px] text-body-muted">

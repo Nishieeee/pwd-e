@@ -377,49 +377,113 @@
                          }
                      }
                  }">
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div>
                         <h2 class="font-heading text-lg font-bold text-primary-dark">{{ __('2. Cover Letter & Accommodation Note') }}</h2>
-                        <p class="text-xs text-body-muted mt-0.5">{{ __('Share any specific workplace accommodation requests or introductory notes with the employer.') }}</p>
+                        <p class="text-xs text-body-muted mt-0.5">{{ __('Choose to write your introductory note in the portal or upload a formatted PDF cover letter.') }}</p>
                     </div>
 
-                    {{-- Voice Dictation Toggle (Web Speech API) --}}
-                    <template x-if="hasSpeech">
+                    {{-- Mode Segmented Switch --}}
+                    <div class="inline-flex rounded-xl border border-primary-border bg-surface p-1 shrink-0" role="tablist" aria-label="{{ __('Cover letter submission mode') }}">
                         <button type="button"
-                                @click="toggleSpeech()"
-                                :class="listening ? 'bg-red-600 text-white animate-pulse' : 'bg-primary-tint text-primary-dark hover:bg-primary/20'"
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors focus:ring-2 focus:ring-primary shrink-0"
-                                :aria-label="listening ? 'Stop voice dictation' : 'Start voice dictation'">
-                            <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
-                            <span x-text="listening ? 'Listening... (Click to Stop)' : 'Voice Dictation'"></span>
+                                wire:click="setCoverLetterType('text')"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all {{ $coverLetterType === 'text' ? 'bg-primary-dark text-white shadow-2xs' : 'text-primary-dark hover:bg-white/80' }}"
+                                role="tab"
+                                aria-selected="{{ $coverLetterType === 'text' ? 'true' : 'false' }}">
+                            <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            <span>{{ __('Write Note in Portal') }}</span>
                         </button>
-                    </template>
+                        <button type="button"
+                                wire:click="setCoverLetterType('upload')"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all {{ $coverLetterType === 'upload' ? 'bg-primary-dark text-white shadow-2xs' : 'text-primary-dark hover:bg-white/80' }}"
+                                role="tab"
+                                aria-selected="{{ $coverLetterType === 'upload' ? 'true' : 'false' }}">
+                            <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                            <span>{{ __('Upload PDF Document') }}</span>
+                        </button>
+                    </div>
                 </div>
 
-                {{-- Low-Typing Starter Chips --}}
-                <div class="flex flex-wrap items-center gap-2 pt-1">
-                    <span class="text-xs font-semibold text-body-muted">{{ __('Quick insert:') }}</span>
-                    <button type="button" wire:click="appendPhrase('I am excited to apply for this role and contribute to your inclusive workplace.')" class="text-xs bg-surface hover:bg-primary-tint border border-primary-border text-primary-dark px-3.5 py-2 rounded-full min-h-[44px] inline-flex items-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
-                        + {{ __('Excited to apply') }}
-                    </button>
-                    <button type="button" wire:click="appendPhrase('My experience aligns well with the stated requirements and technical qualifications.')" class="text-xs bg-surface hover:bg-primary-tint border border-primary-border text-primary-dark px-3.5 py-2 rounded-full min-h-[44px] inline-flex items-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
-                        + {{ __('Qualifications match') }}
-                    </button>
-                    <button type="button" wire:click="appendPhrase('I utilize the accommodations verified in this listing and appreciate your barrier-free workplace.')" class="text-xs bg-surface hover:bg-primary-tint border border-primary-border text-primary-dark px-3.5 py-2 rounded-full min-h-[44px] inline-flex items-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
-                        + {{ __('Accommodations note') }}
-                    </button>
-                </div>
+                @if($coverLetterType === 'text')
+                    {{-- Free-Text Portal Note with Predictive Text & Voice Dictation --}}
+                    <div class="space-y-3">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            {{-- Low-Typing Starter Chips --}}
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="text-xs font-semibold text-body-muted">{{ __('Quick insert:') }}</span>
+                                <button type="button" wire:click="appendPhrase('I am excited to apply for this role and contribute to your inclusive workplace.')" class="text-xs bg-surface hover:bg-primary-tint border border-primary-border text-primary-dark px-3.5 py-1.5 rounded-full inline-flex items-center transition-colors">
+                                    + {{ __('Excited to apply') }}
+                                </button>
+                                <button type="button" wire:click="appendPhrase('My experience aligns well with the stated requirements and technical qualifications.')" class="text-xs bg-surface hover:bg-primary-tint border border-primary-border text-primary-dark px-3.5 py-1.5 rounded-full inline-flex items-center transition-colors">
+                                    + {{ __('Qualifications match') }}
+                                </button>
+                                <button type="button" wire:click="appendPhrase('I utilize the accommodations verified in this listing and appreciate your barrier-free workplace.')" class="text-xs bg-surface hover:bg-primary-tint border border-primary-border text-primary-dark px-3.5 py-1.5 rounded-full inline-flex items-center transition-colors">
+                                    + {{ __('Accommodations note') }}
+                                </button>
+                            </div>
 
-                {{-- Free-text Textarea with Predictive Text engine --}}
-                <div>
-                    <label for="coverLetter" class="sr-only">{{ __('Cover Letter') }}</label>
-                    <textarea id="coverLetter"
-                              wire:model="coverLetter"
-                              rows="6"
-                              class="w-full rounded-xl border border-primary-border p-3.5 text-sm text-primary-dark bg-white focus:outline-none focus:ring-2 focus:ring-primary leading-relaxed"
-                              placeholder="{{ __('Write your note here... (Tip: type to see predictive word suggestions or use voice dictation)') }}"></textarea>
-                    @error('coverLetter') <span class="text-xs text-red-600 block mt-1">{{ $message }}</span> @enderror
-                </div>
+                            {{-- Voice Dictation Toggle (Web Speech API) --}}
+                            <template x-if="hasSpeech">
+                                <button type="button"
+                                        @click="toggleSpeech()"
+                                        :class="listening ? 'bg-red-600 text-white animate-pulse' : 'bg-primary-tint text-primary-dark hover:bg-primary/20'"
+                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors focus:ring-2 focus:ring-primary shrink-0"
+                                        :aria-label="listening ? 'Stop voice dictation' : 'Start voice dictation'">
+                                    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
+                                    <span x-text="listening ? 'Listening... (Click to Stop)' : 'Voice Dictation'"></span>
+                                </button>
+                            </template>
+                        </div>
+
+                        <div>
+                            <label for="coverLetter" class="sr-only">{{ __('Cover Letter') }}</label>
+                            <textarea id="coverLetter"
+                                      wire:model="coverLetter"
+                                      rows="6"
+                                      class="w-full rounded-xl border border-primary-border p-3.5 text-sm text-primary-dark bg-white focus:outline-none focus:ring-2 focus:ring-primary leading-relaxed"
+                                      placeholder="{{ __('Write your note here... (Tip: type to see predictive word suggestions or use voice dictation)') }}"></textarea>
+                            @error('coverLetter') <span class="text-xs text-red-600 block mt-1">{{ $message }}</span> @enderror
+                        </div>
+                    </div>
+                @else
+                    {{-- Upload PDF Cover Letter --}}
+                    <div class="rounded-xl border border-dashed border-primary-border bg-surface/60 p-6 text-center space-y-4">
+                        @if ($coverLetterFile)
+                            <div class="flex items-center justify-between p-3.5 rounded-xl bg-white border border-emerald-200 shadow-2xs max-w-lg mx-auto">
+                                <div class="flex items-center gap-3">
+                                    <div class="size-9 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xs">
+                                        <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                    </div>
+                                    <div class="text-left">
+                                        <div class="text-xs font-bold text-primary-dark truncate max-w-xs">{{ $coverLetterFile->getClientOriginalName() }}</div>
+                                        <div class="text-[11px] text-body-muted">{{ number_format($coverLetterFile->getSize() / 1024, 1) }} KB · {{ __('PDF Cover Letter attached') }}</div>
+                                    </div>
+                                </div>
+                                <button type="button" wire:click="removeCoverLetterFile" class="text-xs font-semibold text-red-600 hover:text-red-800 px-2.5 py-1 rounded-md hover:bg-red-50 transition-colors">
+                                    {{ __('Remove') }}
+                                </button>
+                            </div>
+                        @else
+                            <div class="max-w-md mx-auto space-y-2">
+                                <div class="size-12 rounded-full bg-primary-tint text-primary flex items-center justify-center mx-auto mb-2">
+                                    <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                                </div>
+                                <div class="text-xs font-bold text-primary-dark">
+                                    <label for="coverLetterFileInput" class="text-primary hover:underline cursor-pointer">
+                                        <span>{{ __('Click to select PDF document') }}</span>
+                                        <input id="coverLetterFileInput" type="file" wire:model="coverLetterFile" accept="application/pdf" class="sr-only" />
+                                    </label>
+                                    <span class="text-body-muted font-normal"> {{ __('or drag and drop') }}</span>
+                                </div>
+                                <p class="text-[11px] text-body-muted">{{ __('PDF files only, up to 5MB. Screen-reader accessible tagged PDFs are recommended.') }}</p>
+                                <div wire:loading wire:target="coverLetterFile" class="text-xs text-primary font-semibold">
+                                    {{ __('Uploading PDF cover letter...') }}
+                                </div>
+                            </div>
+                        @endif
+                        @error('coverLetterFile') <span class="text-xs text-red-600 block mt-1">{{ $message }}</span> @enderror
+                    </div>
+                @endif
             </div>
 
             {{-- Action Buttons Bar --}}

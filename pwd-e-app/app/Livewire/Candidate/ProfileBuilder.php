@@ -139,6 +139,17 @@ class ProfileBuilder extends Component
 
     public ?string $draftMessage = null;
 
+    // Resume Scan & Auto-Build Profile
+    public $resumeScanUpload = null;
+
+    public bool $isScanningResume = false;
+
+    public bool $resumeScanSuccess = false;
+
+    public bool $showScanReviewModal = false;
+
+    public ?array $scanSummary = null;
+
     protected function ensureLocationTablesAndData(): void
     {
         if (! Schema::hasTable('location_cities') || ! Schema::hasColumn('location_cities', 'psgc_code')) {
@@ -1058,6 +1069,136 @@ class ProfileBuilder extends Component
         }
 
         return $profile;
+    }
+
+    public function updatedResumeScanUpload(): void
+    {
+        $this->scanAndBuildProfile();
+    }
+
+    public function scanAndBuildProfile(): void
+    {
+        $this->validate([
+            'resumeScanUpload' => ['required', 'file', 'mimes:pdf,docx,txt,text,rtf', 'max:10240'],
+        ]);
+
+        $this->isScanningResume = true;
+        $parser = app(\App\Services\Resume\ResumeParserService::class);
+        $parsed = $parser->parse($this->resumeScanUpload);
+
+        $storedPath = $this->resumeScanUpload->store('resumes', 'public');
+        $filename = $this->resumeScanUpload->getClientOriginalName();
+        $fileSize = round($this->resumeScanUpload->getSize() / 1024, 1).' KB';
+
+        $this->applyParsedResumeData($parsed, $filename, $storedPath, $fileSize);
+    }
+
+    public function loadSampleResume(): void
+    {
+        $sampleText = "Jhon Clein Pagarogan\nSoftware Engineer & Web Developer\nAyala, Zamboanga City, Philippines\nEmail: pagaroganjhonclein@gmail.com\nPhone: +63 96 9468 5197\n\nProfessional Summary:\nA software engineer specializing in accessible web development, dashboard design, and inclusive user experiences.\n\nSkills:\nHTML, CSS, JavaScript, Data Entry, Customer Service, Accessibility\n\nEducation:\nTertiary (College / University)\nWestern Mindanao State University\nBachelor of Science in Computer Science\nClass of 2025\n\nWork Experience:\nSoftware Engineer Intern at AKA (2024 - Present)\nDesigned and developed ERP systems and dashboards with WCAG 2.1 AA accessibility.\n\nAccommodations:\nWheelchair Ramp Access, Accessible Restroom, Screen Reader Compatibility";
+
+        $parser = app(\App\Services\Resume\ResumeParserService::class);
+        $parsed = $parser->extractProfileData($sampleText, 'Sample_Resume_Jhon_Clein.pdf');
+
+        $this->applyParsedResumeData($parsed, 'Sample_Resume_Jhon_Clein.pdf', 'resumes/sample_resume.pdf', '12.5 KB');
+    }
+
+    protected function applyParsedResumeData(array $parsed, string $filename, ?string $storedPath = null, ?string $fileSize = null): void
+    {
+        if (! empty($parsed['first_name'])) {
+            $this->firstName = $parsed['first_name'];
+        }
+        if (! empty($parsed['middle_name'])) {
+            $this->middleName = $parsed['middle_name'];
+        }
+        if (! empty($parsed['last_name'])) {
+            $this->lastName = $parsed['last_name'];
+        }
+        if (! empty($parsed['phone'])) {
+            $this->phone = $parsed['phone'];
+        }
+        if (! empty($parsed['city'])) {
+            $this->city = $parsed['city'];
+            $this->locationCityId = $parsed['location_city_id'];
+        }
+        if (! empty($parsed['barangay'])) {
+            $this->barangay = $parsed['barangay'];
+            $this->locationBarangayId = $parsed['location_barangay_id'];
+        }
+        if (! empty($parsed['zip_code'])) {
+            $this->zipCode = $parsed['zip_code'];
+        }
+        if (! empty($parsed['headline'])) {
+            $this->headline = $parsed['headline'];
+        }
+        if (! empty($parsed['bio'])) {
+            $this->bio = $parsed['bio'];
+        }
+        if (! empty($parsed['skills'])) {
+            $this->selectedSkills = array_values(array_unique(array_merge($this->selectedSkills, $parsed['skills'])));
+        }
+        if (! empty($parsed['spoken_languages'])) {
+            $this->spokenLanguages = array_values(array_unique(array_merge($this->spokenLanguages, $parsed['spoken_languages'])));
+        }
+        if (! empty($parsed['highest_education'])) {
+            $this->highestEducation = $parsed['highest_education'];
+        }
+        if (! empty($parsed['institution_name'])) {
+            $this->institutionName = $parsed['institution_name'];
+        }
+        if (! empty($parsed['year_graduated'])) {
+            $this->yearGraduated = $parsed['year_graduated'];
+        }
+        if (! empty($parsed['experiences'])) {
+            $this->experiences = $parsed['experiences'];
+        }
+        if (! empty($parsed['suggested_accommodations'])) {
+            $this->selectedAccommodations = array_values(array_unique(array_merge($this->selectedAccommodations, $parsed['suggested_accommodations'])));
+        }
+
+        if ($storedPath) {
+            $this->resumePdfPath = $storedPath;
+        }
+        $this->resumeFilename = $filename;
+        if ($fileSize) {
+            $this->resumeFileSize = $fileSize;
+        }
+
+        $this->scanSummary = [
+            'filename' => $filename,
+            'skills_count' => count($parsed['skills'] ?? []),
+            'skills' => $parsed['skills'] ?? [],
+            'experiences_count' => count($parsed['experiences'] ?? []),
+            'experiences' => $parsed['experiences'] ?? [],
+            'education' => $parsed['institution_name'] ? (($parsed['degree'] ?? '') ? "{$parsed['degree']}, {$parsed['institution_name']}" : $parsed['institution_name']) : null,
+            'headline' => $parsed['headline'] ?? null,
+            'contact' => array_filter([$parsed['full_name'] ?? null, $parsed['phone'] ?? null, $parsed['city'] ?? null]),
+            'accommodations_count' => count($parsed['suggested_accommodations'] ?? []),
+        ];
+
+        $this->resumeScanSuccess = true;
+        $this->showScanReviewModal = true;
+        $this->isScanningResume = false;
+
+        $this->currentStep = 2;
+        $this->dispatch('profile-step-changed');
+    }
+
+    public function confirmAndSaveFromScan()
+    {
+        $this->showScanReviewModal = false;
+        return $this->saveProfileAndRedirect();
+    }
+
+    public function closeScanReviewModal(): void
+    {
+        $this->showScanReviewModal = false;
+    }
+
+    public function dismissScanSummary(): void
+    {
+        $this->resumeScanSuccess = false;
+        $this->showScanReviewModal = false;
     }
 
     public function saveDraftAndExit()

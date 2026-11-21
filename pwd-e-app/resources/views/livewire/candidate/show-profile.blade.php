@@ -142,7 +142,12 @@
                     @if($profile->avatar_path)
                         <img src="{{ Storage::url($profile->avatar_path) }}"
                              alt="{{ $candidateUser->name }} 2x2 Photo"
-                             class="w-full h-full object-cover">
+                             class="w-full h-full object-cover"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="flex-col items-center justify-center text-center p-2" style="display: none;">
+                            <span class="font-heading text-2xl font-bold text-primary">{{ $candidateUser?->initials() ?? 'MS' }}</span>
+                            <span class="text-[10px] uppercase font-semibold text-body-muted mt-1 tracking-wider">2x2 Photo</span>
+                        </div>
                     @else
                         <div class="flex flex-col items-center justify-center text-center p-2">
                             <span class="font-heading text-2xl font-bold text-primary">{{ $candidateUser?->initials() ?? 'MS' }}</span>

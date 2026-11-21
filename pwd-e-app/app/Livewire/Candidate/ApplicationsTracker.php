@@ -3,7 +3,9 @@
 namespace App\Livewire\Candidate;
 
 use App\Models\Application;
+use App\Models\ApplicationMessage;
 use App\Models\CandidateProfile;
+use App\Notifications\AccommodationMessageReceived;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
@@ -34,7 +36,101 @@ class ApplicationsTracker extends Component
 
     public bool $showWithdrawConfirmModal = false;
 
+    public ?int $selectedChatAppId = null;
+
+    public bool $showChatModal = false;
+
+    public string $chatMessageText = '';
+
     public ?string $actionNotification = null;
+
+    public function openChatModal(int $appId): void
+    {
+        $user = Auth::user();
+        $candidateProfile = $user?->candidateProfile;
+
+        $app = Application::where('id', $appId)
+            ->where('candidate_profile_id', $candidateProfile?->id)
+            ->first();
+
+        if (! $app) {
+            return;
+        }
+
+        $this->selectedChatAppId = $appId;
+        $this->showChatModal = true;
+        $this->chatMessageText = '';
+
+        // Mark unread messages from employer as read
+        ApplicationMessage::where('application_id', $appId)
+            ->where('sender_id', '!=', $user->id)
+            ->whereNull('read_at')
+            ->update(['read_at' => now()]);
+    }
+
+    public function closeChatModal(): void
+    {
+        $this->showChatModal = false;
+        $this->selectedChatAppId = null;
+        $this->chatMessageText = '';
+    }
+
+    public function sendChatMessage(?string $chipTopic = null): void
+    {
+        $user = Auth::user();
+        $candidateProfile = $user?->candidateProfile;
+
+        if (! $user || ! $this->selectedChatAppId) {
+            return;
+        }
+
+        $app = Application::with('jobPosting.employerProfile.user')
+            ->where('id', $this->selectedChatAppId)
+            ->where('candidate_profile_id', $candidateProfile?->id)
+            ->first();
+
+        if (! $app) {
+            return;
+        }
+
+        $body = trim($this->chatMessageText);
+
+        if ($chipTopic) {
+            $body = match ($chipTopic) {
+                'wheelchair' => 'Inquiry: Does your workplace or interview venue have step-free entrance and wheelchair ramp access?',
+                'fsl' => 'Inquiry: Will there be a Filipino Sign Language (FSL) interpreter provided for the interview, or should I arrange one?',
+                'screen_reader' => 'Inquiry: Could interview test tasks and materials be provided in accessible digital format (screen-reader compatible plain text or HTML)?',
+                'schedule' => 'Inquiry: Is it possible to request a flexible schedule or scheduled rest breaks during the interview process?',
+                default => $chipTopic,
+            };
+            $type = 'accommodation_inquiry';
+            $metadata = ['topic' => $chipTopic, 'resolved' => false];
+        } else {
+            if (empty($body)) {
+                return;
+            }
+            $type = 'message';
+            $metadata = null;
+        }
+
+        $msg = ApplicationMessage::create([
+            'application_id' => $app->id,
+            'sender_id' => $user->id,
+            'body' => $body,
+            'type' => $type,
+            'metadata' => $metadata,
+        ]);
+
+        $this->chatMessageText = '';
+
+        // Notify employer
+        $employerUser = $app->jobPosting?->employerProfile?->user;
+        if ($employerUser) {
+            $employerUser->notify(new AccommodationMessageReceived($msg, $app->jobPosting, $user));
+        }
+
+        \Flux\Flux::toast(variant: 'success', text: __('Message sent to employer.'));
+    }
 
     public function setTab(string $tab): void
     {
@@ -113,10 +209,176 @@ class ApplicationsTracker extends Component
 
     public function acceptAndAddToCalendar(int $appId): void
     {
-        $app = Application::with('jobPosting.employerProfile')->find($appId);
-        if ($app) {
-            $this->actionNotification = "Interview with {$app->jobPosting->employerProfile->company_name} accepted and synced to your schedule!";
+        $user = Auth::user();
+        $candidateProfile = $user?->candidateProfile;
+        if (! $candidateProfile) {
+            return;
         }
+
+        $app = Application::where('id', $appId)
+            ->where('candidate_profile_id', $candidateProfile->id)
+            ->with('jobPosting.employerProfile')
+            ->first();
+
+        if (! $app || $app->status !== 'interview') {
+            return;
+        }
+
+        $app->update([
+            'interview_accepted_at' => now(),
+            'status_subtext' => 'Interview accepted · Scheduled for ' . ($app->interview_at ? $app->interview_at->format('M j, g:i A') : 'upcoming session'),
+        ]);
+
+        ApplicationMessage::create([
+            'application_id' => $app->id,
+            'sender_id' => $user->id,
+            'type' => 'system',
+            'body' => 'Interview Confirmed: Candidate accepted the scheduled interview for ' . ($app->interview_at ? $app->interview_at->format('F j, Y \a\t g:i A') : 'upcoming session') . '.',
+            'metadata' => [
+                'event' => 'interview_accepted',
+                'accepted_at' => now()->toIso8601String(),
+            ],
+        ]);
+
+        $company = $app->jobPosting?->employerProfile?->company_name ?? 'the employer';
+        $this->actionNotification = "Interview with {$company} accepted and confirmed on your schedule!";
+    }
+
+    public function downloadIcs(int $appId)
+    {
+        $user = Auth::user();
+        $candidateProfile = $user?->candidateProfile;
+        if (! $candidateProfile) {
+            return;
+        }
+
+        $app = Application::where('id', $appId)
+            ->where('candidate_profile_id', $candidateProfile->id)
+            ->with('jobPosting.employerProfile')
+            ->first();
+
+        if (! $app) {
+            return;
+        }
+
+        $start = $app->interview_at ?? now()->addDay();
+        $end = (clone $start)->addHour();
+        $summary = "Interview: " . ($app->jobPosting?->title ?? 'Position') . " with " . ($app->jobPosting?->employerProfile?->company_name ?? 'Company');
+        $description = "Accessible Interview for " . ($app->jobPosting?->title ?? 'Position') . "\\nMeeting URL: " . ($app->interview_url ?? '') . "\\nAccommodations: " . ($app->interview_accommodations ?? '');
+        $location = $app->interview_url ?: ($app->interview_location ?: 'Online');
+
+        $ics = "BEGIN:VCALENDAR\r\n"
+            . "VERSION:2.0\r\n"
+            . "PRODID:-//PWD-E Ecosystem//EN\r\n"
+            . "CALSCALE:GREGORIAN\r\n"
+            . "METHOD:PUBLISH\r\n"
+            . "BEGIN:VEVENT\r\n"
+            . "UID:pwde-interview-{$app->id}@pwd-e.local\r\n"
+            . "DTSTAMP:" . gmdate('Ymd\THis\Z') . "\r\n"
+            . "DTSTART:" . $start->format('Ymd\THis\Z') . "\r\n"
+            . "DTEND:" . $end->format('Ymd\THis\Z') . "\r\n"
+            . "SUMMARY:" . $summary . "\r\n"
+            . "DESCRIPTION:" . $description . "\r\n"
+            . "LOCATION:" . $location . "\r\n"
+            . "STATUS:CONFIRMED\r\n"
+            . "END:VEVENT\r\n"
+            . "END:VCALENDAR\r\n";
+
+        return response()->streamDownload(function () use ($ics) {
+            echo $ics;
+        }, "interview-{$app->id}.ics", [
+            'Content-Type' => 'text/calendar; charset=utf-8',
+        ]);
+    }
+
+    public function toggleChecklistItem(int $appId, string $itemKey): void
+    {
+        $user = Auth::user();
+        $candidateProfile = $user?->candidateProfile;
+        if (! $candidateProfile) {
+            return;
+        }
+
+        $app = Application::where('id', $appId)
+            ->where('candidate_profile_id', $candidateProfile->id)
+            ->first();
+
+        if (! $app || $app->status !== 'interview') {
+            return;
+        }
+
+        if (! array_key_exists($itemKey, Application::CHECKLIST_ITEMS)) {
+            return;
+        }
+
+        $checklist = $app->interview_checklist ?? [];
+        $wasChecked = ! empty($checklist[$itemKey]['checked']);
+        $nowChecked = ! $wasChecked;
+
+        $checklist[$itemKey] = [
+            'checked' => $nowChecked,
+            'checked_at' => $nowChecked ? now()->toIso8601String() : null,
+        ];
+
+        $app->update(['interview_checklist' => $checklist]);
+
+        if ($app->fresh()->isInterviewChecklistComplete()) {
+            ApplicationMessage::create([
+                'application_id' => $app->id,
+                'sender_id' => $user->id,
+                'body' => 'Assistive Tech Verified: Candidate completed the pre-interview readiness checklist.',
+                'type' => 'system',
+                'metadata' => [
+                    'event' => 'checklist_completed',
+                    'completed_at' => now()->toIso8601String(),
+                ],
+            ]);
+            $this->actionNotification = 'All 4 assistive tech readiness items verified! The employer has been notified.';
+        } else {
+            $label = Application::CHECKLIST_ITEMS[$itemKey]['label'] ?? 'Item';
+            $this->actionNotification = $nowChecked ? "{$label} marked as ready." : "{$label} unchecked.";
+        }
+    }
+
+    public function markChecklistReady(int $appId): void
+    {
+        $user = Auth::user();
+        $candidateProfile = $user?->candidateProfile;
+        if (! $candidateProfile) {
+            return;
+        }
+
+        $app = Application::where('id', $appId)
+            ->where('candidate_profile_id', $candidateProfile->id)
+            ->first();
+
+        if (! $app || $app->status !== 'interview') {
+            return;
+        }
+
+        $checklist = [];
+        $now = now()->toIso8601String();
+        foreach (Application::CHECKLIST_ITEMS as $key => $meta) {
+            $checklist[$key] = [
+                'checked' => true,
+                'checked_at' => $now,
+            ];
+        }
+
+        $app->update(['interview_checklist' => $checklist]);
+
+        ApplicationMessage::create([
+            'application_id' => $app->id,
+            'sender_id' => $user->id,
+            'body' => 'Assistive Tech Verified: Candidate completed the pre-interview readiness checklist.',
+            'type' => 'system',
+            'metadata' => [
+                'event' => 'checklist_completed',
+                'completed_at' => $now,
+            ],
+        ]);
+
+        $this->actionNotification = 'All pre-interview assistive tech items confirmed ready! Employer notified.';
     }
 
     public function render()
@@ -207,6 +469,10 @@ class ApplicationsTracker extends Component
             ? Application::with(['jobPosting.employerProfile'])->find($this->selectedOfferAppId)
             : null;
 
+        $chatApp = $this->selectedChatAppId
+            ? Application::with(['jobPosting.employerProfile', 'messages.sender'])->find($this->selectedChatAppId)
+            : null;
+
         return view('livewire.candidate.applications-tracker', [
             'user' => $user,
             'candidateProfile' => $candidateProfile,
@@ -218,6 +484,8 @@ class ApplicationsTracker extends Component
             'archivedCount' => $archivedCount,
             'breakdownApp' => $breakdownApp,
             'offerApp' => $offerApp,
+            'chatApp' => $chatApp,
+            'showChatModal' => $this->showChatModal,
             'activeTab' => $this->activeTab,
             'search' => $this->search,
             'statusFilter' => $this->statusFilter,

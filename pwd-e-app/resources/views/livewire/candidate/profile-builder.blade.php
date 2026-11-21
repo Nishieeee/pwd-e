@@ -126,14 +126,14 @@
                 </p>
             </div>
 
-            <!-- 2 Input Mode Selection Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5" role="radiogroup" aria-label="Profile input mode">
+            <!-- 3 Profile Building Mode Selection Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4" role="radiogroup" aria-label="Profile input mode">
                 <!-- Standard Typing Card -->
                 <button type="button"
                         wire:click="selectInputMode('standard')"
                         role="radio"
                         aria-checked="{{ $inputMode === 'standard' ? 'true' : 'false' }}"
-                        class="text-left rounded-xl p-6 transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#244F73] {{ $inputMode === 'standard' ? 'border-2 border-[#244F73] bg-[#EBF3FA]/60 shadow-sm' : 'border border-gray-200 bg-white hover:border-[#244F73]/50' }}">
+                        class="text-left rounded-xl p-5 transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#244F73] {{ $inputMode === 'standard' ? 'border-2 border-[#244F73] bg-[#EBF3FA]/60 shadow-sm' : 'border border-gray-200 bg-white hover:border-[#244F73]/50' }}">
                     <div class="flex items-start justify-between gap-3">
                         <div class="w-10 h-10 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-[#244F73] shadow-2xs">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -146,12 +146,12 @@
                                 &#10003; Selected
                             </span>
                         @else
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#DCEAF4]/70 text-[#244F73]">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#DCEAF4]/70 text-[#244F73]">
                                 Available
                             </span>
                         @endif
                     </div>
-                    <h3 class="text-base font-bold text-[#1A2840] mt-5">Standard Typing</h3>
+                    <h3 class="text-base font-bold text-[#1A2840] mt-4">Standard Typing</h3>
                     <p class="text-xs text-[#4E5F6E] mt-1.5 leading-relaxed">
                         Use your keyboard to enter and edit each section at your own pace.
                     </p>
@@ -162,7 +162,7 @@
                         wire:click="selectInputMode('voice')"
                         role="radio"
                         aria-checked="{{ $inputMode === 'voice' ? 'true' : 'false' }}"
-                        class="text-left rounded-xl p-6 transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#244F73] {{ $inputMode === 'voice' ? 'border-2 border-[#244F73] bg-[#EBF3FA]/60 shadow-sm' : 'border border-gray-200 bg-white hover:border-[#244F73]/50' }}">
+                        class="text-left rounded-xl p-5 transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#244F73] {{ $inputMode === 'voice' ? 'border-2 border-[#244F73] bg-[#EBF3FA]/60 shadow-sm' : 'border border-gray-200 bg-white hover:border-[#244F73]/50' }}">
                     <div class="flex items-start justify-between gap-3">
                         <div class="w-10 h-10 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-[#244F73] shadow-2xs">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -174,17 +174,95 @@
                                 &#10003; Selected
                             </span>
                         @else
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#DCEAF4]/70 text-[#244F73]">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#DCEAF4]/70 text-[#244F73]">
                                 Available
                             </span>
                         @endif
                     </div>
-                    <h3 class="text-base font-bold text-[#1A2840] mt-5">Voice Dictation &amp; Speech-to-Text</h3>
+                    <h3 class="text-base font-bold text-[#1A2840] mt-4">Voice Dictation</h3>
                     <p class="text-xs text-[#4E5F6E] mt-1.5 leading-relaxed">
-                        Speak your answers in Tagalog or English and watch them become editable text. You stay in control.
+                        Speak your answers in Tagalog or English and watch them become editable text.
                     </p>
                 </button>
+
+                <!-- 3. Resume Scan & Auto-Fill Card -->
+                <div class="rounded-xl border border-gray-200 bg-white hover:border-[#244F73]/50 p-5 shadow-xs transition-all h-full flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-[#244F73] text-white flex items-center justify-center shadow-2xs">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                                </svg>
+                            </div>
+                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#DCEAF4] text-[#244F73]">
+                                ⚡ Fastest
+                            </span>
+                        </div>
+                        <h3 class="text-base font-bold text-[#1A2840] mt-4">Resume Scan &amp; Auto-Fill</h3>
+                        <p class="text-xs text-[#4E5F6E] mt-1.5 leading-relaxed">
+                            Upload your resume (PDF, DOCX, TXT) to auto-build your profile, review the output, and save.
+                        </p>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-gray-100 space-y-2">
+                        <label for="resume-scan-input"
+                               class="flex items-center justify-center gap-2 w-full py-2 px-3 rounded-lg bg-[#244F73] text-white text-xs font-bold hover:bg-[#1A2840] cursor-pointer transition shadow-2xs focus-within:ring-2 focus-within:ring-[#244F73]">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                            </svg>
+                            <span>Upload Resume File</span>
+                            <input id="resume-scan-input"
+                                   type="file"
+                                   wire:model="resumeScanUpload"
+                                   accept=".pdf,.docx,.txt"
+                                   class="hidden">
+                        </label>
+                        <button type="button"
+                                wire:click="loadSampleResume"
+                                class="w-full text-center py-1 text-[11px] font-semibold text-[#244F73] hover:underline cursor-pointer">
+                            ⚡ Or try sample resume
+                        </button>
+                    </div>
+                </div>
             </div>
+
+            {{-- Livewire Uploading & Scanning Indicator --}}
+            <div wire:loading wire:target="resumeScanUpload" class="pt-2">
+                <div class="flex items-center gap-3 p-4 rounded-xl bg-[#DCEAF4] text-[#244F73] text-xs font-semibold animate-pulse border border-[#244F73]/20 shadow-xs">
+                    <svg class="w-5 h-5 animate-spin shrink-0" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                    </svg>
+                    <div class="min-w-0">
+                        <div class="font-bold text-sm">Scanning &amp; Parsing Resume...</div>
+                        <div class="text-[11px] opacity-80">Extracting contact info, skills, education, and work experience into your profile...</div>
+                    </div>
+                </div>
+            </div>
+
+            @error('resumeScanUpload')
+                <div class="text-xs text-red-600 font-semibold flex items-center gap-1.5 pt-1">
+                    <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                    <span>{{ $message }}</span>
+                </div>
+            @enderror
+
+            @if($inputMode === 'standard')
+                <div class="pt-4 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2 text-xs font-bold text-[#244F73]">
+                            <span>Standard typing mode selected</span>
+                        </div>
+                        <p class="text-xs text-[#4E5F6E]">Enter your profile details section by section with full manual control.</p>
+                    </div>
+                    <button type="button"
+                            wire:click="goToStep(2)"
+                            class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-[#244F73] text-white text-xs font-bold hover:bg-[#1A2840] transition shadow-xs focus:ring-2 focus:ring-[#244F73] shrink-0">
+                        <span>Continue to Professional Details</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                    </button>
+                </div>
+            @endif
 
             <!-- Speech-to-Text Status & Listening Widget -->
             <div class="pt-4 border-t border-gray-100 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -308,16 +386,101 @@
                             <span>{{ $inputMode === 'voice' ? 'Voice Dictation on' : 'Standard Typing on' }}</span>
                         </span>
 
-                        <button type="button"
-                                wire:click="selectInputMode('{{ $inputMode === 'voice' ? 'standard' : 'voice' }}')"
-                                class="inline-flex items-center gap-1.5 text-xs font-bold text-[#244F73] hover:underline focus:outline-none focus:ring-2 focus:ring-[#244F73] rounded px-1">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                <rect x="3" y="5" width="18" height="14" rx="2" stroke-width="2"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 9h2m3 0h2m3 0h1M7 13h10"/>
-                            </svg>
-                            <span>{{ $inputMode === 'voice' ? 'Switch to typing' : 'Switch to voice dictation' }}</span>
-                        </button>
+                        <div class="flex items-center gap-3">
+                            <label for="step2-resume-scan-input"
+                                   class="inline-flex items-center gap-1.5 text-xs font-bold text-[#244F73] hover:underline cursor-pointer focus-within:ring-2 focus-within:ring-[#244F73] rounded px-1.5 py-1 bg-white border border-[#244F73]/30 shadow-2xs">
+                                <svg class="w-4 h-4 text-[#244F73]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                                </svg>
+                                <span>Scan &amp; Auto-Fill from Resume</span>
+                                <input id="step2-resume-scan-input"
+                                       type="file"
+                                       wire:model="resumeScanUpload"
+                                       accept=".pdf,.docx,.txt"
+                                       class="hidden">
+                            </label>
+
+                            <button type="button"
+                                    wire:click="selectInputMode('{{ $inputMode === 'voice' ? 'standard' : 'voice' }}')"
+                                    class="inline-flex items-center gap-1.5 text-xs font-bold text-[#244F73] hover:underline focus:outline-none focus:ring-2 focus:ring-[#244F73] rounded px-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <rect x="3" y="5" width="18" height="14" rx="2" stroke-width="2"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 9h2m3 0h2m3 0h1M7 13h10"/>
+                                </svg>
+                                <span>{{ $inputMode === 'voice' ? 'Switch to typing' : 'Switch to voice dictation' }}</span>
+                            </button>
+                        </div>
                     </div>
+
+                    {{-- Livewire Uploading & Scanning Indicator (Step 2 Trigger) --}}
+                    <div wire:loading wire:target="resumeScanUpload" class="pt-2">
+                        <div class="flex items-center gap-3 p-3.5 rounded-xl bg-[#DCEAF4] text-[#244F73] text-xs font-semibold animate-pulse border border-[#244F73]/20">
+                            <svg class="w-5 h-5 animate-spin shrink-0" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                            </svg>
+                            <span>Scanning and parsing resume... Auto-building your profile fields...</span>
+                        </div>
+                    </div>
+
+                    {{-- Resume Scan Output Review Banner --}}
+                    @if($resumeScanSuccess && $scanSummary)
+                        <div class="rounded-2xl border-2 border-emerald-300 bg-gradient-to-br from-emerald-50 via-white to-emerald-50/50 p-5 shadow-xs space-y-3.5" role="status" aria-live="polite">
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <h3 class="text-sm font-bold text-emerald-950">Resume Scanned &amp; Profile Auto-Built</h3>
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                                                Review Mode
+                                            </span>
+                                        </div>
+                                        <p class="text-xs text-emerald-800 mt-0.5">
+                                            Extracted details from <span class="font-semibold text-emerald-950">{{ $scanSummary['filename'] }}</span>. Review each section below, make any edits, and proceed to save.
+                                        </p>
+                                    </div>
+                                </div>
+                                <button type="button"
+                                        wire:click="dismissScanSummary"
+                                        class="text-emerald-700 hover:text-emerald-950 text-xs font-semibold px-2 py-1 rounded hover:bg-emerald-100 transition cursor-pointer"
+                                        aria-label="Dismiss scan notification">
+                                    Dismiss ✕
+                                </button>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 pt-1 text-xs">
+                                @if($scanSummary['headline'])
+                                    <div class="bg-white rounded-lg p-2.5 border border-emerald-200/80 shadow-2xs">
+                                        <span class="text-[10px] font-bold text-emerald-800 uppercase tracking-wider block">Headline</span>
+                                        <span class="font-semibold text-gray-900 truncate block mt-0.5" title="{{ $scanSummary['headline'] }}">{{ $scanSummary['headline'] }}</span>
+                                    </div>
+                                @endif
+                                @if(!empty($scanSummary['contact']))
+                                    <div class="bg-white rounded-lg p-2.5 border border-emerald-200/80 shadow-2xs">
+                                        <span class="text-[10px] font-bold text-emerald-800 uppercase tracking-wider block">Contact &amp; Location</span>
+                                        <span class="font-medium text-gray-900 truncate block mt-0.5">{{ implode(' · ', $scanSummary['contact']) }}</span>
+                                    </div>
+                                @endif
+                                @if($scanSummary['skills_count'] > 0)
+                                    <div class="bg-white rounded-lg p-2.5 border border-emerald-200/80 shadow-2xs">
+                                        <span class="text-[10px] font-bold text-emerald-800 uppercase tracking-wider block">Skills Auto-Tagged</span>
+                                        <span class="font-semibold text-gray-900 block mt-0.5">{{ $scanSummary['skills_count'] }} skills populated</span>
+                                    </div>
+                                @endif
+                                @if($scanSummary['education'])
+                                    <div class="bg-white rounded-lg p-2.5 border border-emerald-200/80 shadow-2xs">
+                                        <span class="text-[10px] font-bold text-emerald-800 uppercase tracking-wider block">Education</span>
+                                        <span class="font-semibold text-gray-900 truncate block mt-0.5" title="{{ $scanSummary['education'] }}">{{ $scanSummary['education'] }}</span>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
                 </div>
 
                 <!-- 1. Personal Identification -->
@@ -355,9 +518,9 @@
                                 @endif
                             </div>
                             <div class="space-y-1">
-                                <label for="avatar-upload-input" class="block text-sm font-bold text-primary-dark cursor-pointer">
+                                <span class="block text-sm font-bold text-primary-dark">
                                     2x2 Formal ID Photo <span class="font-normal text-xs text-body-muted">(Recommended for Profile)</span>
-                                </label>
+                                </span>
                                 <p class="text-xs text-body-muted leading-relaxed max-w-md">
                                     Featured on your official Digital Profile. A clear 2x2 photo with a white or plain background is recommended (JPG/PNG, up to 5 MB).
                                 </p>
@@ -370,13 +533,13 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
                                 </svg>
                                 <span>{{ ($avatarUpload || $avatarPath) ? __('Change 2x2 Photo') : __('Upload 2x2 Photo') }}</span>
-                                <input id="avatar-upload-input"
-                                       type="file"
-                                       wire:model="avatarUpload"
-                                       accept="image/png,image/jpeg"
-                                       class="sr-only"
-                                       aria-label="Upload 2x2 ID photo or avatar">
                             </label>
+                            <input id="avatar-upload-input"
+                                   type="file"
+                                   wire:model="avatarUpload"
+                                   accept="image/png,image/jpeg"
+                                   class="hidden"
+                                   aria-label="Upload 2x2 ID photo or avatar">
 
                             @if($avatarUpload || $avatarPath)
                                 <button type="button"
@@ -870,7 +1033,7 @@
                             <input type="file"
                                    wire:model="educationCertificateUpload"
                                    accept=".pdf,.jpg,.jpeg,.png"
-                                   class="sr-only"
+                                   class="hidden"
                                    aria-label="Upload optional education certificate or diploma">
                         </label>
                     </div>
@@ -1247,7 +1410,7 @@
 
                         <label class="text-xs font-bold text-[#244F73] hover:underline cursor-pointer">
                             <span>Replace file</span>
-                            <input type="file" wire:model="customResumeUpload" accept=".pdf,.doc,.docx" class="sr-only">
+                            <input type="file" wire:model="customResumeUpload" accept=".pdf,.doc,.docx" class="hidden">
                         </label>
                     </div>
                 </div>
@@ -1307,7 +1470,7 @@
                             <div class="flex items-center gap-3">
                                 <label class="text-xs font-bold text-[#244F73] hover:underline cursor-pointer">
                                     <span>Replace file</span>
-                                    <input type="file" wire:model="fslVideoUpload" accept="video/mp4" class="sr-only">
+                                    <input type="file" wire:model="fslVideoUpload" accept="video/mp4" class="hidden">
                                 </label>
                                 <button type="button"
                                         wire:click="removeFslVideo"
@@ -1323,7 +1486,7 @@
                             </div>
                             <label class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg border border-[#244F73] bg-white text-xs font-bold text-[#244F73] hover:bg-[#EBF3FA] cursor-pointer shrink-0 focus-within:ring-2 focus-within:ring-[#244F73]">
                                 <span>Upload FSL Video</span>
-                                <input type="file" wire:model="fslVideoUpload" accept="video/mp4" class="sr-only" aria-label="Upload optional FSL video introduction">
+                                <input type="file" wire:model="fslVideoUpload" accept="video/mp4" class="hidden" aria-label="Upload optional FSL video introduction">
                             </label>
                         </div>
                     @endif
@@ -1368,7 +1531,7 @@
                             <input type="file"
                                    wire:model="pwdIdUpload"
                                    accept=".pdf,.jpg,.jpeg,.png"
-                                   class="sr-only"
+                                   class="hidden"
                                    aria-label="Upload official PWD ID document">
                         </label>
                         @if($pwdIdUpload)
@@ -1893,6 +2056,150 @@
                             wire:click="closeResumePreviewModal"
                             class="px-4 py-2 rounded-lg border border-gray-300 bg-white text-xs font-semibold text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-[#244F73]">
                         Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- ===================================================================== --}}
+    {{-- RESUME SCAN OUTPUT REVIEW MODAL                                        --}}
+    {{-- ===================================================================== --}}
+    @if($showScanReviewModal && $scanSummary)
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs overflow-y-auto"
+             role="dialog"
+             aria-modal="true"
+             aria-labelledby="scan-review-modal-title">
+            <div class="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden my-8 animate-in fade-in zoom-in-95 duration-150">
+                <!-- Modal Header -->
+                <div class="px-6 py-4 bg-gradient-to-r from-[#1A2840] to-[#244F73] text-white flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                        </div>
+                        <div>
+                            <h3 id="scan-review-modal-title" class="text-base font-bold text-white">Review Scanned Resume Output</h3>
+                            <p class="text-xs text-white/80">Extracted from <span class="font-semibold text-white">{{ $scanSummary['filename'] }}</span></p>
+                        </div>
+                    </div>
+                    <button type="button"
+                            wire:click="closeScanReviewModal"
+                            class="text-white/80 hover:text-white p-1 rounded-lg hover:bg-white/10 transition cursor-pointer"
+                            aria-label="Close modal">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <!-- Modal Content -->
+                <div class="p-6 space-y-4 max-h-[75vh] overflow-y-auto text-xs text-[#1A2840]">
+                    <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-start gap-3">
+                        <svg class="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <p class="leading-relaxed">
+                            <strong>Your profile has been auto-built!</strong> Please review the extracted information below. You can save it immediately or click &ldquo;Review &amp; Edit in Builder&rdquo; to adjust any section before saving.
+                        </p>
+                    </div>
+
+                    <!-- Personal & Title Card -->
+                    <div class="p-4 rounded-xl border border-gray-200 bg-gray-50/60 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Candidate Identification</span>
+                            <span class="text-[11px] text-[#244F73] font-semibold">✓ Extracted</span>
+                        </div>
+                        <div class="text-sm font-bold text-[#1A2840]">{{ $firstName }} {{ $middleName }} {{ $lastName }}</div>
+                        @if($headline)
+                            <div class="text-xs font-semibold text-[#244F73]">{{ $headline }}</div>
+                        @endif
+                        <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-600 pt-1">
+                            @if($phone) <span>📞 {{ $phone }}</span> @endif
+                            @if($email) <span>✉️ {{ $email }}</span> @endif
+                            @if($city) <span>📍 {{ $barangay ? "$barangay, " : '' }}{{ $city }}</span> @endif
+                        </div>
+                    </div>
+
+                    <!-- Skills Card -->
+                    @if(!empty($selectedSkills))
+                        <div class="p-4 rounded-xl border border-gray-200 bg-gray-50/60 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Detected Skills ({{ count($selectedSkills) }})</span>
+                                <span class="text-[11px] text-[#244F73] font-semibold">✓ Auto-Tagged</span>
+                            </div>
+                            <div class="flex flex-wrap gap-1.5">
+                                @foreach($selectedSkills as $skill)
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-[#DCEAF4] text-[#244F73] border border-[#244F73]/20">
+                                        {{ $skill }}
+                                    </span>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+
+                    <!-- Work Experience Card -->
+                    @if(!empty($experiences))
+                        <div class="p-4 rounded-xl border border-gray-200 bg-gray-50/60 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Work Experience ({{ count($experiences) }})</span>
+                                <span class="text-[11px] text-[#244F73] font-semibold">✓ Formatted</span>
+                            </div>
+                            <div class="space-y-2">
+                                @foreach($experiences as $exp)
+                                    <div class="p-2.5 rounded-lg bg-white border border-gray-200 space-y-1">
+                                        <div class="flex items-center justify-between">
+                                            <span class="font-bold text-[#1A2840]">{{ $exp['job_title'] ?? 'Role' }}</span>
+                                            <span class="text-[11px] font-semibold text-[#244F73]">{{ $exp['start_year'] ?? '' }} – {{ !empty($exp['is_current']) ? 'Present' : ($exp['end_year'] ?? '') }}</span>
+                                        </div>
+                                        <div class="text-xs text-gray-600 font-medium">{{ $exp['company_name'] ?? 'Company' }}</div>
+                                        @if(!empty($exp['description']))
+                                            <p class="text-[11px] text-gray-500 leading-relaxed">{{ $exp['description'] }}</p>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+
+                    <!-- Education Card -->
+                    @if($institutionName || $highestEducation)
+                        <div class="p-4 rounded-xl border border-gray-200 bg-gray-50/60 space-y-1.5">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Education</span>
+                                <span class="text-[11px] text-[#244F73] font-semibold">✓ Matched</span>
+                            </div>
+                            <div class="font-bold text-[#1A2840]">{{ $institutionName ?: 'Educational Institution' }}</div>
+                            <div class="text-xs text-gray-600">{{ $highestEducation }} {{ $yearGraduated ? "· Class of $yearGraduated" : '' }}</div>
+                        </div>
+                    @endif
+
+                    <!-- Accommodations Card -->
+                    @if(!empty($selectedAccommodations))
+                        <div class="p-4 rounded-xl border border-gray-200 bg-gray-50/60 space-y-1.5">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Recommended Accommodations</span>
+                                <span class="text-[11px] text-emerald-700 font-semibold">✓ Matched to Needs</span>
+                            </div>
+                            <div class="flex flex-wrap gap-1.5">
+                                @foreach($selectedAccommodationObjects as $acc)
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                        ✓ {{ $acc->name }}
+                                    </span>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+                </div>
+
+                <!-- Modal Footer Actions -->
+                <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex flex-wrap items-center justify-between gap-3">
+                    <button type="button"
+                            wire:click="closeScanReviewModal"
+                            class="px-4 py-2 rounded-lg border border-gray-300 bg-white text-xs font-bold text-gray-700 hover:bg-gray-100 transition focus:ring-2 focus:ring-[#244F73] cursor-pointer">
+                        Review &amp; Edit in Builder
+                    </button>
+
+                    <button type="button"
+                            wire:click="confirmAndSaveFromScan"
+                            class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#176B47] text-white text-xs font-bold hover:bg-[#125337] transition shadow-xs focus:ring-2 focus:ring-[#176B47] cursor-pointer">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                        <span>Save &amp; Activate Profile</span>
                     </button>
                 </div>
             </div>

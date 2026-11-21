@@ -95,7 +95,7 @@ test('employer can register with company payload without representative name', f
     expect(EmployerProfile::where('user_id', $user->id)->exists())->toBeTrue();
 });
 
-test('newly registered user following dashboard redirect lands on verification pending', function () {
+test('newly registered user is immediately redirected to verification pending', function () {
     $this->post(route('register.store'), [
         'role' => 'candidate',
         'first_name' => 'Maria',
@@ -108,7 +108,7 @@ test('newly registered user following dashboard redirect lands on verification p
         'pwd_id_number' => 'PWD-MARIA-1',
         'consent' => '1',
         'terms' => '1',
-    ])->assertRedirect('/');
+    ])->assertRedirect(route('verification.notice'));
 
     $this->get(route('dashboard'))->assertRedirect(route('verification.notice'));
 });

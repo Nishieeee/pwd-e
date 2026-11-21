@@ -51,6 +51,68 @@
         @endforeach
     </div>
 
+    <!-- Categorization and Bulk Actions Bar -->
+    <div class="rounded-xl border border-primary-border bg-white p-4 shadow-xs flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <!-- Category Filter -->
+        <div class="flex flex-wrap items-center gap-2" role="group" aria-label="{{ __('Filter by account category') }}">
+            <span class="text-xs font-bold text-body-muted mr-1">{{ __('Categorize:') }}</span>
+            <button type="button"
+                    wire:click="setCategory('all')"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all {{ $category === 'all' ? 'bg-primary-dark text-white shadow-2xs' : 'bg-white border border-primary-border text-primary-dark hover:bg-primary-tint' }}">
+                <span>{{ __('All Accounts') }}</span>
+                <span class="px-1.5 py-0.2 rounded-full text-[10px] {{ $category === 'all' ? 'bg-white/20 text-white' : 'bg-primary-tint text-primary-dark font-bold' }}">{{ $categoryCounts['all'] }}</span>
+            </button>
+
+            <button type="button"
+                    wire:click="setCategory('pwd')"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all {{ $category === 'pwd' ? 'bg-emerald-700 text-white shadow-2xs' : 'bg-white border border-emerald-300 text-emerald-800 hover:bg-emerald-50' }}">
+                <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                <span>{{ __('PWD Candidates') }}</span>
+                <span class="px-1.5 py-0.2 rounded-full text-[10px] {{ $category === 'pwd' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-900 font-bold' }}">{{ $categoryCounts['pwd'] }}</span>
+            </button>
+
+            <button type="button"
+                    wire:click="setCategory('employer')"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all {{ $category === 'employer' ? 'bg-indigo-700 text-white shadow-2xs' : 'bg-white border border-indigo-300 text-indigo-800 hover:bg-indigo-50' }}">
+                <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                <span>{{ __('Employers') }}</span>
+                <span class="px-1.5 py-0.2 rounded-full text-[10px] {{ $category === 'employer' ? 'bg-white/20 text-white' : 'bg-indigo-100 text-indigo-900 font-bold' }}">{{ $categoryCounts['employer'] }}</span>
+            </button>
+        </div>
+
+        <!-- Bulk Selection Actions -->
+        <div class="flex items-center gap-3">
+            <label class="inline-flex items-center gap-2 text-xs font-semibold text-primary-dark cursor-pointer select-none">
+                <input type="checkbox"
+                       wire:model.live="selectAll"
+                       class="size-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer" />
+                <span>{{ __('Select All') }}</span>
+            </label>
+
+            @if(count($selectedIds) > 0)
+                <div class="flex items-center gap-2 pl-2 border-l border-gray-200">
+                    <span class="text-xs font-bold text-primary-dark">
+                        {{ count($selectedIds) }} {{ __('selected') }}
+                    </span>
+
+                    <button type="button"
+                            wire:click="openBulkApprove"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary text-white text-xs font-bold hover:bg-secondary/90 shadow-2xs transition-colors">
+                        <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                        <span>{{ __('Multi-Approve (:count)', ['count' => count($selectedIds)]) }}</span>
+                    </button>
+
+                    <button type="button"
+                            wire:click="openBulkReject"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-600 text-white text-xs font-bold hover:bg-rose-700 shadow-2xs transition-colors">
+                        <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                        <span>{{ __('Multi-Reject (:count)', ['count' => count($selectedIds)]) }}</span>
+                    </button>
+                </div>
+            @endif
+        </div>
+    </div>
+
     <!-- Request Cards Stream -->
     @if ($requests->isEmpty())
         <div class="rounded-2xl border border-primary-border bg-white p-12 text-center shadow-sm">
@@ -65,9 +127,20 @@
     @else
         <div class="space-y-4">
             @foreach ($requests as $vr)
-                <article class="rounded-2xl border border-primary-border bg-white p-6 shadow-sm transition hover:border-primary/50">
+                @php
+                    $isSelected = in_array($vr->id, $selectedIds);
+                    $isSelectable = in_array($vr->status, ['pending', 'needs_more_docs']);
+                @endphp
+                <article class="rounded-2xl border border-primary-border bg-white p-6 shadow-sm transition hover:border-primary/50 {{ $isSelected ? 'ring-2 ring-primary/40 bg-primary-tint/10' : '' }}">
                     <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-gray-100">
                         <div class="flex items-center gap-3.5">
+                            @if($isSelectable)
+                                <input type="checkbox"
+                                       wire:click="toggleSelect({{ $vr->id }})"
+                                       @checked($isSelected)
+                                       class="size-5 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer shrink-0"
+                                       title="{{ __('Select for bulk approval or rejection') }}" />
+                            @endif
                             <div class="w-11 h-11 rounded-full bg-[#244F73] text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
                                 {{ strtoupper(substr($vr->user?->name ?? 'U', 0, 2)) }}
                             </div>
@@ -75,8 +148,11 @@
                                 <h2 class="font-heading text-base sm:text-lg font-bold text-primary-dark flex items-center gap-2">
                                     <span>{{ $vr->user->name ?? 'User #'.$vr->user_id }}</span>
                                     <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium {{ $vr->user?->role === 'employer' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200' }}">
-                                        {{ ucfirst($vr->user?->role ?? 'user') }}
+                                        {{ $vr->user?->role === 'employer' ? __('Employer') : __('PWD Candidate') }}
                                     </span>
+                                    @if($vr->user?->role === 'employer' && $vr->user?->employerProfile?->company_name)
+                                        <span class="text-xs font-normal text-body-muted">({{ $vr->user->employerProfile->company_name }})</span>
+                                    @endif
                                 </h2>
                                 <p class="text-xs sm:text-sm text-body-muted mt-0.5">{{ $vr->user?->email ?? 'No email available' }}</p>
                             </div>
@@ -241,6 +317,98 @@
 
         <div class="mt-6">
             {{ $requests->links() }}
+        </div>
+    @endif
+
+    <!-- Bulk Approve Confirmation Modal -->
+    @if($showBulkApproveModal)
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" role="dialog" aria-modal="true" aria-labelledby="queue-bulk-approve-title">
+            <div class="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl space-y-4" wire:click.stop>
+                <div class="flex items-start justify-between border-b border-gray-100 pb-3">
+                    <div class="flex items-center gap-2.5">
+                        <div class="size-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                            <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                        </div>
+                        <div>
+                            <h3 id="queue-bulk-approve-title" class="font-heading text-base font-bold text-primary-dark">
+                                {{ __('Confirm Multi-Approval') }}
+                            </h3>
+                            <p class="text-xs text-body-muted">{{ __('Review selected applicants before granting verified status.') }}</p>
+                        </div>
+                    </div>
+                    <button type="button" wire:click="closeBulkApprove" class="text-body-muted hover:text-primary-dark text-lg">&times;</button>
+                </div>
+
+                <div class="rounded-xl bg-emerald-50/70 border border-emerald-200 p-3.5 text-xs text-emerald-950 flex items-start gap-2.5">
+                    <svg class="size-4 text-emerald-700 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <div>
+                        <strong class="font-bold">{{ __('Impact Warning:') }}</strong>
+                        <span>{{ __('Approving these :count accounts will immediately activate their profiles, grant access to protected platform tools, and dispatch official approval notifications.', ['count' => count($selectedIds)]) }}</span>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-xs font-bold text-primary-dark mb-2 uppercase tracking-wide text-body-muted">{{ __('Selected Applicants Preview (:count)', ['count' => count($selectedIds)]) }}</h4>
+                    <div class="max-h-48 overflow-y-auto space-y-1.5 rounded-xl border border-primary-border p-2 bg-surface">
+                        @foreach($this->selectedRequests as $sel)
+                            <div class="flex items-center justify-between p-2 rounded-lg bg-white border border-gray-100 text-xs">
+                                <div class="flex items-center gap-2">
+                                    <span class="size-2 rounded-full {{ $sel->user?->role === 'candidate' ? 'bg-emerald-500' : 'bg-indigo-500' }}"></span>
+                                    <span class="font-bold text-primary-dark">{{ $sel->user?->name }}</span>
+                                    <span class="text-[10px] text-body-muted">({{ $sel->user?->email }})</span>
+                                </div>
+                                <span class="text-[10px] font-semibold text-primary-dark uppercase font-mono bg-primary-tint px-2 py-0.5 rounded">
+                                    {{ $sel->user?->role === 'employer' ? 'Employer' : 'PWD' }} · {{ $sel->type }}
+                                </span>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-3 border-t border-gray-100">
+                    <button type="button" wire:click="closeBulkApprove" class="px-4 py-2 rounded-lg border border-primary-border text-xs font-semibold text-primary-dark hover:bg-primary-tint">
+                        {{ __('Cancel') }}
+                    </button>
+                    <button type="button" wire:click="bulkApprove" class="px-5 py-2 rounded-lg bg-secondary text-white text-xs font-bold hover:bg-secondary/90 shadow-xs flex items-center gap-1.5">
+                        <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                        <span>{{ __('Confirm Multi-Approve (:count)', ['count' => count($selectedIds)]) }}</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- Bulk Reject Modal -->
+    @if($showBulkRejectModal)
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" role="dialog" aria-modal="true" aria-labelledby="bulk-reject-title">
+            <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl space-y-4" wire:click.stop>
+                <div class="flex items-start justify-between border-b border-gray-100 pb-3">
+                    <div>
+                        <h3 id="bulk-reject-title" class="font-heading text-base font-bold text-rose-800 flex items-center gap-2">
+                            <svg class="size-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            {{ __('Multi-Reject :count Verification Requests', ['count' => count($selectedIds)]) }}
+                        </h3>
+                        <p class="text-xs text-body-muted mt-0.5">{{ __('Provide feedback that will be sent to all selected applicants.') }}</p>
+                    </div>
+                    <button type="button" wire:click="closeBulkReject" class="text-body-muted hover:text-primary-dark">&times;</button>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-primary-dark mb-1">
+                        {{ __('Rejection Reason / Required Correction') }}
+                    </label>
+                    <textarea wire:model="bulkRejectReason" rows="3" class="w-full rounded-xl border border-primary-border p-3 text-xs text-primary-dark focus:ring-2 focus:ring-primary focus:outline-none" placeholder="{{ __('e.g. Incomplete document submission, invalid government ID format, or expired business registration.') }}"></textarea>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
+                    <button type="button" wire:click="closeBulkReject" class="px-3.5 py-1.5 rounded-lg border border-primary-border text-xs font-semibold text-primary-dark hover:bg-primary-tint">
+                        {{ __('Cancel') }}
+                    </button>
+                    <button type="button" wire:click="bulkReject" class="px-4 py-1.5 rounded-lg bg-rose-600 text-white text-xs font-bold hover:bg-rose-700 shadow-2xs">
+                        {{ __('Confirm Multi-Reject') }}
+                    </button>
+                </div>
+            </div>
         </div>
     @endif
 </div>

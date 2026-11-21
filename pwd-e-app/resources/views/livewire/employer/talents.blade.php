@@ -348,8 +348,9 @@
                             </div>
                         @elseif($pendingInvite)
                             <div class="flex-1 flex items-center gap-1.5">
-                                <span class="flex-1 inline-flex items-center justify-center gap-1 px-2.5 py-2 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 text-xs font-semibold truncate" title="{{ __('Invited for :job', ['job' => $pendingInvite->jobPosting?->title]) }}">
-                                    <span>✉️ {{ __('Invited') }}</span>
+                                <span class="flex-1 inline-flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 text-xs font-semibold truncate" title="{{ __('Invited for :job', ['job' => $pendingInvite->jobPosting?->title]) }}">
+                                    <svg class="size-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                    <span>{{ __('Invited') }}</span>
                                 </span>
                                 <button type="button"
                                         wire:click="openWithdrawModal({{ $pendingInvite->id }})"

@@ -75,7 +75,7 @@ return [
 
     'home' => '/dashboard',
     'redirects' => [
-        'register' => '/',
+        'register' => '/verification/pending',
     ],
 
     /*
