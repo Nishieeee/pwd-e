@@ -17,6 +17,7 @@ class Application extends Model
         'status',
         'status_subtext',
         'cover_letter',
+        'cover_letter_pdf_path',
         'employer_notes',
         'fsl_video_path',
         'fsl_caption_path',

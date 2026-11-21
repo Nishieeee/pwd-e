@@ -168,6 +168,64 @@
                         <a href="{{ route('register') }}" class="font-semibold text-primary hover:underline">Create an account</a>
                     </p>
 
+                    {{-- Demo Accounts Quick-Fill for Testing & Presentation --}}
+                    <div class="rounded-xl border border-primary-border bg-[#F8FAFC] p-4 text-xs text-primary-dark">
+                        <div class="flex items-center justify-between pb-2 border-b border-primary-border">
+                            <span class="flex items-center gap-1.5 font-bold uppercase tracking-wider text-primary">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+                                Demo Accounts (1-Click Fill)
+                            </span>
+                            <span class="rounded bg-primary-tint px-2 py-0.5 font-mono text-[11px] font-semibold text-primary-dark">pwd: password</span>
+                        </div>
+
+                        <div class="mt-3 space-y-2.5">
+                            <div>
+                                <span class="font-semibold text-body-muted block mb-1">Admin</span>
+                                <div class="flex flex-wrap gap-1.5">
+                                    <button type="button" onclick="fillDemo('admin@pwd-e.local')" class="inline-flex items-center gap-1 rounded border border-slate-300 bg-white px-2.5 py-1 text-xs font-medium hover:border-primary hover:bg-primary-tint transition">
+                                        <span class="h-2 w-2 rounded-full bg-purple-500" aria-hidden="true"></span> Admin (admin@pwd-e.local)
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div>
+                                <span class="font-semibold text-body-muted block mb-1">Candidates (PWD)</span>
+                                <div class="flex flex-wrap gap-1.5">
+                                    <button type="button" onclick="fillDemo('pagaroganjhonclein@gmail.com')" class="inline-flex items-center gap-1 rounded border border-slate-300 bg-white px-2.5 py-1 text-xs font-medium hover:border-primary hover:bg-primary-tint transition" title="Jhon Clein Pagarogan - Motor/Physical">
+                                        <span class="h-2 w-2 rounded-full bg-emerald-500" aria-hidden="true"></span> Jhon Clein (Motor/Physical)
+                                    </button>
+                                    <button type="button" onclick="fillDemo('maria.clara.santos@wmsu.edu.ph')" class="inline-flex items-center gap-1 rounded border border-slate-300 bg-white px-2.5 py-1 text-xs font-medium hover:border-primary hover:bg-primary-tint transition" title="Maria Clara Santos - Physical/Motor">
+                                        <span class="h-2 w-2 rounded-full bg-emerald-500" aria-hidden="true"></span> Maria Clara (WMSU Alumna)
+                                    </button>
+                                    <button type="button" onclick="fillDemo('candidate2@pwd-e.local')" class="inline-flex items-center gap-1 rounded border border-slate-300 bg-white px-2.5 py-1 text-xs font-medium hover:border-primary hover:bg-primary-tint transition" title="Jose Reyes - Mobility">
+                                        <span class="h-2 w-2 rounded-full bg-emerald-500" aria-hidden="true"></span> Jose Reyes (Mobility)
+                                    </button>
+                                    <button type="button" onclick="fillDemo('candidate1@pwd-e.local')" class="inline-flex items-center gap-1 rounded border border-slate-300 bg-white px-2.5 py-1 text-xs font-medium hover:border-primary hover:bg-primary-tint transition" title="Maria Santos - Visual">
+                                        <span class="h-2 w-2 rounded-full bg-emerald-500" aria-hidden="true"></span> Maria Santos (Visual)
+                                    </button>
+                                    <button type="button" onclick="fillDemo('candidate3@pwd-e.local')" class="inline-flex items-center gap-1 rounded border border-slate-300 bg-white px-2.5 py-1 text-xs font-medium hover:border-primary hover:bg-primary-tint transition" title="Ana Cruz - Hearing">
+                                        <span class="h-2 w-2 rounded-full bg-emerald-500" aria-hidden="true"></span> Ana Cruz (Hearing)
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div>
+                                <span class="font-semibold text-body-muted block mb-1">Employers</span>
+                                <div class="flex flex-wrap gap-1.5">
+                                    <button type="button" onclick="fillDemo('employer@pwd-e.local')" class="inline-flex items-center gap-1 rounded border border-slate-300 bg-white px-2.5 py-1 text-xs font-medium hover:border-primary hover:bg-primary-tint transition">
+                                        <span class="h-2 w-2 rounded-full bg-blue-500" aria-hidden="true"></span> Acme Accessibility PH
+                                    </button>
+                                    <button type="button" onclick="fillDemo('employer2@pwd-e.local')" class="inline-flex items-center gap-1 rounded border border-slate-300 bg-white px-2.5 py-1 text-xs font-medium hover:border-primary hover:bg-primary-tint transition">
+                                        <span class="h-2 w-2 rounded-full bg-blue-500" aria-hidden="true"></span> Inclusive Works Corp.
+                                    </button>
+                                    <button type="button" onclick="fillDemo('contact@openpathdigital.ph')" class="inline-flex items-center gap-1 rounded border border-slate-300 bg-white px-2.5 py-1 text-xs font-medium hover:border-primary hover:bg-primary-tint transition">
+                                        <span class="h-2 w-2 rounded-full bg-blue-500" aria-hidden="true"></span> OpenPath Digital
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="flex gap-3 rounded-xl bg-primary-tint p-4">
                         <span class="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-white text-primary-dark" aria-hidden="true">
                             <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
@@ -192,7 +250,21 @@
     <script>
         (function () {
             const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
             const emailLiveError = document.getElementById('email-live-error');
+
+            window.fillDemo = function (email) {
+                if (emailInput) {
+                    emailInput.value = email;
+                    emailInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    emailInput.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+                if (passwordInput) {
+                    passwordInput.value = 'password';
+                    passwordInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    passwordInput.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            };
             if (emailInput) {
                 const validateEmail = function () {
                     const v = emailInput.value.trim();

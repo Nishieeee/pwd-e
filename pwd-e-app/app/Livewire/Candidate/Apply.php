@@ -23,6 +23,10 @@ class Apply extends Component
 
     public string $coverLetter = '';
 
+    public string $coverLetterType = 'text';
+
+    public $coverLetterFile = null;
+
     public $pwdIdFile = null;
 
     public $resumeFile = null;
@@ -125,6 +129,17 @@ class Apply extends Component
         $this->coverLetter = trim($this->coverLetter . ' ' . $phrase);
     }
 
+    public function setCoverLetterType(string $type): void
+    {
+        $this->coverLetterType = in_array($type, ['text', 'upload'], true) ? $type : 'text';
+    }
+
+    public function removeCoverLetterFile(): void
+    {
+        $this->coverLetterFile = null;
+        $this->resetErrorBag('coverLetterFile');
+    }
+
     public function submit(): void
     {
         if ($this->missingPwdId) {
@@ -138,6 +153,7 @@ class Apply extends Component
 
         $this->validate([
             'coverLetter' => ['nullable', 'string', 'max:5000'],
+            'coverLetterFile' => ['nullable', 'file', 'mimes:pdf', 'max:5120'],
             'pwdIdFile' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
             'resumeFile' => ['nullable', 'file', 'mimes:pdf', 'max:5120'],
             'fslVideoFile' => ['nullable', 'file', 'mimes:mp4,mov,webm', 'max:51200'],
@@ -199,6 +215,11 @@ class Apply extends Component
         $match = $profile->jobMatches()->where('job_posting_id', $this->job->id)->first();
         $fitScore = $match ? (float) round($match->total_score * 100, 2) : 95.00;
 
+        $coverLetterPdfPath = null;
+        if ($this->coverLetterFile) {
+            $coverLetterPdfPath = $this->coverLetterFile->store('applications/cover_letters', 'private');
+        }
+
         $materials = [
             'biodata' => $this->includeBiodata,
             'resume' => $this->includeResume,
@@ -211,6 +232,7 @@ class Apply extends Component
             'status' => 'applied',
             'status_subtext' => 'Application submitted and under review',
             'cover_letter' => $this->coverLetter ?: null,
+            'cover_letter_pdf_path' => $coverLetterPdfPath,
             'fsl_video_path' => $fslPath,
             'resume_path' => $resumePath,
             'application_materials' => $materials,

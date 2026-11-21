@@ -9,6 +9,7 @@ use App\Livewire\Admin\Users;
 use App\Livewire\Admin\VerificationQueue;
 use App\Livewire\Candidate\ApplicationsTracker;
 use App\Livewire\Candidate\Apply;
+use App\Livewire\Candidate\EmployerShow;
 use App\Livewire\Candidate\Dashboard as CandidateDashboard;
 use App\Livewire\Candidate\JobMatches;
 use App\Livewire\Candidate\ProfileBuilder;
@@ -63,6 +64,7 @@ Route::middleware(['auth', 'account.verified'])->group(function () {
     Route::get('jobs/matches/{job?}', JobMatches::class)->name('candidate.jobs');
     Route::get('jobs/{job}/apply', Apply::class)->name('candidate.apply');
     Route::get('applications', ApplicationsTracker::class)->name('candidate.applications');
+    Route::get('employers/{employer}', EmployerShow::class)->name('candidate.employers.show');
 
     Route::prefix('employer')->name('employer.')->group(function () {
         Route::get('/jobs', Index::class)->name('jobs.index');

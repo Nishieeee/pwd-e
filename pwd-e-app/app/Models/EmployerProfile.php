@@ -9,12 +9,27 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class EmployerProfile extends Model
 {
-    protected $fillable = ['user_id', 'company_name', 'business_permit_number', 'business_permit_path', 'verified_at', 'industry', 'location', 'workforce_total', 'workforce_updated_at', 'matrix_completed_at'];
+    protected $fillable = [
+        'user_id',
+        'company_name',
+        'business_permit_number',
+        'business_permit_path',
+        'verified_at',
+        'industry',
+        'location',
+        'about',
+        'website',
+        'accessibility_highlights',
+        'workforce_total',
+        'workforce_updated_at',
+        'matrix_completed_at',
+    ];
 
     protected $casts = [
         'verified_at' => 'datetime',
         'workforce_updated_at' => 'datetime',
         'matrix_completed_at' => 'datetime',
+        'accessibility_highlights' => 'array',
     ];
 
     public function user(): BelongsTo
@@ -50,5 +65,14 @@ class EmployerProfile extends Model
     public function isMatrixComplete(): bool
     {
         return $this->matrix_completed_at !== null;
+    }
+
+    public function getAboutSummaryAttribute(): string
+    {
+        if (! empty($this->about)) {
+            return $this->about;
+        }
+
+        return 'A certified inclusive workplace committed to equal employment opportunities, reasonable accommodations, and barrier-free career growth for Persons with Disabilities (PWDs) under Philippine Republic Act No. 10524 and RA 7277.';
     }
 }

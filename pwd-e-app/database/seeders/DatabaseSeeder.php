@@ -18,9 +18,11 @@ class DatabaseSeeder extends Seeder
         $this->call([
             AccommodationSeeder::class,
             ExclusionaryTermSeeder::class,
+            PsgcLocationSeeder::class,
             AdminUserSeeder::class,
             EmployerUserSeeder::class,
             CandidateUserSeeder::class,
+            CandidatePortalSeeder::class,
         ]);
     }
 }
