@@ -239,10 +239,10 @@
                                                 <span>{{ __('Interview') }}</span>
                                             </button>
 
-                                            <button type="button" wire:click="openHireModal({{ $app->id }})"
+                                            <button type="button" wire:click="openOfferModal({{ $app->id }})"
                                                     class="inline-flex items-center gap-1 rounded-lg bg-secondary px-3 py-1.5 text-xs font-bold text-white hover:bg-secondary/90 transition-colors shadow-2xs whitespace-nowrap shrink-0">
                                                 <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                                                <span>{{ __('Hire') }}</span>
+                                                <span>{{ $app->status === 'offered' ? __('Offer Sent') : __('Extend Offer') }}</span>
                                             </button>
 
                                             <button type="button" wire:click="openRejectModal({{ $app->id }})"
@@ -523,6 +523,58 @@
                     </button>
                     <button type="button" wire:click="saveInterview" class="rounded-lg bg-primary-dark px-4 py-2 text-xs font-semibold text-white hover:bg-primary shadow-xs">
                         {{ __('Save & Notify Candidate') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- Offer Modal --}}
+    @if ($showOfferModal && $offeringApp)
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" role="dialog" aria-modal="true" aria-label="{{ __('Extend job offer') }}">
+            <div class="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 sm:p-8 shadow-xl space-y-5" wire:click.stop>
+                <div class="flex items-start justify-between border-b border-primary-border pb-3">
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-primary-tint text-primary-dark mb-1">
+                            📄 {{ __('Formal Employment Offer') }}
+                        </div>
+                        <h2 class="font-heading text-lg font-bold text-primary-dark">{{ __('Extend Job Offer') }}</h2>
+                        <p class="text-xs text-body-muted mt-0.5">{{ $offeringApp->candidateProfile?->user?->name }} · {{ $offeringApp->jobPosting?->title }}</p>
+                    </div>
+                    <button type="button" wire:click="closeOfferModal" class="text-body-muted hover:text-primary-dark text-lg">&times;</button>
+                </div>
+
+                <div class="space-y-4 text-xs">
+                    <div>
+                        <label class="block font-bold text-primary-dark mb-1">{{ __('Annual Gross Wage (PHP)') }}</label>
+                        <input type="number" wire:model="offerSalary" step="1000" class="w-full rounded-lg border border-primary-border px-3 py-2 text-xs focus:ring-2 focus:ring-primary focus:outline-none" />
+                        <span class="text-[11px] text-body-muted mt-0.5 block">
+                            {{ __('Est. RA 10524 annual deduction:') }} <strong>PHP {{ number_format(($offerSalary ?: 35000) * 0.25, 2) }}</strong>
+                        </span>
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-primary-dark mb-1">{{ __('Target Start Date') }}</label>
+                        <input type="date" wire:model="offerStartDate" class="w-full rounded-lg border border-primary-border px-3 py-2 text-xs focus:ring-2 focus:ring-primary focus:outline-none" />
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-primary-dark mb-1">{{ __('Accessibility & Accommodations Package') }}</label>
+                        <input type="text" wire:model="offerAccommodations" class="w-full rounded-lg border border-primary-border px-3 py-2 text-xs focus:ring-2 focus:ring-primary focus:outline-none" />
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-primary-dark mb-1">{{ __('Offer Message & Terms') }}</label>
+                        <textarea wire:model="offerNotes" rows="3" class="w-full rounded-lg border border-primary-border px-3 py-2 text-xs focus:ring-2 focus:ring-primary focus:outline-none"></textarea>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-3 border-t border-primary-border">
+                    <button type="button" wire:click="closeOfferModal" class="rounded-lg border border-primary-border px-4 py-2 text-xs font-semibold text-primary-dark hover:bg-primary-tint">
+                        {{ __('Cancel') }}
+                    </button>
+                    <button type="button" wire:click="sendOffer" class="rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-white hover:bg-primary/90 shadow-xs">
+                        {{ __('Send Formal Offer to Candidate') }}
                     </button>
                 </div>
             </div>

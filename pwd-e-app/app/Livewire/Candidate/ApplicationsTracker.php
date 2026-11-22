@@ -32,6 +32,12 @@ class ApplicationsTracker extends Component
 
     public bool $showOfferModal = false;
 
+    public ?string $declineReason = '';
+
+    public bool $showDeclineModal = false;
+
+    public ?int $decliningAppId = null;
+
     public ?int $appToWithdrawId = null;
 
     public bool $showWithdrawConfirmModal = false;
@@ -179,6 +185,119 @@ class ApplicationsTracker extends Component
         $this->selectedOfferAppId = null;
     }
 
+    public function acceptOffer(int $appId): void
+    {
+        $user = Auth::user();
+        $candidateProfile = $user?->candidateProfile;
+        if (! $candidateProfile) {
+            return;
+        }
+
+        $app = Application::where('id', $appId)
+            ->where('candidate_profile_id', $candidateProfile->id)
+            ->with(['jobPosting.employerProfile'])
+            ->first();
+
+        if (! $app || ! $app->canTransitionTo(Application::STATUS_HIRED)) {
+            $this->actionNotification = 'Unable to accept offer in current state.';
+            return;
+        }
+
+        $app->update([
+            'status' => Application::STATUS_HIRED,
+            'offer_accepted_at' => now(),
+            'status_subtext' => Application::computeStatusSubtext(Application::STATUS_HIRED, now()),
+        ]);
+
+        $salary = $app->offer_details['salary'] ?? ($app->jobPosting?->salary_max ?? $app->jobPosting?->salary_min ?? 35000);
+        $startDate = ! empty($app->offer_details['start_date']) ? Carbon::parse($app->offer_details['start_date']) : now();
+        $isPwd = ! empty($candidateProfile->user?->pwd_id_number);
+
+        \App\Models\WorkforceRecord::firstOrCreate(
+            ['application_id' => $app->id],
+            [
+                'employer_profile_id' => $app->jobPosting->employer_profile_id,
+                'candidate_profile_id' => $app->candidate_profile_id,
+                'hired_at' => $startDate,
+                'pwd_verified' => $isPwd,
+                'annual_wage' => $salary,
+            ]
+        );
+
+        ApplicationMessage::create([
+            'application_id' => $app->id,
+            'sender_id' => $user->id,
+            'type' => 'system',
+            'body' => 'Offer Accepted: Candidate has formally accepted the job offer!',
+            'metadata' => [
+                'event' => 'offer_accepted',
+                'accepted_at' => now()->toIso8601String(),
+            ],
+        ]);
+
+        $this->closeOfferModal();
+        $company = $app->jobPosting?->employerProfile?->company_name ?? 'the employer';
+        $this->actionNotification = "Congratulations! You have accepted the job offer from {$company}.";
+    }
+
+    public function openDeclineModal(int $appId): void
+    {
+        $this->decliningAppId = $appId;
+        $this->declineReason = '';
+        $this->showDeclineModal = true;
+    }
+
+    public function closeDeclineModal(): void
+    {
+        $this->decliningAppId = null;
+        $this->declineReason = '';
+        $this->showDeclineModal = false;
+    }
+
+    public function confirmDeclineOffer(): void
+    {
+        if (! $this->decliningAppId) {
+            return;
+        }
+
+        $user = Auth::user();
+        $candidateProfile = $user?->candidateProfile;
+        $app = Application::where('id', $this->decliningAppId)
+            ->where('candidate_profile_id', $candidateProfile?->id)
+            ->with(['jobPosting.employerProfile'])
+            ->first();
+
+        if (! $app || ! $app->canTransitionTo(Application::STATUS_OFFER_DECLINED)) {
+            $this->actionNotification = 'Unable to decline offer in current state.';
+            $this->closeDeclineModal();
+            return;
+        }
+
+        $reason = trim($this->declineReason) ?: 'Declined by candidate';
+
+        $app->update([
+            'status' => Application::STATUS_OFFER_DECLINED,
+            'offer_declined_at' => now(),
+            'offer_decline_reason' => $reason,
+            'status_subtext' => Application::computeStatusSubtext(Application::STATUS_OFFER_DECLINED, now()),
+        ]);
+
+        ApplicationMessage::create([
+            'application_id' => $app->id,
+            'sender_id' => $user->id,
+            'type' => 'system',
+            'body' => 'Offer Declined: Candidate declined the job offer. Reason: ' . $reason,
+            'metadata' => [
+                'event' => 'offer_declined',
+                'declined_at' => now()->toIso8601String(),
+            ],
+        ]);
+
+        $this->closeDeclineModal();
+        $this->closeOfferModal();
+        $this->actionNotification = 'You have declined the employment offer.';
+    }
+
     public function promptWithdraw(int $appId): void
     {
         $this->appToWithdrawId = $appId;
@@ -194,8 +313,19 @@ class ApplicationsTracker extends Component
     public function confirmWithdraw(): void
     {
         if ($this->appToWithdrawId) {
-            $app = Application::with('jobPosting.employerProfile')->find($this->appToWithdrawId);
+            $user = Auth::user();
+            $candidateProfile = $user?->candidateProfile;
+            $app = Application::where('candidate_profile_id', $candidateProfile?->id)
+                ->with('jobPosting.employerProfile')
+                ->find($this->appToWithdrawId);
+
             if ($app) {
+                if ($app->isTerminal()) {
+                    $this->actionNotification = "Cannot withdraw application that is already in {$app->status} status.";
+                    $this->closeWithdrawModal();
+                    return;
+                }
+
                 $app->update([
                     'status' => 'closed',
                     'status_subtext' => 'Withdrawn by you · '.Carbon::now()->format('M j'),
@@ -393,7 +523,7 @@ class ApplicationsTracker extends Component
         // Tab counts
         $allCount = Application::where('candidate_profile_id', $candidateProfile->id)->count();
         $activeCount = Application::where('candidate_profile_id', $candidateProfile->id)
-            ->whereIn('status', ['applied', 'under_review', 'interview', 'submitted'])
+            ->whereIn('status', ['applied', 'under_review', 'shortlisted', 'interview', 'offered', 'submitted'])
             ->count();
         $interviewsCount = Application::where('candidate_profile_id', $candidateProfile->id)
             ->where(function ($q) {
@@ -401,18 +531,18 @@ class ApplicationsTracker extends Component
             })
             ->count();
         $archivedCount = Application::where('candidate_profile_id', $candidateProfile->id)
-            ->whereIn('status', ['closed', 'rejected', 'hired', 'withdrawn'])
+            ->whereIn('status', ['closed', 'rejected', 'hired', 'withdrawn', 'offer_declined'])
             ->count();
 
         // Apply Tab Filter
         if ($this->activeTab === 'active') {
-            $query->whereIn('status', ['applied', 'under_review', 'interview', 'submitted']);
+            $query->whereIn('status', ['applied', 'under_review', 'shortlisted', 'interview', 'offered', 'submitted']);
         } elseif ($this->activeTab === 'interviews') {
             $query->where(function ($q) {
                 $q->where('status', 'interview')->orWhereNotNull('interview_at');
             });
         } elseif ($this->activeTab === 'archived') {
-            $query->whereIn('status', ['closed', 'rejected', 'hired', 'withdrawn']);
+            $query->whereIn('status', ['closed', 'rejected', 'hired', 'withdrawn', 'offer_declined']);
         }
 
         // Search Filter

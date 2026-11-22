@@ -126,6 +126,24 @@ class Application extends Model
         return in_array($this->status, self::TERMINAL_STATUSES, true);
     }
 
+    public static function computeStatusSubtext(string $status, ?\Carbon\CarbonInterface $timestamp = null): string
+    {
+        $time = $timestamp ? $timestamp->format('M j, Y') : 'recently';
+
+        return match ($status) {
+            self::STATUS_APPLIED => 'Application submitted and under review',
+            self::STATUS_UNDER_REVIEW => 'Under review by hiring team',
+            self::STATUS_SHORTLISTED => 'Shortlisted for candidate review',
+            self::STATUS_INTERVIEW => 'Interview scheduled · ' . $time,
+            self::STATUS_OFFERED => 'Offer extended · Awaiting candidate decision',
+            self::STATUS_HIRED => 'Offer accepted and hired · ' . $time,
+            self::STATUS_OFFER_DECLINED => 'Offer declined · ' . $time,
+            self::STATUS_REJECTED => 'Application declined',
+            self::STATUS_WITHDRAWN, self::STATUS_CLOSED => 'Withdrawn by candidate · ' . $time,
+            default => ucfirst(str_replace('_', ' ', $status)),
+        };
+    }
+
     public const CHECKLIST_ITEMS = [
         'audio_video_fsl' => [
             'label' => 'Audio & Video Lighting',

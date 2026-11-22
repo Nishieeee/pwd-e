@@ -55,6 +55,18 @@ class Applicants extends Component
 
     public bool $hirePwdVerified = true;
 
+    public bool $showOfferModal = false;
+
+    public ?int $offeringAppId = null;
+
+    public ?float $offerSalary = null;
+
+    public string $offerStartDate = '';
+
+    public string $offerAccommodations = '';
+
+    public string $offerNotes = '';
+
     public bool $showRejectModal = false;
 
     public ?int $rejectingAppId = null;
@@ -392,15 +404,91 @@ class Applicants extends Component
         Flux::toast(variant: 'success', text: __('Applicant declined. Candidate notified politely.'));
     }
 
-    public function updateStatus(int $applicationId, string $status): void
+    public function openOfferModal(int $applicationId): void
     {
         $profile = Auth::user()?->employerProfile;
         if (! $profile) {
             return;
         }
 
-        if ($status === 'rejected') {
-            $this->openRejectModal($applicationId);
+        $app = Application::with(['candidateProfile.user', 'jobPosting'])->whereHas('jobPosting', function ($q) use ($profile) {
+            $q->where('employer_profile_id', $profile->id);
+        })->findOrFail($applicationId);
+
+        $this->offeringAppId = $app->id;
+        $this->offerSalary = (float) ($app->jobPosting?->salary_max ?? $app->jobPosting?->salary_min ?? 35000);
+        $this->offerStartDate = now()->addWeeks(2)->format('Y-m-d');
+        $this->offerAccommodations = $app->interview_accommodations ?? 'Standard verified accessibility package';
+        $this->offerNotes = 'We are pleased to extend this offer of employment for the ' . ($app->jobPosting?->title ?? 'position') . '.';
+        $this->showOfferModal = true;
+    }
+
+    public function closeOfferModal(): void
+    {
+        $this->showOfferModal = false;
+        $this->offeringAppId = null;
+    }
+
+    public function sendOffer(): void
+    {
+        if (! $this->offeringAppId) {
+            return;
+        }
+
+        $profile = Auth::user()?->employerProfile;
+        if (! $profile) {
+            return;
+        }
+
+        $app = Application::with(['candidateProfile.user', 'jobPosting'])->whereHas('jobPosting', function ($q) use ($profile) {
+            $q->where('employer_profile_id', $profile->id);
+        })->findOrFail($this->offeringAppId);
+
+        if (! $app->canTransitionTo(Application::STATUS_OFFERED)) {
+            Flux::toast(variant: 'danger', text: __('Cannot extend offer in current status.'));
+            return;
+        }
+
+        $this->validate([
+            'offerSalary' => 'required|numeric|min:1',
+            'offerStartDate' => 'required|date',
+            'offerAccommodations' => 'nullable|string|max:1000',
+            'offerNotes' => 'nullable|string|max:2000',
+        ]);
+
+        $app->update([
+            'status' => Application::STATUS_OFFERED,
+            'status_subtext' => Application::computeStatusSubtext(Application::STATUS_OFFERED),
+            'offer_extended_at' => now(),
+            'offer_details' => [
+                'salary' => (float) $this->offerSalary,
+                'start_date' => $this->offerStartDate,
+                'accommodations' => $this->offerAccommodations,
+                'notes' => $this->offerNotes,
+            ],
+        ]);
+
+        ApplicationMessage::create([
+            'application_id' => $app->id,
+            'sender_id' => Auth::id(),
+            'body' => 'Formal Job Offer Extended: PHP ' . number_format($this->offerSalary) . ' annual/gross with start date ' . $this->offerStartDate . '.',
+            'type' => 'system',
+            'metadata' => [
+                'event' => 'offer_extended',
+                'extended_at' => now()->toIso8601String(),
+            ],
+        ]);
+
+        $this->showOfferModal = false;
+        $this->offeringAppId = null;
+
+        Flux::toast(variant: 'success', text: __('Formal job offer extended to candidate.'));
+    }
+
+    public function markInterviewCompleted(int $applicationId): void
+    {
+        $profile = Auth::user()?->employerProfile;
+        if (! $profile) {
             return;
         }
 
@@ -408,10 +496,61 @@ class Applicants extends Component
             $q->where('employer_profile_id', $profile->id);
         })->findOrFail($applicationId);
 
-        $app->update(['status' => $status, 'status_subtext' => ucfirst(str_replace('_', ' ', $status))]);
+        if ($app->status !== Application::STATUS_INTERVIEW) {
+            Flux::toast(variant: 'warning', text: __('Application is not currently in interview stage.'));
+            return;
+        }
+
+        $app->update([
+            'status_subtext' => 'Interview completed · Evaluation in progress',
+        ]);
+
+        ApplicationMessage::create([
+            'application_id' => $app->id,
+            'sender_id' => Auth::id(),
+            'body' => 'Interview completed. Hiring team is finalizing the evaluation.',
+            'type' => 'system',
+        ]);
+
+        Flux::toast(variant: 'success', text: __('Interview marked as completed.'));
+    }
+
+    public function updateStatus(int $applicationId, string $status): void
+    {
+        $profile = Auth::user()?->employerProfile;
+        if (! $profile) {
+            return;
+        }
+
+        $app = Application::whereHas('jobPosting', function ($q) use ($profile) {
+            $q->where('employer_profile_id', $profile->id);
+        })->findOrFail($applicationId);
+
+        if (! $app->canTransitionTo($status)) {
+            Flux::toast(variant: 'danger', text: __("Cannot move application from :current to :target.", [
+                'current' => ucfirst(str_replace('_', ' ', $app->status)),
+                'target' => ucfirst(str_replace('_', ' ', $status)),
+            ]));
+            return;
+        }
+
+        $app->update([
+            'status' => $status,
+            'status_subtext' => Application::computeStatusSubtext($status, now()),
+        ]);
+
+        if ($status === 'rejected') {
+            $this->openRejectModal($applicationId);
+            return;
+        }
 
         if ($status === 'interview') {
             $this->openInterviewModal($applicationId);
+            return;
+        }
+
+        if ($status === 'offered') {
+            $this->openOfferModal($applicationId);
             return;
         }
 
@@ -420,7 +559,7 @@ class Applicants extends Component
             return;
         }
 
-        Flux::toast(variant: 'success', text: __('Status updated.'));
+        Flux::toast(variant: 'success', text: __('Status updated to :status.', ['status' => ucfirst(str_replace('_', ' ', $status))]));
     }
 
     public function hire(int $applicationId): void
@@ -487,6 +626,7 @@ class Applicants extends Component
             'applied' => (clone $baseCountQuery)->where('status', 'applied')->count(),
             'under_review' => (clone $baseCountQuery)->where('status', 'under_review')->count(),
             'interview' => (clone $baseCountQuery)->where('status', 'interview')->count(),
+            'offered' => (clone $baseCountQuery)->where('status', 'offered')->count(),
             'hired' => (clone $baseCountQuery)->where('status', 'hired')->count(),
             'rejected' => (clone $baseCountQuery)->where('status', 'rejected')->count(),
         ];
@@ -513,6 +653,10 @@ class Applicants extends Component
             ? Application::with(['candidateProfile.user', 'jobPosting'])->find($this->interviewAppId)
             : null;
 
+        $offeringApp = $this->offeringAppId
+            ? Application::with(['candidateProfile.user', 'jobPosting'])->find($this->offeringAppId)
+            : null;
+
         $hiringApp = $this->hiringAppId
             ? Application::with(['candidateProfile.user', 'jobPosting'])->find($this->hiringAppId)
             : null;
@@ -530,10 +674,12 @@ class Applicants extends Component
             'allCounts' => $allCounts,
             'viewing' => $viewing,
             'interviewingApp' => $interviewingApp,
+            'offeringApp' => $offeringApp,
             'hiringApp' => $hiringApp,
             'rejectingApp' => $rejectingApp,
             'chatApp' => $chatApp,
             'showChatModal' => $this->showChatModal,
+            'showOfferModal' => $this->showOfferModal,
             'employerJobs' => $employerJobs,
         ]);
     }

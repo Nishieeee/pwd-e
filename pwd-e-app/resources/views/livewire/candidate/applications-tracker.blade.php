@@ -272,12 +272,12 @@
                             <!-- Actions -->
                             <td class="py-4 px-6 align-middle">
                                 <div class="flex flex-col gap-1.5 w-44">
-                                    @if($app->offer_details)
+                                    @if($app->offer_details || $app->status === 'offered')
                                         <button type="button"
                                                 wire:click="viewOffer({{ $app->id }})"
                                                 class="w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#176B47] text-white text-xs font-bold hover:bg-[#125437] shadow-xs hover:shadow transition-all focus:ring-2 focus:ring-[#176B47]/40">
                                             <svg class="size-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                            <span>View Offer</span>
+                                            <span>{{ $app->status === 'offered' ? 'Review Job Offer' : 'View Offer' }}</span>
                                         </button>
                                     @endif
 
@@ -579,25 +579,81 @@
                 <div class="p-4 rounded-xl bg-sky-50 border border-sky-200 text-xs text-sky-900 space-y-2">
                     <div class="flex justify-between font-medium">
                         <span>Offered Salary:</span>
-                        <strong class="font-bold text-sm text-gray-900">₱29,000 /month</strong>
+                        <strong class="font-bold text-sm text-gray-900">
+                            PHP {{ number_format($offerApp->offer_details['salary'] ?? ($offerApp->jobPosting->salary_max ?? $offerApp->jobPosting->salary_min ?? 35000), 2) }}
+                        </strong>
                     </div>
                     <div class="flex justify-between">
                         <span>Work Arrangement:</span>
                         <span class="font-semibold">{{ ucfirst($offerApp->jobPosting->work_arrangement) }}</span>
                     </div>
                     <div class="flex justify-between">
-                        <span>Offer Date:</span>
-                        <span>October 22, 2026</span>
+                        <span>Target Start Date:</span>
+                        <span>{{ $offerApp->offer_details['start_date'] ?? 'Flexible' }}</span>
                     </div>
-                    <div class="flex justify-between">
-                        <span>Status:</span>
-                        <span class="font-bold text-amber-700">Declined by candidate (Oct 24, 2026)</span>
+                    @if(!empty($offerApp->offer_details['accommodations']))
+                        <div class="pt-1 border-t border-sky-200/60">
+                            <span class="block font-semibold mb-0.5">Accommodations Package:</span>
+                            <span class="text-sky-800">{{ $offerApp->offer_details['accommodations'] }}</span>
+                        </div>
+                    @endif
+                    @if(!empty($offerApp->offer_details['notes']))
+                        <div class="pt-1 border-t border-sky-200/60">
+                            <span class="block font-semibold mb-0.5">Employer Note:</span>
+                            <span class="text-sky-800">{{ $offerApp->offer_details['notes'] }}</span>
+                        </div>
+                    @endif
+                    <div class="flex justify-between pt-1 border-t border-sky-200/60">
+                        <span>Offer Status:</span>
+                        @if($offerApp->status === 'hired')
+                            <span class="font-bold text-emerald-700">Accepted by you</span>
+                        @elseif($offerApp->status === 'offer_declined')
+                            <span class="font-bold text-amber-700">Declined by you</span>
+                        @else
+                            <span class="font-bold text-[#244F73]">Pending your decision</span>
+                        @endif
                     </div>
                 </div>
 
-                <div class="pt-3 flex justify-end">
-                    <button type="button" wire:click="closeOfferModal" class="px-4 py-2 rounded-lg bg-[#244F73] text-white text-xs font-semibold hover:bg-[#1A2840]">
+                <div class="pt-3 flex items-center justify-between">
+                    <button type="button" wire:click="closeOfferModal" class="px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 text-xs font-semibold hover:bg-gray-50">
                         Close
+                    </button>
+                    @if($offerApp->status === 'offered')
+                        <div class="flex items-center gap-2">
+                            <button type="button" wire:click="openDeclineModal({{ $offerApp->id }})" class="px-3 py-1.5 rounded-lg border border-red-200 text-red-600 text-xs font-semibold hover:bg-red-50">
+                                Decline Offer
+                            </button>
+                            <button type="button" wire:click="acceptOffer({{ $offerApp->id }})" class="px-4 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 shadow-xs">
+                                Accept Offer
+                            </button>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- 3. Decline Offer Modal -->
+    @if($showDeclineModal)
+        <div class="fixed inset-0 z-50 overflow-y-auto bg-black/50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="modal-decline-title">
+            <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl border border-gray-200 space-y-4">
+                <h3 id="modal-decline-title" class="text-base font-bold text-[#1A2840]">
+                    Decline Job Offer
+                </h3>
+                <p class="text-xs text-gray-600">
+                    Are you sure you want to decline this job offer? You can optionally share a reason with the employer.
+                </p>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Reason for declining (optional)</label>
+                    <textarea wire:model="declineReason" rows="2" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-xs focus:ring-2 focus:ring-primary focus:outline-none" placeholder="e.g. Accepted another offer, salary mismatch..."></textarea>
+                </div>
+                <div class="flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
+                    <button type="button" wire:click="closeDeclineModal" class="px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 text-xs font-semibold hover:bg-gray-50">
+                        Cancel
+                    </button>
+                    <button type="button" wire:click="confirmDeclineOffer" class="px-3 py-1.5 rounded-lg bg-red-600 text-white text-xs font-semibold hover:bg-red-700">
+                        Confirm Decline
                     </button>
                 </div>
             </div>
