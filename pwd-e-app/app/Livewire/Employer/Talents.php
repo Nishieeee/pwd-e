@@ -152,9 +152,42 @@ class Talents extends Component
             'invitationMessage' => 'nullable|string|max:1000',
         ]);
 
+        // Check daily limit
+        $dailyLimit = config('recruitment.max_daily_invitations', 25);
+        $invitesToday = JobInvitation::where('employer_profile_id', $employerProfile?->id)
+            ->where('created_at', '>=', now()->subHours(24))
+            ->count();
+
+        if ($invitesToday >= $dailyLimit) {
+            $this->addError('selectedJobId', "You have reached the daily limit of {$dailyLimit} invitations. Please try again tomorrow.");
+            return;
+        }
+
+        // Validate job is published and open
         $job = JobPosting::where('employer_profile_id', $employerProfile?->id)
             ->where('id', $this->selectedJobId)
-            ->firstOrFail();
+            ->where('status', 'published')
+            ->where(function ($q) {
+                $q->whereNull('closes_at')->orWhere('closes_at', '>=', today());
+            })
+            ->first();
+
+        if (! $job) {
+            $this->addError('selectedJobId', 'Invitations can only be sent for open, published job postings.');
+            return;
+        }
+
+        // Prevent duplicate invitations
+        $existing = JobInvitation::where('employer_profile_id', $employerProfile?->id)
+            ->where('job_posting_id', $job->id)
+            ->where('candidate_profile_id', $this->invitingCandidateProfileId)
+            ->whereIn('status', ['pending', 'accepted'])
+            ->first();
+
+        if ($existing) {
+            $this->addError('selectedJobId', 'An active invitation has already been sent to this candidate for this job.');
+            return;
+        }
 
         $candidateProfile = CandidateProfile::with('user')->findOrFail($this->invitingCandidateProfileId);
 

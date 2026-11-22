@@ -80,6 +80,8 @@ class Edit extends Component
      */
     protected function rules(): array
     {
+        $isPublished = $this->job->status === 'published';
+
         return [
             'title' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string', 'min:20'],
@@ -92,10 +94,14 @@ class Edit extends Component
             ],
             'salary_min' => ['nullable', 'numeric', 'min:0'],
             'salary_max' => ['nullable', 'numeric', 'gte:salary_min'],
-            'closes_at' => ['nullable', 'date'],
+            'closes_at' => [
+                'nullable',
+                'date',
+                $isPublished ? 'after_or_equal:today' : 'nullable',
+            ],
             'required_skills' => ['nullable', 'array'],
             'required_skills.*' => ['string', 'max:50'],
-            'selectedAccommodations' => ['array'],
+            'selectedAccommodations' => [$isPublished ? 'required' : 'array', 'array', $isPublished ? 'min:1' : 'nullable'],
             'selectedAccommodations.*' => ['integer', 'exists:accommodations,id'],
         ];
     }
