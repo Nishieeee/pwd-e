@@ -17,42 +17,44 @@
      x-init="
          $wire.on('profile-step-changed', () => scrollToTop());
      "
-     class="space-y-6 max-w-6xl mx-auto pb-8 w-full min-w-0">
+     class="space-y-8 max-w-6xl mx-auto pb-12 w-full min-w-0">
     @if(!$isEmbedded)
-        <!-- Breadcrumb -->
-        <nav class="flex items-center text-xs text-gray-500 gap-1.5" aria-label="Breadcrumb">
-            <a href="{{ route('dashboard') }}" class="hover:text-gray-900">Dashboard</a>
-            <span aria-hidden="true">/</span>
-            <span class="text-gray-900 font-medium" aria-current="page">Profile Builder</span>
-        </nav>
-
-        <!-- Page Header -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-                <h1 class="text-2xl lg:text-3xl font-bold text-[#1A2840] tracking-tight">Profile Builder</h1>
-                <p class="text-sm text-[#4E5F6E] mt-1">
-                    @if($currentStep === 1)
-                        Your experience, in your own words. Speak or type an answer, then review the text that becomes your employment profile.
-                    @elseif($currentStep === 2)
-                        Tell us about your background. All experience counts, including projects, internships, and volunteer work.
-                    @elseif($currentStep === 3)
-                        Let employers know what helps you do your best work. Choose the support you need, not a diagnosis.
-                    @elseif($currentStep === 4)
-                        Bring your story to life. Add your resume and a Filipino Sign Language introduction to complete your profile.
-                    @else
-                        Take one last look, {{ $firstName ?: 'Maria' }}. This is the profile we'll use to find work that fits your skills and support needs.
-                    @endif
-                </p>
+        <!-- Page Header Banner Card -->
+        <div class="w-full relative overflow-hidden rounded-2xl border border-primary-border bg-white p-5 sm:p-6 shadow-sm" style="background: linear-gradient(135deg, #DCEAF4 0%, #FFFFFF 100%); box-shadow: 0 4px 20px rgba(26,40,64,0.06);">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <div class="space-y-2 max-w-3xl min-w-0 flex-1">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <nav class="inline-flex items-center gap-1.5 rounded-full border border-primary-border bg-white px-3 py-1 text-xs font-semibold text-body-muted shadow-2xs" aria-label="Breadcrumb">
+                            <a href="{{ route('dashboard') }}" class="hover:text-primary transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">Dashboard</a>
+                            <span aria-hidden="true">/</span>
+                            <span class="text-primary-dark font-bold" aria-current="page">Profile Builder</span>
+                        </nav>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-primary-tint text-primary-dark border border-primary-border/70">
+                            Private draft
+                        </span>
+                    </div>
+                    <h1 class="font-heading text-2xl sm:text-3xl font-bold text-primary-dark tracking-tight">Profile Builder</h1>
+                    <p class="text-xs sm:text-sm text-body-muted leading-relaxed max-w-2xl">
+                        @if($currentStep === 1)
+                            Your experience, in your own words. Speak or type an answer, then review the text that becomes your employment profile.
+                        @elseif($currentStep === 2)
+                            Tell us about your background. All experience counts, including projects, internships, and volunteer work.
+                        @elseif($currentStep === 3)
+                            Let employers know what helps you do your best work. Choose the support you need, not a diagnosis.
+                        @elseif($currentStep === 4)
+                            Bring your story to life. Add your resume and a Filipino Sign Language introduction to complete your profile.
+                        @else
+                            Take one last look, {{ $firstName ?: 'Maria' }}. This is the profile we'll use to find work that fits your skills and support needs.
+                        @endif
+                    </p>
+                </div>
             </div>
-            <span class="inline-flex items-center self-start sm:self-center px-3 py-1 rounded-full text-xs font-semibold bg-[#DCEAF4] text-[#244F73]">
-                Private draft
-            </span>
         </div>
     @endif
 
     <!-- 5-Step Progress Indicator Card -->
-    <section class="bg-white rounded-xl border border-gray-200 p-5 shadow-xs space-y-4" aria-label="Profile Builder Progress">
-        <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
+    <section class="bg-white rounded-2xl border border-gray-200 p-6 sm:p-7 shadow-xs space-y-5" aria-label="Profile Builder Progress">
+        <div class="flex flex-wrap items-center justify-between gap-3 text-xs sm:text-sm">
             <span class="font-bold text-[#1A2840]">
                 @if($currentStep === 1)
                     Step 1 of 5 &middot; Input mode selection
@@ -66,7 +68,7 @@
                     Step 5 of 5 &middot; Review &amp; save
                 @endif
             </span>
-            <span class="text-gray-500">Your draft is saved &middot; Take your time</span>
+            <span class="text-xs text-gray-500">Your draft is saved &middot; Take your time</span>
         </div>
 
         @php
@@ -79,7 +81,7 @@
             ];
         @endphp
 
-        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3" role="list">
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-4" role="list">
             @foreach($steps as $stepNumber => $stepLabel)
                 @php
                     $isCompleted = $stepNumber < $currentStep;
@@ -89,23 +91,23 @@
                         wire:click="goToStep({{ $stepNumber }})"
                         role="listitem"
                         aria-current="{{ $isCurrent ? 'step' : 'false' }}"
-                        class="text-left group focus:outline-none focus:ring-2 focus:ring-[#244F73] rounded-lg p-1 transition-colors min-w-0">
-                    <div class="h-1 w-full rounded-full mb-2.5 {{ ($isCompleted || $isCurrent) ? 'bg-[#244F73]' : 'bg-gray-200' }}"></div>
-                    <div class="flex items-center gap-2 min-w-0">
+                        class="text-left group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#244F73] focus-visible:ring-offset-2 rounded-xl p-2 hover:bg-gray-50 transition-colors min-w-0">
+                    <div class="h-1.5 w-full rounded-full mb-3 {{ ($isCompleted || $isCurrent) ? 'bg-[#244F73]' : 'bg-gray-200' }}"></div>
+                    <div class="flex items-center gap-2.5 min-w-0">
                         @if($isCompleted)
-                            <span class="w-5 h-5 rounded-full border border-[#244F73] text-[#244F73] bg-sky-50 flex items-center justify-center text-[11px] font-bold shrink-0">
+                            <span class="w-6 h-6 rounded-full border border-[#244F73] text-[#244F73] bg-sky-50 flex items-center justify-center text-[11px] font-bold shrink-0">
                                 &#10003;
                             </span>
                         @elseif($isCurrent)
-                            <span class="w-5 h-5 rounded-full bg-[#244F73] text-white flex items-center justify-center text-[11px] font-bold shrink-0">
+                            <span class="w-6 h-6 rounded-full bg-[#244F73] text-white flex items-center justify-center text-[11px] font-bold shrink-0">
                                 {{ $stepNumber }}
                             </span>
                         @else
-                            <span class="w-5 h-5 rounded-full border border-gray-300 text-gray-500 flex items-center justify-center text-[11px] font-semibold shrink-0">
+                            <span class="w-6 h-6 rounded-full border border-gray-300 text-gray-500 flex items-center justify-center text-[11px] font-semibold shrink-0">
                                 {{ $stepNumber }}
                             </span>
                         @endif
-                        <span class="text-xs truncate min-w-0 {{ $isCurrent ? 'font-bold text-[#1A2840]' : ($isCompleted ? 'font-medium text-[#1A2840]' : 'text-gray-500') }}">
+                        <span class="text-xs sm:text-[13px] truncate min-w-0 {{ $isCurrent ? 'font-bold text-[#1A2840]' : ($isCompleted ? 'font-medium text-[#1A2840]' : 'text-gray-500 group-hover:text-gray-700') }}">
                             {{ $stepLabel }}
                         </span>
                     </div>
@@ -369,27 +371,27 @@
     {{-- STEP 2: PROFESSIONAL DETAILS                                          --}}
     {{-- ===================================================================== --}}
     @if($currentStep === 2)
-        <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start w-full min-w-0">
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start w-full min-w-0">
             <!-- Left Form Column -->
-            <section class="xl:col-span-8 bg-white rounded-xl border border-gray-200 p-6 shadow-xs space-y-6 min-w-0 w-full" aria-labelledby="step2-heading">
-                <div class="space-y-3">
-                    <div>
-                        <h2 id="step2-heading" class="text-lg font-bold text-[#1A2840]">Professional details</h2>
-                        <p class="text-xs text-[#4E5F6E] mt-1">
+            <section class="xl:col-span-8 bg-white rounded-2xl border border-gray-200 p-6 sm:p-8 lg:p-10 shadow-xs space-y-10 min-w-0 w-full" aria-labelledby="step2-heading">
+                <div class="space-y-5">
+                    <div class="space-y-2">
+                        <h2 id="step2-heading" class="text-xl font-bold text-[#1A2840] tracking-tight">Professional details</h2>
+                        <p class="text-sm text-gray-500 leading-relaxed max-w-2xl">
                             Speak through each category in order. Your spoken answers will map directly into the matching text boxes before continuing to the Accommodations Checklist.
                         </p>
                     </div>
 
-                    <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-[#DCEAF4] text-[#244F73]">
-                            <span class="w-2 h-2 rounded-full bg-[#244F73]"></span>
+                    <div class="flex flex-wrap items-center justify-between gap-4 pt-2">
+                        <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-[#DCEAF4] text-[#244F73]">
+                            <span class="w-2 h-2 rounded-full bg-[#244F73]" aria-hidden="true"></span>
                             <span>{{ $inputMode === 'voice' ? 'Voice Dictation on' : 'Standard Typing on' }}</span>
                         </span>
 
-                        <div class="flex items-center gap-3">
+                        <div class="flex flex-wrap items-center gap-4">
                             <label for="step2-resume-scan-input"
-                                   class="inline-flex items-center gap-1.5 text-xs font-bold text-[#244F73] hover:underline cursor-pointer focus-within:ring-2 focus-within:ring-[#244F73] rounded px-1.5 py-1 bg-white border border-[#244F73]/30 shadow-2xs">
-                                <svg class="w-4 h-4 text-[#244F73]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                   class="inline-flex items-center gap-2 text-xs font-semibold text-[#244F73] hover:bg-[#EBF3FA]/60 cursor-pointer focus-within:outline-none focus-within:ring-2 focus-within:ring-[#244F73] focus-within:ring-offset-2 rounded-lg px-3.5 py-2 bg-white border border-[#244F73]/30 shadow-2xs transition-colors">
+                                <svg class="w-4 h-4 text-[#244F73] shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
                                 </svg>
                                 <span>Scan &amp; Auto-Fill from Resume</span>
@@ -397,13 +399,13 @@
                                        type="file"
                                        wire:model="resumeScanUpload"
                                        accept=".pdf,.docx,.txt"
-                                       class="hidden">
+                                       class="sr-only">
                             </label>
 
                             <button type="button"
                                     wire:click="selectInputMode('{{ $inputMode === 'voice' ? 'standard' : 'voice' }}')"
-                                    class="inline-flex items-center gap-1.5 text-xs font-bold text-[#244F73] hover:underline focus:outline-none focus:ring-2 focus:ring-[#244F73] rounded px-1">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    class="inline-flex items-center gap-2 text-xs font-semibold text-[#244F73] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#244F73] focus-visible:ring-offset-2 rounded-lg px-2.5 py-2 cursor-pointer transition-colors">
+                                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                     <rect x="3" y="5" width="18" height="14" rx="2" stroke-width="2"/>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 9h2m3 0h2m3 0h1M7 13h10"/>
                                 </svg>
@@ -414,8 +416,8 @@
 
                     {{-- Livewire Uploading & Scanning Indicator (Step 2 Trigger) --}}
                     <div wire:loading wire:target="resumeScanUpload" class="pt-2">
-                        <div class="flex items-center gap-3 p-3.5 rounded-xl bg-[#DCEAF4] text-[#244F73] text-xs font-semibold animate-pulse border border-[#244F73]/20">
-                            <svg class="w-5 h-5 animate-spin shrink-0" fill="none" viewBox="0 0 24 24">
+                        <div class="flex items-center gap-3 p-4 rounded-xl bg-[#DCEAF4] text-[#244F73] text-xs font-semibold animate-pulse border border-[#244F73]/20">
+                            <svg class="w-5 h-5 animate-spin shrink-0" fill="none" viewBox="0 0 24 24" aria-hidden="true">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
                             </svg>
@@ -425,9 +427,9 @@
 
                     {{-- Resume Scan Output Review Banner --}}
                     @if($resumeScanSuccess && $scanSummary)
-                        <div class="rounded-2xl border-2 border-emerald-300 bg-gradient-to-br from-emerald-50 via-white to-emerald-50/50 p-5 shadow-xs space-y-3.5" role="status" aria-live="polite">
-                            <div class="flex items-start justify-between gap-3">
-                                <div class="flex items-center gap-3">
+                        <div class="rounded-2xl border-2 border-emerald-300 bg-gradient-to-br from-emerald-50 via-white to-emerald-50/50 p-6 shadow-xs space-y-4" role="status" aria-live="polite">
+                            <div class="flex items-start justify-between gap-4">
+                                <div class="flex items-center gap-3.5">
                                     <div class="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
@@ -440,42 +442,42 @@
                                                 Review Mode
                                             </span>
                                         </div>
-                                        <p class="text-xs text-emerald-800 mt-0.5">
+                                        <p class="text-xs text-emerald-800 mt-1 leading-relaxed">
                                             Extracted details from <span class="font-semibold text-emerald-950">{{ $scanSummary['filename'] }}</span>. Review each section below, make any edits, and proceed to save.
                                         </p>
                                     </div>
                                 </div>
                                 <button type="button"
                                         wire:click="dismissScanSummary"
-                                        class="text-emerald-700 hover:text-emerald-950 text-xs font-semibold px-2 py-1 rounded hover:bg-emerald-100 transition cursor-pointer"
+                                        class="text-emerald-700 hover:text-emerald-950 text-xs font-semibold px-2.5 py-1.5 rounded-lg hover:bg-emerald-100 transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#244F73] focus-visible:ring-offset-2"
                                         aria-label="Dismiss scan notification">
-                                    Dismiss ✕
+                                    Dismiss &#10005;
                                 </button>
                             </div>
 
-                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 pt-1 text-xs">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1 text-xs">
                                 @if($scanSummary['headline'])
-                                    <div class="bg-white rounded-lg p-2.5 border border-emerald-200/80 shadow-2xs">
+                                    <div class="bg-white rounded-lg p-3 border border-emerald-200/80 shadow-2xs">
                                         <span class="text-[10px] font-bold text-emerald-800 uppercase tracking-wider block">Headline</span>
-                                        <span class="font-semibold text-gray-900 truncate block mt-0.5" title="{{ $scanSummary['headline'] }}">{{ $scanSummary['headline'] }}</span>
+                                        <span class="font-semibold text-gray-900 truncate block mt-1" title="{{ $scanSummary['headline'] }}">{{ $scanSummary['headline'] }}</span>
                                     </div>
                                 @endif
                                 @if(!empty($scanSummary['contact']))
-                                    <div class="bg-white rounded-lg p-2.5 border border-emerald-200/80 shadow-2xs">
+                                    <div class="bg-white rounded-lg p-3 border border-emerald-200/80 shadow-2xs">
                                         <span class="text-[10px] font-bold text-emerald-800 uppercase tracking-wider block">Contact &amp; Location</span>
-                                        <span class="font-medium text-gray-900 truncate block mt-0.5">{{ implode(' · ', $scanSummary['contact']) }}</span>
+                                        <span class="font-medium text-gray-900 truncate block mt-1">{{ implode(' · ', $scanSummary['contact']) }}</span>
                                     </div>
                                 @endif
                                 @if($scanSummary['skills_count'] > 0)
-                                    <div class="bg-white rounded-lg p-2.5 border border-emerald-200/80 shadow-2xs">
+                                    <div class="bg-white rounded-lg p-3 border border-emerald-200/80 shadow-2xs">
                                         <span class="text-[10px] font-bold text-emerald-800 uppercase tracking-wider block">Skills Auto-Tagged</span>
-                                        <span class="font-semibold text-gray-900 block mt-0.5">{{ $scanSummary['skills_count'] }} skills populated</span>
+                                        <span class="font-semibold text-gray-900 block mt-1">{{ $scanSummary['skills_count'] }} skills populated</span>
                                     </div>
                                 @endif
                                 @if($scanSummary['education'])
-                                    <div class="bg-white rounded-lg p-2.5 border border-emerald-200/80 shadow-2xs">
+                                    <div class="bg-white rounded-lg p-3 border border-emerald-200/80 shadow-2xs">
                                         <span class="text-[10px] font-bold text-emerald-800 uppercase tracking-wider block">Education</span>
-                                        <span class="font-semibold text-gray-900 truncate block mt-0.5" title="{{ $scanSummary['education'] }}">{{ $scanSummary['education'] }}</span>
+                                        <span class="font-semibold text-gray-900 truncate block mt-1" title="{{ $scanSummary['education'] }}">{{ $scanSummary['education'] }}</span>
                                     </div>
                                 @endif
                             </div>
@@ -484,27 +486,27 @@
                 </div>
 
                 <!-- 1. Personal Identification -->
-                <div class="space-y-4 pt-2 border-t border-gray-100">
+                <div class="space-y-6 pt-8 border-t border-gray-200/80">
                     @if ($errors->any())
-                        <div class="p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs flex items-start gap-3" role="alert" aria-live="assertive">
-                            <svg class="w-5 h-5 text-red-500 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                        <div class="p-5 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs flex items-start gap-3.5" role="alert" aria-live="assertive">
+                            <svg class="w-5 h-5 text-red-600 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
                             </svg>
                             <div>
                                 <div class="font-bold text-sm">Please complete the required details before continuing</div>
-                                <p class="mt-1 text-red-700">Some required fields (such as your Name, Phone Number, or City) need your attention.</p>
+                                <p class="mt-1.5 text-red-700 leading-relaxed">Some required fields (such as your Name, Phone Number, or City) need your attention.</p>
                             </div>
                         </div>
                     @endif
 
-                    <h3 class="text-sm font-bold text-[#1A2840]">Personal Identification</h3>
+                    <h3 class="text-base font-bold text-[#1A2840]">Personal Identification</h3>
 
                     <!-- 2x2 Photo / Avatar Upload Field for Digital Bio-Data -->
-                    <div class="p-5 rounded-2xl bg-white border border-primary-border shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-5">
-                        <div class="flex items-center gap-4">
+                    <div class="p-6 rounded-2xl bg-white border border-gray-200 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                        <div class="flex items-center gap-5">
                             <div class="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl bg-primary-tint/40 text-primary border-2 border-primary-border flex items-center justify-center font-bold text-lg overflow-hidden shrink-0 shadow-2xs">
                                 <div wire:loading wire:target="avatarUpload" class="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
-                                    <svg class="size-6 animate-spin text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                                    <svg class="size-6 animate-spin text-white" fill="none" viewBox="0 0 24 24" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
                                 </div>
                                 @if($avatarUpload)
                                     <img src="{{ $avatarUpload->temporaryUrl() }}" alt="2x2 Photo Preview" class="w-full h-full object-cover">
@@ -517,47 +519,47 @@
                                     </div>
                                 @endif
                             </div>
-                            <div class="space-y-1">
+                            <div class="space-y-1.5">
                                 <span class="block text-sm font-bold text-primary-dark">
-                                    2x2 Formal ID Photo <span class="font-normal text-xs text-body-muted">(Recommended for Profile)</span>
+                                    2x2 Formal ID Photo <span class="font-normal text-xs text-gray-500">(Recommended for Profile)</span>
                                 </span>
-                                <p class="text-xs text-body-muted leading-relaxed max-w-md">
+                                <p class="text-xs sm:text-[13px] text-gray-500 leading-relaxed max-w-md">
                                     Featured on your official Digital Profile. A clear 2x2 photo with a white or plain background is recommended (JPG/PNG, up to 5 MB).
                                 </p>
                             </div>
                         </div>
 
-                        <div class="flex flex-wrap items-center gap-2 shrink-0">
-                            <label for="avatar-upload-input" class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg border border-primary-border bg-white text-xs font-semibold text-primary-dark hover:bg-primary-tint cursor-pointer shadow-2xs transition-colors focus-within:ring-2 focus-within:ring-primary/40">
-                                <svg class="size-4 text-primary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                        <div class="flex flex-wrap items-center gap-3 shrink-0">
+                            <label for="avatar-upload-input" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-gray-300 bg-white text-xs font-semibold text-primary-dark hover:bg-gray-50 cursor-pointer shadow-2xs transition-colors focus-within:outline-none focus-within:ring-2 focus-within:ring-[#244F73] focus-within:ring-offset-2">
+                                <svg class="size-4 text-primary shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
                                 </svg>
                                 <span>{{ ($avatarUpload || $avatarPath) ? __('Change 2x2 Photo') : __('Upload 2x2 Photo') }}</span>
+                                <input id="avatar-upload-input"
+                                       type="file"
+                                       wire:model="avatarUpload"
+                                       accept="image/png,image/jpeg"
+                                       class="sr-only"
+                                       aria-label="Upload 2x2 ID photo or avatar">
                             </label>
-                            <input id="avatar-upload-input"
-                                   type="file"
-                                   wire:model="avatarUpload"
-                                   accept="image/png,image/jpeg"
-                                   class="hidden"
-                                   aria-label="Upload 2x2 ID photo or avatar">
 
                             @if($avatarUpload || $avatarPath)
                                 <button type="button"
                                         wire:click="removeAvatar"
-                                        class="inline-flex items-center gap-1 px-3 py-2.5 rounded-lg border border-red-200 text-xs font-semibold text-red-700 hover:bg-red-50 transition-colors"
+                                        class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-lg border border-red-200 text-xs font-semibold text-red-700 hover:bg-red-50 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
                                         aria-label="Remove uploaded 2x2 photo">
-                                    <svg class="size-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                    <svg class="size-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                     <span>Remove</span>
                                 </button>
                             @endif
                         </div>
                     </div>
 
-                    <!-- Name Grid -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-12 gap-3 min-w-0">
-                        <div class="sm:col-span-1 xl:col-span-4 min-w-0">
-                            <label for="first-name" class="block text-xs font-semibold text-[#1A2840] mb-1">
-                                First Name <span class="text-red-500" aria-hidden="true">*</span>
+                    <!-- Balanced 2x2 Name Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 min-w-0">
+                        <div class="min-w-0">
+                            <label for="first-name" class="block text-xs sm:text-[13px] font-semibold text-[#1A2840] mb-2">
+                                First Name <span class="text-red-600" aria-hidden="true">*</span>
                             </label>
                             <input id="first-name"
                                    type="text"
@@ -565,25 +567,25 @@
                                    aria-required="true"
                                    aria-invalid="{{ $errors->has('firstName') ? 'true' : 'false' }}"
                                    @if($errors->has('firstName')) aria-describedby="first-name-error" @endif
-                                   class="w-full px-3 py-2 rounded-lg border {{ $errors->has('firstName') ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-[#244F73]' }} text-xs text-gray-900 focus:outline-none focus:ring-2">
+                                   class="w-full px-3.5 py-2.5 rounded-lg border {{ $errors->has('firstName') ? 'border-red-600 focus:ring-red-600 focus:border-red-600' : 'border-gray-300 hover:border-gray-400 focus:ring-[#244F73] focus:border-[#244F73]' }} text-sm text-gray-900 bg-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1">
                             @error('firstName')
-                                <p id="first-name-error" class="text-xs text-red-600 mt-1 flex items-center gap-1" role="alert">
+                                <p id="first-name-error" class="text-xs text-red-600 mt-1.5 flex items-center gap-1.5" role="alert">
                                     <svg class="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
                                     <span>{{ $message }}</span>
                                 </p>
                             @enderror
                         </div>
-                        <div class="sm:col-span-1 xl:col-span-3 min-w-0">
-                            <label for="middle-name" class="block text-xs font-semibold text-[#1A2840] mb-1">Middle Name</label>
+                        <div class="min-w-0">
+                            <label for="middle-name" class="block text-xs sm:text-[13px] font-semibold text-[#1A2840] mb-2">Middle Name</label>
                             <input id="middle-name"
                                    type="text"
                                    wire:model.live="middleName"
                                    placeholder="Optional"
-                                   class="w-full px-3 py-2 rounded-lg border border-gray-300 text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#244F73]">
+                                   class="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 hover:border-gray-400 bg-white text-sm text-gray-900 placeholder-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-[#244F73] focus:ring-offset-1 focus:border-[#244F73]">
                         </div>
-                        <div class="sm:col-span-1 xl:col-span-4 min-w-0">
-                            <label for="last-name" class="block text-xs font-semibold text-[#1A2840] mb-1">
-                                Last Name <span class="text-red-500" aria-hidden="true">*</span>
+                        <div class="min-w-0">
+                            <label for="last-name" class="block text-xs sm:text-[13px] font-semibold text-[#1A2840] mb-2">
+                                Last Name <span class="text-red-600" aria-hidden="true">*</span>
                             </label>
                             <input id="last-name"
                                    type="text"
@@ -591,29 +593,29 @@
                                    aria-required="true"
                                    aria-invalid="{{ $errors->has('lastName') ? 'true' : 'false' }}"
                                    @if($errors->has('lastName')) aria-describedby="last-name-error" @endif
-                                   class="w-full px-3 py-2 rounded-lg border {{ $errors->has('lastName') ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-[#244F73]' }} text-xs text-gray-900 focus:outline-none focus:ring-2">
+                                   class="w-full px-3.5 py-2.5 rounded-lg border {{ $errors->has('lastName') ? 'border-red-600 focus:ring-red-600 focus:border-red-600' : 'border-gray-300 hover:border-gray-400 focus:ring-[#244F73] focus:border-[#244F73]' }} text-sm text-gray-900 bg-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1">
                             @error('lastName')
-                                <p id="last-name-error" class="text-xs text-red-600 mt-1 flex items-center gap-1" role="alert">
+                                <p id="last-name-error" class="text-xs text-red-600 mt-1.5 flex items-center gap-1.5" role="alert">
                                     <svg class="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
                                     <span>{{ $message }}</span>
                                 </p>
                             @enderror
                         </div>
-                        <div class="sm:col-span-1 xl:col-span-1 min-w-0">
-                            <label for="name-suffix" class="block text-xs font-semibold text-[#1A2840] mb-1">Suffix</label>
+                        <div class="min-w-0">
+                            <label for="name-suffix" class="block text-xs sm:text-[13px] font-semibold text-[#1A2840] mb-2">Suffix</label>
                             <input id="name-suffix"
                                    type="text"
                                    wire:model.live="suffix"
                                    placeholder="Optional"
-                                   class="w-full px-3 py-2 rounded-lg border border-gray-300 text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#244F73]">
+                                   class="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 hover:border-gray-400 bg-white text-sm text-gray-900 placeholder-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-[#244F73] focus:ring-offset-1 focus:border-[#244F73]">
                         </div>
                     </div>
 
                     <!-- Email, Phone, PWD ID Number (Auto-filled & Read-only) -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 min-w-0">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 min-w-0 pt-1">
                         <div class="min-w-0">
-                            <label for="email-address" class="block text-xs font-semibold text-[#1A2840] mb-1">
-                                Email Address <span class="text-red-500" aria-hidden="true">*</span>
+                            <label for="email-address" class="block text-xs sm:text-[13px] font-semibold text-[#1A2840] mb-2">
+                                Email Address <span class="text-red-600" aria-hidden="true">*</span>
                             </label>
                             <input id="email-address"
                                    type="email"
@@ -621,17 +623,17 @@
                                    aria-required="true"
                                    aria-invalid="{{ $errors->has('email') ? 'true' : 'false' }}"
                                    @if($errors->has('email')) aria-describedby="email-error" @endif
-                                   class="w-full px-3 py-2 rounded-lg border {{ $errors->has('email') ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-[#244F73]' }} text-xs text-gray-900 focus:outline-none focus:ring-2">
+                                   class="w-full px-3.5 py-2.5 rounded-lg border {{ $errors->has('email') ? 'border-red-600 focus:ring-red-600 focus:border-red-600' : 'border-gray-300 hover:border-gray-400 focus:ring-[#244F73] focus:border-[#244F73]' }} text-sm text-gray-900 bg-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1">
                             @error('email')
-                                <p id="email-error" class="text-xs text-red-600 mt-1 flex items-center gap-1" role="alert">
+                                <p id="email-error" class="text-xs text-red-600 mt-1.5 flex items-center gap-1.5" role="alert">
                                     <svg class="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
                                     <span>{{ $message }}</span>
                                 </p>
                             @enderror
                         </div>
                         <div class="min-w-0">
-                            <label for="phone-number" class="block text-xs font-semibold text-[#1A2840] mb-1">
-                                Phone Number <span class="text-red-500" aria-hidden="true">*</span>
+                            <label for="phone-number" class="block text-xs sm:text-[13px] font-semibold text-[#1A2840] mb-2">
+                                Phone Number <span class="text-red-600" aria-hidden="true">*</span>
                             </label>
                             <input id="phone-number"
                                    type="text"
@@ -640,39 +642,39 @@
                                    aria-required="true"
                                    aria-invalid="{{ $errors->has('phone') ? 'true' : 'false' }}"
                                    @if($errors->has('phone')) aria-describedby="phone-error" @endif
-                                   class="w-full px-3 py-2 rounded-lg border {{ $errors->has('phone') ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-[#244F73]' }} text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2">
+                                   class="w-full px-3.5 py-2.5 rounded-lg border {{ $errors->has('phone') ? 'border-red-600 focus:ring-red-600 focus:border-red-600' : 'border-gray-300 hover:border-gray-400 focus:ring-[#244F73] focus:border-[#244F73]' }} text-sm text-gray-900 placeholder-gray-400 bg-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1">
                             @error('phone')
-                                <p id="phone-error" class="text-xs text-red-600 mt-1 flex items-center gap-1" role="alert">
+                                <p id="phone-error" class="text-xs text-red-600 mt-1.5 flex items-center gap-1.5" role="alert">
                                     <svg class="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
                                     <span>{{ $message }}</span>
                                 </p>
                             @enderror
                         </div>
                         <div class="sm:col-span-2 xl:col-span-1 min-w-0">
-                            <label for="pwd-id-number" class="block text-xs font-semibold text-[#1A2840] mb-1">PWD ID Number</label>
+                            <label for="pwd-id-number" class="block text-xs sm:text-[13px] font-semibold text-[#1A2840] mb-2">PWD ID Number</label>
                             <input id="pwd-id-number"
                                    type="text"
                                    value="{{ $pwdIdNumber }}"
                                    placeholder="e.g., PWD-0931-7000-1234"
                                    readonly
                                    aria-readonly="true"
-                                   class="w-full px-3 py-2 rounded-lg border border-gray-200 bg-gray-100 text-xs text-gray-700 placeholder-gray-400 font-medium cursor-not-allowed">
+                                   class="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 bg-gray-100 text-sm text-gray-700 placeholder-gray-400 font-medium cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[#244F73] focus:ring-offset-1">
                         </div>
                     </div>
 
-                    <p class="text-[11px] text-gray-500 flex items-center gap-1.5">
-                        <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                    <p class="text-xs text-gray-500 flex items-center gap-2 leading-relaxed">
+                        <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                         </svg>
                         <span>PWD ID is automatically linked from your verified account registration record and is read-only.</span>
                     </p>
 
                     <!-- Searchable Address / Location Comboboxes + Auto-populated Zip Code (Single-line clean items, PSGC-backed) -->
-                    <div class="space-y-1.5 pt-1">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 min-w-0">
+                    <div class="space-y-3 pt-2">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 min-w-0">
                             <!-- Country Searchable Combobox -->
                             <div class="relative min-w-0" x-data="{ openCountry: false }">
-                                <label for="country-combobox" class="block text-xs font-semibold text-[#1A2840] mb-1">Country</label>
+                                <label for="country-combobox" class="block text-xs sm:text-[13px] font-semibold text-[#1A2840] mb-2">Country</label>
                                 <div class="relative">
                                     <input id="country-combobox"
                                            type="text"
@@ -685,26 +687,26 @@
                                            aria-autocomplete="list"
                                            aria-label="Country"
                                            placeholder="Select country"
-                                           class="w-full pl-3 pr-7 py-2 rounded-lg border border-gray-300 text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#244F73]">
+                                           class="w-full pl-3.5 pr-8 py-2.5 rounded-lg border border-gray-300 hover:border-gray-400 bg-white text-sm text-gray-900 placeholder-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-[#244F73] focus:ring-offset-1 focus:border-[#244F73]">
                                     <button type="button"
                                             @click="openCountry = !openCountry"
                                             tabindex="-1"
                                             aria-label="Toggle country list"
-                                            class="absolute inset-y-0 right-0 px-2 flex items-center text-gray-400 hover:text-gray-600">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                            class="absolute inset-y-0 right-0 px-2.5 flex items-center text-gray-400 hover:text-gray-600">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                     </button>
                                 </div>
                                 <ul x-show="openCountry"
                                     x-cloak
                                     role="listbox"
                                     aria-label="Countries"
-                                    class="absolute left-0 right-0 w-full mt-1 max-h-48 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-xl z-50 py-1 text-xs">
+                                    class="absolute left-0 right-0 w-full mt-1.5 max-h-48 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-xl z-50 py-1 text-xs">
                                     @foreach($countries as $countryName)
                                         <li>
                                             <button type="button"
                                                     wire:click="$set('country', '{{ addslashes($countryName) }}')"
                                                     @click="openCountry = false"
-                                                    class="w-full text-left px-3 py-1.5 truncate whitespace-nowrap hover:bg-[#EBF3FA] text-[#1A2840] font-medium">
+                                                    class="w-full text-left px-3.5 py-2 truncate whitespace-nowrap hover:bg-[#EBF3FA] text-[#1A2840] font-medium focus-visible:outline-none focus-visible:bg-[#EBF3FA] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#244F73]">
                                                 {{ $countryName }}
                                             </button>
                                         </li>
@@ -714,8 +716,8 @@
 
                             <!-- City Searchable Combobox (Single-line clean items: "City Name (ZIP 7000)") -->
                             <div class="relative min-w-0" x-data="{ openCity: false }">
-                                <label for="city-combobox" class="block text-xs font-semibold text-[#1A2840] mb-1">
-                                    City / Municipality <span class="text-red-500" aria-hidden="true">*</span>
+                                <label for="city-combobox" class="block text-xs sm:text-[13px] font-semibold text-[#1A2840] mb-2">
+                                    City / Municipality <span class="text-red-600" aria-hidden="true">*</span>
                                 </label>
                                 <div class="relative">
                                     <input id="city-combobox"
@@ -731,17 +733,17 @@
                                            placeholder="Search city..."
                                            aria-required="true"
                                            aria-invalid="{{ $errors->has('city') ? 'true' : 'false' }}"
-                                           class="w-full pl-3 pr-7 py-2 rounded-lg border {{ $errors->has('city') ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-[#244F73]' }} text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2">
+                                           class="w-full pl-3.5 pr-8 py-2.5 rounded-lg border {{ $errors->has('city') ? 'border-red-600 focus:ring-red-600 focus:border-red-600' : 'border-gray-300 hover:border-gray-400 focus:ring-[#244F73] focus:border-[#244F73]' }} bg-white text-sm text-gray-900 placeholder-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1">
                                     <button type="button"
                                             @click="openCity = !openCity"
                                             tabindex="-1"
                                             aria-label="Toggle city list"
-                                            class="absolute inset-y-0 right-0 px-2 flex items-center text-gray-400 hover:text-gray-600">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                            class="absolute inset-y-0 right-0 px-2.5 flex items-center text-gray-400 hover:text-gray-600">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                     </button>
                                 </div>
                                 @error('city')
-                                    <p class="text-xs text-red-600 mt-1 flex items-center gap-1" role="alert">
+                                    <p class="text-xs text-red-600 mt-1.5 flex items-center gap-1.5" role="alert">
                                         <svg class="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
                                         <span>{{ $message }}</span>
                                     </p>
@@ -750,13 +752,13 @@
                                     x-cloak
                                     role="listbox"
                                     aria-label="Cities"
-                                    class="absolute left-0 right-0 w-full mt-1 max-h-56 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-xl z-50 py-1 text-xs">
+                                    class="absolute left-0 right-0 w-full mt-1.5 max-h-56 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-xl z-50 py-1 text-xs">
                                     @foreach($cities as $cityOption)
                                         <li>
                                             <button type="button"
                                                     wire:click="selectCityOption('{{ addslashes($cityOption->name) }}')"
                                                     @click="openCity = false"
-                                                    class="w-full text-left px-3 py-1.5 truncate whitespace-nowrap hover:bg-[#EBF3FA] {{ $city === $cityOption->name ? 'bg-[#EBF3FA] font-bold text-[#244F73]' : 'text-[#1A2840]' }}">
+                                                    class="w-full text-left px-3.5 py-2 truncate whitespace-nowrap hover:bg-[#EBF3FA] focus-visible:outline-none focus-visible:bg-[#EBF3FA] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#244F73] {{ $city === $cityOption->name ? 'bg-[#EBF3FA] font-bold text-[#244F73]' : 'text-[#1A2840]' }}">
                                                 {{ $cityOption->name }} (ZIP {{ $cityOption->zip_code }})
                                             </button>
                                         </li>
@@ -766,7 +768,7 @@
 
                             <!-- Barangay Searchable Combobox (Single-line clean items) -->
                             <div class="relative min-w-0" x-data="{ openBarangay: false }">
-                                <label for="barangay-combobox" class="block text-xs font-semibold text-[#1A2840] mb-1">Barangay</label>
+                                <label for="barangay-combobox" class="block text-xs sm:text-[13px] font-semibold text-[#1A2840] mb-2">Barangay</label>
                                 <div class="relative">
                                     <input id="barangay-combobox"
                                            type="text"
@@ -779,26 +781,26 @@
                                            aria-autocomplete="list"
                                            aria-label="Barangay"
                                            placeholder="Search barangay..."
-                                           class="w-full pl-3 pr-7 py-2 rounded-lg border border-gray-300 text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#244F73]">
+                                           class="w-full pl-3.5 pr-8 py-2.5 rounded-lg border border-gray-300 hover:border-gray-400 bg-white text-sm text-gray-900 placeholder-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-[#244F73] focus:ring-offset-1 focus:border-[#244F73]">
                                     <button type="button"
                                             @click="openBarangay = !openBarangay"
                                             tabindex="-1"
                                             aria-label="Toggle barangay list"
-                                            class="absolute inset-y-0 right-0 px-2 flex items-center text-gray-400 hover:text-gray-600">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                            class="absolute inset-y-0 right-0 px-2.5 flex items-center text-gray-400 hover:text-gray-600">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                     </button>
                                 </div>
                                 <ul x-show="openBarangay"
                                     x-cloak
                                     role="listbox"
                                     aria-label="Barangays"
-                                    class="absolute left-0 right-0 w-full mt-1 max-h-56 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-xl z-50 py-1 text-xs">
+                                    class="absolute left-0 right-0 w-full mt-1.5 max-h-56 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-xl z-50 py-1 text-xs">
                                     @foreach($barangays as $brgyOption)
                                         <li>
                                             <button type="button"
                                                     wire:click="selectBarangayOption('{{ addslashes($brgyOption->name) }}')"
                                                     @click="openBarangay = false"
-                                                    class="w-full text-left px-3 py-1.5 truncate whitespace-nowrap hover:bg-[#EBF3FA] {{ $barangay === $brgyOption->name ? 'bg-[#EBF3FA] font-bold text-[#244F73]' : 'text-[#1A2840]' }}">
+                                                    class="w-full text-left px-3.5 py-2 truncate whitespace-nowrap hover:bg-[#EBF3FA] focus-visible:outline-none focus-visible:bg-[#EBF3FA] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#244F73] {{ $barangay === $brgyOption->name ? 'bg-[#EBF3FA] font-bold text-[#244F73]' : 'text-[#1A2840]' }}">
                                                 {{ $brgyOption->name }}
                                             </button>
                                         </li>
@@ -807,8 +809,8 @@
                             </div>
 
                             <!-- Auto-Populated Zip Code -->
-                            <div>
-                                <label for="zip-code-input" class="block text-xs font-semibold text-[#1A2840] mb-1">Zip Code</label>
+                            <div class="min-w-0">
+                                <label for="zip-code-input" class="block text-xs sm:text-[13px] font-semibold text-[#1A2840] mb-2">Zip Code</label>
                                 <input id="zip-code-input"
                                        type="text"
                                        wire:model="zipCode"
@@ -816,127 +818,119 @@
                                        readonly
                                        aria-readonly="true"
                                        aria-label="Zip Code (auto-populated from selected city)"
-                                       class="w-full px-3 py-2 rounded-lg border border-gray-200 bg-gray-100 text-xs text-gray-700 font-semibold cursor-not-allowed">
+                                       class="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 bg-gray-100 text-sm text-gray-700 font-semibold cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[#244F73] focus:ring-offset-1">
                             </div>
                         </div>
-
-                        @if($selectedCityRecord)
-                            <p class="text-[11px] text-gray-500">
-                                {{ $selectedCityRecord->name }} (ZIP {{ $selectedCityRecord->zip_code }})
-                                @if($selectedCityRecord->region_name) &middot; {{ $selectedCityRecord->region_name }} @endif
-                                @if($selectedCityRecord->psgc_code) &middot; PSGC {{ $selectedCityRecord->psgc_code }} @endif
-                            </p>
-                        @endif
                     </div>
 
                     <!-- Spoken Languages Checkboxes + "Others" Conditional Input -->
-                    <fieldset class="pt-2 space-y-2">
-                        <legend class="text-xs font-semibold text-[#1A2840]">Spoken Languages</legend>
+                    <fieldset class="pt-4 space-y-3">
+                        <legend class="text-xs sm:text-[13px] font-semibold text-[#1A2840]">Spoken Languages</legend>
                         <div class="flex flex-wrap items-center gap-3">
                             @foreach($languageOptions as $langOpt)
-                                <label class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs cursor-pointer transition-colors {{ in_array($langOpt->name, $spokenLanguages, true) ? 'bg-[#EBF3FA] border-[#244F73] text-[#1A2840] font-semibold' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50' }}">
+                                <label class="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-lg border text-xs sm:text-[13px] cursor-pointer transition-colors focus-within:ring-2 focus-within:ring-[#244F73] focus-within:ring-offset-2 {{ in_array($langOpt->name, $spokenLanguages, true) ? 'bg-[#EBF3FA] border-[#244F73] text-[#1A2840] font-semibold' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400' }}">
                                     <input type="checkbox"
                                            value="{{ $langOpt->name }}"
                                            wire:model.live="spokenLanguages"
-                                           class="rounded border-gray-300 text-[#244F73] focus:ring-[#244F73] w-3.5 h-3.5">
+                                           class="rounded border-gray-400 text-[#244F73] focus:ring-2 focus:ring-[#244F73] focus:ring-offset-1 w-4 h-4">
                                     <span>{{ $langOpt->name }}</span>
                                 </label>
                             @endforeach
 
                             <!-- "Others" Checkbox -->
-                            <label class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs cursor-pointer transition-colors {{ $hasOtherLanguage ? 'bg-[#EBF3FA] border-[#244F73] text-[#1A2840] font-semibold' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50' }}">
+                            <label class="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-lg border text-xs sm:text-[13px] cursor-pointer transition-colors focus-within:ring-2 focus-within:ring-[#244F73] focus-within:ring-offset-2 {{ $hasOtherLanguage ? 'bg-[#EBF3FA] border-[#244F73] text-[#1A2840] font-semibold' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400' }}">
                                 <input type="checkbox"
                                        wire:model.live="hasOtherLanguage"
-                                       class="rounded border-gray-300 text-[#244F73] focus:ring-[#244F73] w-3.5 h-3.5">
+                                       class="rounded border-gray-400 text-[#244F73] focus:ring-2 focus:ring-[#244F73] focus:ring-offset-1 w-4 h-4">
                                 <span>Others</span>
                             </label>
                         </div>
 
                         @if($hasOtherLanguage)
-                            <div class="pt-1 max-w-xs">
+                            <div class="pt-2 max-w-sm">
                                 <label for="other-language-input" class="sr-only">Specify other spoken language</label>
                                 <input id="other-language-input"
                                        type="text"
                                        wire:model.live="otherLanguage"
                                        placeholder="Please specify other language(s)..."
-                                       class="w-full px-3 py-2 rounded-lg border border-[#244F73] text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#244F73]">
+                                       class="w-full px-3.5 py-2.5 rounded-lg border border-[#244F73] bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#244F73] focus:ring-offset-1">
                             </div>
                         @endif
                     </fieldset>
                 </div>
 
                 <!-- 2. Professional Headline & Summary -->
-                <div class="space-y-3 pt-4 border-t border-gray-100">
+                <div class="space-y-4 pt-8 border-t border-gray-200/80">
                     <div>
-                        <label for="professional-headline" class="block text-xs font-bold text-[#1A2840]">Professional Headline</label>
-                        <p id="headline-helper" class="text-[11px] text-[#4E5F6E] mt-0.5">
-                            A short title summarizing your main role or work goal. If left blank, we will automatically generate one using your most recent Job Title.
+                        <label for="professional-headline" class="block text-base font-bold text-[#1A2840]">Professional Headline</label>
+                        <p id="headline-helper" class="text-xs sm:text-[13px] text-gray-500 mt-1.5 mb-4 leading-relaxed max-w-2xl">
+                            Your main job role or target title (optional &mdash; auto-filled from your latest job if left blank).
                         </p>
                         <input id="professional-headline"
                                type="text"
                                wire:model.live="headline"
                                aria-describedby="headline-helper"
                                placeholder="e.g., Administrative Assistant, Data Entry Clerk, or Customer Support"
-                               class="mt-1.5 w-full px-3 py-2 rounded-lg border border-gray-300 text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#244F73]">
+                               class="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 hover:border-gray-400 bg-white text-sm text-gray-900 placeholder-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-[#244F73] focus:ring-offset-1 focus:border-[#244F73]">
                     </div>
                 </div>
 
                 <!-- 3. Work Experience (Start Year & End Year + Present Toggle) -->
-                <div class="space-y-4 pt-4 border-t border-gray-100">
-                    <h3 class="text-sm font-bold text-[#1A2840]">Work Experience</h3>
+                <div class="space-y-6 pt-8 border-t border-gray-200/80">
+                    <h3 class="text-base font-bold text-[#1A2840]">Work Experience</h3>
 
                     @foreach($experiences as $index => $exp)
-                        <div wire:key="exp-item-{{ $index }}" class="p-4 rounded-xl border border-gray-200 bg-gray-50/40 space-y-3">
-                            <div class="flex items-center justify-between">
-                                <span class="text-xs font-bold text-[#244F73]">Experience #{{ $index + 1 }}</span>
+                        <div wire:key="exp-item-{{ $index }}" class="p-6 rounded-2xl border border-gray-200 bg-gray-50/40 space-y-5">
+                            <div class="flex items-center justify-between gap-3">
+                                <span class="text-xs font-bold uppercase tracking-wider text-[#244F73]">Experience #{{ $index + 1 }}</span>
                                 @if(count($experiences) > 1)
                                     <button type="button"
                                             wire:click="removeExperience({{ $index }})"
-                                            class="text-[11px] text-red-600 hover:underline font-semibold">
+                                            class="text-xs text-red-600 hover:underline font-semibold rounded px-2 py-1 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2">
                                         Remove
                                     </button>
                                 @endif
                             </div>
 
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                 <div>
-                                    <label for="job-title-{{ $index }}" class="block text-xs font-semibold text-[#1A2840] mb-1">Job Title</label>
+                                    <label for="job-title-{{ $index }}" class="block text-xs sm:text-[13px] font-semibold text-[#1A2840] mb-2">Job Title</label>
                                     <input id="job-title-{{ $index }}"
                                            type="text"
                                            wire:model.live="experiences.{{ $index }}.job_title"
                                            placeholder="e.g., Administrative Assistant or Data Entry Clerk"
-                                           class="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#244F73]">
+                                           class="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 hover:border-gray-400 bg-white text-sm text-gray-900 placeholder-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-[#244F73] focus:ring-offset-1 focus:border-[#244F73]">
                                 </div>
                                 <div>
-                                    <label for="company-name-{{ $index }}" class="block text-xs font-semibold text-[#1A2840] mb-1">Company Name</label>
+                                    <label for="company-name-{{ $index }}" class="block text-xs sm:text-[13px] font-semibold text-[#1A2840] mb-2">Company Name</label>
                                     <input id="company-name-{{ $index }}"
                                            type="text"
                                            wire:model.live="experiences.{{ $index }}.company_name"
                                            placeholder="e.g., Zamboanga City LGU or BrightPath Solutions"
-                                           class="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#244F73]">
+                                           class="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 hover:border-gray-400 bg-white text-sm text-gray-900 placeholder-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-[#244F73] focus:ring-offset-1 focus:border-[#244F73]">
                                 </div>
                             </div>
 
                             <!-- Start Year, End Year & Present Toggle -->
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 items-end">
                                 <div>
-                                    <label for="start-year-{{ $index }}" class="block text-xs font-semibold text-[#1A2840] mb-1">Start Year</label>
+                                    <label for="start-year-{{ $index }}" class="block text-xs sm:text-[13px] font-semibold text-[#1A2840] mb-2">Start Year</label>
                                     <input id="start-year-{{ $index }}"
                                            type="number"
                                            min="1970"
                                            max="2030"
                                            wire:model.live="experiences.{{ $index }}.start_year"
                                            placeholder="2023"
-                                           class="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#244F73]">
+                                           class="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 hover:border-gray-400 bg-white text-sm text-gray-900 placeholder-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-[#244F73] focus:ring-offset-1 focus:border-[#244F73]">
                                 </div>
                                 <div>
-                                    <div class="flex items-center justify-between mb-1">
-                                        <label for="end-year-{{ $index }}" class="block text-xs font-semibold text-[#1A2840]">End Year</label>
-                                        <label class="inline-flex items-center gap-1.5 text-xs font-semibold text-[#244F73] cursor-pointer">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <label for="end-year-{{ $index }}" class="block text-xs sm:text-[13px] font-semibold text-[#1A2840]">End Year</label>
+                                        <label class="inline-flex items-center gap-2 text-xs font-semibold text-[#244F73] cursor-pointer rounded px-1.5 py-0.5 focus-within:ring-2 focus-within:ring-[#244F73] focus-within:ring-offset-2">
                                             <input type="checkbox"
                                                    wire:click="toggleExperienceCurrent({{ $index }})"
                                                    @checked(!empty($exp['is_current']))
-                                                   class="rounded border-gray-300 text-[#244F73] focus:ring-[#244F73] w-3.5 h-3.5">
+                                                   class="rounded border-gray-400 text-[#244F73] focus:ring-2 focus:ring-[#244F73] focus:ring-offset-1 w-4 h-4">
                                             <span>Present</span>
                                         </label>
                                     </div>
@@ -945,7 +939,7 @@
                                                type="text"
                                                value="Present"
                                                disabled
-                                               class="w-full px-3 py-2 rounded-lg border border-gray-200 bg-gray-100 text-xs text-gray-600 font-semibold cursor-not-allowed">
+                                               class="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 bg-gray-100 text-sm text-gray-600 font-semibold cursor-not-allowed">
                                     @else
                                         <input id="end-year-{{ $index }}"
                                                type="number"
@@ -953,103 +947,103 @@
                                                max="2030"
                                                wire:model.live="experiences.{{ $index }}.end_year"
                                                placeholder="2025"
-                                               class="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#244F73]">
+                                               class="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 hover:border-gray-400 bg-white text-sm text-gray-900 placeholder-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-[#244F73] focus:ring-offset-1 focus:border-[#244F73]">
                                     @endif
                                 </div>
                             </div>
 
                             <div>
-                                <label for="responsibilities-{{ $index }}" class="block text-xs font-semibold text-[#1A2840] mb-1">Responsibilities</label>
+                                <label for="responsibilities-{{ $index }}" class="block text-xs sm:text-[13px] font-semibold text-[#1A2840] mb-2">Responsibilities</label>
                                 <textarea id="responsibilities-{{ $index }}"
                                           rows="3"
                                           wire:model.live="experiences.{{ $index }}.description"
                                           placeholder="Briefly describe your main duties and accomplishments..."
-                                          class="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#244F73]"></textarea>
+                                          class="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 hover:border-gray-400 bg-white text-sm text-gray-900 placeholder-gray-400 leading-relaxed transition-colors focus:outline-none focus:ring-2 focus:ring-[#244F73] focus:ring-offset-1 focus:border-[#244F73]"></textarea>
                             </div>
                         </div>
                     @endforeach
 
                     <button type="button"
                             wire:click="addExperience"
-                            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-gray-300 bg-white text-xs font-bold text-[#244F73] hover:bg-gray-50 focus:ring-2 focus:ring-[#244F73]">
+                            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-gray-300 bg-white text-xs font-bold text-[#244F73] hover:bg-gray-50 hover:border-gray-400 cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#244F73] focus-visible:ring-offset-2">
                         <span>+ Add another experience</span>
                     </button>
                 </div>
 
                 <!-- 4. Education (Single Dropdown: Highest Educational Attainment + Strictly Optional Certificate) -->
-                <div class="space-y-3 pt-4 border-t border-gray-100">
+                <div class="space-y-6 pt-8 border-t border-gray-200/80">
                     <div>
-                        <h3 class="text-sm font-bold text-[#1A2840]">Education</h3>
-                        <p class="text-[11px] text-[#4E5F6E] mt-0.5">
+                        <h3 class="text-base font-bold text-[#1A2840]">Education</h3>
+                        <p class="text-xs sm:text-[13px] text-gray-500 mt-1.5 leading-relaxed max-w-2xl">
                             Select your highest educational level. Uploading diplomas or certificates for Tertiary, Vocational, or any level is strictly optional.
                         </p>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
                         <div>
-                            <label for="highest-education-select" class="block text-xs font-semibold text-[#1A2840] mb-1">
+                            <label for="highest-education-select" class="block text-xs sm:text-[13px] font-semibold text-[#1A2840] mb-2">
                                 Highest Educational Attainment
                             </label>
                             <select id="highest-education-select"
                                     wire:model.live="highestEducation"
-                                    class="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#244F73]">
+                                    class="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 hover:border-gray-400 bg-white text-sm text-gray-900 transition-colors focus:outline-none focus:ring-2 focus:ring-[#244F73] focus:ring-offset-1 focus:border-[#244F73]">
                                 @foreach($educationLevels as $eduOption)
                                     <option value="{{ $eduOption->name }}">{{ $eduOption->name }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div>
-                            <label for="institution-name" class="block text-xs font-semibold text-[#1A2840] mb-1">
+                            <label for="institution-name" class="block text-xs sm:text-[13px] font-semibold text-[#1A2840] mb-2">
                                 Institution Name <span class="font-normal text-gray-500">(Optional)</span>
                             </label>
                             <input id="institution-name"
                                    type="text"
                                    wire:model.live="institutionName"
                                    placeholder="e.g., Western Mindanao State University"
-                                   class="w-full px-3 py-2 rounded-lg border border-gray-300 text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#244F73]">
+                                   class="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 hover:border-gray-400 bg-white text-sm text-gray-900 placeholder-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-[#244F73] focus:ring-offset-1 focus:border-[#244F73]">
                         </div>
                         <div>
-                            <label for="year-graduated" class="block text-xs font-semibold text-[#1A2840] mb-1">
+                            <label for="year-graduated" class="block text-xs sm:text-[13px] font-semibold text-[#1A2840] mb-2">
                                 Year Graduated <span class="font-normal text-gray-500">(Optional)</span>
                             </label>
                             <input id="year-graduated"
                                    type="text"
                                    wire:model.live="yearGraduated"
                                    placeholder="e.g., 2025"
-                                   class="w-full px-3 py-2 rounded-lg border border-gray-300 text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#244F73]">
+                                   class="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 hover:border-gray-400 bg-white text-sm text-gray-900 placeholder-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-[#244F73] focus:ring-offset-1 focus:border-[#244F73]">
                         </div>
                     </div>
 
                     <!-- Optional Education Certificate / Diploma Upload -->
-                    <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
-                        <div class="text-[11px] text-gray-500">
+                    <div class="flex flex-wrap items-center justify-between gap-4 pt-2">
+                        <div class="text-xs text-gray-500 leading-relaxed">
                             @if($educationCertificateFilename)
                                 <span class="font-semibold text-[#176B47]">&#10003; Certificate attached: {{ $educationCertificateFilename }}</span>
                             @else
                                 <span>Certificate or diploma upload is optional and never required to complete your profile.</span>
                             @endif
                         </div>
-                        <label class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-300 bg-white text-xs font-semibold text-[#244F73] hover:bg-gray-50 cursor-pointer focus-within:ring-2 focus-within:ring-[#244F73]">
+                        <label class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-gray-300 bg-white text-xs font-semibold text-[#244F73] hover:bg-gray-50 hover:border-gray-400 cursor-pointer transition-colors focus-within:outline-none focus-within:ring-2 focus-within:ring-[#244F73] focus-within:ring-offset-2">
                             <span>{{ $educationCertificateFilename ? 'Replace Certificate (Optional)' : 'Upload Certificate / Diploma (Optional)' }}</span>
                             <input type="file"
                                    wire:model="educationCertificateUpload"
                                    accept=".pdf,.jpg,.jpeg,.png"
-                                   class="hidden"
+                                   class="sr-only"
                                    aria-label="Upload optional education certificate or diploma">
                         </label>
                     </div>
                 </div>
 
                 <!-- 5. Skills & Strengths (Pre-populated Clickable Toggle Tags + Custom Skill Input) -->
-                <div class="space-y-3 pt-4 border-t border-gray-100">
+                <div class="space-y-6 pt-8 border-t border-gray-200/80">
                     <div>
-                        <h3 class="text-sm font-bold text-[#1A2840]">Skills &amp; Strengths</h3>
-                        <p class="text-xs text-[#4E5F6E] mt-0.5">
+                        <h3 class="text-base font-bold text-[#1A2840]">Skills &amp; Strengths</h3>
+                        <p class="text-xs sm:text-[13px] text-gray-500 mt-1.5 leading-relaxed max-w-2xl">
                             Click any tag below to toggle your skills on or off, or add your own custom skill.
                         </p>
                     </div>
 
-                    <div class="p-4 rounded-xl border border-gray-200 bg-gray-50/40 space-y-4">
-                        <div class="flex flex-wrap gap-2" role="group" aria-label="Common skills toggle grid">
+                    <div class="p-6 rounded-2xl border border-gray-200 bg-gray-50/40 space-y-5">
+                        <div class="flex flex-wrap gap-2.5" role="group" aria-label="Common skills toggle grid">
                             @foreach($skillOptions as $skillOpt)
                                 @php
                                     $isSkillActive = in_array($skillOpt->name, $selectedSkills, true);
@@ -1058,7 +1052,7 @@
                                         wire:key="skill-tag-{{ $skillOpt->id }}"
                                         wire:click="toggleSkill('{{ addslashes($skillOpt->name) }}')"
                                         aria-pressed="{{ $isSkillActive ? 'true' : 'false' }}"
-                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#244F73] {{ $isSkillActive ? 'bg-[#244F73] text-white shadow-2xs' : 'bg-[#DCEAF4]/70 text-[#1A2840] hover:bg-[#DCEAF4]' }}">
+                                        class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#244F73] focus-visible:ring-offset-2 {{ $isSkillActive ? 'bg-[#244F73] text-white shadow-2xs' : 'bg-[#DCEAF4]/70 text-[#1A2840] hover:bg-[#DCEAF4]' }}">
                                     @if($isSkillActive)
                                         <span aria-hidden="true">&#10003;</span>
                                     @endif
@@ -1068,7 +1062,7 @@
                         </div>
 
                         <!-- Add Custom Skill Input & Button -->
-                        <div class="pt-3 border-t border-gray-200/80 flex flex-col sm:flex-row sm:items-center gap-2">
+                        <div class="pt-4 border-t border-gray-200/80 flex flex-col sm:flex-row sm:items-center gap-3">
                             <div class="flex-1">
                                 <label for="custom-skill-input" class="sr-only">Add custom skill</label>
                                 <input id="custom-skill-input"
@@ -1076,16 +1070,16 @@
                                        wire:model="customSkillInput"
                                        wire:keydown.enter.prevent="addCustomSkill"
                                        placeholder="Add custom skill (e.g., Graphic Design, Encoding, Tailoring)..."
-                                       class="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#244F73]">
+                                       class="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 hover:border-gray-400 bg-white text-sm text-gray-900 placeholder-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-[#244F73] focus:ring-offset-1 focus:border-[#244F73]">
                             </div>
                             <button type="button"
                                     wire:click="addCustomSkill"
-                                    class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg bg-[#244F73] text-white text-xs font-bold hover:bg-[#1A2840] transition-colors focus:ring-2 focus:ring-[#244F73] shrink-0">
+                                    class="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-lg bg-[#244F73] text-white text-xs font-bold hover:bg-[#1A2840] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1A2840] focus-visible:ring-offset-2 shrink-0">
                                 <span>+ Add</span>
                             </button>
                         </div>
 
-                        <p class="text-[11px] text-gray-500">
+                        <p class="text-xs text-gray-500">
                             {{ count($selectedSkills) }} {{ Str::plural('skill', count($selectedSkills)) }} selected. Click any tag above to toggle it on or off.
                         </p>
                     </div>
@@ -1093,11 +1087,11 @@
             </section>
 
             <!-- Right Preview & Voice Column -->
-            <aside class="xl:col-span-4 space-y-4 min-w-0 w-full">
+            <aside class="xl:col-span-4 space-y-6 min-w-0 w-full">
                 <!-- Voice Listening Widget with WCAG 44px Controls -->
-                <div class="rounded-xl border border-[#244F73]/40 bg-white p-4 shadow-xs flex items-center justify-between gap-3 min-w-0">
-                    <div class="flex items-center gap-3 min-w-0 flex-1">
-                        <div class="w-10 h-10 rounded-full bg-[#244F73] text-white flex items-center justify-center ring-4 ring-[#DCEAF4] shrink-0">
+                <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-xs flex items-center justify-between gap-4 min-w-0">
+                    <div class="flex items-center gap-3.5 min-w-0 flex-1">
+                        <div class="w-11 h-11 rounded-full bg-[#244F73] text-white flex items-center justify-center ring-4 ring-[#DCEAF4] shrink-0">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
                             </svg>
@@ -1106,7 +1100,7 @@
                             <div class="text-xs font-bold text-[#244F73] truncate" aria-live="polite">
                                 {{ $isListening ? 'Listening...' : 'Dictation Paused' }}
                             </div>
-                            <div class="flex items-center gap-0.5 my-1" aria-hidden="true">
+                            <div class="flex items-center gap-0.5 my-1.5" aria-hidden="true">
                                 <span class="w-1 h-2.5 bg-[#244F73] rounded-full {{ $isListening ? 'animate-pulse' : 'opacity-40' }}"></span>
                                 <span class="w-1 h-4 bg-[#244F73] rounded-full {{ $isListening ? 'animate-pulse' : 'opacity-40' }}"></span>
                                 <span class="w-1 h-2 bg-[#244F73] rounded-full {{ $isListening ? 'animate-pulse' : 'opacity-40' }}"></span>
@@ -1114,14 +1108,14 @@
                                 <span class="w-1 h-3 bg-[#244F73] rounded-full {{ $isListening ? 'animate-pulse' : 'opacity-40' }}"></span>
                                 <span class="w-1 h-4 bg-[#244F73] rounded-full {{ $isListening ? 'animate-pulse' : 'opacity-40' }}"></span>
                             </div>
-                            <div class="text-[11px] text-gray-500 truncate">Speak naturally &middot; 00:18</div>
+                            <div class="text-xs text-gray-500 truncate">Speak naturally &middot; 00:18</div>
                         </div>
                     </div>
                     <button type="button"
                             wire:click="toggleListening"
                             :aria-pressed="{{ $isListening ? 'true' : 'false' }}"
                             aria-label="{{ $isListening ? 'Pause voice dictation' : 'Resume voice dictation' }}"
-                            class="min-w-[44px] min-h-[44px] w-11 h-11 rounded-full border border-gray-300 flex items-center justify-center text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:ring-2 focus:ring-[#244F73] transition-colors cursor-pointer shrink-0">
+                            class="min-w-[44px] min-h-[44px] w-11 h-11 rounded-full border border-gray-300 flex items-center justify-center text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#244F73] focus-visible:ring-offset-2 transition-colors cursor-pointer shrink-0">
                         @if($isListening)
                             <svg class="w-4 h-4 text-[#244F73]" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                                 <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/>
@@ -1135,34 +1129,34 @@
                 </div>
 
                 <!-- Live Profile Preview Card -->
-                <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-xs space-y-4">
+                <div class="bg-white rounded-2xl border border-gray-200 p-6 shadow-xs space-y-5">
                     <div>
                         <h3 class="text-sm font-bold text-[#1A2840]">Profile preview</h3>
-                        <p class="text-[11px] text-gray-500 mt-0.5">
+                        <p class="text-xs text-gray-500 mt-1 leading-relaxed">
                             Your details are coming together. Nothing is published yet.
                         </p>
                     </div>
 
-                    <div class="space-y-1.5 pt-1">
+                    <div class="space-y-2 pt-2 border-t border-gray-100">
                         <div class="text-sm font-bold text-[#1A2840]">
                             {{ trim(implode(' ', array_filter([$firstName, $middleName, $lastName, $suffix]))) ?: 'Candidate Name' }}
                         </div>
-                        <div class="text-xs text-[#4E5F6E]">
+                        <div class="text-xs text-gray-500">
                             {{ $effectiveHeadline }}@if($city) &middot; {{ $city }}@endif
                         </div>
                         @if($pwdIdNumber)
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#E8F5E9] text-[#176B47]">
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#E8F5E9] text-[#176B47]">
                                 PWD ID Verified ({{ $pwdIdNumber }})
                             </span>
                         @endif
                     </div>
 
                     @if(!empty($selectedSkills))
-                        <div class="space-y-2 pt-2 border-t border-gray-100">
+                        <div class="space-y-2.5 pt-4 border-t border-gray-100">
                             <div class="text-xs font-bold text-[#1A2840]">Skills &amp; strengths</div>
-                            <div class="flex flex-wrap gap-1.5">
+                            <div class="flex flex-wrap gap-2">
                                 @foreach($selectedSkills as $sk)
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-[#DCEAF4] text-[#244F73]">
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-semibold bg-[#DCEAF4] text-[#244F73]">
                                         {{ $sk }}
                                     </span>
                                 @endforeach
@@ -1171,14 +1165,14 @@
                     @endif
 
                     @if($bio)
-                        <p class="text-xs text-[#4E5F6E] leading-relaxed pt-1">
+                        <p class="text-xs text-gray-500 leading-relaxed pt-2 border-t border-gray-100">
                             {{ $bio }}
                         </p>
                     @endif
                 </div>
 
                 <!-- Sequential Guidance Tip -->
-                <div class="rounded-xl bg-[#EBF3FA] border border-[#B8D0E2] p-4 space-y-1.5">
+                <div class="rounded-2xl bg-white border border-gray-200 p-6 shadow-xs space-y-2.5">
                     <div class="flex items-center gap-2 text-xs font-bold text-[#1A2840]">
                         <svg class="w-4 h-4 text-[#244F73] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <circle cx="12" cy="12" r="10" stroke-width="2"/>
@@ -1186,7 +1180,7 @@
                         </svg>
                         <span>Speak through each category sequentially</span>
                     </div>
-                    <p class="text-[11px] text-[#4E5F6E] leading-relaxed">
+                    <p class="text-xs text-gray-500 leading-relaxed">
                         Start with Personal Identification, then Professional Headline, Work Experience, Education, and finally Skills. Pause when you finish each section so your spoken answers map directly into the correct text boxes.
                     </p>
                 </div>
@@ -1812,40 +1806,40 @@
     @endif
 
     <!-- Bottom Step Navigation Bar -->
-    <div class="pt-4 border-t border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 w-full min-w-0">
-        <div class="flex items-center gap-4 min-w-0">
+    <div class="mt-10 rounded-2xl bg-white border border-gray-200 px-6 py-5 sm:px-8 shadow-xs flex flex-wrap items-center justify-between gap-5 w-full min-w-0">
+        <div class="flex flex-wrap items-center gap-4 min-w-0 flex-1">
             @if($currentStep === 1)
                 <a href="{{ route('dashboard') }}"
-                   class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-gray-300 bg-white text-xs font-bold text-[#244F73] hover:bg-gray-50 shrink-0">
+                   class="inline-flex items-center gap-2 px-5 py-3 min-h-[44px] rounded-xl border border-gray-300 bg-white text-xs sm:text-sm font-bold text-[#244F73] hover:bg-gray-50 hover:border-gray-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#244F73] focus-visible:ring-offset-2 shrink-0">
                     <span>&larr; Cancel</span>
                 </a>
             @else
                 <button type="button"
                         wire:click="prevStep"
-                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-gray-300 bg-white text-xs font-bold text-[#244F73] hover:bg-gray-50 focus:ring-2 focus:ring-[#244F73] shrink-0">
+                        class="inline-flex items-center gap-2 px-5 py-3 min-h-[44px] rounded-xl border border-gray-300 bg-white text-xs sm:text-sm font-bold text-[#244F73] hover:bg-gray-50 hover:border-gray-400 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#244F73] focus-visible:ring-offset-2 shrink-0">
                     <span>&larr; Back</span>
                 </button>
             @endif
 
-            <div class="min-w-0">
-                <div class="text-xs font-bold text-[#1A2840] truncate">
+            <div class="min-w-0 space-y-0.5">
+                <div class="text-xs sm:text-[13px] font-bold text-[#1A2840] leading-snug">
                     {{ $currentStep === 5 ? 'Ready when you are. You can edit your profile anytime.' : 'Your profile stays private until you finish.' }}
                 </div>
-                <div class="text-[11px] text-gray-500 truncate">Save a draft to return to this step later.</div>
+                <div class="text-xs text-gray-500 leading-snug">Save a draft to return to this step later.</div>
             </div>
         </div>
 
-        <div class="flex flex-wrap items-center gap-3 shrink-0">
+        <div class="flex flex-wrap items-center gap-3.5 max-w-full">
             <button type="button"
                     wire:click="saveDraftAndExit"
-                    class="px-4 py-2.5 rounded-lg border border-gray-300 bg-white text-xs font-bold text-[#244F73] hover:bg-gray-50 focus:ring-2 focus:ring-[#244F73]">
+                    class="px-5 py-3 min-h-[44px] rounded-xl border border-gray-300 bg-white text-xs sm:text-sm font-bold text-[#244F73] hover:bg-gray-50 hover:border-gray-400 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#244F73] focus-visible:ring-offset-2">
                 Save draft &amp; exit
             </button>
 
             @if($currentStep < 5)
                 <button type="button"
                         wire:click="nextStep"
-                        class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#244F73] text-white text-xs font-bold hover:bg-[#1A2840] shadow-xs focus:ring-2 focus:ring-[#244F73]">
+                        class="inline-flex items-center gap-2 px-6 py-3 min-h-[44px] rounded-xl bg-[#244F73] text-white text-xs sm:text-sm font-bold hover:bg-[#1A2840] shadow-xs transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1A2840] focus-visible:ring-offset-2">
                     <span>
                         @if($currentStep === 1)
                             &rarr; Continue to details
@@ -1861,192 +1855,349 @@
             @else
                 <button type="button"
                         wire:click="saveProfileAndRedirect"
-                        class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#244F73] text-white text-xs font-bold hover:bg-[#1A2840] shadow-xs focus:ring-2 focus:ring-[#244F73]">
+                        class="inline-flex items-center gap-2 px-6 py-3 min-h-[44px] rounded-xl bg-[#244F73] text-white text-xs sm:text-sm font-bold hover:bg-[#1A2840] shadow-xs transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1A2840] focus-visible:ring-offset-2">
                     <span>&rarr; Save Profile &amp; Find Matches</span>
                 </button>
             @endif
         </div>
     </div>
 
-    <div class="text-center text-[11px] text-gray-500">
+    <div class="mt-6 text-center text-xs text-gray-500">
         All steps support keyboard navigation. Voice input is always optional.
     </div>
 
-    <!-- Modern Two-Column / Header-Split Resume Preview Modal -->
+    <!-- Print-Friendly Digital Profile Resume Preview Modal -->
     @if($showResumePreviewModal)
+        @php
+            $resumeUser = auth()->user();
+            $resumeProfile = $resumeUser?->candidateProfile;
+            $resumeFullName = trim(implode(' ', array_filter([$firstName, $middleName, $lastName, $suffix]))) ?: ($resumeUser?->name ?? 'Candidate Name');
+            $resumePrintName = trim(implode(' ', array_filter([$firstName, $middleName, $lastName]))) ?: ($resumeUser?->name ?? 'Candidate Name');
+            $resumeInitials = strtoupper(substr($firstName, 0, 1).substr($lastName, 0, 1)) ?: ($resumeUser?->initials() ?? 'MS');
+            $resumeMaskedId = 'PWD-'.str_pad((string) ($resumeUser?->id ?? 0), 5, '0', STR_PAD_LEFT);
+            $resumeUpdatedDate = $resumeProfile?->updated_at ? $resumeProfile->updated_at->format('M d, Y') : now()->format('M d, Y');
+            $resumeLocation = implode(', ', array_filter([$barangay, $city, $country]));
+            $resumeLanguages = array_values(array_filter(array_merge(
+                $spokenLanguages,
+                ($hasOtherLanguage && trim($otherLanguage) !== '') ? [trim($otherLanguage)] : []
+            )));
+            if (empty($resumeLanguages)) {
+                $resumeLanguages = ['Filipino', 'English'];
+            }
+        @endphp
+        <style>
+            @media print {
+                body * {
+                    visibility: hidden !important;
+                }
+                #resume-preview-printable,
+                #resume-preview-printable * {
+                    visibility: visible !important;
+                }
+                #resume-preview-printable {
+                    position: fixed !important;
+                    inset: 0 !important;
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    background: #ffffff !important;
+                    box-shadow: none !important;
+                    border: none !important;
+                    overflow: visible !important;
+                }
+                #resume-preview-printable .resume-no-break {
+                    break-inside: avoid !important;
+                    page-break-inside: avoid !important;
+                }
+            }
+        </style>
         <div class="fixed inset-0 z-50 overflow-y-auto bg-black/60 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="resume-preview-title">
-            <div class="bg-white rounded-2xl max-w-3xl w-full shadow-2xl border border-gray-200 overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="bg-white rounded-2xl max-w-4xl w-full shadow-2xl border border-gray-200 overflow-hidden flex flex-col max-h-[90vh]">
                 <!-- Modal Top Toolbar -->
-                <div class="px-6 py-3.5 bg-gray-50 border-b border-gray-200 flex items-center justify-between shrink-0">
-                    <div class="flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-[#176B47]"></span>
-                        <h3 id="resume-preview-title" class="text-xs font-bold uppercase tracking-wider text-[#1A2840]">
+                <div class="px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between gap-4 shrink-0">
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <span class="w-2.5 h-2.5 rounded-full bg-[#176B47] shrink-0" aria-hidden="true"></span>
+                        <h3 id="resume-preview-title" class="text-xs font-bold uppercase tracking-wider text-[#1A2840] truncate">
                             Auto-Generated Resume Preview &middot; {{ $resumeFilename }}
                         </h3>
                     </div>
                     <button type="button"
                             wire:click="closeResumePreviewModal"
-                            class="p-1 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-200/60 focus:outline-none focus:ring-2 focus:ring-[#244F73]"
+                            class="p-1.5 rounded-lg text-gray-500 hover:text-gray-800 hover:bg-gray-200/70 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#244F73] focus-visible:ring-offset-2 shrink-0"
                             aria-label="Close resume preview">
                         &#10005;
                     </button>
                 </div>
 
-                <!-- Resume Document Canvas -->
-                <div class="overflow-y-auto flex-1">
-                    <!-- Professional Top Header Split -->
-                    <div class="bg-[#1A2840] text-white px-6 py-6 space-y-4">
-                        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                            <div>
-                                <h4 class="text-xl font-extrabold tracking-tight text-white">
-                                    {{ trim(implode(' ', array_filter([$firstName, $middleName, $lastName, $suffix]))) ?: 'Candidate Name' }}
-                                </h4>
-                                <div class="text-sm font-semibold text-sky-200 mt-0.5">
-                                    {{ $effectiveHeadline }}
+                <!-- Resume Document Canvas (Clean Print-Friendly Digital Profile Layout) -->
+                <div class="overflow-y-auto flex-1 bg-white">
+                    <article id="resume-preview-printable" class="bg-white p-6 sm:p-10 space-y-8 w-full min-w-0" aria-label="{{ __('Generated Candidate Digital Profile Resume') }}">
+                        {{-- Clean White Official Header --}}
+                        <header class="resume-no-break break-inside-avoid flex flex-col sm:flex-row items-start justify-between gap-6 pb-6 border-b-2 border-primary-dark/20 w-full min-w-0">
+                            <div class="flex flex-col sm:flex-row items-start gap-6 min-w-0 flex-1">
+                                {{-- 2x2 Photo Frame --}}
+                                <div class="relative w-28 h-28 sm:w-32 sm:h-32 rounded-xl border-2 border-primary-border bg-primary-tint/30 flex items-center justify-center overflow-hidden shrink-0 shadow-xs">
+                                    @if($avatarUpload)
+                                        <img src="{{ $avatarUpload->temporaryUrl() }}"
+                                             alt="{{ $resumeFullName }} 2x2 Photo"
+                                             class="w-full h-full object-cover">
+                                    @elseif($avatarPath)
+                                        <img src="{{ Storage::url($avatarPath) }}"
+                                             alt="{{ $resumeFullName }} 2x2 Photo"
+                                             class="w-full h-full object-cover"
+                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                        <div class="flex-col items-center justify-center text-center p-2" style="display: none;">
+                                            <span class="font-heading text-2xl font-bold text-primary">{{ $resumeInitials }}</span>
+                                            <span class="text-[10px] uppercase font-semibold text-body-muted mt-1 tracking-wider">2x2 Photo</span>
+                                        </div>
+                                    @else
+                                        <div class="flex flex-col items-center justify-center text-center p-2">
+                                            <span class="font-heading text-2xl font-bold text-primary">{{ $resumeInitials }}</span>
+                                            <span class="text-[10px] uppercase font-semibold text-body-muted mt-1 tracking-wider">2x2 Photo</span>
+                                        </div>
+                                    @endif
+                                    <div class="absolute inset-0 border border-black/5 pointer-events-none rounded-xl"></div>
+                                </div>
+
+                                {{-- Name & Identity Meta --}}
+                                <div class="space-y-1.5 min-w-0 flex-1">
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#E8F5E9] text-[#176B47] border border-[#176B47]/20">
+                                            <svg class="size-3.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                                            RA 7277 Verified PWD
+                                        </span>
+                                        @if($resumeProfile?->disability_type)
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary-tint text-primary-dark border border-primary-border">
+                                                Category: {{ $resumeProfile->disability_type }}
+                                            </span>
+                                        @endif
+                                    </div>
+
+                                    <h4 class="font-heading text-2xl sm:text-3xl font-extrabold text-primary-dark tracking-tight break-words">
+                                        {{ $resumeFullName }}
+                                    </h4>
+
+                                    <p class="text-sm font-semibold text-primary break-words">
+                                        {{ $effectiveHeadline ?: __('Professional seeking inclusive and barrier-free opportunities') }}
+                                    </p>
+
+                                    <div class="flex flex-wrap items-center gap-y-1 gap-x-4 pt-1 text-xs text-body-muted min-w-0">
+                                        @if($resumeLocation)
+                                            <span class="flex items-center gap-1">
+                                                <svg class="size-3.5 text-primary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                                <span class="break-words">{{ $resumeLocation }}</span>
+                                            </span>
+                                        @endif
+
+                                        @if($email || $resumeUser?->email)
+                                            <span class="flex items-center gap-1 min-w-0 break-all">
+                                                <svg class="size-3.5 text-primary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                                <span>{{ $email ?: $resumeUser?->email }}</span>
+                                            </span>
+                                        @endif
+
+                                        @if($phone)
+                                            <span class="flex items-center gap-1 shrink-0">
+                                                <svg class="size-3.5 text-primary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                                                <span>{{ $phone }}</span>
+                                            </span>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
-                            @if($pwdIdNumber)
-                                <span class="inline-flex items-center gap-1.5 self-start px-3 py-1 rounded-full text-xs font-bold bg-[#176B47] text-white border border-emerald-400/30">
-                                    <span>&#10003; PWD ID: {{ $pwdIdNumber }}</span>
-                                </span>
-                            @endif
-                        </div>
 
-                        <!-- Contact & Metadata Pill Tags -->
-                        <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-white/15 text-[11px]">
-                            @if($email)
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-md bg-white/10 text-gray-100 font-medium">
-                                    {{ $email }}
+                            {{-- Document Stamp / Meta (Masked ID only) --}}
+                            <div class="sm:text-right space-y-1 text-xs shrink-0 pt-2 sm:pt-0">
+                                <span class="inline-block uppercase tracking-wider text-[10px] font-bold text-primary bg-primary-tint px-2.5 py-1 rounded">
+                                    Digital Profile
                                 </span>
-                            @endif
-                            @if($phone)
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-md bg-white/10 text-gray-100 font-medium">
-                                    {{ $phone }}
-                                </span>
-                            @endif
-                            @if($barangay || $city || $country || $zipCode)
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-md bg-white/10 text-gray-100 font-medium">
-                                    {{ implode(', ', array_filter([$barangay, $city, $country, $zipCode ? 'ZIP '.$zipCode : null])) }}
-                                </span>
-                            @endif
-                            @php
-                                $previewLanguages = array_values(array_filter(array_merge($spokenLanguages, $hasOtherLanguage && $otherLanguage ? [$otherLanguage] : [])));
-                            @endphp
-                            @if(!empty($previewLanguages))
-                                <span class="inline-flex items-center px-2.5 py-1 rounded-md bg-white/10 text-sky-200 font-medium">
-                                    Languages: {{ implode(', ', $previewLanguages) }}
-                                </span>
-                            @endif
-                        </div>
-                    </div>
+                                <p class="font-mono text-[11px] text-body-muted">
+                                    ID: {{ $resumeMaskedId }}
+                                </p>
+                                <p class="text-[11px] text-body-muted">
+                                    Updated: {{ $resumeUpdatedDate }}
+                                </p>
+                            </div>
+                        </header>
 
-                    <!-- Two-Column Structured Resume Body -->
-                    <div class="grid grid-cols-1 md:grid-cols-12 gap-6 p-6 bg-white text-xs">
-                        <!-- Left Main Column (7 cols): Summary & Work Experience -->
-                        <div class="md:col-span-7 space-y-5">
-                            @if($bio)
-                                <div class="space-y-2">
-                                    <h5 class="text-[11px] font-bold uppercase tracking-wider text-[#244F73] pb-1 border-b border-gray-200">
-                                        Professional Summary
-                                    </h5>
-                                    <p class="text-[#25313B] leading-relaxed">
-                                        {{ $bio }}
-                                    </p>
-                                </div>
-                            @endif
-
-                            <div class="space-y-3">
-                                <h5 class="text-[11px] font-bold uppercase tracking-wider text-[#244F73] pb-1 border-b border-gray-200">
-                                    Work Experience
+                        {{-- 1. Personal Summary & Career Objective --}}
+                        @if(trim($bio) !== '')
+                            <section class="resume-no-break break-inside-avoid space-y-2">
+                                <h5 class="font-heading text-xs font-bold uppercase tracking-wider text-primary-dark pb-1.5 border-b border-gray-100 flex items-center gap-2">
+                                    <svg class="size-4 text-primary shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                    <span>{{ __('Personal Summary & Career Objective') }}</span>
                                 </h5>
+                                <p class="text-sm text-primary-dark leading-relaxed whitespace-pre-line">
+                                    {{ $bio }}
+                                </p>
+                            </section>
+                        @endif
+
+                        {{-- 2. Required Workplace Accommodations (RA 7277 / RA 10524) --}}
+                        <section class="resume-no-break break-inside-avoid rounded-xl border border-primary-border bg-primary-tint/30 p-5 space-y-3">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <h5 class="font-heading text-xs font-bold uppercase tracking-wider text-primary-dark flex items-center gap-2">
+                                    <svg class="size-4 text-primary shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="4" r="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0l-3 6m3-6l3 6M9 9h6"/></svg>
+                                    <span>{{ __('Required Workplace Accommodations (RA 7277 / RA 10524)') }}</span>
+                                </h5>
+                                <span class="text-[11px] font-semibold text-primary">Incentive Eligible</span>
+                            </div>
+
+                            <p class="text-xs text-body-muted">
+                                {{ __('Accommodations required by candidate to perform essential job duties efficiently without physical or communication barriers:') }}
+                            </p>
+
+                            <div class="flex flex-wrap gap-2 pt-1">
+                                @forelse($selectedAccommodationObjects as $accObj)
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-primary-dark border border-primary-border shadow-2xs">
+                                        <svg class="size-3.5 text-secondary shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                        <span>{{ $accObj->name }}</span>
+                                    </span>
+                                @empty
+                                    @if(trim($accommodationNotes) !== '')
+                                        <span class="text-xs text-primary-dark font-medium">{{ $accommodationNotes }}</span>
+                                    @else
+                                        <span class="text-xs text-body-muted italic">{{ __('Standard workplace accommodations indicated upon application.') }}</span>
+                                    @endif
+                                @endforelse
+                            </div>
+
+                            @if(trim($accommodationNotes) !== '' && $selectedAccommodationObjects->isNotEmpty())
+                                <p class="text-xs text-primary-dark pt-1">
+                                    <strong>{{ __('Candidate notes:') }}</strong> {{ $accommodationNotes }}
+                                </p>
+                            @endif
+                        </section>
+
+                        {{-- 3. Work Experience & Employment History --}}
+                        <section class="resume-no-break break-inside-avoid space-y-4">
+                            <h5 class="font-heading text-xs font-bold uppercase tracking-wider text-primary-dark pb-1.5 border-b border-gray-100 flex items-center gap-2">
+                                <svg class="size-4 text-primary shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                <span>{{ __('Work Experience & Employment History') }}</span>
+                            </h5>
+
+                            <div class="space-y-4">
                                 @forelse($validExperiences as $exp)
-                                    <div class="space-y-1 pb-3 border-b border-gray-100 last:border-b-0 last:pb-0">
+                                    <div class="resume-no-break break-inside-avoid space-y-1 text-sm border-l-2 border-primary/40 pl-3.5 py-0.5">
                                         <div class="flex flex-wrap items-center justify-between gap-2">
-                                            <div class="font-bold text-sm text-[#1A2840]">
-                                                {{ $exp['job_title'] ?: 'Professional Role' }}
-                                            </div>
-                                            @if($exp['start_year'] || $exp['end_year'])
-                                                <span class="px-2 py-0.5 rounded bg-gray-100 text-[11px] font-semibold text-gray-700 tabular-nums">
-                                                    {{ $exp['start_year'] ?: 'Start' }} &ndash; {{ $exp['end_year'] ?: 'Present' }}
+                                            <h6 class="font-bold text-primary-dark text-base">{{ $exp['job_title'] ?: 'Professional Role' }}</h6>
+                                            @if($exp['start_year'] || $exp['end_year'] || !empty($exp['is_current']))
+                                                <span class="text-xs text-body-muted font-medium tabular-nums">
+                                                    {{ $exp['start_year'] ?: 'Start' }} &mdash; {{ !empty($exp['is_current']) ? 'Present' : ($exp['end_year'] ?: 'End') }}
                                                 </span>
                                             @endif
                                         </div>
                                         @if($exp['company_name'])
-                                            <div class="font-semibold text-[#244F73]">
+                                            <p class="text-xs font-semibold text-primary">
                                                 {{ $exp['company_name'] }}
-                                            </div>
+                                            </p>
                                         @endif
                                         @if($exp['description'])
-                                            <p class="text-[#4E5F6E] leading-relaxed pt-0.5">
+                                            <p class="text-xs text-body-muted leading-relaxed whitespace-pre-line pt-1">
                                                 {{ $exp['description'] }}
                                             </p>
                                         @endif
                                     </div>
                                 @empty
-                                    <p class="text-gray-500">No work experience listed.</p>
+                                    <p class="text-xs text-body-muted italic">{{ __('No formal work experience added yet. Entry-level & vocational training candidate.') }}</p>
                                 @endforelse
                             </div>
-                        </div>
+                        </section>
 
-                        <!-- Right Sidebar Column (5 cols): Education, Skills & Accommodations -->
-                        <div class="md:col-span-5 space-y-5 md:border-l md:border-gray-200 md:pl-6">
-                            <!-- Education -->
-                            <div class="space-y-2">
-                                <h5 class="text-[11px] font-bold uppercase tracking-wider text-[#244F73] pb-1 border-b border-gray-200">
-                                    Education
-                                </h5>
-                                <div class="font-bold text-[#1A2840]">{{ $highestEducation }}</div>
-                                @if($institutionName)
-                                    <div class="text-[#4E5F6E]">{{ $institutionName }}</div>
-                                @endif
-                                @if($yearGraduated)
-                                    <div class="text-[11px] text-gray-500">Graduated {{ $yearGraduated }}</div>
-                                @endif
-                            </div>
+                        {{-- 4. Educational Attainment --}}
+                        <section class="resume-no-break break-inside-avoid space-y-4">
+                            <h5 class="font-heading text-xs font-bold uppercase tracking-wider text-primary-dark pb-1.5 border-b border-gray-100 flex items-center gap-2">
+                                <svg class="size-4 text-primary shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+                                <span>{{ __('Educational Attainment') }}</span>
+                            </h5>
 
-                            <!-- Skills & Strengths -->
-                            <div class="space-y-2">
-                                <h5 class="text-[11px] font-bold uppercase tracking-wider text-[#244F73] pb-1 border-b border-gray-200">
-                                    Skills &amp; Strengths
-                                </h5>
-                                @if(!empty($selectedSkills))
-                                    <div class="flex flex-wrap gap-1.5">
-                                        @foreach($selectedSkills as $sk)
-                                            <span class="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-semibold bg-[#DCEAF4] text-[#1A2840]">
-                                                {{ $sk }}
-                                            </span>
-                                        @endforeach
+                            <div class="space-y-3">
+                                @if($highestEducation || $institutionName)
+                                    <div class="resume-no-break break-inside-avoid space-y-0.5 text-sm border-l-2 border-secondary/40 pl-3.5 py-0.5">
+                                        <div class="flex flex-wrap items-center justify-between gap-2">
+                                            <h6 class="font-bold text-primary-dark">{{ $highestEducation ?: __('Educational Background') }}</h6>
+                                            @if($yearGraduated)
+                                                <span class="text-xs text-body-muted font-medium tabular-nums">
+                                                    Graduated {{ $yearGraduated }}
+                                                </span>
+                                            @endif
+                                        </div>
+                                        @if($institutionName)
+                                            <p class="text-xs font-semibold text-secondary">
+                                                {{ $institutionName }}
+                                            </p>
+                                        @endif
                                     </div>
                                 @else
-                                    <p class="text-gray-500">No skills selected.</p>
+                                    <p class="text-xs text-body-muted italic">{{ __('Educational background details available upon request.') }}</p>
                                 @endif
                             </div>
+                        </section>
 
-                            <!-- Workplace Accommodations -->
-                            @if($selectedAccommodationObjects->isNotEmpty())
-                                <div class="space-y-2">
-                                    <h5 class="text-[11px] font-bold uppercase tracking-wider text-[#176B47] pb-1 border-b border-gray-200">
-                                        Workplace Accommodations
-                                    </h5>
-                                    <ul class="space-y-1.5">
-                                        @foreach($selectedAccommodationObjects as $accObj)
-                                            <li class="flex items-center gap-1.5 text-[#176B47] font-medium">
-                                                <span>&#10003;</span>
-                                                <span>{{ $accObj->name }}</span>
-                                            </li>
-                                        @endforeach
-                                    </ul>
+                        {{-- 5. Two-Column Grid: Skills & Core Competencies + Communication & Languages --}}
+                        <div class="resume-no-break break-inside-avoid grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            {{-- Skills & Core Competencies --}}
+                            <section class="space-y-2.5">
+                                <h5 class="font-heading text-xs font-bold uppercase tracking-wider text-primary-dark pb-1.5 border-b border-gray-100">
+                                    {{ __('Skills & Core Competencies') }}
+                                </h5>
+                                <div class="flex flex-wrap gap-1.5">
+                                    @forelse($selectedSkills as $sk)
+                                        <span class="px-2.5 py-1 rounded-md bg-gray-100 text-primary-dark text-xs font-medium">
+                                            {{ $sk }}
+                                        </span>
+                                    @empty
+                                        <span class="text-xs text-body-muted italic">{{ __('Skills documented during onboarding.') }}</span>
+                                    @endforelse
                                 </div>
-                            @endif
+                            </section>
+
+                            {{-- Communication & Languages --}}
+                            <section class="space-y-2.5">
+                                <h5 class="font-heading text-xs font-bold uppercase tracking-wider text-primary-dark pb-1.5 border-b border-gray-100">
+                                    {{ __('Communication & Languages') }}
+                                </h5>
+                                <div class="flex flex-wrap gap-1.5">
+                                    @foreach($resumeLanguages as $lang)
+                                        <span class="px-2.5 py-1 rounded-md bg-primary-tint/60 text-primary-dark text-xs font-medium">
+                                            {{ $lang }}
+                                        </span>
+                                    @endforeach
+                                </div>
+                            </section>
                         </div>
-                    </div>
+
+                        {{-- 6. Legal Certification & Bottom Signature / Accreditation Footer --}}
+                        <footer class="resume-no-break break-inside-avoid pt-6 border-t-2 border-primary-dark/20 space-y-6">
+                            <p class="text-xs text-body-muted italic leading-relaxed text-center sm:text-left">
+                                &ldquo;I hereby certify that all information stated herein is true, correct, and complete to the best of my knowledge and belief. Prepared in compliance with Republic Act No. 7277, RA 10524, and the Data Privacy Act of 2012 (RA 10173).&rdquo;
+                            </p>
+
+                            <div class="flex flex-col sm:flex-row items-center sm:items-end justify-between gap-6 pt-4 text-xs text-primary-dark w-full min-w-0">
+                                <div class="space-y-1 text-center sm:text-left min-w-0 flex-1">
+                                    <p class="text-[11px] text-body-muted">Accredited by PESO &amp; Republic Act No. 10524 Partner</p>
+                                    <p class="font-bold text-xs">PWD-E Multimodal Employment Platform</p>
+                                    <p class="text-[10px] text-body-muted">Western Mindanao State University &middot; College of Computing Studies</p>
+                                </div>
+
+                                <div class="text-center sm:text-right space-y-1 shrink-0 w-full sm:w-auto flex flex-col items-center sm:items-end">
+                                    <div class="w-56 border-b border-primary-dark pb-1">
+                                        <span class="font-bold uppercase tracking-wider text-xs">{{ $resumePrintName }}</span>
+                                    </div>
+                                    <p class="text-[10px] text-body-muted uppercase tracking-wider">Candidate Signature Over Printed Name</p>
+                                    <p class="text-[10px] text-body-muted">Date: {{ now()->format('F d, Y') }}</p>
+                                </div>
+                            </div>
+                        </footer>
+                    </article>
                 </div>
 
                 <!-- Modal Footer Actions -->
-                <div class="px-6 py-3.5 bg-gray-50 border-t border-gray-200 flex items-center justify-end gap-2.5 shrink-0">
+                <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-end gap-3 shrink-0">
                     <button type="button"
                             wire:click="downloadResume"
-                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#244F73] text-white text-xs font-bold hover:bg-[#1A2840] focus:ring-2 focus:ring-[#244F73]">
+                            class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg bg-[#244F73] text-white text-xs font-bold hover:bg-[#1A2840] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1A2840] focus-visible:ring-offset-2">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                         </svg>
@@ -2054,7 +2205,7 @@
                     </button>
                     <button type="button"
                             wire:click="closeResumePreviewModal"
-                            class="px-4 py-2 rounded-lg border border-gray-300 bg-white text-xs font-semibold text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-[#244F73]">
+                            class="px-4 py-2.5 rounded-lg border border-gray-300 bg-white text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#244F73] focus-visible:ring-offset-2">
                         Close
                     </button>
                 </div>
