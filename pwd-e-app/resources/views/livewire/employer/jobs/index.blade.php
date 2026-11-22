@@ -1,12 +1,12 @@
 <div class="space-y-6">
     <!-- Hero Header with Landing Page Design -->
-    <div class="relative overflow-hidden rounded-2xl border border-primary-border bg-white p-6 sm:p-8 shadow-sm" style="background: linear-gradient(135deg, #DCEAF4 0%, #FFFFFF 100%); box-shadow: 0 4px 20px rgba(26,40,64,0.06);">
-        <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-            <div class="space-y-2">
+    <div class="relative overflow-hidden rounded-2xl border border-primary-border bg-white p-6 lg:p-7 shadow-sm" style="background: linear-gradient(135deg, #DCEAF4 0%, #FFFFFF 100%); box-shadow: 0 4px 20px rgba(26,40,64,0.06);">
+        <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+            <div class="space-y-2.5 max-w-3xl min-w-0">
                 <div class="flex flex-wrap items-center gap-2">
-                    <span class="inline-flex items-center gap-1.5 rounded-full border border-primary-border bg-white px-3 py-1 text-xs font-bold text-secondary shadow-xs">
-                        <svg class="size-3.5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                        {{ __('Inclusive Employer Portal') }}
+                    <span class="inline-flex items-center gap-1.5 rounded-full border border-primary-border bg-white px-3 py-1 text-xs font-bold text-secondary shadow-2xs">
+                        <svg class="size-3.5 text-secondary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                        <span>{{ __('Inclusive Employer Portal') }}</span>
                     </span>
                     @if (auth()->user()->employerProfile?->company_name)
                         <span class="rounded-full bg-primary-tint px-3 py-1 text-xs font-bold text-primary-dark border border-primary-border/70">
@@ -15,22 +15,22 @@
                     @endif
                 </div>
 
-                <h1 class="font-heading text-2xl sm:text-3xl font-bold text-primary-dark">
+                <h1 class="font-heading text-2xl sm:text-3xl font-bold text-primary-dark tracking-tight">
                     {{ __('Job Postings Management') }}
                 </h1>
-                <p class="text-sm sm:text-base text-body-muted max-w-2xl">
+                <p class="text-xs sm:text-sm text-body-muted leading-relaxed max-w-2xl">
                     {{ __('Create, review, and manage your barrier-free job listings accredited under Republic Act 10524.') }}
                 </p>
             </div>
 
             <!-- Header CTA -->
-            <div class="shrink-0">
+            <div class="flex flex-wrap items-center gap-2.5 shrink-0">
                 <a
                     href="{{ route('employer.jobs.create') }}"
-                    class="inline-flex items-center gap-2 rounded-xl bg-primary-dark px-6 py-3.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary min-h-[48px]"
+                    class="inline-flex items-center justify-center gap-2 h-11 rounded-xl bg-primary-dark px-4 text-xs sm:text-sm font-semibold text-white shadow-xs transition hover:bg-primary whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark focus-visible:ring-offset-2"
                 >
-                    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                    {{ __('Post a New Opportunity') }}
+                    <svg class="size-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                    <span>{{ __('Post a New Opportunity') }}</span>
                 </a>
             </div>
         </div>
@@ -175,7 +175,7 @@
         <div class="space-y-4">
             @foreach ($jobs as $job)
                 <article class="rounded-2xl border border-primary-border bg-white p-6 shadow-sm transition hover:shadow-md" style="box-shadow: 0 4px 16px rgba(26,40,64,0.08);">
-                    <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+                    <div class="flex flex-col gap-6 lg:flex-row lg:items-stretch lg:justify-between">
                         <!-- Left Details -->
                         <div class="space-y-3 flex-1 min-w-0">
                             <!-- Title & Status Badge -->
@@ -269,7 +269,7 @@
                         </div>
 
                         <!-- Right Stats Box & Action Controls -->
-                        <div class="flex flex-wrap items-center gap-3 lg:flex-col lg:items-end shrink-0">
+                        <div class="flex flex-wrap items-center gap-3 lg:flex-col lg:justify-center lg:items-end lg:self-center shrink-0">
                             <!-- Applicant Counter Box -->
                             <div class="rounded-xl border border-primary-border bg-surface p-3 text-center min-w-[130px]">
                                 <span class="block font-heading text-xl font-bold text-primary-dark">
@@ -281,19 +281,19 @@
                             </div>
 
                             <!-- Actions Group -->
-                            <div class="flex items-center gap-2">
+                            <div class="flex flex-wrap items-center gap-2">
                                 <a
                                     href="{{ route('employer.jobs.applicants', $job->id) }}"
-                                    class="inline-flex items-center gap-1.5 rounded-xl border border-primary-border bg-white px-3.5 py-2 text-xs font-bold text-primary-dark shadow-xs transition hover:bg-primary-tint"
+                                    class="inline-flex items-center gap-1.5 rounded-xl border border-primary-border bg-white px-3.5 py-2 text-xs font-bold text-primary-dark shadow-xs transition hover:bg-primary-tint whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                                 >
                                     {{ __('Applicants') }}
                                 </a>
 
                                 <a
                                     href="{{ route('employer.jobs.edit', $job->id) }}"
-                                    class="inline-flex items-center gap-1.5 rounded-xl border border-primary-border bg-white px-3.5 py-2 text-xs font-bold text-primary-dark shadow-xs transition hover:bg-primary-tint"
+                                    class="inline-flex items-center gap-1.5 rounded-xl border border-primary-border bg-white px-3.5 py-2 text-xs font-bold text-primary-dark shadow-xs transition hover:bg-primary-tint whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                                 >
-                                    <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                    <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                     {{ __('Edit') }}
                                 </a>
 
@@ -302,7 +302,7 @@
                                         type="button"
                                         wire:click="closeJob({{ $job->id }})"
                                         wire:confirm="{{ __('Are you sure you want to close this job posting?') }}"
-                                        class="rounded-xl border border-rose-200 bg-rose-50/50 px-3.5 py-2 text-xs font-bold text-rose-700 hover:bg-rose-100 transition"
+                                        class="rounded-xl border border-rose-200 bg-rose-50/50 px-3.5 py-2 text-xs font-bold text-rose-700 hover:bg-rose-100 transition whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-600 focus-visible:ring-offset-2"
                                     >
                                         {{ __('Close') }}
                                     </button>
@@ -310,7 +310,7 @@
                                     <button
                                         type="button"
                                         wire:click="reopenJob({{ $job->id }})"
-                                        class="rounded-xl bg-secondary px-3.5 py-2 text-xs font-bold text-white shadow-xs hover:bg-secondary/90 transition"
+                                        class="rounded-xl bg-secondary px-3.5 py-2 text-xs font-bold text-white shadow-xs hover:bg-secondary/90 transition whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2"
                                     >
                                         {{ __('Republish') }}
                                     </button>
@@ -321,7 +321,7 @@
                                         type="button"
                                         wire:click="deleteJob({{ $job->id }})"
                                         wire:confirm="{{ __('Are you sure you want to delete this draft?') }}"
-                                        class="rounded-xl border border-rose-300 bg-white px-3.5 py-2 text-xs font-bold text-rose-700 hover:bg-rose-50 transition"
+                                        class="rounded-xl border border-rose-300 bg-white px-3.5 py-2 text-xs font-bold text-rose-700 hover:bg-rose-50 transition whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-600 focus-visible:ring-offset-2"
                                     >
                                         {{ __('Delete') }}
                                     </button>

@@ -1,4 +1,4 @@
-<div class="space-y-6 max-w-5xl mx-auto w-full min-w-0">
+<div class="space-y-8 max-w-6xl mx-auto w-full min-w-0">
     <style>
         @media print {
             body {
@@ -43,88 +43,90 @@
         </div>
     @endif
 
-    {{-- Top Action Bar (Screen Only) --}}
-    <div class="no-print flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-primary-border w-full min-w-0">
-        <div>
-            <div class="flex items-center gap-2 text-xs text-body-muted">
-                @if($isEmployer)
-                    <a href="{{ route('employer.jobs.index') }}" class="hover:text-primary transition-colors">Employer Portal</a>
-                    <span>/</span>
-                    <span class="text-primary-dark font-medium">Candidate Profile</span>
-                @else
-                    <a href="{{ route('dashboard') }}" class="hover:text-primary transition-colors">Dashboard</a>
-                    <span>/</span>
-                    <span class="text-primary-dark font-medium">{{ __('View my Profile') }}</span>
-                @endif
+    {{-- Top Header Banner Card (Screen Only) --}}
+    <div class="no-print w-full relative overflow-hidden rounded-2xl border border-primary-border bg-white p-5 sm:p-6 shadow-sm" style="background: linear-gradient(135deg, #DCEAF4 0%, #FFFFFF 100%); box-shadow: 0 4px 20px rgba(26,40,64,0.06);">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div class="space-y-2 max-w-3xl min-w-0 flex-1">
+                <nav class="inline-flex items-center gap-1.5 rounded-full border border-primary-border bg-white px-3 py-1 text-xs font-semibold text-body-muted shadow-2xs" aria-label="Breadcrumb">
+                    @if($isEmployer)
+                        <a href="{{ route('employer.jobs.index') }}" class="hover:text-primary transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">Employer Portal</a>
+                        <span aria-hidden="true">/</span>
+                        <span class="text-primary-dark font-bold" aria-current="page">Candidate Profile</span>
+                    @else
+                        <a href="{{ route('dashboard') }}" class="hover:text-primary transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">Dashboard</a>
+                        <span aria-hidden="true">/</span>
+                        <span class="text-primary-dark font-bold" aria-current="page">{{ __('View my Profile') }}</span>
+                    @endif
+                </nav>
+                <h1 class="font-heading text-2xl sm:text-3xl font-bold text-primary-dark tracking-tight">
+                    {{ $isOwner ? __('Profile') : __('Candidate Digital Profile') }}
+                </h1>
+                <p class="text-xs sm:text-sm text-body-muted leading-relaxed max-w-2xl">
+                    {{ __('Official multimodal employment profile and Philippine Digital Profile format under RA 10524.') }}
+                </p>
             </div>
-            <h1 class="font-heading text-2xl font-bold text-primary-dark mt-1">
-                {{ $isOwner ? __('Profile') : __('Candidate Digital Profile') }}
-            </h1>
-            <p class="text-xs text-body-muted mt-0.5">
-                {{ __('Official multimodal employment profile and Philippine Digital Profile format under RA 10524.') }}
-            </p>
-        </div>
 
-        <div class="flex flex-wrap items-center gap-2.5 shrink-0">
-            @if($isOwner)
-                {{-- Mode Switcher Tabs --}}
-                <div class="inline-flex rounded-xl p-1 bg-surface border border-primary-border shadow-2xs" role="tablist" aria-label="Profile navigation">
-                    <button type="button"
-                            wire:click="setTab('view')"
-                            role="tab"
-                            aria-selected="{{ $tab === 'view' ? 'true' : 'false' }}"
-                            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all {{ $tab === 'view' ? 'bg-primary-dark text-white shadow-xs' : 'text-body-muted hover:text-primary-dark hover:bg-white/60' }}">
-                        <svg class="size-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                        <span>{{ __('View Profile') }}</span>
-                    </button>
-                    <button type="button"
-                            wire:click="setTab('edit')"
-                            role="tab"
-                            aria-selected="{{ $tab === 'edit' ? 'true' : 'false' }}"
-                            class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all {{ $tab === 'edit' ? 'bg-primary-dark text-white shadow-xs' : 'text-body-muted hover:text-primary-dark hover:bg-white/60' }}">
-                        <svg class="size-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-                        <span>{{ __('Edit Profile') }}</span>
-                    </button>
-                </div>
+            <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+                @if($isOwner)
+                    {{-- Mode Switcher Tabs --}}
+                    <div class="inline-flex rounded-xl p-1 bg-white/90 border border-primary-border shadow-2xs" role="tablist" aria-label="Profile navigation">
+                        <button type="button"
+                                wire:click="setTab('view')"
+                                role="tab"
+                                aria-selected="{{ $tab === 'view' ? 'true' : 'false' }}"
+                                class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 {{ $tab === 'view' ? 'bg-primary-dark text-white shadow-xs' : 'text-body-muted hover:text-primary-dark hover:bg-primary-tint/50' }}">
+                            <svg class="size-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                            <span>{{ __('View Profile') }}</span>
+                        </button>
+                        <button type="button"
+                                wire:click="setTab('edit')"
+                                role="tab"
+                                aria-selected="{{ $tab === 'edit' ? 'true' : 'false' }}"
+                                class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 {{ $tab === 'edit' ? 'bg-primary-dark text-white shadow-xs' : 'text-body-muted hover:text-primary-dark hover:bg-primary-tint/50' }}">
+                            <svg class="size-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                            <span>{{ __('Edit Profile') }}</span>
+                        </button>
+                    </div>
 
-                @if($tab === 'view')
+                    @if($tab === 'view')
+                        <button type="button" onclick="window.print()"
+                                class="inline-flex items-center justify-center gap-2 h-11 px-4 rounded-xl bg-primary-dark text-xs sm:text-sm font-semibold text-white hover:bg-primary shadow-xs transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark focus-visible:ring-offset-2 cursor-pointer">
+                            <svg class="size-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                            </svg>
+                            <span>{{ __('Print / Save Profile') }}</span>
+                        </button>
+                    @endif
+                @else
+                    <button type="button" onclick="history.back()"
+                            class="inline-flex items-center justify-center gap-1.5 h-11 px-4 rounded-xl border border-primary-border bg-white text-xs sm:text-sm font-semibold text-primary-dark hover:bg-primary-tint/60 shadow-2xs transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 cursor-pointer">
+                        <svg class="size-4 text-primary shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                        <span>{{ __('Back') }}</span>
+                    </button>
                     <button type="button" onclick="window.print()"
-                            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-dark text-xs font-semibold text-white hover:bg-primary shadow-xs transition-colors focus:outline-none focus:ring-2 focus:ring-primary/40 cursor-pointer">
-                        <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                            class="inline-flex items-center justify-center gap-2 h-11 px-4 rounded-xl bg-primary-dark text-xs sm:text-sm font-semibold text-white hover:bg-primary shadow-xs transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark focus-visible:ring-offset-2 cursor-pointer">
+                        <svg class="size-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
                         </svg>
                         <span>{{ __('Print / Save Profile') }}</span>
                     </button>
                 @endif
-            @else
-                <button type="button" onclick="history.back()"
-                        class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-lg border border-primary-border bg-white text-xs font-semibold text-primary-dark hover:bg-primary-tint shadow-xs transition-colors">
-                    <svg class="size-4 text-primary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                    <span>{{ __('Back') }}</span>
-                </button>
-                <button type="button" onclick="window.print()"
-                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary-dark text-xs font-semibold text-white hover:bg-primary shadow-xs transition-colors focus:outline-none focus:ring-2 focus:ring-primary/40 cursor-pointer">
-                    <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
-                    </svg>
-                    <span>{{ __('Print / Save Profile') }}</span>
-                </button>
-            @endif
+            </div>
         </div>
     </div>
 
     @if ($isOwner && $tab === 'edit')
         {{-- Unified Profile Editor --}}
-        <div class="no-print space-y-4 w-full min-w-0">
-            <div class="flex items-center justify-between pb-2 border-b border-primary-border/60">
+        <div class="no-print space-y-6 w-full min-w-0">
+            <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-primary-border/60">
                 <div>
-                    <h2 class="text-base font-bold text-primary-dark">{{ __('Edit Profile & Credentials') }}</h2>
-                    <p class="text-xs text-body-muted">{{ __('Update your personal information, work history, education, skills, and workplace accommodations.') }}</p>
+                    <h2 class="text-lg font-bold text-primary-dark">{{ __('Edit Profile & Credentials') }}</h2>
+                    <p class="text-sm text-gray-500 mt-1 leading-relaxed">{{ __('Update your personal information, work history, education, skills, and workplace accommodations.') }}</p>
                 </div>
                 <button type="button" wire:click="setTab('view')"
-                        class="text-xs font-semibold text-primary hover:underline inline-flex items-center gap-1">
+                        class="text-xs font-semibold text-primary hover:underline inline-flex items-center gap-1 rounded px-2 py-1 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#244F73] focus-visible:ring-offset-2">
                     <span>{{ __('View Profile Preview') }}</span>
-                    <span>&rarr;</span>
+                    <span aria-hidden="true">&rarr;</span>
                 </button>
             </div>
 

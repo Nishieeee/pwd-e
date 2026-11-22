@@ -1,19 +1,36 @@
 <div class="space-y-6">
-    <!-- Screen Header & Actions -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-            <h1 class="font-heading text-2xl font-bold text-primary-dark">{{ __('Workforce & Tax Incentives') }}</h1>
-            <p class="text-sm text-body-muted">{{ __('Statutory gross income deduction calculator and compliance records under Republic Act No. 10524.') }}</p>
-        </div>
-        <div class="print:hidden">
-            <button
-                type="button"
-                onclick="window.print()"
-                class="inline-flex items-center gap-2 rounded-xl border border-primary-border bg-white px-4 py-2.5 text-xs font-bold text-primary-dark shadow-xs hover:bg-primary-tint transition-colors focus:ring-2 focus:ring-primary min-h-[44px]"
-            >
-                <svg class="size-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-                <span>{{ __('Print BIR Compliance Summary') }}</span>
-            </button>
+    <!-- Screen Header Banner Card -->
+    <div class="print:hidden relative overflow-hidden rounded-2xl border border-primary-border bg-white p-6 lg:p-7 shadow-sm" style="background: linear-gradient(135deg, #DCEAF4 0%, #FFFFFF 100%); box-shadow: 0 4px 20px rgba(26,40,64,0.06);">
+        <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+            <div class="space-y-2.5 max-w-3xl min-w-0">
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="inline-flex items-center gap-1.5 rounded-full border border-primary-border bg-white px-3 py-1 text-xs font-bold text-secondary shadow-2xs">
+                        <svg class="size-3.5 text-secondary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                        <span>{{ __('RA 10524 Statutory Compliance') }}</span>
+                    </span>
+                    <span class="rounded-full bg-primary-tint px-3 py-1 text-xs font-semibold text-primary-dark border border-primary-border/70">
+                        {{ __('DOLE / BIR Tax Deduction Tracker') }}
+                    </span>
+                </div>
+
+                <h1 class="font-heading text-2xl sm:text-3xl font-bold text-primary-dark tracking-tight">
+                    {{ __('Workforce & Tax Incentives') }}
+                </h1>
+                <p class="text-xs sm:text-sm text-body-muted leading-relaxed max-w-2xl">
+                    {{ __('Statutory gross income deduction calculator and compliance records under Republic Act No. 10524.') }}
+                </p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+                <button
+                    type="button"
+                    onclick="window.print()"
+                    class="inline-flex items-center justify-center gap-2 h-11 rounded-xl border border-primary-border bg-white px-4 text-xs sm:text-sm font-semibold text-primary-dark shadow-2xs hover:bg-primary-tint/60 transition-colors whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                >
+                    <svg class="size-4 text-primary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                    <span>{{ __('Print BIR Compliance Summary') }}</span>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -65,45 +82,47 @@
     </div>
 
     <!-- Records table -->
-    <div class="rounded-2xl border border-primary-border bg-white shadow-sm">
-        <table class="w-full text-sm">
-            <caption class="sr-only">{{ __('Workforce records') }}</caption>
-            <thead>
-                <tr class="border-b border-primary-border text-left text-xs uppercase tracking-wide text-body-muted">
-                    <th scope="col" class="px-4 py-3">{{ __('Employee') }}</th>
-                    <th scope="col" class="px-4 py-3">{{ __('DOLE / PWD ID No.') }}</th>
-                    <th scope="col" class="px-4 py-3">{{ __('Hired') }}</th>
-                    <th scope="col" class="px-4 py-3">{{ __('Annual wage') }}</th>
-                    <th scope="col" class="px-4 py-3">{{ __('PWD verified') }}</th>
-                    <th scope="col" class="px-4 py-3 text-right">{{ __('Actions') }}</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-primary-border/60">
-                @forelse ($records as $record)
-                    <tr>
-                        <td class="px-4 py-3 font-semibold text-primary-dark">{{ $record->candidateProfile?->user?->name ?? '—' }}</td>
-                        <td class="px-4 py-3 text-xs font-mono text-body-muted">
-                            {{ $record->candidateProfile?->user?->pwd_id_number ?? __('DOLE Verified') }}
-                        </td>
-                        <td class="px-4 py-3 text-body-muted">{{ $record->hired_at?->format('M d, Y') ?? '—' }}</td>
-                        <td class="px-4 py-3 tabular-nums">₱{{ number_format($record->annual_wage, 2) }}</td>
-                        <td class="px-4 py-3">
-                            <button type="button" wire:click="togglePwdVerified({{ $record->id }})" class="rounded-full px-2.5 py-0.5 text-xs font-semibold {{ $record->pwd_verified ? 'bg-secondary-tint text-secondary' : 'bg-gray-100 text-gray-600' }}">
-                                {{ $record->pwd_verified ? __('Verified') : __('Unverified') }}
-                            </button>
-                        </td>
-                        <td class="px-4 py-3 text-right">
-                            <button type="button" wire:click="removeRecord({{ $record->id }})" wire:confirm="Remove this record?" class="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-700">
-                                {{ __('Remove') }}
-                            </button>
-                        </td>
+    <div class="rounded-2xl border border-primary-border bg-white shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm divide-y divide-primary-border/60">
+                <caption class="sr-only">{{ __('Workforce records') }}</caption>
+                <thead class="bg-surface border-b border-primary-border/70">
+                    <tr class="text-left text-xs font-semibold uppercase tracking-wide text-body-muted">
+                        <th scope="col" class="px-5 py-3.5 text-left whitespace-nowrap">{{ __('Employee') }}</th>
+                        <th scope="col" class="px-4 py-3.5 text-left whitespace-nowrap">{{ __('DOLE / PWD ID No.') }}</th>
+                        <th scope="col" class="px-4 py-3.5 text-left whitespace-nowrap">{{ __('Hired') }}</th>
+                        <th scope="col" class="px-4 py-3.5 text-left whitespace-nowrap">{{ __('Annual wage') }}</th>
+                        <th scope="col" class="px-4 py-3.5 text-left whitespace-nowrap">{{ __('PWD verified') }}</th>
+                        <th scope="col" class="px-5 py-3.5 text-right whitespace-nowrap">{{ __('Actions') }}</th>
                     </tr>
-                @empty
-                    <tr>
-                        <td colspan="6" class="px-4 py-6 text-center text-body-muted">{{ __('No workforce records yet. Records are created when you hire an applicant.') }}</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
+                </thead>
+                <tbody class="divide-y divide-primary-border/60">
+                    @forelse ($records as $record)
+                        <tr class="hover:bg-primary-tint/25 transition-colors align-middle">
+                            <td class="px-5 py-4 text-left font-semibold text-primary-dark">{{ $record->candidateProfile?->user?->name ?? '—' }}</td>
+                            <td class="px-4 py-4 text-left text-xs font-mono text-body-muted whitespace-nowrap">
+                                {{ $record->candidateProfile?->user?->pwd_id_number ?? __('DOLE Verified') }}
+                            </td>
+                            <td class="px-4 py-4 text-left text-xs text-body-muted whitespace-nowrap">{{ $record->hired_at?->format('M d, Y') ?? '—' }}</td>
+                            <td class="px-4 py-4 text-left font-medium text-primary-dark tabular-nums whitespace-nowrap">₱{{ number_format($record->annual_wage, 2) }}</td>
+                            <td class="px-4 py-4 text-left whitespace-nowrap">
+                                <button type="button" wire:click="togglePwdVerified({{ $record->id }})" class="rounded-full px-3 py-1 text-xs font-semibold border transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 {{ $record->pwd_verified ? 'bg-secondary-tint text-secondary border-secondary/20 hover:bg-secondary/10' : 'bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200/70' }}">
+                                    {{ $record->pwd_verified ? __('Verified') : __('Unverified') }}
+                                </button>
+                            </td>
+                            <td class="px-5 py-4 text-right whitespace-nowrap">
+                                <button type="button" wire:click="removeRecord({{ $record->id }})" wire:confirm="Remove this record?" class="inline-flex items-center justify-center h-[34px] rounded-lg bg-red-600 px-3 text-xs font-semibold text-white hover:bg-red-700 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2">
+                                    {{ __('Remove') }}
+                                </button>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="px-6 py-10 text-center text-body-muted">{{ __('No workforce records yet. Records are created when you hire an applicant.') }}</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>

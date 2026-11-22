@@ -1,4 +1,4 @@
-<div class="space-y-6 max-w-7xl mx-auto">
+<div class="space-y-6 max-w-7xl mx-auto w-full min-w-0">
     <!-- Notification Banner -->
     @if($actionNotification)
         <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center justify-between" role="alert">
@@ -14,80 +14,54 @@
         </div>
     @endif
 
-    <!-- Header Section -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-            <h1 class="text-2xl lg:text-3xl font-bold text-[#1A2840] tracking-tight">Applications</h1>
-            <p class="text-sm text-[#4E5F6E] mt-1">
-                Your job search, in one place. Track applications, employer updates, interviews, and offers.
-            </p>
-        </div>
+    <!-- Header Banner Card -->
+    <div class="w-full relative overflow-hidden rounded-2xl border border-primary-border bg-white p-5 sm:p-6 shadow-sm" style="background: linear-gradient(135deg, #DCEAF4 0%, #FFFFFF 100%); box-shadow: 0 4px 20px rgba(26,40,64,0.06);">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div class="space-y-2 max-w-3xl min-w-0 flex-1">
+                <nav class="inline-flex items-center gap-1.5 rounded-full border border-primary-border bg-white px-3 py-1 text-xs font-semibold text-body-muted shadow-2xs" aria-label="Breadcrumb">
+                    <a href="{{ route('dashboard') }}" class="hover:text-primary transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">Dashboard</a>
+                    <span aria-hidden="true">/</span>
+                    <span class="text-primary-dark font-bold" aria-current="page">Applications</span>
+                </nav>
+                <h1 class="font-heading text-2xl sm:text-3xl font-bold text-primary-dark tracking-tight">Applications</h1>
+                <p class="text-xs sm:text-sm text-body-muted leading-relaxed max-w-2xl">
+                    Your job search, in one place. Track applications, employer updates, interviews, and offers.
+                </p>
+            </div>
 
-        <a href="{{ route('candidate.jobs') }}" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-[#244F73] text-white text-sm font-semibold hover:bg-[#1A2840] shadow-sm transition-colors focus:ring-2 focus:ring-offset-2 focus:ring-[#244F73] shrink-0">
-            <span>Find job matches</span>
-            <span aria-hidden="true">&rarr;</span>
-        </a>
+            <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+                <a href="{{ route('candidate.jobs') }}" class="inline-flex items-center justify-center gap-2 h-11 px-4 rounded-xl bg-primary-dark text-white text-xs sm:text-sm font-semibold hover:bg-primary shadow-xs transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark focus-visible:ring-offset-2">
+                    <span>Find job matches</span>
+                    <span aria-hidden="true">&rarr;</span>
+                </a>
+            </div>
+        </div>
     </div>
 
     <!-- Tabbed Navigation -->
-    <div class="border-b border-gray-200" role="tablist" aria-label="Application categories">
-        <nav class="-mb-px flex space-x-8" aria-label="Tabs">
-            <!-- Tab: All Applications -->
-            <button type="button"
-                    wire:click="setTab('all')"
-                    role="tab"
-                    aria-selected="{{ $activeTab === 'all' ? 'true' : 'false' }}"
-                    class="whitespace-nowrap py-3 px-1 border-b-2 font-semibold text-xs flex items-center gap-2 transition-colors {{ $activeTab === 'all' ? 'border-[#244F73] text-[#244F73]' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
-                <span>All Applications</span>
-                @if($allCount > 0)
-                    <span class="rounded-full px-2 py-0.5 text-[11px] {{ $activeTab === 'all' ? 'bg-[#DCEAF4] text-[#1A2840]' : 'bg-gray-100 text-gray-600' }}">
-                        {{ $allCount }}
+    <div class="border-b border-primary-border/80 pb-3.5">
+        <div class="flex flex-wrap items-center gap-2 max-w-full" role="tablist" aria-label="Application categories">
+            @foreach ([
+                ['key' => 'all', 'label' => 'All Applications', 'count' => $allCount],
+                ['key' => 'active', 'label' => 'Active Applications', 'count' => $activeCount],
+                ['key' => 'interviews', 'label' => 'Interviews', 'count' => $interviewsCount],
+                ['key' => 'archived', 'label' => 'Past/Archived', 'count' => $archivedCount],
+            ] as $tabItem)
+                @php
+                    $isActive = $activeTab === $tabItem['key'];
+                @endphp
+                <button type="button"
+                        wire:click="setTab('{{ $tabItem['key'] }}')"
+                        role="tab"
+                        aria-selected="{{ $isActive ? 'true' : 'false' }}"
+                        class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 shrink-0 {{ $isActive ? 'bg-primary-dark text-white shadow-xs' : 'bg-white text-body-muted border border-primary-border/70 hover:bg-primary-tint/50 hover:text-primary-dark' }}">
+                    <span>{{ $tabItem['label'] }}</span>
+                    <span class="px-2 py-0.5 rounded-full text-[11px] font-bold tabular-nums {{ $isActive ? 'bg-white/20 text-white' : 'bg-primary-tint text-primary-dark' }}">
+                        {{ $tabItem['count'] ?? 0 }}
                     </span>
-                @endif
-            </button>
-
-            <!-- Tab: Active Applications -->
-            <button type="button"
-                    wire:click="setTab('active')"
-                    role="tab"
-                    aria-selected="{{ $activeTab === 'active' ? 'true' : 'false' }}"
-                    class="whitespace-nowrap py-3 px-1 border-b-2 font-semibold text-xs flex items-center gap-2 transition-colors {{ $activeTab === 'active' ? 'border-[#244F73] text-[#244F73]' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
-                <span>Active Applications</span>
-                @if($activeCount > 0)
-                    <span class="rounded-full px-2 py-0.5 text-[11px] {{ $activeTab === 'active' ? 'bg-[#DCEAF4] text-[#1A2840]' : 'bg-gray-100 text-gray-600' }}">
-                        {{ $activeCount }}
-                    </span>
-                @endif
-            </button>
-
-            <!-- Tab: Interviews -->
-            <button type="button"
-                    wire:click="setTab('interviews')"
-                    role="tab"
-                    aria-selected="{{ $activeTab === 'interviews' ? 'true' : 'false' }}"
-                    class="whitespace-nowrap py-3 px-1 border-b-2 font-semibold text-xs flex items-center gap-2 transition-colors {{ $activeTab === 'interviews' ? 'border-[#244F73] text-[#244F73]' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
-                <span>Interviews</span>
-                @if($interviewsCount > 0)
-                    <span class="rounded-full px-2 py-0.5 text-[11px] {{ $activeTab === 'interviews' ? 'bg-[#DCEAF4] text-[#1A2840]' : 'bg-gray-100 text-gray-600' }}">
-                        {{ $interviewsCount }}
-                    </span>
-                @endif
-            </button>
-
-            <!-- Tab: Past/Archived -->
-            <button type="button"
-                    wire:click="setTab('archived')"
-                    role="tab"
-                    aria-selected="{{ $activeTab === 'archived' ? 'true' : 'false' }}"
-                    class="whitespace-nowrap py-3 px-1 border-b-2 font-semibold text-xs flex items-center gap-2 transition-colors {{ $activeTab === 'archived' ? 'border-[#244F73] text-[#244F73]' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
-                <span>Past/Archived</span>
-                @if($archivedCount > 0)
-                    <span class="rounded-full px-2 py-0.5 text-[11px] {{ $activeTab === 'archived' ? 'bg-[#DCEAF4] text-[#1A2840]' : 'bg-gray-100 text-gray-600' }}">
-                        {{ $archivedCount }}
-                    </span>
-                @endif
-            </button>
-        </nav>
+                </button>
+            @endforeach
+        </div>
     </div>
 
     <!-- Search & Filter Controls -->

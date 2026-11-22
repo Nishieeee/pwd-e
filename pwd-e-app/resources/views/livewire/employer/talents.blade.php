@@ -14,30 +14,36 @@
         </div>
     @endif
 
-    {{-- Header Section --}}
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-primary-border">
-        <div>
-            <div class="flex items-center gap-2 text-xs text-body-muted">
-                <a href="{{ route('dashboard') }}" class="hover:text-primary transition-colors">Employer Portal</a>
-                <span>/</span>
-                <span class="text-primary-dark font-medium">Talent Discovery</span>
-            </div>
-            <h1 class="font-heading text-2xl font-bold text-primary-dark mt-1 flex items-center gap-2.5">
-                <span>{{ __('Talent Discovery') }}</span>
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary-tint text-primary-dark border border-primary-border">
-                    {{ $candidates->total() }} {{ __('Available') }}
-                </span>
-            </h1>
-            <p class="text-xs text-body-muted mt-0.5">
-                {{ __('Proactively discover and source verified PWD candidates qualified for your open roles under RA 10524.') }}
-            </p>
-        </div>
+    {{-- Header Banner Card --}}
+    <div class="relative overflow-hidden rounded-2xl border border-primary-border bg-white p-6 lg:p-7 shadow-sm" style="background: linear-gradient(135deg, #DCEAF4 0%, #FFFFFF 100%); box-shadow: 0 4px 20px rgba(26,40,64,0.06);">
+        <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+            <div class="space-y-2.5 max-w-3xl min-w-0">
+                <div class="flex flex-wrap items-center gap-2">
+                    <nav class="inline-flex items-center gap-1.5 rounded-full border border-primary-border bg-white px-3 py-1 text-xs font-semibold text-body-muted shadow-2xs" aria-label="Breadcrumb">
+                        <a href="{{ route('dashboard') }}" class="hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded">Employer Portal</a>
+                        <span aria-hidden="true">/</span>
+                        <span class="text-primary-dark font-bold" aria-current="page">Talent Discovery</span>
+                    </nav>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-primary-tint text-primary-dark border border-primary-border/70">
+                        {{ $candidates->total() }} {{ __('Available') }}
+                    </span>
+                </div>
 
-        <div class="flex items-center gap-3">
-            <a href="{{ route('employer.jobs.create') }}" class="inline-flex items-center gap-2 rounded-xl bg-primary-dark px-4 py-2.5 text-xs font-bold text-white hover:bg-primary shadow-xs transition-colors">
-                <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                <span>{{ __('Post New Job') }}</span>
-            </a>
+                <h1 class="font-heading text-2xl sm:text-3xl font-bold text-primary-dark tracking-tight">
+                    {{ __('Talent Discovery') }}
+                </h1>
+                <p class="text-xs sm:text-sm text-body-muted leading-relaxed max-w-2xl">
+                    {{ __('Proactively discover and source verified PWD candidates qualified for your open roles under RA 10524.') }}
+                </p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+                <a href="{{ route('employer.jobs.create') }}"
+                   class="inline-flex items-center justify-center gap-2 h-11 rounded-xl bg-primary-dark px-4 text-xs sm:text-sm font-semibold text-white hover:bg-primary shadow-xs transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark focus-visible:ring-offset-2">
+                    <svg class="size-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    <span>{{ __('Post New Job') }}</span>
+                </a>
+            </div>
         </div>
     </div>
 
