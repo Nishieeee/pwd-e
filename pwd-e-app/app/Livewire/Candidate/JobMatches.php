@@ -113,28 +113,76 @@ class JobMatches extends Component
             return;
         }
 
+        $job = JobPosting::with('employerProfile')->find($jobId);
+        if (! $job || $job->status !== 'published' || ($job->closes_at && $job->closes_at->isPast())) {
+            $this->applicationSuccessMessage = 'This job posting is no longer accepting applications.';
+            return;
+        }
+
         $existing = Application::where('candidate_profile_id', $candidateProfile->id)
             ->where('job_posting_id', $jobId)
+            ->whereNotIn('status', ['withdrawn', 'closed', 'rejected'])
             ->first();
 
         if ($existing) {
-            $this->applicationSuccessMessage = 'You have already submitted an application for this role on '.($existing->applied_at ? $existing->applied_at->format('M d, Y') : 'recently').'.';
+            $this->applicationSuccessMessage = 'You already have an active application submitted for this role on '.($existing->applied_at ? $existing->applied_at->format('M d, Y') : 'recently').'.';
 
             return;
         }
 
-        $job = JobPosting::with('employerProfile')->find($jobId);
+        $previousWithdrawn = Application::where('candidate_profile_id', $candidateProfile->id)
+            ->where('job_posting_id', $jobId)
+            ->whereIn('status', ['withdrawn', 'closed'])
+            ->latest()
+            ->first();
+
         $match = $candidateProfile->jobMatches()->where('job_posting_id', $jobId)->first();
-        $fitScore = $match ? (int) round($match->total_score * 100) : 95;
+        if ($match) {
+            $fitScore = (float) round($match->total_score * 100, 2);
+        } else {
+            try {
+                $scorer = app(\App\Services\Matching\MatchScorer::class);
+                $scores = $scorer->score($candidateProfile->id, $jobId);
+                $fitScore = (float) round(($scores['total_score'] ?? 0.0) * 100, 2);
+            } catch (\Throwable $e) {
+                $fitScore = null;
+            }
+        }
+
+        $materials = [
+            'biodata' => true,
+            'resume' => ! empty($candidateProfile->resume_pdf_path),
+            'fsl_video' => ! empty($candidateProfile->fsl_video_path),
+        ];
 
         Application::create([
             'candidate_profile_id' => $candidateProfile->id,
             'job_posting_id' => $jobId,
+            'reapplied_from_id' => $previousWithdrawn?->id,
             'status' => 'applied',
-            'status_subtext' => 'Application submitted and under review',
+            'status_subtext' => Application::computeStatusSubtext(Application::STATUS_APPLIED),
+            'resume_path' => $candidateProfile->resume_pdf_path,
+            'fsl_video_path' => $candidateProfile->fsl_video_path,
+            'application_materials' => $materials,
             'fit_score_at_apply' => $fitScore,
             'applied_at' => Carbon::now(),
         ]);
+
+        // Auto-accept pending job invitation for this role if one existed
+        \App\Models\JobInvitation::where('candidate_profile_id', $candidateProfile->id)
+            ->where('job_posting_id', $jobId)
+            ->where('status', 'pending')
+            ->update(['status' => 'accepted']);
+
+        // Notify employer
+        $employerUser = $job->employerProfile?->user;
+        if ($employerUser) {
+            $employerUser->notify(new \App\Notifications\ApplicationReceived(
+                candidateName: $user->name,
+                jobTitle: $job->title,
+                applicationUrl: route('employer.jobs.index'),
+            ));
+        }
 
         $this->applicationSuccessMessage = "Application submitted successfully to {$job->employerProfile->company_name}! You can track it in Applications.";
         $this->dispatch('application-submitted');
@@ -147,6 +195,9 @@ class JobMatches extends Component
 
         // Base query
         $query = JobPosting::where('status', 'published')
+            ->where(function ($q) {
+                $q->whereNull('closes_at')->orWhere('closes_at', '>=', today());
+            })
             ->with(['employerProfile', 'accommodations', 'jobAccommodations.accommodation'])
             ->whereHas('employerProfile');
 
