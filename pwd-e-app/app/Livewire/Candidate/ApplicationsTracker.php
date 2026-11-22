@@ -238,6 +238,17 @@ class ApplicationsTracker extends Component
         $this->closeOfferModal();
         $company = $app->jobPosting?->employerProfile?->company_name ?? 'the employer';
         $this->actionNotification = "Congratulations! You have accepted the job offer from {$company}.";
+
+        $employerUser = $app->jobPosting?->employerProfile?->user;
+        if ($employerUser) {
+            $employerUser->notify(
+                new \App\Notifications\ApplicationStatusChanged(
+                    $app->jobPosting?->title ?? 'Position',
+                    'offer_accepted',
+                    "{$user->name} has accepted the job offer!"
+                )
+            );
+        }
     }
 
     public function openDeclineModal(int $appId): void

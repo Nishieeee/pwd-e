@@ -495,6 +495,16 @@ class Applicants extends Component
         $this->showOfferModal = false;
         $this->offeringAppId = null;
 
+        if ($app->candidateProfile?->user) {
+            $app->candidateProfile->user->notify(
+                new \App\Notifications\ApplicationStatusChanged(
+                    $app->jobPosting?->title ?? 'Position',
+                    Application::STATUS_OFFERED,
+                    'Formal offer extended: PHP ' . number_format($this->offerSalary) . ' annual/gross with start date ' . $this->offerStartDate . '.'
+                )
+            );
+        }
+
         Flux::toast(variant: 'success', text: __('Formal job offer extended to candidate.'));
     }
 
@@ -535,7 +545,7 @@ class Applicants extends Component
             return;
         }
 
-        $app = Application::whereHas('jobPosting', function ($q) use ($profile) {
+        $app = Application::with(['candidateProfile.user', 'jobPosting'])->whereHas('jobPosting', function ($q) use ($profile) {
             $q->where('employer_profile_id', $profile->id);
         })->findOrFail($applicationId);
 
@@ -551,6 +561,15 @@ class Applicants extends Component
             'status' => $status,
             'status_subtext' => Application::computeStatusSubtext($status, now()),
         ]);
+
+        if ($app->candidateProfile?->user && ! in_array($status, ['rejected', 'offered'])) {
+            $app->candidateProfile->user->notify(
+                new \App\Notifications\ApplicationStatusChanged(
+                    $app->jobPosting?->title ?? 'Position',
+                    $status
+                )
+            );
+        }
 
         if ($status === 'rejected') {
             $this->openRejectModal($applicationId);

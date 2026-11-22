@@ -48,7 +48,7 @@ test('admin rejection does not lock out user and keeps status pending for resubm
     $candidate->refresh();
     $vr->refresh();
 
-    expect($candidate->status)->toBe('pending')
+    expect($candidate->status)->toBe('rejected')
         ->and($vr->status)->toBe('rejected')
         ->and($vr->rejection_reason)->toBe('ID card photo is blurry. Please upload a clear copy.');
 });

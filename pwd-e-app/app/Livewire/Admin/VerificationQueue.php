@@ -122,7 +122,7 @@ class VerificationQueue extends Component
         ]);
 
         $vr->user->update([
-            'status' => 'pending', // Keep user status pending so they can view the rejection reason and resubmit
+            'status' => 'rejected',
         ]);
 
         $vr->user->notify(new VerificationStatusUpdated('rejected', $this->reviewNote));
