@@ -331,6 +331,11 @@ class ApplicationsTracker extends Component
                     'status_subtext' => 'Withdrawn by you · '.Carbon::now()->format('M j'),
                     'updated_at' => Carbon::now(),
                 ]);
+
+                \App\Models\WorkforceRecord::where('application_id', $app->id)
+                    ->whereNull('ended_at')
+                    ->update(['ended_at' => Carbon::now()]);
+
                 $this->actionNotification = "Application for {$app->jobPosting->title} has been withdrawn.";
             }
         }

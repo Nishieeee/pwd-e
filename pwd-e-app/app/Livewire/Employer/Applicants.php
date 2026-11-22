@@ -444,6 +444,19 @@ class Applicants extends Component
             $q->where('employer_profile_id', $profile->id);
         })->findOrFail($this->offeringAppId);
 
+        if ($app->candidateProfile?->user_id === Auth::id()) {
+            if (function_exists('activity')) {
+                activity('fraud_alert')
+                    ->performedOn($app)
+                    ->causedBy(Auth::user())
+                    ->withProperties(['candidate_user_id' => $app->candidateProfile?->user_id])
+                    ->log('Self-hiring attempt blocked');
+            }
+            Flux::toast(variant: 'danger', text: __('Self-hiring is not permitted.'));
+            $this->closeOfferModal();
+            return;
+        }
+
         if (! $app->canTransitionTo(Application::STATUS_OFFERED)) {
             Flux::toast(variant: 'danger', text: __('Cannot extend offer in current status.'));
             return;
@@ -572,6 +585,18 @@ class Applicants extends Component
         $app = Application::with(['candidateProfile.user', 'jobPosting'])->whereHas('jobPosting', function ($q) use ($profile) {
             $q->where('employer_profile_id', $profile->id);
         })->findOrFail($applicationId);
+
+        if ($app->candidateProfile?->user_id === Auth::id()) {
+            if (function_exists('activity')) {
+                activity('fraud_alert')
+                    ->performedOn($app)
+                    ->causedBy(Auth::user())
+                    ->withProperties(['candidate_user_id' => $app->candidateProfile?->user_id])
+                    ->log('Self-hiring attempt blocked');
+            }
+            Flux::toast(variant: 'danger', text: __('Self-hiring is not permitted.'));
+            return;
+        }
 
         $app->update([
             'status' => 'hired',
