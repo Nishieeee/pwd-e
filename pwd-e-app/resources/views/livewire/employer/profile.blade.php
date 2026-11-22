@@ -1,67 +1,67 @@
-<div class="space-y-6">
+<div class="w-full space-y-6">
     {{-- Success Alert --}}
     @if(session('profile_updated_banner'))
         <div class="rounded-xl bg-[#E8F5E9] border border-[#A5D6A7] p-4 text-xs font-semibold text-[#176B47] flex items-center justify-between gap-3 shadow-2xs" role="alert">
             <div class="flex items-center gap-2">
-                <svg class="size-4 shrink-0 text-emerald-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                <svg class="size-4 shrink-0 text-emerald-600" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
                 <span>{{ session('profile_updated_banner') }}</span>
             </div>
-            <button type="button" onclick="this.parentElement.remove()" class="text-emerald-700 hover:text-emerald-950 font-bold text-sm leading-none">&times;</button>
+            <button type="button" onclick="this.parentElement.remove()" class="text-emerald-700 hover:text-emerald-950 font-bold text-sm leading-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary rounded px-1" aria-label="{{ __('Dismiss notification') }}">&times;</button>
         </div>
     @endif
 
     {{-- Company Profile Header Banner --}}
-    <div class="relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-xs" style="background: linear-gradient(135deg, #F0F4F8 0%, #FFFFFF 100%);">
-        <div class="flex flex-col md:flex-row md:items-start justify-between gap-6">
-            <div class="flex flex-col sm:flex-row items-start gap-4">
+    <div class="w-full relative overflow-hidden rounded-2xl border border-primary-border bg-white p-6 lg:p-7 shadow-sm" style="background: linear-gradient(135deg, #DCEAF4 0%, #FFFFFF 100%); box-shadow: 0 4px 20px rgba(26,40,64,0.06);">
+        <div class="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-5">
+            <div class="flex flex-col sm:flex-row items-start gap-4 min-w-0 flex-1">
                 <div class="w-16 h-16 rounded-2xl bg-[#244F73] text-white flex items-center justify-center font-bold text-2xl uppercase shadow-md shrink-0">
                     {{ strtoupper(substr($profile->company_name ?? 'CO', 0, 2)) }}
                 </div>
-                <div class="space-y-1.5">
+                <div class="space-y-2 min-w-0 flex-1">
                     <div class="flex flex-wrap items-center gap-2">
                         @if($profile->verified_at)
-                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
-                                <svg class="size-3 text-emerald-700" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-white text-secondary border border-primary-border shadow-2xs">
+                                <svg class="size-3.5 text-secondary shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
                                 <span>{{ __('Verified Employer') }}</span>
                             </span>
                         @else
-                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-900 border border-amber-300">
+                            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-900 border border-amber-300">
                                 <span>{{ __('Verification Pending') }}</span>
                             </span>
                         @endif
-                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-sky-100 text-sky-800 border border-sky-300">
+                        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-primary-tint text-primary-dark border border-primary-border/70">
                             <span>{{ __('Republic Act No. 10524 Partner') }}</span>
                         </span>
                         @if($profile->isMatrixComplete())
-                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-secondary-tint text-secondary border border-secondary/30">
                                 <span>{{ __('Accessibility Matrix Certified') }}</span>
                             </span>
                         @endif
                     </div>
 
-                    <h1 class="font-heading text-2xl font-bold text-[#1A2840]">
+                    <h1 class="font-heading text-2xl sm:text-3xl font-bold text-primary-dark tracking-tight">
                         {{ $profile->company_name }}
                     </h1>
 
-                    <div class="flex flex-wrap items-center gap-y-1 gap-x-4 text-xs text-gray-500">
+                    <div class="flex flex-wrap items-center gap-y-1.5 gap-x-4 text-xs sm:text-sm text-body-muted">
                         @if($profile->industry)
                             <div class="flex items-center gap-1.5">
-                                <svg class="size-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                <svg class="size-3.5 text-primary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                                 <span>{{ $profile->industry }}</span>
                             </div>
                         @endif
 
                         @if($profile->location)
                             <div class="flex items-center gap-1.5">
-                                <svg class="size-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                <svg class="size-3.5 text-primary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                                 <span>{{ $profile->location }}</span>
                             </div>
                         @endif
 
                         @if($profile->website)
                             <div class="flex items-center gap-1.5">
-                                <svg class="size-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
-                                <a href="{{ $profile->website }}" target="_blank" rel="noopener noreferrer" class="text-[#244F73] font-semibold hover:underline">
+                                <svg class="size-3.5 text-primary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
+                                <a href="{{ $profile->website }}" target="_blank" rel="noopener noreferrer" class="text-primary font-semibold hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded">
                                     {{ preg_replace('#^https?://#', '', $profile->website) }}
                                 </a>
                             </div>
@@ -70,27 +70,28 @@
                 </div>
             </div>
 
-            <div class="flex flex-wrap items-center gap-2 shrink-0">
+            <div class="flex flex-wrap items-center gap-2.5 shrink-0">
                 <a href="{{ route('candidate.employers.show', $profile) }}"
                    target="_blank"
-                   class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-gray-300 text-gray-700 hover:text-[#244F73] hover:border-[#244F73] text-xs font-semibold shadow-2xs transition-colors"
+                   rel="noopener noreferrer"
+                   class="inline-flex items-center justify-center gap-2 h-11 px-4 rounded-xl bg-white border border-primary-border text-primary-dark hover:bg-primary-tint/60 text-xs sm:text-sm font-semibold shadow-2xs transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                    title="{{ __('View how candidates and visitors see this profile') }}">
-                    <svg class="size-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                    <svg class="size-4 text-primary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                     <span>{{ __('Preview Public Visitor View') }}</span>
-                    <svg class="size-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                    <svg class="size-3.5 text-body-muted shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                 </a>
 
                 @if($activeTab === 'overview')
                     <button type="button"
                             wire:click="setTab('edit')"
-                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#244F73] text-white text-xs font-semibold hover:bg-[#1A2840] shadow-xs transition-colors">
-                        <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            class="inline-flex items-center justify-center gap-2 h-11 px-4 rounded-xl bg-primary-dark text-white text-xs sm:text-sm font-semibold hover:bg-primary shadow-xs transition-colors whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark focus-visible:ring-offset-2">
+                        <svg class="size-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                         <span>{{ __('Edit Profile') }}</span>
                     </button>
                 @else
                     <button type="button"
                             wire:click="setTab('overview')"
-                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200 text-xs font-semibold transition-colors">
+                            class="inline-flex items-center justify-center gap-2 h-11 px-4 rounded-xl border border-primary-border bg-white text-primary-dark hover:bg-primary-tint/60 text-xs sm:text-sm font-semibold shadow-2xs transition-colors whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
                         <span>{{ __('Back to Overview') }}</span>
                     </button>
                 @endif
@@ -98,18 +99,22 @@
         </div>
 
         {{-- Tab Controls --}}
-        <div class="flex items-center gap-2 mt-6 pt-4 border-t border-gray-200/80">
+        <div class="flex flex-wrap items-center gap-2 mt-5 pt-4 border-t border-primary-border/70" role="tablist" aria-label="{{ __('Company profile sections') }}">
             <button type="button"
                     wire:click="setTab('overview')"
-                    class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all {{ $activeTab === 'overview' ? 'bg-[#244F73] text-white shadow-2xs' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100' }}">
-                <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                    role="tab"
+                    aria-selected="{{ $activeTab === 'overview' ? 'true' : 'false' }}"
+                    class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 {{ $activeTab === 'overview' ? 'bg-primary-dark text-white shadow-xs' : 'bg-white/80 text-body-muted border border-primary-border/70 hover:text-primary-dark hover:bg-white' }}">
+                <svg class="size-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
                 <span>{{ __('Profile Overview') }}</span>
             </button>
 
             <button type="button"
                     wire:click="setTab('edit')"
-                    class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all {{ $activeTab === 'edit' ? 'bg-[#244F73] text-white shadow-2xs' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100' }}">
-                <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                    role="tab"
+                    aria-selected="{{ $activeTab === 'edit' ? 'true' : 'false' }}"
+                    class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 {{ $activeTab === 'edit' ? 'bg-primary-dark text-white shadow-xs' : 'bg-white/80 text-body-muted border border-primary-border/70 hover:text-primary-dark hover:bg-white' }}">
+                <svg class="size-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                 <span>{{ __('Edit Profile & Accessibility Matrix') }}</span>
             </button>
         </div>
@@ -118,44 +123,44 @@
     {{-- TAB 1: OVERVIEW MODE --}}
     @if($activeTab === 'overview')
         {{-- Stat Summary Grid --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-2xs">
-                <div class="text-xs font-medium text-gray-500">{{ __('Published Job Openings') }}</div>
-                <div class="mt-1 flex items-baseline justify-between">
-                    <span class="text-2xl font-bold text-[#1A2840]">{{ $activeJobCount }}</span>
-                    <a href="{{ route('employer.jobs.index') }}" class="text-xs font-semibold text-[#244F73] hover:underline">{{ __('Manage') }} &rarr;</a>
+        <div class="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white rounded-2xl border border-primary-border p-5 shadow-sm">
+                <div class="text-xs font-semibold text-body-muted">{{ __('Published Job Openings') }}</div>
+                <div class="mt-1.5 flex items-baseline justify-between gap-2">
+                    <span class="text-2xl font-bold text-primary-dark tabular-nums">{{ $activeJobCount }}</span>
+                    <a href="{{ route('employer.jobs.index') }}" class="text-xs font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded">{{ __('Manage') }} &rarr;</a>
                 </div>
             </div>
 
-            <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-2xs">
-                <div class="text-xs font-medium text-gray-500">{{ __('Workplace Accommodations') }}</div>
-                <div class="mt-1 flex items-baseline justify-between">
-                    <span class="text-2xl font-bold text-emerald-700">{{ $profile->accommodations->count() }}</span>
-                    <span class="text-xs text-gray-400">{{ __('Active in Matrix') }}</span>
+            <div class="bg-white rounded-2xl border border-primary-border p-5 shadow-sm">
+                <div class="text-xs font-semibold text-body-muted">{{ __('Workplace Accommodations') }}</div>
+                <div class="mt-1.5 flex items-baseline justify-between gap-2">
+                    <span class="text-2xl font-bold text-secondary tabular-nums">{{ $profile->accommodations->count() }}</span>
+                    <span class="text-xs text-body-muted">{{ __('Active in Matrix') }}</span>
                 </div>
             </div>
 
-            <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-2xs">
-                <div class="text-xs font-medium text-gray-500">{{ __('Declared Total Workforce') }}</div>
-                <div class="mt-1 flex items-baseline justify-between">
-                    <span class="text-2xl font-bold text-[#1A2840]">{{ $profile->workforce_total ?? 0 }}</span>
-                    <a href="{{ route('employer.workforce') }}" class="text-xs font-semibold text-[#244F73] hover:underline">{{ __('Workforce & Tax') }} &rarr;</a>
+            <div class="bg-white rounded-2xl border border-primary-border p-5 shadow-sm">
+                <div class="text-xs font-semibold text-body-muted">{{ __('Declared Total Workforce') }}</div>
+                <div class="mt-1.5 flex items-baseline justify-between gap-2">
+                    <span class="text-2xl font-bold text-primary-dark tabular-nums">{{ $profile->workforce_total ?? 0 }}</span>
+                    <a href="{{ route('employer.workforce') }}" class="text-xs font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded">{{ __('Workforce & Tax') }} &rarr;</a>
                 </div>
             </div>
 
-            <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-2xs">
-                <div class="text-xs font-medium text-gray-500">{{ __('Matrix Certified Status') }}</div>
-                <div class="mt-1 flex items-baseline justify-between">
+            <div class="bg-white rounded-2xl border border-primary-border p-5 shadow-sm">
+                <div class="text-xs font-semibold text-body-muted">{{ __('Matrix Certified Status') }}</div>
+                <div class="mt-1.5 flex items-baseline justify-between gap-2">
                     @if($profile->isMatrixComplete())
-                        <span class="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">
+                        <span class="inline-flex items-center gap-1 text-xs font-bold text-secondary bg-secondary-tint px-2.5 py-0.5 rounded-md border border-secondary/20">
                             ✓ {{ __('Certified') }}
                         </span>
                     @else
-                        <span class="inline-flex items-center gap-1 text-xs font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md">
+                        <span class="inline-flex items-center gap-1 text-xs font-semibold text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-md border border-amber-200">
                             {{ __('Incomplete') }}
                         </span>
                     @endif
-                    <button type="button" wire:click="setTab('edit')" class="text-xs font-semibold text-[#244F73] hover:underline">{{ __('Update') }} &rarr;</button>
+                    <button type="button" wire:click="setTab('edit')" class="text-xs font-semibold text-primary hover:underline cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded">{{ __('Update') }} &rarr;</button>
                 </div>
             </div>
         </div>

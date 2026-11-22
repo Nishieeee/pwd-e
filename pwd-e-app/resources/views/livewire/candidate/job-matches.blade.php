@@ -1,17 +1,19 @@
-<div class="space-y-6 max-w-7xl mx-auto">
-    <!-- Breadcrumb / Eyebrow -->
-    <nav class="flex items-center text-xs text-gray-500 gap-1.5" aria-label="Breadcrumb">
-        <a href="{{ route('dashboard') }}" class="hover:text-gray-900">Your workspace</a>
-        <span aria-hidden="true">/</span>
-        <span class="text-gray-900 font-medium" aria-current="page">Job Matches &amp; Search</span>
-    </nav>
-
-    <!-- Header Section -->
-    <div>
-        <h1 class="text-2xl lg:text-3xl font-bold text-[#1A2840] tracking-tight">Job Matches &amp; Search</h1>
-        <p class="text-sm text-[#4E5F6E] mt-1">
-            Find work that fits your skills and supports your needs. Your saved profile has already done the matching.
-        </p>
+<div class="space-y-6 max-w-7xl mx-auto w-full min-w-0">
+    <!-- Header Banner Card -->
+    <div class="w-full relative overflow-hidden rounded-2xl border border-primary-border bg-white p-5 sm:p-6 shadow-sm" style="background: linear-gradient(135deg, #DCEAF4 0%, #FFFFFF 100%); box-shadow: 0 4px 20px rgba(26,40,64,0.06);">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div class="space-y-2 max-w-3xl min-w-0 flex-1">
+                <nav class="inline-flex items-center gap-1.5 rounded-full border border-primary-border bg-white px-3 py-1 text-xs font-semibold text-body-muted shadow-2xs" aria-label="Breadcrumb">
+                    <a href="{{ route('dashboard') }}" class="hover:text-primary transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">Your workspace</a>
+                    <span aria-hidden="true">/</span>
+                    <span class="text-primary-dark font-bold" aria-current="page">Job Matches &amp; Search</span>
+                </nav>
+                <h1 class="font-heading text-2xl sm:text-3xl font-bold text-primary-dark tracking-tight">Job Matches &amp; Search</h1>
+                <p class="text-xs sm:text-sm text-body-muted leading-relaxed max-w-2xl">
+                    Find work that fits your skills and supports your needs. Your saved profile has already done the matching.
+                </p>
+            </div>
+        </div>
     </div>
 
     <!-- Alert / Application Confirmation Banner -->

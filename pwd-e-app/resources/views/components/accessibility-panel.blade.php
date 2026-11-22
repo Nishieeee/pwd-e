@@ -187,9 +187,10 @@
         <div class="flex items-center justify-between pb-3 border-b border-gray-100">
             <div class="flex items-center gap-2">
                 <div class="w-7 h-7 rounded-lg bg-[#DCEAF4] text-[#244F73] flex items-center justify-center font-bold text-xs">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <circle cx="12" cy="12" r="9" stroke-width="2"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v18M3 12h18"/>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10"/>
+                        <circle cx="12" cy="7.25" r="1.35" fill="currentColor" stroke="none"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M7.25 10.5l4.75 1 4.75-1M12 11.5v3.25m0 0l-2.6 3.75m2.6-3.75l2.6 3.75"/>
                     </svg>
                 </div>
                 <div>

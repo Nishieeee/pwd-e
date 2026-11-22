@@ -721,7 +721,12 @@ class ProfileBuilder extends Component
     {
         $this->applyHeadlineFallback();
 
+        $user = Auth::user();
+        $profile = $user?->candidateProfile;
+
         $fullName = trim(implode(' ', array_filter([$this->firstName, $this->middleName, $this->lastName, $this->suffix])));
+        $printName = trim(implode(' ', array_filter([$this->firstName, $this->middleName, $this->lastName])));
+        $initials = strtoupper(substr($this->firstName, 0, 1).substr($this->lastName, 0, 1)) ?: ($user?->initials() ?? 'MS');
         $slugName = Str::slug($this->firstName.'_'.$this->lastName, '_') ?: 'Candidate';
         $this->resumeFilename = $slugName.'_Resume.pdf';
         $relativePath = 'resumes/'.$this->resumeFilename;
@@ -734,20 +739,33 @@ class ProfileBuilder extends Component
         if ($this->hasOtherLanguage && trim($this->otherLanguage) !== '') {
             $languagesList[] = trim($this->otherLanguage);
         }
+        if (empty($languagesList)) {
+            $languagesList = ['Filipino', 'English'];
+        }
 
         $locationParts = array_filter([
-            $this->barangay ? 'Brgy. '.$this->barangay : null,
+            $this->barangay,
             $this->city,
             $this->country,
-            $this->zipCode ? 'ZIP '.$this->zipCode : null,
         ]);
 
+        $maskedId = 'PWD-'.str_pad((string) ($user?->id ?? 0), 5, '0', STR_PAD_LEFT);
+        $updatedDate = $profile?->updated_at ? $profile->updated_at->format('M d, Y') : now()->format('M d, Y');
+
         $sections = [
-            'name' => $fullName ?: 'Candidate Profile',
+            'name' => $fullName ?: ($user?->name ?? 'Candidate Profile'),
+            'print_name' => $printName ?: ($user?->name ?? 'Candidate Profile'),
+            'initials' => $initials,
+            'disability_type' => trim((string) ($profile?->disability_type ?? '')),
             'headline' => $this->getEffectiveHeadline(),
-            'pwd_id' => $this->pwdIdNumber ? 'PWD ID: '.$this->pwdIdNumber.' (Verified)' : 'PWD Candidate Profile',
-            'contact' => implode('  |  ', array_filter([$this->email, $this->phone, implode(', ', $locationParts)])),
-            'languages' => ! empty($languagesList) ? 'Spoken Languages: '.implode(', ', $languagesList) : '',
+            'masked_id' => $maskedId,
+            'updated_at' => $updatedDate,
+            'contact' => implode('  |  ', array_filter([
+                implode(', ', $locationParts),
+                $this->email ?: ($user?->email ?? ''),
+                $this->phone,
+            ])),
+            'languages' => $languagesList,
             'summary' => trim($this->bio),
             'experiences' => $this->getValidExperiences(),
             'education' => [
@@ -757,6 +775,8 @@ class ProfileBuilder extends Component
             ],
             'skills' => array_values(array_filter($this->selectedSkills)),
             'accommodations' => $accommodationsNames,
+            'accommodation_notes' => trim($this->accommodationNotes),
+            'signed_date' => now()->format('F d, Y'),
         ];
 
         $pdfContent = $this->buildModernPdfDocument($sections);
@@ -777,131 +797,422 @@ class ProfileBuilder extends Component
 
     protected function buildModernPdfDocument(array $sections): string
     {
-        $ops = [];
+        $pages = [[]];
+        $pageIdx = 0;
+        $y = 752.0;
 
-        // 1. Modern Dark Navy Header Banner (x=40, y=685, w=532, h=70)
-        $ops[] = '0.102 0.157 0.251 rg';
-        $ops[] = '40 685 532 70 re f';
-
-        // Candidate Name (White, Bold 18pt)
-        $nameEsc = $this->escapePdfText(strtoupper($sections['name']));
-        $ops[] = 'BT 1 1 1 rg /F2 17 Tf 56 728 Td ('.$nameEsc.') Tj ET';
-
-        // Headline & PWD ID Badge (Light Sky Blue, Regular 10.5pt)
-        $subHeader = $sections['headline'].'   |   '.$sections['pwd_id'];
-        $subEsc = $this->escapePdfText($subHeader);
-        $ops[] = 'BT 0.86 0.92 0.96 rg /F1 10 Tf 56 708 Td ('.$subEsc.') Tj ET';
-
-        // 2. Contact Pill Bar (Light Tint Box x=40, y=652, w=532, h=30)
-        $ops[] = '0.922 0.953 0.980 rg';
-        $ops[] = '40 652 532 30 re f';
-
-        $contactEsc = $this->escapePdfText($sections['contact']);
-        $ops[] = 'BT 0.102 0.157 0.251 rg /F1 9 Tf 56 668 Td ('.$contactEsc.') Tj ET';
-
-        if (! empty($sections['languages'])) {
-            $langEsc = $this->escapePdfText($sections['languages']);
-            $ops[] = 'BT 0.306 0.373 0.431 rg /F1 8.5 Tf 56 657 Td ('.$langEsc.') Tj ET';
-        }
-
-        $y = 628;
-
-        $drawSectionHeader = function (string $title) use (&$ops, &$y) {
-            $y -= 8;
-            $titleEsc = $this->escapePdfText(strtoupper($title));
-            $ops[] = "BT 0.141 0.310 0.451 rg /F2 10.5 Tf 44 {$y} Td ({$titleEsc}) Tj ET";
-            $y -= 5;
-            $ops[] = "0.82 0.86 0.90 RG 0.8 w 44 {$y} m 568 {$y} l S";
-            $y -= 14;
+        $addOp = function (string $op) use (&$pages, &$pageIdx): void {
+            $pages[$pageIdx][] = $op;
         };
 
-        $drawWrappedText = function (string $text, string $font = '/F1', float $size = 9.5, int $wrapWidth = 92) use (&$ops, &$y) {
-            foreach (explode("\n", wordwrap($text, $wrapWidth, "\n")) as $line) {
-                if ($y < 55) {
-                    break;
-                }
-                $lineEsc = $this->escapePdfText(trim($line));
-                if ($lineEsc === '') {
+        $ensureSpace = function (float $neededHeight) use (&$pages, &$pageIdx, &$y): void {
+            if ($y - $neededHeight < 50.0) {
+                $pages[] = [];
+                $pageIdx++;
+                $y = 752.0;
+            }
+        };
+
+        $drawText = function (string $text, float $x, float $yPos, string $font = '/F1', float $size = 9.5, string $color = '0.102 0.157 0.251') use ($addOp): void {
+            $esc = $this->escapePdfText($text);
+            if ($esc === '') {
+                return;
+            }
+            $addOp(sprintf('BT %s rg %s %.2F Tf %.2F %.2F Td (%s) Tj ET', $color, $font, $size, $x, $yPos, $esc));
+        };
+
+        $approxWidth = function (string $text, float $size): float {
+            return strlen($text) * $size * 0.52;
+        };
+
+        // ---------------------------------------------------------------------
+        // 1. Clean White Digital Profile Header
+        // ---------------------------------------------------------------------
+        // 2x2 Photo Box (Left: x=40, y=674, w=74, h=74)
+        $addOp('0.945 0.969 0.984 rg 40 674 74 74 re f');
+        $addOp('0.722 0.816 0.886 RG 1.2 w 40 674 74 74 re S');
+        $initials = (string) ($sections['initials'] ?: 'MS');
+        $initX = 40.0 + max(8.0, (74.0 - $approxWidth($initials, 18.0)) / 2.0);
+        $drawText($initials, $initX, 710.0, '/F2', 18.0, '0.141 0.310 0.451');
+        $drawText('2x2 PHOTO', 55.0, 691.0, '/F2', 7.0, '0.306 0.373 0.431');
+
+        // Top-right Document Stamp (DIGITAL PROFILE + Masked ID + Updated Date)
+        $addOp('0.863 0.918 0.957 rg 482 732 90 16 re f');
+        $drawText('DIGITAL PROFILE', 491.0, 737.0, '/F2', 7.5, '0.141 0.310 0.451');
+        $drawText('ID: '.$sections['masked_id'], 482.0, 719.0, '/F1', 8.0, '0.306 0.373 0.431');
+        $drawText('Updated: '.$sections['updated_at'], 482.0, 707.0, '/F1', 8.0, '0.306 0.373 0.431');
+
+        // Middle Identity Column (x=128..472)
+        // Badges row: RA 7277 Verified PWD + Optional Category
+        $badgeX = 128.0;
+        $verifiedText = 'RA 7277 Verified PWD';
+        $verifiedW = max(106.0, $approxWidth($verifiedText, 8.0) + 16.0);
+        $addOp(sprintf('0.910 0.961 0.914 rg %.2F 732 %.2F 16 re f', $badgeX, $verifiedW));
+        $addOp(sprintf('0.647 0.839 0.655 RG 0.6 w %.2F 732 %.2F 16 re S', $badgeX, $verifiedW));
+        $drawText($verifiedText, $badgeX + 8.0, 737.0, '/F2', 8.0, '0.090 0.420 0.278');
+
+        if (! empty($sections['disability_type'])) {
+            $catX = $badgeX + $verifiedW + 6.0;
+            $catText = 'Category: '.$sections['disability_type'];
+            $catW = min(472.0 - $catX, max(84.0, $approxWidth($catText, 8.0) + 14.0));
+            if ($catW > 45.0) {
+                $addOp(sprintf('0.863 0.918 0.957 rg %.2F 732 %.2F 16 re f', $catX, $catW));
+                $addOp(sprintf('0.722 0.816 0.886 RG 0.6 w %.2F 732 %.2F 16 re S', $catX, $catW));
+                $drawText($catText, $catX + 7.0, 737.0, '/F2', 8.0, '0.102 0.157 0.251');
+            }
+        }
+
+        // Full Name & Headline
+        $drawText($sections['name'], 128.0, 711.0, '/F2', 16.0, '0.102 0.157 0.251');
+        $drawText($sections['headline'], 128.0, 696.0, '/F2', 10.0, '0.141 0.310 0.451');
+
+        // Contact Row (wrapped cleanly inside x=128..472)
+        $contactLines = explode("\n", wordwrap((string) $sections['contact'], 72, "\n"));
+        $contactY = 682.0;
+        foreach (array_slice($contactLines, 0, 2) as $cLine) {
+            $drawText(trim($cLine), 128.0, $contactY, '/F1', 8.2, '0.306 0.373 0.431');
+            $contactY -= 11.0;
+        }
+
+        // Header bottom rule
+        $y = min(660.0, $contactY - 6.0);
+        $addOp(sprintf('0.780 0.820 0.860 RG 1.4 w 40 %.2F m 572 %.2F l S', $y, $y));
+        $y -= 18.0;
+
+        $drawSectionHeader = function (string $title, float $x = 40.0, float $width = 532.0) use ($addOp, $drawText, &$y): void {
+            $drawText(strtoupper($title), $x, $y, '/F2', 9.0, '0.102 0.157 0.251');
+            $y -= 5.0;
+            $addOp(sprintf('0.898 0.906 0.922 RG 0.7 w %.2F %.2F m %.2F %.2F l S', $x, $y, $x + $width, $y));
+            $y -= 14.0;
+        };
+
+        $drawWrappedParagraph = function (string $text, float $x, float $size, int $wrapWidth, string $font = '/F1', string $color = '0.102 0.157 0.251', float $lineHeight = 13.0) use ($drawText, $ensureSpace, &$y): void {
+            foreach (explode("\n", wordwrap(trim($text), $wrapWidth, "\n")) as $line) {
+                $trimmed = trim($line);
+                if ($trimmed === '') {
                     continue;
                 }
-                $ops[] = "BT 0.145 0.192 0.231 rg {$font} {$size} Tf 44 {$y} Td ({$lineEsc}) Tj ET";
-                $y -= 13;
+                $ensureSpace($lineHeight + 4.0);
+                $drawText($trimmed, $x, $y, $font, $size, $color);
+                $y -= $lineHeight;
             }
         };
 
-        // 3. Professional Summary
+        // ---------------------------------------------------------------------
+        // Section 1: PERSONAL SUMMARY & CAREER OBJECTIVE
+        // ---------------------------------------------------------------------
         if (! empty($sections['summary'])) {
-            $drawSectionHeader('Professional Summary');
-            $drawWrappedText($sections['summary']);
+            $summaryLines = count(explode("\n", wordwrap($sections['summary'], 96, "\n")));
+            $ensureSpace(30.0 + ($summaryLines * 13.0));
+            $drawSectionHeader('Personal Summary & Career Objective');
+            $drawWrappedParagraph($sections['summary'], 40.0, 9.2, 96, '/F1', '0.102 0.157 0.251', 13.0);
+            $y -= 10.0;
         }
 
-        // 4. Work Experience
-        if (! empty($sections['experiences'])) {
-            $drawSectionHeader('Work Experience');
-            foreach ($sections['experiences'] as $exp) {
-                if ($y < 70) {
-                    break;
-                }
-                $roleLine = trim($exp['job_title'].($exp['company_name'] ? '  —  '.$exp['company_name'] : ''));
-                $period = trim(($exp['start_year'] ?: '').(($exp['start_year'] && $exp['end_year']) ? ' - ' : '').($exp['end_year'] ?: ''));
-                if ($period !== '') {
-                    $roleLine .= '   ('.$period.')';
-                }
-                $drawWrappedText($roleLine, '/F2', 10, 88);
-                if (! empty($exp['description'])) {
-                    $drawWrappedText($exp['description'], '/F1', 9.2, 92);
-                }
-                $y -= 4;
+        // ---------------------------------------------------------------------
+        // Section 2: REQUIRED WORKPLACE ACCOMMODATIONS (RA 7277 / RA 10524)
+        // ---------------------------------------------------------------------
+        $accItems = (array) ($sections['accommodations'] ?? []);
+        $accNotes = trim((string) ($sections['accommodation_notes'] ?? ''));
+
+        // Pre-measure pill rows for the bordered card so break-inside: avoid is exact
+        $pillRows = [];
+        $currentRow = [];
+        $rowWidth = 0.0;
+        $maxInnerWidth = 504.0;
+        foreach ($accItems as $accName) {
+            $pillW = max(56.0, $approxWidth($accName, 8.2) + 22.0);
+            if (! empty($currentRow) && ($rowWidth + $pillW + 6.0) > $maxInnerWidth) {
+                $pillRows[] = $currentRow;
+                $currentRow = [];
+                $rowWidth = 0.0;
             }
+            $currentRow[] = ['label' => $accName, 'w' => $pillW];
+            $rowWidth += $pillW + 6.0;
+        }
+        if (! empty($currentRow)) {
+            $pillRows[] = $currentRow;
         }
 
-        // 5. Education
-        $drawSectionHeader('Education');
-        $eduLine = $sections['education']['level'];
-        if (! empty($sections['education']['institution'])) {
-            $eduLine .= '  —  '.$sections['education']['institution'];
-        }
-        if (! empty($sections['education']['year'])) {
-            $eduLine .= ' (Graduated '.$sections['education']['year'].')';
-        }
-        $drawWrappedText($eduLine, '/F2', 9.8, 90);
+        $notesLines = $accNotes !== '' ? explode("\n", wordwrap('Candidate notes: '.$accNotes, 90, "\n")) : [];
+        $accCardHeight = 46.0
+            + (empty($pillRows) ? 16.0 : (count($pillRows) * 23.0))
+            + (! empty($pillRows) && ! empty($notesLines) ? (count($notesLines) * 12.0 + 6.0) : 0.0)
+            + 12.0;
 
-        // 6. Skills & Strengths
-        if (! empty($sections['skills'])) {
-            $drawSectionHeader('Skills & Strengths');
-            $drawWrappedText(implode('   •   ', $sections['skills']), '/F1', 9.5, 90);
+        $ensureSpace($accCardHeight + 12.0);
+        $cardTop = $y + 4.0;
+        $cardBottom = $cardTop - $accCardHeight;
+
+        $addOp(sprintf('0.945 0.969 0.984 rg 40 %.2F 532 %.2F re f', $cardBottom, $accCardHeight));
+        $addOp(sprintf('0.722 0.816 0.886 RG 0.9 w 40 %.2F 532 %.2F re S', $cardBottom, $accCardHeight));
+
+        $innerY = $cardTop - 16.0;
+        $drawText('REQUIRED WORKPLACE ACCOMMODATIONS (RA 7277 / RA 10524)', 54.0, $innerY, '/F2', 8.8, '0.102 0.157 0.251');
+        $drawText('Incentive Eligible', 494.0, $innerY, '/F2', 8.0, '0.141 0.310 0.451');
+
+        $innerY -= 14.0;
+        $drawText('Accommodations required by candidate to perform essential job duties efficiently without barriers:', 54.0, $innerY, '/F1', 8.0, '0.306 0.373 0.431');
+
+        $innerY -= 20.0;
+        if (! empty($pillRows)) {
+            foreach ($pillRows as $row) {
+                $px = 54.0;
+                foreach ($row as $pill) {
+                    $addOp(sprintf('1 1 1 rg %.2F %.2F %.2F 17 re f', $px, $innerY - 4.0, $pill['w']));
+                    $addOp(sprintf('0.722 0.816 0.886 RG 0.6 w %.2F %.2F %.2F 17 re S', $px, $innerY - 4.0, $pill['w']));
+                    $drawText('+ '.$pill['label'], $px + 7.0, $innerY + 1.0, '/F2', 8.0, '0.102 0.157 0.251');
+                    $px += $pill['w'] + 6.0;
+                }
+                $innerY -= 23.0;
+            }
+            if (! empty($notesLines)) {
+                $innerY -= 2.0;
+                foreach ($notesLines as $nLine) {
+                    $drawText(trim($nLine), 54.0, $innerY, '/F1', 8.2, '0.102 0.157 0.251');
+                    $innerY -= 12.0;
+                }
+            }
+        } else {
+            $fallbackAcc = $accNotes !== '' ? $accNotes : 'Standard workplace accommodations indicated upon application.';
+            $drawText($fallbackAcc, 54.0, $innerY + 2.0, '/F3', 8.2, '0.306 0.373 0.431');
         }
 
-        // 7. Workplace Accommodations
-        if (! empty($sections['accommodations'])) {
-            $drawSectionHeader('Workplace Accommodations');
-            $drawWrappedText(implode('   •   ', $sections['accommodations']), '/F1', 9.5, 90);
+        $y = $cardBottom - 18.0;
+
+        // ---------------------------------------------------------------------
+        // Section 3: WORK EXPERIENCE & EMPLOYMENT HISTORY
+        // ---------------------------------------------------------------------
+        $ensureSpace(48.0);
+        $drawSectionHeader('Work Experience & Employment History');
+
+        if (! empty($sections['experiences'])) {
+            foreach ($sections['experiences'] as $exp) {
+                $descLines = ! empty($exp['description']) ? explode("\n", wordwrap($exp['description'], 92, "\n")) : [];
+                $blockHeight = 32.0 + (count($descLines) * 12.0) + 10.0;
+                $ensureSpace($blockHeight);
+
+                $blockTop = $y + 8.0;
+                $roleTitle = $exp['job_title'] ?: 'Professional Role';
+                $period = trim(($exp['start_year'] ?: '').(($exp['start_year'] && $exp['end_year']) ? ' - ' : '').($exp['end_year'] ?: ''));
+
+                $drawText($roleTitle, 52.0, $y, '/F2', 10.0, '0.102 0.157 0.251');
+                if ($period !== '') {
+                    $periodX = max(420.0, 570.0 - $approxWidth($period, 8.2));
+                    $drawText($period, $periodX, $y, '/F1', 8.2, '0.306 0.373 0.431');
+                }
+                $y -= 13.0;
+
+                if (! empty($exp['company_name'])) {
+                    $drawText($exp['company_name'], 52.0, $y, '/F2', 8.8, '0.141 0.310 0.451');
+                    $y -= 13.0;
+                }
+
+                foreach ($descLines as $dLine) {
+                    $drawText(trim($dLine), 52.0, $y, '/F1', 8.5, '0.306 0.373 0.431');
+                    $y -= 12.0;
+                }
+
+                $blockBottom = $y + 8.0;
+                $addOp(sprintf('0.550 0.670 0.770 RG 1.8 w 43 %.2F m 43 %.2F l S', $blockTop, $blockBottom));
+                $y -= 8.0;
+            }
+        } else {
+            $drawText('No formal work experience added yet. Entry-level & vocational training candidate.', 40.0, $y, '/F3', 8.5, '0.306 0.373 0.431');
+            $y -= 16.0;
         }
 
-        $streamData = implode("\n", $ops);
-        $streamLength = strlen($streamData);
+        $y -= 6.0;
 
+        // ---------------------------------------------------------------------
+        // Section 4: EDUCATIONAL ATTAINMENT
+        // ---------------------------------------------------------------------
+        $ensureSpace(58.0);
+        $drawSectionHeader('Educational Attainment');
+
+        $eduLevel = (string) ($sections['education']['level'] ?? '');
+        $eduInst = (string) ($sections['education']['institution'] ?? '');
+        $eduYear = (string) ($sections['education']['year'] ?? '');
+
+        if ($eduLevel !== '' || $eduInst !== '') {
+            $eduTop = $y + 8.0;
+            $drawText($eduLevel ?: 'Educational Background', 52.0, $y, '/F2', 9.8, '0.102 0.157 0.251');
+            if ($eduYear !== '') {
+                $yrLabel = 'Graduated '.$eduYear;
+                $yrX = max(430.0, 570.0 - $approxWidth($yrLabel, 8.2));
+                $drawText($yrLabel, $yrX, $y, '/F1', 8.2, '0.306 0.373 0.431');
+            }
+            $y -= 13.0;
+            if ($eduInst !== '') {
+                $drawText($eduInst, 52.0, $y, '/F2', 8.8, '0.090 0.420 0.278');
+                $y -= 13.0;
+            }
+            $eduBottom = $y + 8.0;
+            $addOp(sprintf('0.550 0.760 0.660 RG 1.8 w 43 %.2F m 43 %.2F l S', $eduTop, $eduBottom));
+        } else {
+            $drawText('Educational background details available upon request.', 40.0, $y, '/F3', 8.5, '0.306 0.373 0.431');
+            $y -= 14.0;
+        }
+
+        $y -= 12.0;
+
+        // ---------------------------------------------------------------------
+        // Section 5: Two-Column Grid (Skills & Core Competencies | Communication & Languages)
+        // ---------------------------------------------------------------------
+        $buildColumnRows = function (array $items, float $colWidth) use ($approxWidth): array {
+            $rows = [];
+            $row = [];
+            $w = 0.0;
+            foreach ($items as $item) {
+                $pillW = min($colWidth, max(44.0, $approxWidth($item, 8.0) + 14.0));
+                if (! empty($row) && ($w + $pillW + 5.0) > $colWidth) {
+                    $rows[] = $row;
+                    $row = [];
+                    $w = 0.0;
+                }
+                $row[] = ['label' => $item, 'w' => $pillW];
+                $w += $pillW + 5.0;
+            }
+            if (! empty($row)) {
+                $rows[] = $row;
+            }
+
+            return $rows;
+        };
+
+        $skillRows = $buildColumnRows((array) ($sections['skills'] ?? []), 254.0);
+        $langRows = $buildColumnRows((array) ($sections['languages'] ?? []), 254.0);
+        $maxRows = max(1, count($skillRows), count($langRows));
+        $twoColHeight = 28.0 + ($maxRows * 21.0) + 10.0;
+
+        $ensureSpace($twoColHeight);
+        $colsStartY = $y;
+
+        // Left Column Header
+        $drawText('SKILLS & CORE COMPETENCIES', 40.0, $colsStartY, '/F2', 8.8, '0.102 0.157 0.251');
+        $addOp(sprintf('0.898 0.906 0.922 RG 0.7 w 40 %.2F m 294 %.2F l S', $colsStartY - 5.0, $colsStartY - 5.0));
+
+        // Right Column Header
+        $drawText('COMMUNICATION & LANGUAGES', 318.0, $colsStartY, '/F2', 8.8, '0.102 0.157 0.251');
+        $addOp(sprintf('0.898 0.906 0.922 RG 0.7 w 318 %.2F m 572 %.2F l S', $colsStartY - 5.0, $colsStartY - 5.0));
+
+        $leftY = $colsStartY - 22.0;
+        if (! empty($skillRows)) {
+            foreach ($skillRows as $row) {
+                $px = 40.0;
+                foreach ($row as $pill) {
+                    $addOp(sprintf('0.953 0.957 0.965 rg %.2F %.2F %.2F 16 re f', $px, $leftY - 4.0, $pill['w']));
+                    $drawText($pill['label'], $px + 7.0, $leftY + 1.0, '/F1', 8.0, '0.102 0.157 0.251');
+                    $px += $pill['w'] + 5.0;
+                }
+                $leftY -= 21.0;
+            }
+        } else {
+            $drawText('Skills documented during onboarding.', 40.0, $leftY + 2.0, '/F3', 8.2, '0.306 0.373 0.431');
+            $leftY -= 16.0;
+        }
+
+        $rightY = $colsStartY - 22.0;
+        foreach ($langRows as $row) {
+            $px = 318.0;
+            foreach ($row as $pill) {
+                $addOp(sprintf('0.898 0.941 0.973 rg %.2F %.2F %.2F 16 re f', $px, $rightY - 4.0, $pill['w']));
+                $drawText($pill['label'], $px + 7.0, $rightY + 1.0, '/F1', 8.0, '0.102 0.157 0.251');
+                $px += $pill['w'] + 5.0;
+            }
+            $rightY -= 21.0;
+        }
+
+        $y = min($leftY, $rightY) - 12.0;
+
+        // ---------------------------------------------------------------------
+        // Section 6: Legal Certification & Bottom Signature / Accreditation Footer
+        // ---------------------------------------------------------------------
+        $ensureSpace(110.0);
+        $addOp(sprintf('0.780 0.820 0.860 RG 1.4 w 40 %.2F m 572 %.2F l S', $y, $y));
+        $y -= 16.0;
+
+        $certQuote = '"I hereby certify that all information stated herein is true, correct, and complete to the best of my knowledge and belief. Prepared in compliance with Republic Act No. 7277, RA 10524, and the Data Privacy Act of 2012 (RA 10173)."';
+        foreach (explode("\n", wordwrap($certQuote, 102, "\n")) as $qLine) {
+            $drawText(trim($qLine), 40.0, $y, '/F3', 8.2, '0.306 0.373 0.431');
+            $y -= 11.5;
+        }
+
+        $y -= 18.0;
+        $footerY = $y;
+
+        // Left Accreditation Block
+        $drawText('Accredited by PESO & Republic Act No. 10524 Partner', 40.0, $footerY, '/F1', 8.0, '0.306 0.373 0.431');
+        $drawText('PWD-E Multimodal Employment Platform', 40.0, $footerY - 12.0, '/F2', 8.8, '0.102 0.157 0.251');
+        $drawText('Western Mindanao State University - College of Computing Studies', 40.0, $footerY - 23.0, '/F1', 7.5, '0.306 0.373 0.431');
+
+        // Right Signature Block
+        $printedName = strtoupper((string) ($sections['print_name'] ?: $sections['name']));
+        $sigLineStart = 392.0;
+        $sigLineEnd = 572.0;
+        $nameX = max($sigLineStart, $sigLineEnd - $approxWidth($printedName, 8.5));
+        $drawText($printedName, $nameX, $footerY, '/F2', 8.5, '0.102 0.157 0.251');
+        $addOp(sprintf('0.102 0.157 0.251 RG 0.8 w %.2F %.2F m %.2F %.2F l S', $sigLineStart, $footerY - 4.0, $sigLineEnd, $footerY - 4.0));
+        $sigCaption = 'CANDIDATE SIGNATURE OVER PRINTED NAME';
+        $sigCapX = max($sigLineStart - 10.0, $sigLineEnd - $approxWidth($sigCaption, 7.0));
+        $drawText($sigCaption, $sigCapX, $footerY - 14.0, '/F1', 7.0, '0.306 0.373 0.431');
+        $dateLine = 'Date: '.$sections['signed_date'];
+        $dateX = max($sigLineStart, $sigLineEnd - $approxWidth($dateLine, 7.2));
+        $drawText($dateLine, $dateX, $footerY - 24.0, '/F1', 7.2, '0.306 0.373 0.431');
+
+        // ---------------------------------------------------------------------
+        // Assemble Multi-Page PDF 1.4 Objects
+        // ---------------------------------------------------------------------
+        // Object layout:
+        // 1: Catalog
+        // 2: Pages
+        // 3: Font /F1 Helvetica
+        // 4: Font /F2 Helvetica-Bold
+        // 5: Font /F3 Helvetica-Oblique
+        // 6..: Pairs of (Page obj, Content stream obj)
         $objects = [];
-        $objects[1] = "1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n";
-        $objects[2] = "2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n";
-        $objects[3] = "3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> >>\nendobj\n";
-        $objects[4] = "4 0 obj\n<< /Length {$streamLength} >>\nstream\n{$streamData}\nendstream\nendobj\n";
-        $objects[5] = "5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n";
-        $objects[6] = "6 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>\nendobj\n";
+        $pageObjectIds = [];
+        $nextObjId = 6;
+
+        foreach ($pages as $pageOps) {
+            $pageObjId = $nextObjId++;
+            $contentObjId = $nextObjId++;
+            $pageObjectIds[] = $pageObjId;
+
+            $streamData = implode("\n", $pageOps);
+            $streamLength = strlen($streamData);
+
+            $objects[$pageObjId] = "{$pageObjId} 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents {$contentObjId} 0 R /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> >>\nendobj\n";
+            $objects[$contentObjId] = "{$contentObjId} 0 obj\n<< /Length {$streamLength} >>\nstream\n{$streamData}\nendstream\nendobj\n";
+        }
+
+        $kidsStr = implode(' ', array_map(fn ($id) => "{$id} 0 R", $pageObjectIds));
+        $pageCount = count($pageObjectIds);
+
+        $allObjects = [
+            1 => "1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n",
+            2 => "2 0 obj\n<< /Type /Pages /Kids [{$kidsStr}] /Count {$pageCount} >>\nendobj\n",
+            3 => "3 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n",
+            4 => "4 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>\nendobj\n",
+            5 => "5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Oblique >>\nendobj\n",
+        ] + $objects;
+
+        ksort($allObjects);
 
         $pdf = "%PDF-1.4\n";
         $offsets = [];
-        foreach ($objects as $num => $objContent) {
+        foreach ($allObjects as $num => $objContent) {
             $offsets[$num] = strlen($pdf);
             $pdf .= $objContent;
         }
 
+        $totalObjs = count($allObjects) + 1;
         $xrefOffset = strlen($pdf);
-        $pdf .= "xref\n0 7\n0000000000 65535 f \n";
-        for ($i = 1; $i <= 6; $i++) {
+        $pdf .= "xref\n0 {$totalObjs}\n0000000000 65535 f \n";
+        for ($i = 1; $i < $totalObjs; $i++) {
             $pdf .= sprintf("%010d 00000 n \n", $offsets[$i]);
         }
-        $pdf .= "trailer\n<< /Size 7 /Root 1 0 R >>\nstartxref\n{$xrefOffset}\n%%EOF";
+        $pdf .= "trailer\n<< /Size {$totalObjs} /Root 1 0 R >>\nstartxref\n{$xrefOffset}\n%%EOF";
 
         return $pdf;
     }

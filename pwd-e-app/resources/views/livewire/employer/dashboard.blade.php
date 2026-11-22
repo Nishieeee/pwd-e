@@ -29,25 +29,25 @@
             <div class="flex flex-wrap items-center gap-2.5 shrink-0 pt-1">
                 <a
                     href="{{ route('employer.jobs.create') }}"
-                    class="inline-flex items-center gap-2 rounded-xl bg-primary-dark px-4 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-xs transition hover:bg-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 whitespace-nowrap"
+                    class="inline-flex items-center justify-center gap-2 h-11 rounded-xl bg-primary-dark px-4 text-xs sm:text-sm font-semibold text-white shadow-xs transition hover:bg-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark focus-visible:ring-offset-2 whitespace-nowrap"
                 >
-                    <svg class="size-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    <svg class="size-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                     <span>{{ __('Post a New Job') }}</span>
                 </a>
 
                 <a
                     href="{{ route('employer.talents') }}"
-                    class="inline-flex items-center gap-2 rounded-xl border border-primary-border bg-white px-4 py-2.5 text-xs sm:text-sm font-semibold text-primary-dark shadow-2xs transition hover:bg-primary-tint/60 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 whitespace-nowrap"
+                    class="inline-flex items-center justify-center gap-2 h-11 rounded-xl border border-primary-border bg-white px-4 text-xs sm:text-sm font-semibold text-primary-dark shadow-2xs transition hover:bg-primary-tint/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 whitespace-nowrap"
                 >
-                    <svg class="size-4 text-primary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg>
+                    <svg class="size-4 text-primary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg>
                     <span>{{ __('Discover Talents') }}</span>
                 </a>
 
                 <a
                     href="{{ route('employer.applicants') }}"
-                    class="inline-flex items-center gap-2 rounded-xl border border-primary-border bg-white px-4 py-2.5 text-xs sm:text-sm font-semibold text-primary-dark shadow-2xs transition hover:bg-primary-tint/60 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 whitespace-nowrap"
+                    class="inline-flex items-center justify-center gap-2 h-11 rounded-xl border border-primary-border bg-white px-4 text-xs sm:text-sm font-semibold text-primary-dark shadow-2xs transition hover:bg-primary-tint/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 whitespace-nowrap"
                 >
-                    <svg class="size-4 text-primary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <svg class="size-4 text-primary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                     <span>{{ __('All Applicants') }}</span>
                     @if($needsReviewCount > 0)
                         <span class="rounded-full bg-primary-tint px-2 py-0.5 text-xs font-bold text-primary-dark">{{ $needsReviewCount }}</span>
@@ -121,16 +121,16 @@
     </div>
 
     <!-- Main Content Grid -->
-    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <!-- Left 2 Cols: Actionable Recent Applicants -->
-        <div class="lg:col-span-2 space-y-4">
+    <div class="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_272px] 2xl:grid-cols-[minmax(0,1fr)_320px]">
+        <!-- Left Col: Actionable Recent Applicants -->
+        <div class="min-w-0 space-y-4">
             <div class="rounded-2xl border border-primary-border bg-white shadow-sm overflow-hidden">
-                <div class="flex items-center justify-between p-5 border-b border-primary-border/60">
-                    <div>
+                <div class="flex flex-wrap items-center justify-between gap-3 p-5 border-b border-primary-border/60">
+                    <div class="min-w-0">
                         <h2 class="font-heading text-lg font-bold text-primary-dark">{{ __('Recent Applicants') }}</h2>
                         <p class="text-xs text-body-muted">{{ __('Candidates who applied to your open listings, ranked by match fit.') }}</p>
                     </div>
-                    <a href="{{ route('employer.applicants') }}" class="text-xs font-bold text-primary hover:text-primary-dark inline-flex items-center gap-1">
+                    <a href="{{ route('employer.applicants') }}" class="text-xs font-bold text-primary hover:text-primary-dark inline-flex items-center gap-1 whitespace-nowrap rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
                         {{ __('View All Applicants') }} &rarr;
                     </a>
                 </div>
@@ -154,17 +154,17 @@
                     </div>
                 @else
                     <div class="overflow-x-auto">
-                        <table class="w-full text-sm">
-                            <thead>
-                                <tr class="border-b border-primary-border/60 bg-surface text-left text-xs uppercase tracking-wide text-body-muted">
-                                    <th scope="col" class="px-4 py-3">{{ __('Candidate') }}</th>
-                                    <th scope="col" class="px-4 py-3">{{ __('Position') }}</th>
-                                    <th scope="col" class="px-4 py-3">{{ __('Fit') }}</th>
-                                    <th scope="col" class="px-4 py-3">{{ __('Status') }}</th>
-                                    <th scope="col" class="px-4 py-3 text-right">{{ __('Actions') }}</th>
+                        <table class="w-full text-sm divide-y divide-primary-border/60">
+                            <thead class="bg-surface border-b border-primary-border/70">
+                                <tr class="text-left text-xs font-semibold uppercase tracking-wide text-body-muted">
+                                    <th scope="col" class="pl-4 pr-2 py-3.5 text-left whitespace-nowrap">{{ __('Candidate') }}</th>
+                                    <th scope="col" class="px-2 py-3.5 text-left whitespace-nowrap">{{ __('Position') }}</th>
+                                    <th scope="col" class="px-2 py-3.5 text-left whitespace-nowrap">{{ __('Fit') }}</th>
+                                    <th scope="col" class="px-2 py-3.5 text-left whitespace-nowrap">{{ __('Status') }}</th>
+                                    <th scope="col" class="pl-2 pr-4 py-3.5 text-center whitespace-nowrap">{{ __('Actions') }}</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-primary-border/40">
+                            <tbody class="divide-y divide-primary-border/60">
                                 @foreach($recentApplicants as $app)
                                     @php
                                         $userCandidate = $app->candidateProfile?->user;
@@ -174,35 +174,35 @@
                                         $hasResume = ($materials['resume'] ?? false) || !empty($app->resume_path) || !empty($app->candidateProfile?->resume_pdf_path);
                                         $hasFsl = ($materials['fsl_video'] ?? false) || !empty($app->fsl_video_path);
                                     @endphp
-                                    <tr class="hover:bg-primary-tint/20 transition-colors">
-                                        <td class="px-4 py-3.5">
-                                            <div class="flex items-center gap-2.5">
-                                                <div class="size-8 rounded-full bg-primary-tint text-primary-dark font-bold flex items-center justify-center text-xs shrink-0">
+                                    <tr class="hover:bg-primary-tint/25 transition-colors align-middle">
+                                        <td class="pl-4 pr-2 py-3.5">
+                                            <div class="flex items-center gap-2 min-w-0">
+                                                <div class="size-7 rounded-full bg-primary-tint text-primary-dark font-bold flex items-center justify-center text-[11px] shrink-0">
                                                     {{ $userCandidate ? substr($userCandidate->name, 0, 2) : 'CA' }}
                                                 </div>
-                                                <div class="min-w-0">
-                                                    <div class="font-semibold text-primary-dark truncate flex items-center gap-1.5 text-xs sm:text-sm">
-                                                        <span>{{ $userCandidate?->name ?? 'Candidate' }}</span>
+                                                <div class="min-w-0 max-w-[136px] 2xl:max-w-[190px]">
+                                                    <div class="font-semibold text-primary-dark flex items-center gap-1 text-xs leading-snug min-w-0">
+                                                        <span class="truncate" title="{{ $userCandidate?->name ?? 'Candidate' }}">{{ $userCandidate?->name ?? 'Candidate' }}</span>
                                                         @if(!empty($userCandidate?->pwd_id_number))
-                                                            <span class="text-[10px] bg-secondary-tint text-secondary px-1.5 py-0.2 rounded font-semibold" title="Verified PWD ID">✓ PWD</span>
+                                                            <span class="text-[10px] bg-secondary-tint text-secondary px-1 py-0.2 rounded font-semibold shrink-0 whitespace-nowrap" title="Verified PWD ID">✓ PWD</span>
                                                         @endif
                                                     </div>
                                                     <div class="flex items-center gap-1.5 mt-0.5 text-[10px] text-body-muted">
                                                         @if($hasBio)
-                                                            <span class="inline-flex items-center gap-0.5" title="Profile / Bio-Data">
-                                                                <svg class="size-3 text-primary/80" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                                            <span class="inline-flex items-center gap-0.5 whitespace-nowrap" title="Profile / Bio-Data">
+                                                                <svg class="size-3 text-primary/80 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                                                                 <span>Profile</span>
                                                             </span>
                                                         @endif
                                                         @if($hasResume)
-                                                            <span class="inline-flex items-center gap-0.5" title="Résumé / CV">
-                                                                <svg class="size-3 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                                                            <span class="inline-flex items-center gap-0.5 whitespace-nowrap" title="Résumé / CV">
+                                                                <svg class="size-3 text-blue-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
                                                                 <span>CV</span>
                                                             </span>
                                                         @endif
                                                         @if($hasFsl)
-                                                            <span class="inline-flex items-center gap-0.5" title="Filipino Sign Language Video">
-                                                                <svg class="size-3 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                                            <span class="inline-flex items-center gap-0.5 whitespace-nowrap" title="Filipino Sign Language Video">
+                                                                <svg class="size-3 text-emerald-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                                                                 <span>FSL</span>
                                                             </span>
                                                         @endif
@@ -210,20 +210,20 @@
                                                 </div>
                                             </div>
                                         </td>
-                                        <td class="px-4 py-3.5">
-                                            <div class="font-semibold text-primary-dark text-xs truncate max-w-[150px]">
+                                        <td class="px-2 py-3.5">
+                                            <div class="font-semibold text-primary-dark text-xs truncate max-w-[115px] 2xl:max-w-[160px]" title="{{ $appliedJob?->title ?? 'Position' }}">
                                                 {{ $appliedJob?->title ?? 'Position' }}
                                             </div>
-                                            <div class="text-[10px] text-body-muted">
+                                            <div class="text-[10px] text-body-muted truncate max-w-[115px] 2xl:max-w-[160px]" title="{{ $appliedJob?->location ?? 'Location' }}">
                                                 {{ $appliedJob?->location ?? 'Location' }}
                                             </div>
                                         </td>
-                                        <td class="px-4 py-3.5">
+                                        <td class="px-2 py-3.5 whitespace-nowrap">
                                             <span class="font-bold text-primary-dark text-xs tabular-nums">
                                                 {{ $app->fit_score_at_apply !== null ? number_format($app->fit_score_at_apply, 0).'%' : '95%' }}
                                             </span>
                                         </td>
-                                        <td class="px-4 py-3.5">
+                                        <td class="px-2 py-3.5 whitespace-nowrap">
                                             @php
                                                 $badgeClass = match($app->status) {
                                                     'hired' => 'bg-secondary-tint text-secondary border border-emerald-200',
@@ -233,26 +233,30 @@
                                                     default => 'bg-primary-tint text-primary-dark border border-primary-border',
                                                 };
                                             @endphp
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold {{ $badgeClass }}">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold whitespace-nowrap {{ $badgeClass }}">
                                                 {{ ucfirst(str_replace('_', ' ', $app->status)) }}
                                             </span>
                                         </td>
-                                        <td class="px-4 py-3.5 text-right">
-                                            <div class="inline-flex items-center justify-end gap-1.5">
+                                        <td class="pl-2 pr-4 py-3.5 text-center whitespace-nowrap">
+                                            <div class="inline-flex items-center justify-center gap-1.5">
                                                 @if($app->candidate_profile_id)
-                                                    <a href="{{ route('employer.candidates.show', $app->candidate_profile_id) }}" target="_blank"
-                                                       class="inline-flex items-center gap-1 rounded-md bg-primary-dark px-2.5 py-1 text-xs font-semibold text-white hover:bg-primary shadow-2xs transition-colors"
+                                                    <a href="{{ route('employer.candidates.show', $app->candidate_profile_id) }}"
+                                                       target="_blank"
+                                                       rel="noopener noreferrer"
+                                                       class="inline-flex items-center justify-center rounded-md bg-primary-dark px-2.5 py-1.5 text-[11px] font-semibold text-white hover:bg-primary shadow-2xs transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark focus-visible:ring-offset-1"
                                                        title="{{ __('Open full candidate profile') }}">
                                                         <span>{{ __('Profile') }}</span>
                                                     </a>
                                                 @endif
-                                                <button type="button" wire:click="viewDetails({{ $app->id }})"
-                                                        class="rounded-md border border-primary-border bg-white px-2 py-1 text-xs font-semibold text-primary-dark hover:bg-primary-tint transition-colors">
+                                                <button type="button"
+                                                        wire:click="viewDetails({{ $app->id }})"
+                                                        class="inline-flex items-center justify-center rounded-md border border-primary-border bg-white px-2.5 py-1.5 text-[11px] font-semibold text-primary-dark hover:bg-primary-tint transition-colors whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1">
                                                     {{ __('Details') }}
                                                 </button>
                                                 @if($app->status !== 'hired')
-                                                    <button type="button" wire:click="openInterviewModal({{ $app->id }})"
-                                                            class="rounded-md border border-primary-border bg-white px-2 py-1 text-xs font-semibold text-primary hover:bg-primary-tint transition-colors">
+                                                    <button type="button"
+                                                            wire:click="openInterviewModal({{ $app->id }})"
+                                                            class="inline-flex items-center justify-center rounded-md border border-primary-border bg-white px-2.5 py-1.5 text-[11px] font-semibold text-primary hover:bg-primary-tint transition-colors whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1">
                                                         {{ __('Interview') }}
                                                     </button>
                                                 @endif
@@ -266,15 +270,15 @@
                 @endif
 
                 <div class="p-3 bg-surface border-t border-primary-border/60 text-center">
-                    <a href="{{ route('employer.applicants') }}" class="text-xs font-bold text-primary hover:underline">
+                    <a href="{{ route('employer.applicants') }}" class="text-xs font-bold text-primary hover:underline rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
                         {{ __('Open Centralized Applicants Pipeline') }} &rarr;
                     </a>
                 </div>
             </div>
         </div>
 
-        <!-- Right 1 Col: Active Jobs Snapshot & Tax Incentives -->
-        <div class="space-y-6">
+        <!-- Right Col: Active Jobs Snapshot & Tax Incentives -->
+        <div class="min-w-0 space-y-6">
             <!-- Active Jobs Snapshot -->
             <div class="rounded-2xl border border-primary-border bg-white p-5 shadow-sm space-y-4">
                 <div class="flex items-center justify-between pb-3 border-b border-primary-border/60">

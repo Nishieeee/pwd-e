@@ -1,4 +1,4 @@
-<div class="space-y-8 max-w-7xl mx-auto">
+<div class="space-y-6 max-w-7xl mx-auto w-full min-w-0">
     <!-- Profile Saved Success Banner (Redirected from Profile Builder) -->
     @if(!empty($profileSavedMessage))
         <div class="p-4 rounded-xl bg-[#F0FDF4] border border-[#BBF7D0] text-[#176B47] flex items-center justify-between gap-4 shadow-xs" role="alert" aria-live="polite">
@@ -87,40 +87,43 @@
         </div>
     @endif
 
-    <!-- Dashboard Header -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-            <h1 class="text-2xl lg:text-3xl font-bold text-[#1A2840] tracking-tight">Candidate Dashboard</h1>
-            <p class="text-sm text-[#4E5F6E] mt-1">
-                Welcome back, {{ $user->name }}. Your PWD credentials and accommodation profile are active.
-            </p>
-            <div class="flex flex-wrap items-center gap-2.5 mt-3">
-                <!-- PWD ID Verified Pill -->
-                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-800 border border-emerald-200">
-                    <svg class="w-3.5 h-3.5 text-emerald-600" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                    </svg>
-                    <span>PWD ID: {{ $user->pwd_id_number ?? '09-7332-0001842-A' }} (Verified)</span>
-                </span>
-
-                <!-- Alumni Badge Pill -->
-                @if($candidateProfile->education_badge)
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-[#DCEAF4] text-[#1A2840] border border-[#B8D0E2]">
-                        {{ $candidateProfile->education_badge }}
+    <!-- Dashboard Header Banner Card -->
+    <div class="w-full relative overflow-hidden rounded-2xl border border-primary-border bg-white p-5 sm:p-6 shadow-sm" style="background: linear-gradient(135deg, #DCEAF4 0%, #FFFFFF 100%); box-shadow: 0 4px 20px rgba(26,40,64,0.06);">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div class="space-y-2 max-w-3xl min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-2">
+                    <!-- PWD ID Verified Pill -->
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-white text-secondary border border-primary-border shadow-2xs">
+                        <svg class="w-3.5 h-3.5 text-secondary shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        <span>PWD ID: {{ $user->pwd_id_number ?? '09-7332-0001842-A' }} (Verified)</span>
                     </span>
-                @endif
-            </div>
-        </div>
 
-        <div class="flex flex-wrap items-center gap-2.5 shrink-0">
-            <a href="{{ route('candidate.profile.show') }}" class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-primary-border bg-white text-[#1A2840] text-sm font-semibold hover:bg-primary-tint shadow-xs transition-colors">
-                <svg class="size-4 text-primary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/></svg>
-                <span>Profile</span>
-            </a>
-            <a href="{{ route('candidate.jobs') }}" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-[#244F73] text-white text-sm font-semibold hover:bg-[#1A2840] shadow-sm transition-colors focus:ring-2 focus:ring-offset-2 focus:ring-[#244F73]">
-                <span>Find job matches</span>
-                <span aria-hidden="true">&rarr;</span>
-            </a>
+                    <!-- Alumni Badge Pill -->
+                    @if($candidateProfile->education_badge)
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-primary-tint text-primary-dark border border-primary-border/70">
+                            {{ $candidateProfile->education_badge }}
+                        </span>
+                    @endif
+                </div>
+
+                <h1 class="font-heading text-2xl sm:text-3xl font-bold text-primary-dark tracking-tight">Candidate Dashboard</h1>
+                <p class="text-xs sm:text-sm text-body-muted leading-relaxed max-w-2xl">
+                    Welcome back, {{ $user->name }}. Your PWD credentials and accommodation profile are active.
+                </p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+                <a href="{{ route('candidate.profile.show') }}" class="inline-flex items-center justify-center gap-2 h-11 px-4 rounded-xl border border-primary-border bg-white text-primary-dark text-xs sm:text-sm font-semibold hover:bg-primary-tint/60 shadow-2xs transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
+                    <svg class="size-4 text-primary shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/></svg>
+                    <span>Profile</span>
+                </a>
+                <a href="{{ route('candidate.jobs') }}" class="inline-flex items-center justify-center gap-2 h-11 px-4 rounded-xl bg-primary-dark text-white text-xs sm:text-sm font-semibold hover:bg-primary shadow-xs transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-dark focus-visible:ring-offset-2">
+                    <span>Find job matches</span>
+                    <span aria-hidden="true">&rarr;</span>
+                </a>
+            </div>
         </div>
     </div>
 
