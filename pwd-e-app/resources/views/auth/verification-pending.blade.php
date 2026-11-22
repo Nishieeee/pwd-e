@@ -19,8 +19,10 @@
                         <strong>Reason provided:</strong> {{ $reason }}
                     </p>
                 @endif
-                <p class="mt-2 text-xs text-red-700">Please contact your local PESO administrator or support desk for re-evaluation.</p>
+                <p class="mt-2 text-xs text-red-700">Please review the reason above and resubmit a valid, clear accreditation document below.</p>
             </div>
+
+            @livewire('auth.resubmit-verification')
         @elseif($status === 'needs_more_docs')
             <div class="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900" role="alert">
                 <div class="flex items-center gap-2 font-bold text-amber-800">
@@ -34,6 +36,8 @@
                 @endif
                 <p class="mt-2 text-xs text-amber-700">The reviewing administrator requested clearer proof of accreditation or identification.</p>
             </div>
+
+            @livewire('auth.resubmit-verification')
         @else
             <div class="rounded-xl border border-primary-border bg-primary-tint px-4 py-3.5 text-sm text-primary-dark" role="status" aria-live="polite">
                 <div class="flex items-center gap-2 font-bold">

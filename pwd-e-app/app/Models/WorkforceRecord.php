@@ -4,9 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class WorkforceRecord extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = ['employer_profile_id', 'candidate_profile_id', 'application_id', 'hired_at', 'ended_at', 'pwd_verified', 'annual_wage'];
 
     protected $casts = [

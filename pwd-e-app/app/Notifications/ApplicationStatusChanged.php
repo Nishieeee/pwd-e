@@ -19,7 +19,17 @@ class ApplicationStatusChanged extends Notification implements ShouldQueue
 
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        $channels = ['database'];
+
+        $pref = method_exists($notifiable, 'notificationPreferences')
+            ? $notifiable->notificationPreferences()->where('event_type', 'application_status')->first()
+            : null;
+
+        if ($pref === null || $pref->email_enabled) {
+            $channels[] = 'mail';
+        }
+
+        return $channels;
     }
 
     public function toMail(object $notifiable): MailMessage
