@@ -14,6 +14,7 @@ class Application extends Model
     protected $fillable = [
         'candidate_profile_id',
         'job_posting_id',
+        'reapplied_from_id',
         'status',
         'status_subtext',
         'cover_letter',
@@ -30,6 +31,10 @@ class Application extends Model
         'interview_checklist',
         'interview_accepted_at',
         'offer_details',
+        'offer_extended_at',
+        'offer_accepted_at',
+        'offer_declined_at',
+        'offer_decline_reason',
         'application_materials',
         'resume_path',
         'rejection_reason',
@@ -43,10 +48,83 @@ class Application extends Model
         'interview_at' => 'datetime',
         'interview_accepted_at' => 'datetime',
         'rejected_at' => 'datetime',
+        'offer_extended_at' => 'datetime',
+        'offer_accepted_at' => 'datetime',
+        'offer_declined_at' => 'datetime',
         'offer_details' => 'array',
         'application_materials' => 'array',
         'interview_checklist' => 'array',
     ];
+
+    public const STATUS_APPLIED = 'applied';
+    public const STATUS_UNDER_REVIEW = 'under_review';
+    public const STATUS_SHORTLISTED = 'shortlisted';
+    public const STATUS_INTERVIEW = 'interview';
+    public const STATUS_OFFERED = 'offered';
+    public const STATUS_OFFER_DECLINED = 'offer_declined';
+    public const STATUS_HIRED = 'hired';
+    public const STATUS_REJECTED = 'rejected';
+    public const STATUS_WITHDRAWN = 'withdrawn';
+    public const STATUS_CLOSED = 'closed';
+
+    public const TERMINAL_STATUSES = [
+        self::STATUS_HIRED,
+        self::STATUS_REJECTED,
+        self::STATUS_WITHDRAWN,
+        self::STATUS_OFFER_DECLINED,
+        self::STATUS_CLOSED,
+    ];
+
+    public const TRANSITIONS = [
+        self::STATUS_APPLIED => [
+            self::STATUS_UNDER_REVIEW,
+            self::STATUS_SHORTLISTED,
+            self::STATUS_INTERVIEW,
+            self::STATUS_REJECTED,
+            self::STATUS_WITHDRAWN,
+            self::STATUS_CLOSED,
+        ],
+        self::STATUS_UNDER_REVIEW => [
+            self::STATUS_SHORTLISTED,
+            self::STATUS_INTERVIEW,
+            self::STATUS_REJECTED,
+            self::STATUS_WITHDRAWN,
+        ],
+        self::STATUS_SHORTLISTED => [
+            self::STATUS_INTERVIEW,
+            self::STATUS_OFFERED,
+            self::STATUS_REJECTED,
+            self::STATUS_WITHDRAWN,
+        ],
+        self::STATUS_INTERVIEW => [
+            self::STATUS_OFFERED,
+            self::STATUS_REJECTED,
+            self::STATUS_WITHDRAWN,
+        ],
+        self::STATUS_OFFERED => [
+            self::STATUS_HIRED,
+            self::STATUS_OFFER_DECLINED,
+            self::STATUS_WITHDRAWN,
+        ],
+        self::STATUS_HIRED => [],
+        self::STATUS_REJECTED => [],
+        self::STATUS_WITHDRAWN => [],
+        self::STATUS_OFFER_DECLINED => [],
+        self::STATUS_CLOSED => [],
+    ];
+
+    public function canTransitionTo(string $targetStatus): bool
+    {
+        $current = $this->status;
+        $allowed = self::TRANSITIONS[$current] ?? [];
+
+        return in_array($targetStatus, $allowed, true);
+    }
+
+    public function isTerminal(): bool
+    {
+        return in_array($this->status, self::TERMINAL_STATUSES, true);
+    }
 
     public const CHECKLIST_ITEMS = [
         'audio_video_fsl' => [
@@ -144,6 +222,16 @@ class Application extends Model
     public function messages(): HasMany
     {
         return $this->hasMany(ApplicationMessage::class)->orderBy('created_at', 'asc');
+    }
+
+    public function reappliedFrom(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'reapplied_from_id');
+    }
+
+    public function reapplications(): HasMany
+    {
+        return $this->hasMany(self::class, 'reapplied_from_id');
     }
 
     public function unreadMessagesFor(?User $user): int
