@@ -16,8 +16,14 @@ class RegisterResponse implements RegisterResponseContract
      */
     public function toResponse($request): Response
     {
-        return $request->wantsJson()
-            ? new JsonResponse('', 201)
-            : redirect()->route('verification.notice');
+        if ($request->wantsJson()) {
+            return new JsonResponse('', 201);
+        }
+
+        if ($request->user()?->isEmployer()) {
+            return redirect()->route('dashboard');
+        }
+
+        return redirect()->route('verification.notice');
     }
 }

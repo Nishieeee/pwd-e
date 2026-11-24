@@ -32,9 +32,9 @@
         <div class="flex flex-col-reverse items-stretch overflow-hidden rounded-2xl bg-white shadow-[0_8px_24px_rgba(26,40,64,0.06)] md:grid md:grid-cols-2"
              x-data="{
                  role: '{{ old('role', 'candidate') }}',
-                 step: {{ $errors->hasAny(['date_of_birth']) ? 1 : ($errors->hasAny(['disability_type', 'pwd_id_number', 'pwd_id_file', 'consent']) ? 2 : ($errors->hasAny(['business_permit_number', 'business_permit_file']) ? 1 : 0)) }},
+                 step: {{ $errors->hasAny(['date_of_birth']) ? 1 : ($errors->hasAny(['disability_type', 'pwd_id_number', 'pwd_id_file', 'consent']) ? 2 : 0) }},
                  candidateSteps: 3,
-                 employerSteps: 2,
+                 employerSteps: 1,
                  showCandidatePassword: false,
                  showEmployerPassword: false,
                  canContinue: false,
@@ -64,16 +64,12 @@
                                     this.isChecked('terms');
                          }
                      } else {
-                         if (this.step === 0) {
-                             const p = this.val('employer_password');
-                             const pc = this.val('employer_password_confirmation');
-                             return this.val('employer_company_name') !== '' &&
-                                    this.val('employer_email') !== '' &&
-                                    p.length >= 8 && p === pc;
-                         }
-                         if (this.step === 1) {
-                             return this.val('business_permit_number') !== '' && this.isChecked('terms');
-                         }
+                         const p = this.val('employer_password');
+                         const pc = this.val('employer_password_confirmation');
+                         return this.val('employer_company_name') !== '' &&
+                                this.val('employer_email') !== '' &&
+                                p.length >= 8 && p === pc &&
+                                this.isChecked('terms');
                      }
                      return true;
                  },
@@ -217,16 +213,16 @@
                                 </div>
                             </div>
 
-                            {{-- Step 2: Icon Document/Permit --}}
+                            {{-- Step 2: Instant Onboarding --}}
                             <div class="flex items-start gap-3">
                                 <span class="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-primary-border bg-white text-primary-dark" aria-hidden="true">
                                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                                     </svg>
                                 </span>
                                 <div>
-                                    <p class="text-sm font-semibold leading-snug text-primary-dark">Business &amp; Permit Verification</p>
-                                    <p class="text-xs leading-snug text-body-muted">Validate your organization to ensure a safe, trusted, and compliant hiring environment.</p>
+                                    <p class="text-sm font-semibold leading-snug text-primary-dark">Instant Onboarding</p>
+                                    <p class="text-xs leading-snug text-body-muted">Post vacancies immediately and match with qualified PWD talents through real-time accessibility filters.</p>
                                 </div>
                             </div>
 
@@ -395,11 +391,20 @@
                                 <input id="employer_password_confirmation" name="password_confirmation" :type="showEmployerPassword ? 'text' : 'password'" autocomplete="new-password" placeholder="Confirm password"
                                        class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                             </div>
+
+                            <label class="flex cursor-pointer items-start gap-2 text-sm text-primary-dark">
+                                <input type="checkbox" name="terms" value="1" {{ old('terms') ? 'checked' : '' }} class="mt-1 h-4 w-4" @change="updateState()">
+                                <span>I accept the Terms and Conditions. <span class="text-[#B3261E]">*</span></span>
+                            </label>
+                            @error('terms')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                         </fieldset>
 
                         <div class="flex gap-3">
-                            <button type="button" @click="next()" :disabled="!canContinue" :class="canContinue ? 'bg-[#2A5D8F] hover:bg-[#224B73]' : 'bg-[#94A3B8] cursor-not-allowed'" class="flex h-[52px] w-full items-center justify-center gap-2 rounded-lg text-base font-semibold text-white disabled:opacity-60">
+                            <button x-show="role === 'candidate'" type="button" @click="next()" :disabled="!canContinue" :class="canContinue ? 'bg-[#2A5D8F] hover:bg-[#224B73]' : 'bg-[#94A3B8] cursor-not-allowed'" class="flex h-[52px] w-full items-center justify-center gap-2 rounded-lg text-base font-semibold text-white disabled:opacity-60">
                                 Continue
+                            </button>
+                            <button x-show="role === 'employer'" type="submit" :disabled="!canContinue" :class="canContinue ? 'bg-[#2A5D8F] hover:bg-[#224B73]' : 'bg-[#94A3B8] cursor-not-allowed'" class="flex h-[52px] w-full items-center justify-center gap-2 rounded-lg text-base font-semibold text-white disabled:opacity-60">
+                                Create account
                             </button>
                         </div>
                     </div>
@@ -461,33 +466,7 @@
                         </div>
                     </div>
 
-                    {{-- Employer Step 1: Permit & Accreditation --}}
-                    <div x-show="role === 'employer' && step === 1" x-cloak class="flex flex-col gap-5">
-                        <div>
-                            <label for="business_permit_number" class="mb-1.5 block text-sm font-semibold text-primary-dark">DTI / SEC / Business Registration Number <span class="text-[#B3261E]">*</span></label>
-                            <input id="business_permit_number" name="business_permit_number" type="text" value="{{ old('business_permit_number') }}" :required="role === 'employer'" placeholder="e.g. DTI-12345678 or SEC-CS202612345"
-                                   class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
-                            @error('business_permit_number')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
-                            <p class="mt-1 text-xs text-body-muted">Enter your DTI Certificate, SEC Registration, or Mayor's Business Permit number for compliance verification.</p>
-                        </div>
-                        <div>
-                            <label for="business_permit_file" class="mb-1.5 block text-sm font-semibold text-primary-dark">Business Accreditation Document (DTI / SEC / BIR 2303 / Permit)</label>
-                            <input id="business_permit_file" name="business_permit_file" type="file" accept=".jpg,.jpeg,.png,.pdf"
-                                   class="block w-full text-sm text-primary-dark file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-2 file:text-white">
-                            @error('business_permit_file')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
-                        </div>
-                        <label class="flex cursor-pointer items-start gap-2 text-sm text-primary-dark">
-                            <input type="checkbox" name="terms" value="1" {{ old('terms') ? 'checked' : '' }} class="mt-1 h-4 w-4">
-                            <span>I accept the Terms and Conditions. <span class="text-[#B3261E]">*</span></span>
-                        </label>
-                        @error('terms')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
-                        <div class="flex gap-3">
-                            <button type="button" @click="prev()" class="flex h-[52px] flex-1 items-center justify-center rounded-lg border border-[#CBD5E1] text-base font-semibold text-primary-dark hover:bg-primary-tint">Back</button>
-                            <button type="submit" :disabled="!canContinue" :class="canContinue ? 'bg-[#2A5D8F] hover:bg-[#224B73]' : 'bg-[#94A3B8] cursor-not-allowed'" class="flex h-[52px] flex-1 items-center justify-center gap-2 rounded-lg text-base font-semibold text-white disabled:opacity-60">
-                                Create account
-                            </button>
-                        </div>
-                    </div>
+
 
                     <p class="text-center text-base text-body-muted">
                         Already have an account?
@@ -531,7 +510,7 @@
                     }
                 } else if (name === 'disability_type' && val === '') {
                     msg = 'Please select a disability type.';
-                } else if ((name === 'pwd_id_number' || name === 'business_permit_number' || name === 'company_name' || (el.hasAttribute('required') && (name === 'first_name' || name === 'last_name'))) && val === '') {
+                } else if ((name === 'pwd_id_number' || name === 'company_name' || (el.hasAttribute('required') && (name === 'first_name' || name === 'last_name'))) && val === '') {
                     msg = 'This field is required.';
                 }
                 const span = el.parentElement.querySelector('.client-error');

@@ -41,7 +41,7 @@ class CreateNewUser implements CreatesNewUsers
             $rules['first_name'] = ['nullable', 'string', 'max:100'];
             $rules['last_name'] = ['nullable', 'string', 'max:100'];
             $rules['middle_name'] = ['nullable', 'string', 'max:100'];
-            $rules['business_permit_number'] = ['required', 'string', 'max:100'];
+            $rules['business_permit_number'] = ['nullable', 'string', 'max:100'];
             $rules['business_permit_file'] = ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'];
         }
 
@@ -66,6 +66,8 @@ class CreateNewUser implements CreatesNewUsers
                 $lastName,
             ])));
 
+            $isCandidate = $role === 'candidate';
+
             $user = User::create([
                 'name' => $fullName,
                 'first_name' => $firstName,
@@ -74,15 +76,15 @@ class CreateNewUser implements CreatesNewUsers
                 'email' => $input['email'],
                 'password' => $input['password'],
                 'role' => $role,
-                'status' => 'pending',
-                'verified_at' => null,
-                'pwd_id_number' => $role === 'candidate' ? ($input['pwd_id_number'] ?? null) : null,
+                'status' => $isCandidate ? 'pending' : 'active',
+                'verified_at' => $isCandidate ? null : now(),
+                'pwd_id_number' => $isCandidate ? ($input['pwd_id_number'] ?? null) : null,
                 'pwd_id_path' => $pwdIdPath,
             ]);
 
             $user->assignRole($role);
 
-            if ($role === 'candidate') {
+            if ($isCandidate) {
                 CandidateProfile::create([
                     'user_id' => $user->id,
                     'disability_type' => $input['disability_type'],
@@ -99,15 +101,8 @@ class CreateNewUser implements CreatesNewUsers
                 EmployerProfile::create([
                     'user_id' => $user->id,
                     'company_name' => $input['company_name'],
-                    'business_permit_number' => $input['business_permit_number'],
+                    'business_permit_number' => $input['business_permit_number'] ?? null,
                     'business_permit_path' => $permitPath,
-                ]);
-                VerificationRequest::create([
-                    'user_id' => $user->id,
-                    'type' => 'business_permit',
-                    'id_number' => $input['business_permit_number'] ?? null,
-                    'document_path' => $permitPath,
-                    'status' => 'pending',
                 ]);
             }
 

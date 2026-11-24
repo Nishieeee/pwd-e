@@ -93,7 +93,7 @@
                     </span>
                 </div>
                 <p class="text-xs text-body-muted mt-1">
-                    {{ __('Review and multi-approve or multi-reject candidate medical certificates / PWD credentials and employer DTI/SEC accreditations.') }}
+                    {{ __('Review and multi-approve or multi-reject candidate clinical medical certificates and PWD credentials.') }}
                 </p>
             </div>
 
@@ -125,6 +125,7 @@
                     <span class="px-1.5 py-0.2 rounded-full text-[10px] {{ $category === 'pwd' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-900 font-bold' }}">{{ $pendingCounts['pwd'] }}</span>
                 </button>
 
+                @if (($pendingCounts['employer'] ?? 0) > 0)
                 <button type="button"
                         wire:click="setCategory('employer')"
                         class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all {{ $category === 'employer' ? 'bg-indigo-700 text-white shadow-2xs' : 'bg-white border border-indigo-300 text-indigo-800 hover:bg-indigo-50' }}">
@@ -132,6 +133,7 @@
                     <span>{{ __('Employers') }}</span>
                     <span class="px-1.5 py-0.2 rounded-full text-[10px] {{ $category === 'employer' ? 'bg-white/20 text-white' : 'bg-indigo-100 text-indigo-900 font-bold' }}">{{ $pendingCounts['employer'] }}</span>
                 </button>
+                @endif
             </div>
 
             <!-- Bulk Multi-Action Buttons -->

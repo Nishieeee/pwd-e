@@ -68,9 +68,10 @@ test('employer can register with permit and creates profile', function () {
     expect($user->role)->toBe('employer');
     expect($user->first_name)->toBe('Acme');
     expect($user->last_name)->toBe('Corp');
-    expect($user->status)->toBe('pending');
+    expect($user->status)->toBe('active');
+    expect($user->verified_at)->not->toBeNull();
     expect(EmployerProfile::where('user_id', $user->id)->exists())->toBeTrue();
-    expect(VerificationRequest::where('user_id', $user->id)->where('type', 'business_permit')->exists())->toBeTrue();
+    expect(VerificationRequest::where('user_id', $user->id)->exists())->toBeFalse();
 });
 
 test('employer can register with company payload without representative name', function () {
@@ -91,11 +92,48 @@ test('employer can register with company payload without representative name', f
     expect($user->role)->toBe('employer');
     expect($user->first_name)->toBe('Stark Industries PH');
     expect($user->last_name)->toBe('Representative');
-    expect($user->status)->toBe('pending');
+    expect($user->status)->toBe('active');
+    expect($user->verified_at)->not->toBeNull();
     expect(EmployerProfile::where('user_id', $user->id)->exists())->toBeTrue();
 });
 
-test('newly registered user is immediately redirected to verification pending', function () {
+test('employer can register with only company name and email without permit', function () {
+    $response = $this->post(route('register.store'), [
+        'role' => 'employer',
+        'company_name' => 'Zero Permit Inc',
+        'email' => 'nopermit@example.com',
+        'password' => 'password',
+        'password_confirmation' => 'password',
+        'terms' => '1',
+    ]);
+
+    $response->assertSessionHasNoErrors();
+
+    $user = User::where('email', 'nopermit@example.com')->first();
+    expect($user)->not->toBeNull();
+    expect($user->role)->toBe('employer');
+    expect($user->status)->toBe('active');
+    expect($user->verified_at)->not->toBeNull();
+    expect(EmployerProfile::where('user_id', $user->id)->exists())->toBeTrue();
+    expect(VerificationRequest::where('user_id', $user->id)->exists())->toBeFalse();
+});
+
+test('newly registered employer is immediately active and redirected to dashboard', function () {
+    $response = $this->post(route('register.store'), [
+        'role' => 'employer',
+        'company_name' => 'Instant Access Corp',
+        'email' => 'instant@example.com',
+        'password' => 'password',
+        'password_confirmation' => 'password',
+        'business_permit_number' => 'BP-INSTANT-1',
+        'terms' => '1',
+    ]);
+
+    $response->assertRedirect(route('dashboard'));
+    $this->get(route('dashboard'))->assertOk();
+});
+
+test('newly registered candidate is redirected to verification pending', function () {
     $this->post(route('register.store'), [
         'role' => 'candidate',
         'first_name' => 'Maria',
