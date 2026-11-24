@@ -35,6 +35,74 @@
         </div>
     @endif
 
+    <!-- Statutory Employment Separation Notice Banner (Due Process under RA 7277) -->
+    @if($pendingSeparationNotice)
+        <div class="p-5 sm:p-6 rounded-2xl bg-amber-50 border-2 border-amber-300 shadow-sm space-y-4" role="alert" aria-live="assertive">
+            <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                <div class="space-y-2 max-w-3xl">
+                    <div class="flex items-center gap-2">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-600 text-white shadow-xs">
+                            <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                            <span>{{ __('Action Required: Notice of Employment Separation') }}</span>
+                        </span>
+                        <span class="text-xs font-medium text-amber-900">{{ $pendingSeparationNotice->separation_notice_at?->diffForHumans() }}</span>
+                    </div>
+
+                    <h2 class="font-heading text-lg sm:text-xl font-bold text-amber-950">
+                        {{ $pendingSeparationNotice->employerProfile?->company_name ?? __('Your Employer') }} {{ __('has submitted a Notice of Separation') }}
+                    </h2>
+
+                    <div class="text-xs sm:text-sm text-amber-900 leading-relaxed space-y-1.5">
+                        <p>
+                            <strong>{{ __('Position:') }}</strong> {{ $pendingSeparationNotice->application?->jobPosting?->title ?? __('Hired Position') }} &bull;
+                            <strong>{{ __('Proposed Effective Date:') }}</strong> {{ $pendingSeparationNotice->ended_at?->format('F d, Y') ?? '—' }} &bull;
+                            <strong>{{ __('Reason:') }}</strong> <span class="capitalize">{{ $pendingSeparationNotice->ended_reason }}</span>
+                        </p>
+                        @if($pendingSeparationNotice->ended_notes)
+                            <p class="italic bg-amber-100/70 p-2.5 rounded-lg border border-amber-200 text-amber-950">
+                                "{{ $pendingSeparationNotice->ended_notes }}"
+                            </p>
+                        @endif
+                        <p class="text-xs text-amber-800">
+                            {{ __('Under Republic Act No. 7277 (Magna Carta for Disabled Persons) and Philippine Labor Standards, security of tenure is protected. You have the right to acknowledge this separation or submit a formal contestation/dispute for DOLE & administrative review.') }}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap md:flex-col items-center gap-2.5 shrink-0">
+                    <button type="button"
+                            wire:click="openAcknowledgeModal({{ $pendingSeparationNotice->id }})"
+                            class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-white border border-amber-300 text-xs font-bold text-amber-900 hover:bg-amber-100 transition-colors cursor-pointer shadow-2xs">
+                        <svg class="size-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                        <span>{{ __('Acknowledge Separation') }}</span>
+                    </button>
+                    <button type="button"
+                            wire:click="openDisputeModal({{ $pendingSeparationNotice->id }})"
+                            class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-red-600 text-white text-xs font-bold hover:bg-red-700 transition-colors cursor-pointer shadow-xs">
+                        <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        <span>{{ __('Contest / Dispute Separation') }}</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- Separation Disputed Banner (Active Case Pending Review) -->
+    @if($disputedSeparationNotice && ! $pendingSeparationNotice)
+        <div class="p-4 rounded-xl bg-red-50 border border-red-200 text-red-900 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+            <div class="flex items-start gap-3">
+                <svg class="size-5 text-red-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <div class="text-xs leading-relaxed">
+                    <strong class="block font-bold text-red-950">{{ __('Separation Under Formal Dispute / Review') }}</strong>
+                    <span>{{ __('You contested the notice of separation from :company on :date. Your record is preserved under dispute for RA 7277 compliance auditing.', ['company' => $disputedSeparationNotice->employerProfile?->company_name ?? 'Employer', 'date' => $disputedSeparationNotice->candidate_response_at?->format('M d, Y')]) }}</span>
+                </div>
+            </div>
+            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800 border border-red-200 shrink-0">
+                {{ __('Contested Case Active') }}
+            </span>
+        </div>
+    @endif
+
     {{-- Direct Employer Job Invitations --}}
     @if(isset($jobInvitations) && $jobInvitations->isNotEmpty())
         <div class="space-y-3">
@@ -72,9 +140,8 @@
                     </div>
                     <div class="flex items-center gap-2.5 shrink-0">
                         <button type="button"
-                                wire:click="declineInvitation({{ $invite->id }})"
-                                wire:confirm="{{ __('Are you sure you want to decline this invitation?') }}"
-                                class="inline-flex items-center px-3.5 py-2.5 rounded-xl border border-gray-300 bg-white text-xs font-semibold text-body-muted hover:text-red-600 hover:border-red-200 hover:bg-red-50 transition-colors">
+                                wire:click="openDeclineInviteModal({{ $invite->id }})"
+                                class="inline-flex items-center px-3.5 py-2.5 rounded-xl border border-gray-300 bg-white text-xs font-semibold text-body-muted hover:text-red-600 hover:border-red-200 hover:bg-red-50 transition-colors cursor-pointer">
                             {{ __('Decline') }}
                         </button>
                         <a href="{{ $actionUrl }}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary-dark text-xs font-bold text-white hover:bg-primary shadow-xs transition-colors">
@@ -461,6 +528,150 @@
                 <div class="pt-4 border-t border-gray-100 flex justify-end">
                     <button type="button" wire:click="closeBreakdownModal" class="px-4 py-2 rounded-lg bg-[#244F73] text-white text-xs font-semibold hover:bg-[#1A2840]">
                         Close Breakdown
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- Candidate Employment Separation Dispute Modal -->
+    @if ($showDisputeModal)
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" role="dialog" aria-modal="true" aria-label="{{ __('Contest Employment Separation') }}">
+            <div class="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 sm:p-8 shadow-xl space-y-5" wire:click.stop>
+                <div class="flex items-start justify-between border-b border-primary-border pb-3">
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-50 text-red-700 border border-red-200 mb-1">
+                            {{ __('Statutory Due Process Rights') }}
+                        </div>
+                        <h2 class="font-heading text-lg font-bold text-primary-dark">{{ __('Contest Notice of Separation') }}</h2>
+                        <p class="text-xs text-body-muted mt-0.5">{{ __('Under Republic Act No. 7277 (Magna Carta for Disabled Persons)') }}</p>
+                    </div>
+                    <button type="button" wire:click="closeDisputeModal" class="text-body-muted hover:text-primary-dark text-lg">&times;</button>
+                </div>
+
+                <div class="space-y-4 text-xs">
+                    <div class="rounded-xl border border-sky-200 bg-sky-50/70 p-3.5 text-xs text-sky-900 leading-relaxed">
+                        <strong class="font-bold block mb-1">{{ __('Your Legal Rights:') }}</strong>
+                        {{ __('No qualified employee with disability shall be terminated without just or authorized cause and observance of due process. Submitting this contestation places the separation under dispute, notifies the employer, and maintains the audit trail.') }}
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-primary-dark mb-1.5">
+                            {{ __('Reason / Statement of Contestation') }} <span class="text-red-500">*</span>
+                        </label>
+                        <textarea
+                            wire:model="candidateDisputeReason"
+                            rows="5"
+                            placeholder="{{ __('Detail your grounds for contesting this separation (e.g., absence of justifiable cause, lack of reasonable accommodation, breach of agreed terms, discriminatory treatment)...') }}"
+                            class="w-full rounded-lg border border-primary-border p-3 text-xs focus:ring-2 focus:ring-red-500 focus:outline-none"></textarea>
+                        @error('candidateDisputeReason')
+                            <span class="text-xs text-red-600 mt-1 block">{{ $message }}</span>
+                        @enderror
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-3 border-t border-primary-border">
+                    <button type="button" wire:click="closeDisputeModal" class="rounded-lg border border-primary-border px-4 py-2 text-xs font-semibold text-primary-dark hover:bg-primary-tint">
+                        {{ __('Cancel') }}
+                    </button>
+                    <button type="button" wire:click="submitDispute" class="rounded-lg bg-red-600 px-4 py-2 text-xs font-semibold text-white hover:bg-red-700 shadow-xs cursor-pointer">
+                        {{ __('Submit Formal Dispute') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- Candidate Employment Separation Acknowledgment Modal -->
+    @if ($showAcknowledgeModal && $acknowledgingRecord)
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs" role="dialog" aria-modal="true" aria-label="{{ __('Acknowledge Employment Separation') }}">
+            <div class="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 sm:p-8 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-150" wire:click.stop>
+                <div class="flex items-start justify-between border-b border-primary-border pb-3">
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 mb-1">
+                            {{ __('Statutory Due Process Notice') }}
+                        </div>
+                        <h2 class="font-heading text-lg font-bold text-primary-dark">{{ __('Acknowledge Employment Separation') }}</h2>
+                        <p class="text-xs text-body-muted mt-0.5">{{ $acknowledgingRecord->employerProfile?->company_name ?? __('Employer') }} &bull; {{ $acknowledgingRecord->application?->jobPosting?->title ?? __('Position') }}</p>
+                    </div>
+                    <button type="button" wire:click="closeAcknowledgeModal" class="text-body-muted hover:text-primary-dark text-xl leading-none cursor-pointer">&times;</button>
+                </div>
+
+                <div class="space-y-4 text-xs">
+                    <div class="rounded-xl border border-gray-200 bg-surface p-4 space-y-2 text-xs">
+                        <div class="flex justify-between">
+                            <span class="font-semibold text-primary-dark">{{ __('Employer:') }}</span>
+                            <span class="text-body-muted">{{ $acknowledgingRecord->employerProfile?->company_name ?? '—' }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-semibold text-primary-dark">{{ __('Position:') }}</span>
+                            <span class="text-body-muted">{{ $acknowledgingRecord->application?->jobPosting?->title ?? '—' }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-semibold text-primary-dark">{{ __('Effective Date:') }}</span>
+                            <span class="font-medium text-primary-dark">{{ $acknowledgingRecord->ended_at?->format('F d, Y') ?? '—' }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-semibold text-primary-dark">{{ __('Reason for Departure:') }}</span>
+                            <span class="capitalize text-body-muted font-medium">{{ $acknowledgingRecord->ended_reason }}</span>
+                        </div>
+                        @if($acknowledgingRecord->ended_notes)
+                            <div class="pt-2 border-t border-gray-200/80">
+                                <span class="font-semibold text-primary-dark block mb-0.5">{{ __('Employer Remarks:') }}</span>
+                                <p class="text-xs text-body-muted italic bg-white p-2.5 rounded-lg border border-gray-200">
+                                    "{{ $acknowledgingRecord->ended_notes }}"
+                                </p>
+                            </div>
+                        @endif
+                    </div>
+
+                    <div class="rounded-xl border border-amber-200 bg-amber-50/80 p-3.5 text-xs text-amber-950 leading-relaxed">
+                        <strong class="font-bold block mb-1">{{ __('Statutory Due Process Confirmation:') }}</strong>
+                        {{ __('Confirming this action indicates that you have received and accepted this notice of separation pursuant to Philippine Labor Standards and R.A. 7277. Your employment record will transition to Separated Staff, and your employer will be notified.') }}
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-primary-border">
+                    <button type="button" wire:click="closeAcknowledgeModal" class="rounded-xl border border-primary-border px-4 py-2.5 text-xs font-semibold text-primary-dark hover:bg-primary-tint transition-colors cursor-pointer">
+                        {{ __('Cancel') }}
+                    </button>
+                    <button type="button" wire:click="acknowledgeSeparation({{ $acknowledgingRecord->id }})" class="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-emerald-700 shadow-xs cursor-pointer transition-colors">
+                        <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                        <span>{{ __('Confirm & Acknowledge Separation') }}</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- Decline Invitation Confirmation Modal --}}
+    @if ($showDeclineInviteModal)
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs" role="dialog" aria-modal="true" aria-label="{{ __('Decline Invitation') }}">
+            <div class="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-6 sm:p-7 shadow-2xl space-y-4" wire:click.stop>
+                <div class="flex items-start justify-between border-b border-primary-border pb-3">
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 mb-1">
+                            {{ __('Invitation Notice') }}
+                        </div>
+                        <h2 class="font-heading text-lg font-bold text-primary-dark">{{ __('Decline Application Invitation?') }}</h2>
+                    </div>
+                    <button type="button" wire:click="closeDeclineInviteModal" class="text-body-muted hover:text-primary-dark text-xl leading-none cursor-pointer">&times;</button>
+                </div>
+
+                <p class="text-xs text-body-muted leading-relaxed">
+                    {{ __('Are you sure you want to decline the invitation to apply for :job from :employer?', ['job' => $decliningInviteJobTitle, 'employer' => $decliningInviteEmployer]) }}
+                </p>
+
+                <div class="rounded-xl border border-gray-200 bg-surface p-3 text-xs text-body-muted leading-relaxed">
+                    {{ __('You will not be automatically reconsidered for this invitation, but you can still search and apply for other openings by this employer anytime.') }}
+                </div>
+
+                <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-primary-border">
+                    <button type="button" wire:click="closeDeclineInviteModal" class="rounded-xl border border-primary-border px-4 py-2 text-xs font-semibold text-primary-dark hover:bg-primary-tint transition-colors cursor-pointer">
+                        {{ __('Keep Invitation') }}
+                    </button>
+                    <button type="button" wire:click="confirmDeclineInvitation" class="rounded-xl bg-red-600 px-4 py-2 text-xs font-bold text-white hover:bg-red-700 shadow-xs transition-colors cursor-pointer">
+                        {{ __('Yes, Decline Invitation') }}
                     </button>
                 </div>
             </div>

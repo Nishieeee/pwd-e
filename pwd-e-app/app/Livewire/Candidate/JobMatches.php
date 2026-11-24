@@ -122,17 +122,24 @@ class JobMatches extends Component
         $existing = Application::where('candidate_profile_id', $candidateProfile->id)
             ->where('job_posting_id', $jobId)
             ->whereNotIn('status', ['withdrawn', 'closed', 'rejected'])
+            ->latest()
             ->first();
 
         if ($existing) {
-            $this->applicationSuccessMessage = 'You already have an active application submitted for this role on '.($existing->applied_at ? $existing->applied_at->format('M d, Y') : 'recently').'.';
-
-            return;
+            if ($existing->status === 'hired') {
+                $workforceRecord = \App\Models\WorkforceRecord::where('application_id', $existing->id)->first();
+                if (! $workforceRecord || $workforceRecord->separation_status !== 'acknowledged') {
+                    $this->applicationSuccessMessage = 'You are currently employed or under active separation review for this position.';
+                    return;
+                }
+            } else {
+                $this->applicationSuccessMessage = 'You already have an active application submitted for this role on '.($existing->applied_at ? $existing->applied_at->format('M d, Y') : 'recently').'.';
+                return;
+            }
         }
 
-        $previousWithdrawn = Application::where('candidate_profile_id', $candidateProfile->id)
+        $previousApp = Application::where('candidate_profile_id', $candidateProfile->id)
             ->where('job_posting_id', $jobId)
-            ->whereIn('status', ['withdrawn', 'closed'])
             ->latest()
             ->first();
 
@@ -158,7 +165,7 @@ class JobMatches extends Component
         Application::create([
             'candidate_profile_id' => $candidateProfile->id,
             'job_posting_id' => $jobId,
-            'reapplied_from_id' => $previousWithdrawn?->id,
+            'reapplied_from_id' => $previousApp?->id,
             'status' => 'applied',
             'status_subtext' => Application::computeStatusSubtext(Application::STATUS_APPLIED),
             'resume_path' => $candidateProfile->resume_pdf_path,

@@ -497,6 +497,25 @@ class ProfileBuilder extends Component
         }
     }
 
+    public function updatedAvatarUpload(): void
+    {
+        $this->validate([
+            'avatarUpload' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:5120'],
+        ], [
+            'avatarUpload.image' => 'The 2x2 photo must be a valid image file.',
+            'avatarUpload.mimes' => 'The 2x2 photo must be in JPG, PNG, or WebP format.',
+            'avatarUpload.max' => 'The 2x2 photo must not exceed 5 MB.',
+        ]);
+
+        if ($this->avatarUpload) {
+            if ($this->avatarPath && Storage::disk('public')->exists($this->avatarPath)) {
+                Storage::disk('public')->delete($this->avatarPath);
+            }
+            $this->avatarPath = $this->avatarUpload->store('avatars', 'public');
+            $this->avatarUpload = null;
+        }
+    }
+
     public function removeAvatar(): void
     {
         if ($this->avatarPath && Storage::disk('public')->exists($this->avatarPath)) {
@@ -661,13 +680,14 @@ class ProfileBuilder extends Component
         }
 
         if ($step > $this->currentStep) {
-            try {
-                for ($s = $this->currentStep; $s < $step; $s++) {
+            for ($s = $this->currentStep; $s < $step; $s++) {
+                try {
                     $this->validateStep($s);
+                } catch (\Illuminate\Validation\ValidationException $e) {
+                    $this->currentStep = $s;
+                    $this->dispatch('profile-step-changed');
+                    throw $e;
                 }
-            } catch (\Illuminate\Validation\ValidationException $e) {
-                $this->dispatch('profile-step-changed');
-                throw $e;
             }
         }
 
@@ -1257,7 +1277,7 @@ class ProfileBuilder extends Component
         $user = Auth::user();
 
         if ($this->avatarUpload) {
-            $this->avatarPath = $this->avatarUpload->store('avatars', 'public');
+            $this->updatedAvatarUpload();
         }
 
         if ($this->customResumeUpload) {
@@ -1528,8 +1548,14 @@ class ProfileBuilder extends Component
 
     public function saveProfileAndRedirect()
     {
-        $this->validateStep(1);
-        $this->validateStep(2);
+        try {
+            $this->validateStep(1);
+            $this->validateStep(2);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->currentStep = 2;
+            $this->dispatch('profile-step-changed');
+            throw $e;
+        }
 
         $this->persistProfileData();
 

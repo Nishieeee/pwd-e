@@ -85,6 +85,8 @@
                     aria-label="Filter by application status">
                 <option value="all">All statuses</option>
                 <option value="interview">Interview Scheduled</option>
+                <option value="offered">Offer Received</option>
+                <option value="hired">Hired</option>
                 <option value="under_review">Under Review</option>
                 <option value="closed">Closed</option>
                 <option value="rejected">Rejected</option>
@@ -124,19 +126,19 @@
             <table class="w-full text-left text-xs" role="table">
                 <thead class="bg-[#F8FAFC] text-gray-500 font-bold border-b border-gray-200/80 text-[11px] uppercase tracking-wider">
                     <tr>
-                        <th scope="col" class="py-3.5 px-6 whitespace-nowrap">Job Title</th>
-                        <th scope="col" class="py-3.5 px-6 whitespace-nowrap">Employer Name</th>
-                        <th scope="col" class="py-3.5 px-6 whitespace-nowrap">Application Date</th>
-                        <th scope="col" class="py-3.5 px-6 whitespace-nowrap text-center">Accessibility-Fit</th>
-                        <th scope="col" class="py-3.5 px-6 whitespace-nowrap">Application Status</th>
-                        <th scope="col" class="py-3.5 px-6 whitespace-nowrap text-center">Actions</th>
+                        <th scope="col" class="py-3.5 px-4 lg:px-5 whitespace-nowrap">Job Title</th>
+                        <th scope="col" class="py-3.5 px-4 lg:px-5 whitespace-nowrap">Employer Name</th>
+                        <th scope="col" class="py-3.5 px-3 lg:px-4 whitespace-nowrap">Application Date</th>
+                        <th scope="col" class="py-3.5 px-3 lg:px-4 whitespace-nowrap text-center">Accessibility-Fit</th>
+                        <th scope="col" class="py-3.5 px-4 lg:px-5 whitespace-nowrap">Application Status</th>
+                        <th scope="col" class="py-3.5 px-4 lg:px-5 whitespace-nowrap text-center">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                     @forelse($applications as $app)
                         <tr class="hover:bg-slate-50/70 transition-colors {{ $app->status === 'interview' ? 'bg-emerald-50/20' : '' }}">
                             <!-- Job Title -->
-                            <td class="py-4 px-6 align-middle">
+                            <td class="py-4 px-4 lg:px-5 align-middle">
                                 <div class="font-bold text-sm text-[#1A2840] hover:text-[#244F73] transition-colors leading-snug">
                                     {{ $app->jobPosting->title }}
                                 </div>
@@ -147,7 +149,7 @@
                             </td>
 
                             <!-- Employer Name -->
-                            <td class="py-4 px-6 align-middle">
+                            <td class="py-4 px-4 lg:px-5 align-middle">
                                 <div class="font-semibold text-xs text-gray-900 leading-snug">
                                     @if($app->jobPosting?->employerProfile)
                                         <a href="{{ route('candidate.employers.show', $app->jobPosting->employerProfile) }}"
@@ -167,7 +169,7 @@
                             </td>
 
                             <!-- Application Date -->
-                            <td class="py-4 px-6 align-middle tabular-nums whitespace-nowrap">
+                            <td class="py-4 px-3 lg:px-4 align-middle tabular-nums whitespace-nowrap">
                                 <div class="font-medium text-xs text-gray-800">
                                     {{ $app->applied_at ? $app->applied_at->format('M j, Y') : 'Oct 25, 2026' }}
                                 </div>
@@ -177,7 +179,7 @@
                             </td>
 
                             <!-- Accessibility-Fit Score -->
-                            <td class="py-4 px-6 align-middle text-center whitespace-nowrap">
+                            <td class="py-4 px-3 lg:px-4 align-middle text-center whitespace-nowrap">
                                 @php
                                     $score = (int) ($app->fit_score_at_apply ?? 95);
                                     $fitBadgeClass = $score >= 90
@@ -199,7 +201,7 @@
                             </td>
 
                             <!-- Application Status -->
-                            <td class="py-4 px-6 align-middle">
+                            <td class="py-4 px-4 lg:px-5 align-middle">
                                 <div>
                                     @if($app->status === 'interview')
                                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#E8F5E9] text-[#176B47] border border-[#A5D6A7] shadow-2xs">
@@ -215,6 +217,21 @@
                                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
                                             Closed
                                         </span>
+                                    @elseif($app->status === 'offered')
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-teal-50 text-teal-800 border border-teal-200 shadow-2xs">
+                                            <svg class="size-3.5 text-teal-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                            <span>{{ __('Offer Received') }}</span>
+                                        </span>
+                                        @if($app->status_subtext)
+                                            <div class="text-[11px] text-teal-700 mt-1.5 max-w-[200px] leading-tight">
+                                                {{ $app->status_subtext }}
+                                            </div>
+                                        @endif
+                                    @elseif($app->status === 'offer_declined')
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 border border-gray-200 shadow-2xs">
+                                            <span class="size-1.5 rounded-full bg-gray-400"></span>
+                                            <span>{{ __('Offer Declined') }}</span>
+                                        </span>
                                     @elseif($app->status === 'rejected')
                                         <div class="inline-flex flex-col items-start gap-1">
                                             <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-800 border border-rose-200 shadow-2xs">
@@ -228,23 +245,82 @@
                                                 </div>
                                             @endif
                                         </div>
+                                    @elseif($app->status === 'hired')
+                                        @php
+                                            $sepStatus = $app->workforceRecord?->separation_status;
+                                        @endphp
+
+                                        @if($sepStatus === 'acknowledged')
+                                            {{-- Employment Ended / Separated --}}
+                                            <div class="inline-flex flex-col items-start">
+                                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-300/80 shadow-2xs">
+                                                    <span class="size-1.5 rounded-full bg-slate-500"></span>
+                                                    <span>{{ __('Separated') }}</span>
+                                                </span>
+                                                @php
+                                                    $sepReason = match($app->workforceRecord?->ended_reason) {
+                                                        'resigned' => __('Resigned'),
+                                                        'relieved' => __('Relieved'),
+                                                        'contract_ended' => __('Contract Ended'),
+                                                        default => __('Departure'),
+                                                    };
+                                                @endphp
+                                                <div class="text-[11px] text-gray-500 mt-1.5 max-w-[200px] leading-tight">
+                                                    {{ $sepReason }} &bull; {{ $app->workforceRecord?->ended_at?->format('M j, Y') ?? ($app->updated_at ? $app->updated_at->format('M j, Y') : '') }}
+                                                </div>
+                                            </div>
+                                        @elseif($sepStatus === 'pending_review')
+                                            {{-- Separation Notice Pending Candidate Action --}}
+                                            <div class="inline-flex flex-col items-start">
+                                                <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-900 border border-amber-300 hover:bg-amber-100 shadow-2xs transition-colors" title="{{ __('Notice of separation issued. Action required on Dashboard.') }}">
+                                                    <span class="size-2 rounded-full bg-amber-500 animate-pulse"></span>
+                                                    <span>{{ __('Separation Notice') }}</span>
+                                                </a>
+                                                <a href="{{ route('dashboard') }}" class="text-[11px] text-amber-800 hover:underline font-medium mt-1.5 max-w-[200px] leading-tight flex items-center gap-1">
+                                                    <span>{{ __('Action required on Dashboard') }}</span>
+                                                    <span>&rarr;</span>
+                                                </a>
+                                            </div>
+                                        @elseif($sepStatus === 'disputed')
+                                            {{-- Separation Contested by Candidate --}}
+                                            <div class="inline-flex flex-col items-start">
+                                                <a href="{{ route('dashboard') }}" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-800 border border-rose-200 hover:bg-rose-100 shadow-2xs transition-colors" title="{{ __('Contested separation under DOLE / RA 7277 review.') }}">
+                                                    <span class="size-2 rounded-full bg-rose-500"></span>
+                                                    <span>{{ __('Separation Contested') }}</span>
+                                                </a>
+                                                <div class="text-[11px] text-rose-700 mt-1.5 max-w-[200px] leading-tight">
+                                                    {{ __('Under RA 7277 review') }}
+                                                </div>
+                                            </div>
+                                        @else
+                                            {{-- Active and Employed --}}
+                                            <div class="inline-flex flex-col items-start">
+                                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">
+                                                    <svg class="size-3.5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                                    <span>{{ __('Currently Employed') }}</span>
+                                                </span>
+                                                <div class="text-[11px] text-gray-500 mt-1.5 max-w-[200px] leading-tight">
+                                                    {{ __('Active since :date', ['date' => $app->workforceRecord?->hired_at?->format('M j, Y') ?? ($app->updated_at ? $app->updated_at->format('M j, Y') : 'Nov 2026')]) }}
+                                                </div>
+                                            </div>
+                                        @endif
                                     @else
                                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-sky-50 text-[#1A2840] border border-sky-200 shadow-2xs">
                                             <svg class="size-3.5 text-[#244F73] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                             <span>{{ ucfirst($app->status) }}</span>
                                         </span>
-                                    @endif
 
-                                    @if($app->status_subtext)
-                                        <div class="text-[11px] text-gray-500 mt-1.5 max-w-[200px] leading-tight">
-                                            {{ $app->status_subtext }}
-                                        </div>
+                                        @if($app->status_subtext)
+                                            <div class="text-[11px] text-gray-500 mt-1.5 max-w-[200px] leading-tight">
+                                                {{ $app->status_subtext }}
+                                            </div>
+                                        @endif
                                     @endif
                                 </div>
                             </td>
 
                             <!-- Actions -->
-                            <td class="py-4 px-6 align-middle">
+                            <td class="py-4 px-4 lg:px-5 align-middle">
                                 <div class="flex flex-col gap-1.5 w-44">
                                     @if($app->offer_details || $app->status === 'offered')
                                         <button type="button"

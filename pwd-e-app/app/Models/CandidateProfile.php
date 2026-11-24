@@ -104,4 +104,9 @@ class CandidateProfile extends Model
     {
         return $this->hasMany(JobInvitation::class);
     }
+
+    public function workforceRecords(): HasMany
+    {
+        return $this->hasMany(WorkforceRecord::class);
+    }
 }

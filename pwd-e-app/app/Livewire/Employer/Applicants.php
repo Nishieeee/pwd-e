@@ -29,6 +29,14 @@ class Applicants extends Component
     #[Url(as: 'status')]
     public string $statusFilter = 'all';
 
+    public bool $showCloseJobPromptModal = false;
+
+    public ?int $promptCloseJobId = null;
+
+    public ?string $promptCloseJobTitle = '';
+
+    public ?string $hiredCandidateName = '';
+
     public bool $showInterviewModal = false;
 
     public ?int $interviewAppId = null;
@@ -549,6 +557,21 @@ class Applicants extends Component
             $q->where('employer_profile_id', $profile->id);
         })->findOrFail($applicationId);
 
+        if ($status === 'rejected') {
+            $this->openRejectModal($applicationId);
+            return;
+        }
+
+        if ($status === 'offered') {
+            $this->openOfferModal($applicationId);
+            return;
+        }
+
+        if ($status === 'hired') {
+            $this->openHireModal($applicationId);
+            return;
+        }
+
         if (! $app->canTransitionTo($status)) {
             Flux::toast(variant: 'danger', text: __("Cannot move application from :current to :target.", [
                 'current' => ucfirst(str_replace('_', ' ', $app->status)),
@@ -571,23 +594,8 @@ class Applicants extends Component
             );
         }
 
-        if ($status === 'rejected') {
-            $this->openRejectModal($applicationId);
-            return;
-        }
-
         if ($status === 'interview') {
             $this->openInterviewModal($applicationId);
-            return;
-        }
-
-        if ($status === 'offered') {
-            $this->openOfferModal($applicationId);
-            return;
-        }
-
-        if ($status === 'hired') {
-            $this->openHireModal($applicationId);
             return;
         }
 
@@ -637,7 +645,63 @@ class Applicants extends Component
             ]
         );
 
+        if ($app->jobPosting && $app->jobPosting->status === 'published') {
+            $this->promptCloseJobId = $app->jobPosting->id;
+            $this->promptCloseJobTitle = $app->jobPosting->title;
+            $this->hiredCandidateName = $app->candidateProfile?->user?->name ?? 'Candidate';
+            $this->showCloseJobPromptModal = true;
+        }
+
         Flux::toast(variant: 'success', text: __('Marked as hired; workforce record created with RA 10524 tax incentive.'));
+    }
+
+    public function openCloseJobPrompt(int $jobId): void
+    {
+        $profile = Auth::user()?->employerProfile;
+        if (! $profile) {
+            return;
+        }
+
+        $job = JobPosting::where('employer_profile_id', $profile->id)->find($jobId);
+        if (! $job) {
+            return;
+        }
+
+        $this->promptCloseJobId = $job->id;
+        $this->promptCloseJobTitle = $job->title;
+        $hiredApp = Application::where('job_posting_id', $job->id)
+            ->where('status', 'hired')
+            ->latest()
+            ->first();
+        $this->hiredCandidateName = $hiredApp?->candidateProfile?->user?->name ?? 'Candidate';
+        $this->showCloseJobPromptModal = true;
+    }
+
+    public function closeJobListing(?int $jobId = null): void
+    {
+        $targetJobId = $jobId ?? $this->promptCloseJobId;
+        $profile = Auth::user()?->employerProfile;
+        if (! $profile || ! $targetJobId) {
+            return;
+        }
+
+        $job = JobPosting::where('employer_profile_id', $profile->id)->findOrFail($targetJobId);
+        $job->update([
+            'status' => 'closed',
+            'closes_at' => now(),
+        ]);
+
+        $this->showCloseJobPromptModal = false;
+        $this->promptCloseJobId = null;
+
+        Flux::toast(variant: 'success', text: __('Job listing ":title" closed. No new applications will be received.', ['title' => $job->title]));
+    }
+
+    public function keepJobListingOpen(): void
+    {
+        $this->showCloseJobPromptModal = false;
+        $this->promptCloseJobId = null;
+        Flux::toast(variant: 'info', text: __('Job listing remains published for additional hires.'));
     }
 
     public function render(): View
@@ -647,6 +711,23 @@ class Applicants extends Component
             ? JobPosting::where('employer_profile_id', $profile->id)->orderBy('title')->get()
             : collect();
 
+        $activeJobFilled = false;
+        $filledJob = null;
+        if ($this->job && $this->job->status === 'published') {
+            $activeJobFilled = $this->job->applications()->where('status', 'hired')->exists();
+            if ($activeJobFilled) {
+                $filledJob = $this->job;
+            }
+        } elseif ($this->selectedJobId) {
+            $selectedJobModel = $employerJobs->firstWhere('id', $this->selectedJobId);
+            if ($selectedJobModel && $selectedJobModel->status === 'published') {
+                $activeJobFilled = $selectedJobModel->applications()->where('status', 'hired')->exists();
+                if ($activeJobFilled) {
+                    $filledJob = $selectedJobModel;
+                }
+            }
+        }
+
         $query = Application::with([
             'candidateProfile.user',
             'candidateProfile.education',
@@ -654,8 +735,19 @@ class Applicants extends Component
             'candidateProfile.certifications',
             'jobPosting.employerProfile',
             'messages',
+            'workforceRecord',
+            'reappliedFrom',
         ])->whereHas('jobPosting', function ($q) use ($profile) {
             $q->where('employer_profile_id', $profile?->id ?? 0);
+        });
+
+        // Deduplicate: Exclude superseded applications when candidate has a newer application for the same job
+        $query->whereNotExists(function ($sub) {
+            $sub->selectRaw(1)
+                ->from('applications as newer_apps')
+                ->whereColumn('newer_apps.candidate_profile_id', 'applications.candidate_profile_id')
+                ->whereColumn('newer_apps.job_posting_id', 'applications.job_posting_id')
+                ->whereColumn('newer_apps.id', '>', 'applications.id');
         });
 
         if ($this->job) {
@@ -672,10 +764,12 @@ class Applicants extends Component
             'interview' => (clone $baseCountQuery)->where('status', 'interview')->count(),
             'offered' => (clone $baseCountQuery)->where('status', 'offered')->count(),
             'hired' => (clone $baseCountQuery)->where('status', 'hired')->count(),
-            'rejected' => (clone $baseCountQuery)->where('status', 'rejected')->count(),
+            'rejected' => (clone $baseCountQuery)->whereIn('status', ['rejected', 'offer_declined'])->count(),
         ];
 
-        if ($this->statusFilter !== 'all') {
+        if ($this->statusFilter === 'rejected') {
+            $query->whereIn('status', ['rejected', 'offer_declined']);
+        } elseif ($this->statusFilter !== 'all') {
             $query->where('status', $this->statusFilter);
         }
 
@@ -688,6 +782,8 @@ class Applicants extends Component
                 'candidateProfile.workExperiences',
                 'candidateProfile.certifications',
                 'jobPosting',
+                'workforceRecord',
+                'reappliedFrom.workforceRecord',
             ])->whereHas('jobPosting', function ($q) use ($profile) {
                 $q->where('employer_profile_id', $profile?->id ?? 0);
             })->find($this->viewingApplicationId)
@@ -725,6 +821,8 @@ class Applicants extends Component
             'showChatModal' => $this->showChatModal,
             'showOfferModal' => $this->showOfferModal,
             'employerJobs' => $employerJobs,
+            'activeJobFilled' => $activeJobFilled,
+            'filledJob' => $filledJob,
         ]);
     }
 }

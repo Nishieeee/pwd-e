@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Application extends Model
@@ -80,30 +81,37 @@ class Application extends Model
             self::STATUS_UNDER_REVIEW,
             self::STATUS_SHORTLISTED,
             self::STATUS_INTERVIEW,
+            self::STATUS_OFFERED,
             self::STATUS_REJECTED,
             self::STATUS_WITHDRAWN,
             self::STATUS_CLOSED,
         ],
         self::STATUS_UNDER_REVIEW => [
+            self::STATUS_APPLIED,
             self::STATUS_SHORTLISTED,
             self::STATUS_INTERVIEW,
+            self::STATUS_OFFERED,
             self::STATUS_REJECTED,
             self::STATUS_WITHDRAWN,
         ],
         self::STATUS_SHORTLISTED => [
+            self::STATUS_UNDER_REVIEW,
             self::STATUS_INTERVIEW,
             self::STATUS_OFFERED,
             self::STATUS_REJECTED,
             self::STATUS_WITHDRAWN,
         ],
         self::STATUS_INTERVIEW => [
+            self::STATUS_UNDER_REVIEW,
             self::STATUS_OFFERED,
             self::STATUS_REJECTED,
             self::STATUS_WITHDRAWN,
         ],
         self::STATUS_OFFERED => [
             self::STATUS_HIRED,
+            self::STATUS_INTERVIEW,
             self::STATUS_OFFER_DECLINED,
+            self::STATUS_REJECTED,
             self::STATUS_WITHDRAWN,
         ],
         self::STATUS_HIRED => [],
@@ -250,6 +258,11 @@ class Application extends Model
     public function reapplications(): HasMany
     {
         return $this->hasMany(self::class, 'reapplied_from_id');
+    }
+
+    public function workforceRecord(): HasOne
+    {
+        return $this->hasOne(WorkforceRecord::class);
     }
 
     public function unreadMessagesFor(?User $user): int

@@ -6,6 +6,8 @@ use App\Models\Application;
 use App\Models\CandidateProfile;
 use App\Models\JobInvitation;
 use App\Models\JobPosting;
+use App\Models\WorkforceRecord;
+use App\Notifications\EmploymentSeparationResponse;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -21,6 +23,24 @@ class Dashboard extends Component
 
     public ?string $profileSavedMessage = null;
 
+    public bool $showDisputeModal = false;
+
+    public ?int $disputingRecordId = null;
+
+    public string $candidateDisputeReason = '';
+
+    public bool $showAcknowledgeModal = false;
+
+    public ?int $acknowledgingRecordId = null;
+
+    public bool $showDeclineInviteModal = false;
+
+    public ?int $decliningInviteId = null;
+
+    public string $decliningInviteJobTitle = '';
+
+    public string $decliningInviteEmployer = '';
+
     public function mount(): void
     {
         if (session()->has('profile_saved_banner')) {
@@ -31,6 +51,134 @@ class Dashboard extends Component
     public function dismissProfileSavedBanner(): void
     {
         $this->profileSavedMessage = null;
+    }
+
+    public function openAcknowledgeModal(int $id): void
+    {
+        $this->acknowledgingRecordId = $id;
+        $this->showAcknowledgeModal = true;
+    }
+
+    public function closeAcknowledgeModal(): void
+    {
+        $this->showAcknowledgeModal = false;
+        $this->acknowledgingRecordId = null;
+    }
+
+    public function acknowledgeSeparation(?int $id = null): void
+    {
+        $targetId = $id ?? $this->acknowledgingRecordId;
+        if (! $targetId) {
+            return;
+        }
+
+        $candidateProfile = Auth::user()?->candidateProfile;
+        if (! $candidateProfile) {
+            return;
+        }
+
+        $record = WorkforceRecord::with(['employerProfile.user', 'application.jobPosting'])
+            ->where('candidate_profile_id', $candidateProfile->id)
+            ->where('separation_status', 'pending_review')
+            ->findOrFail($targetId);
+
+        $record->update([
+            'separation_status' => 'acknowledged',
+            'candidate_response_at' => now(),
+        ]);
+
+        if ($record->employerProfile?->user) {
+            $positionTitle = $record->application?->jobPosting?->title ?? 'Position';
+
+            $record->employerProfile->user->notify(
+                new EmploymentSeparationResponse(
+                    candidateName: Auth::user()->name,
+                    positionTitle: $positionTitle,
+                    responseType: 'acknowledged',
+                    disputeReason: null,
+                    workforceRecordId: $record->id,
+                )
+            );
+        }
+
+        if (function_exists('activity')) {
+            activity('workforce')
+                ->performedOn($record)
+                ->causedBy(Auth::user())
+                ->withProperties(['separation_status' => 'acknowledged'])
+                ->log('Employment separation acknowledged by candidate');
+        }
+
+        $this->closeAcknowledgeModal();
+        $this->dispatch('toast', message: __('Employment separation acknowledged. Workforce records updated.'));
+    }
+
+    public function openDisputeModal(int $id): void
+    {
+        $this->disputingRecordId = $id;
+        $this->candidateDisputeReason = '';
+        $this->showDisputeModal = true;
+    }
+
+    public function closeDisputeModal(): void
+    {
+        $this->showDisputeModal = false;
+        $this->disputingRecordId = null;
+        $this->candidateDisputeReason = '';
+        $this->resetValidation();
+    }
+
+    public function submitDispute(): void
+    {
+        $this->validate([
+            'candidateDisputeReason' => ['required', 'string', 'min:10', 'max:1000'],
+        ], [
+            'candidateDisputeReason.required' => 'Please provide the grounds or statement for contesting this separation.',
+            'candidateDisputeReason.min' => 'Please provide at least 10 characters detailing your contestation grounds.',
+        ]);
+
+        $candidateProfile = Auth::user()?->candidateProfile;
+        if (! $candidateProfile || ! $this->disputingRecordId) {
+            return;
+        }
+
+        $record = WorkforceRecord::with(['employerProfile.user', 'application.jobPosting'])
+            ->where('candidate_profile_id', $candidateProfile->id)
+            ->findOrFail($this->disputingRecordId);
+
+        $record->update([
+            'separation_status' => 'disputed',
+            'candidate_response_at' => now(),
+            'candidate_dispute_reason' => $this->candidateDisputeReason,
+        ]);
+
+        if ($record->employerProfile?->user) {
+            $positionTitle = $record->application?->jobPosting?->title ?? 'Position';
+
+            $record->employerProfile->user->notify(
+                new EmploymentSeparationResponse(
+                    candidateName: Auth::user()->name,
+                    positionTitle: $positionTitle,
+                    responseType: 'disputed',
+                    disputeReason: $this->candidateDisputeReason,
+                    workforceRecordId: $record->id,
+                )
+            );
+        }
+
+        if (function_exists('activity')) {
+            activity('workforce')
+                ->performedOn($record)
+                ->causedBy(Auth::user())
+                ->withProperties([
+                    'separation_status' => 'disputed',
+                    'dispute_reason' => $this->candidateDisputeReason,
+                ])
+                ->log('Employment separation formally contested/disputed by candidate');
+        }
+
+        $this->dispatch('toast', message: __('Formal dispute submitted. Notice has been flagged for statutory compliance review.'));
+        $this->closeDisputeModal();
     }
 
     public function viewFitBreakdown(int $applicationId): void
@@ -52,6 +200,42 @@ class Dashboard extends Component
             $this->calendarDownloadSuccess = "Interview with {$application->jobPosting->employerProfile->company_name} accepted and added to calendar!";
             $this->dispatch('interview-accepted', message: $this->calendarDownloadSuccess);
         }
+    }
+
+    public function openDeclineInviteModal(int $invitationId): void
+    {
+        $user = Auth::user();
+        $candidateProfile = $user?->candidateProfile;
+        if (! $candidateProfile) {
+            return;
+        }
+
+        $invitation = JobInvitation::where('candidate_profile_id', $candidateProfile->id)
+            ->where('id', $invitationId)
+            ->first();
+
+        if (! $invitation) {
+            return;
+        }
+
+        $this->decliningInviteId = $invitation->id;
+        $this->decliningInviteJobTitle = $invitation->jobPosting?->title ?? 'Position';
+        $this->decliningInviteEmployer = $invitation->jobPosting?->employerProfile?->company_name ?? 'Employer';
+        $this->showDeclineInviteModal = true;
+    }
+
+    public function closeDeclineInviteModal(): void
+    {
+        $this->showDeclineInviteModal = false;
+        $this->decliningInviteId = null;
+    }
+
+    public function confirmDeclineInvitation(): void
+    {
+        if ($this->decliningInviteId) {
+            $this->declineInvitation($this->decliningInviteId);
+        }
+        $this->closeDeclineInviteModal();
     }
 
     public function declineInvitation(int $invitationId): void
@@ -132,6 +316,25 @@ class Dashboard extends Component
             ->take(5)
             ->get();
 
+        // 6. Statutory Employment Separation Due Process Notices
+        $pendingSeparationNotice = WorkforceRecord::where('candidate_profile_id', $candidateProfile->id)
+            ->where('separation_status', 'pending_review')
+            ->with(['employerProfile.user', 'application.jobPosting'])
+            ->latest('separation_notice_at')
+            ->first();
+
+        $disputedSeparationNotice = WorkforceRecord::where('candidate_profile_id', $candidateProfile->id)
+            ->where('separation_status', 'disputed')
+            ->with(['employerProfile.user', 'application.jobPosting'])
+            ->latest('candidate_response_at')
+            ->first();
+
+        $acknowledgingRecord = $this->acknowledgingRecordId
+            ? WorkforceRecord::where('candidate_profile_id', $candidateProfile->id)
+                ->with(['employerProfile.user', 'application.jobPosting'])
+                ->find($this->acknowledgingRecordId)
+            : null;
+
         return view('livewire.candidate.dashboard', [
             'user' => $user,
             'candidateProfile' => $candidateProfile,
@@ -147,6 +350,9 @@ class Dashboard extends Component
             'profileSavedMessage' => $this->profileSavedMessage,
             'showBreakdownModal' => $this->showBreakdownModal,
             'jobInvitations' => $jobInvitations,
+            'pendingSeparationNotice' => $pendingSeparationNotice,
+            'disputedSeparationNotice' => $disputedSeparationNotice,
+            'acknowledgingRecord' => $acknowledgingRecord,
         ]);
     }
 }

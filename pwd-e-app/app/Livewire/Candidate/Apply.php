@@ -90,15 +90,33 @@ class Apply extends Component
                 $this->includeFslVideo = true;
             }
 
-            $this->existingApplication = Application::where('candidate_profile_id', $profile->id)
+            $activeApp = Application::where('candidate_profile_id', $profile->id)
                 ->where('job_posting_id', $this->job->id)
                 ->whereNotIn('status', ['withdrawn', 'closed', 'rejected'])
+                ->latest()
                 ->first();
 
-            if ($this->existingApplication) {
-                $this->alreadyApplied = true;
-                $this->referenceNumber = $this->existingApplication->id;
-                $this->formattedReference = 'PWD-APP-' . date('Y') . '-' . str_pad((string) $this->existingApplication->id, 5, '0', STR_PAD_LEFT);
+            if ($activeApp) {
+                // If previously hired, check if candidate has completed separation
+                if ($activeApp->status === 'hired') {
+                    $workforceRecord = \App\Models\WorkforceRecord::where('application_id', $activeApp->id)->first();
+                    if ($workforceRecord && $workforceRecord->separation_status === 'acknowledged') {
+                        // Separated candidate: reapplication to an open job is permitted!
+                        $this->existingApplication = null;
+                        $this->alreadyApplied = false;
+                    } else {
+                        // Still active or in dispute/notice: block reapplication
+                        $this->existingApplication = $activeApp;
+                        $this->alreadyApplied = true;
+                        $this->referenceNumber = $activeApp->id;
+                        $this->formattedReference = 'PWD-APP-' . date('Y') . '-' . str_pad((string) $activeApp->id, 5, '0', STR_PAD_LEFT);
+                    }
+                } else {
+                    $this->existingApplication = $activeApp;
+                    $this->alreadyApplied = true;
+                    $this->referenceNumber = $activeApp->id;
+                    $this->formattedReference = 'PWD-APP-' . date('Y') . '-' . str_pad((string) $activeApp->id, 5, '0', STR_PAD_LEFT);
+                }
             }
         }
     }
@@ -195,22 +213,35 @@ class Apply extends Component
         $activeExisting = Application::where('candidate_profile_id', $profile->id)
             ->where('job_posting_id', $this->job->id)
             ->whereNotIn('status', ['withdrawn', 'closed', 'rejected'])
+            ->latest()
             ->first();
 
         if ($activeExisting) {
-            $this->alreadyApplied = true;
-            $this->applicationSuccessMessage = 'You already have an active application under review for this job.';
-            $this->submitted = true;
-            $this->referenceNumber = $activeExisting->id;
-            $this->formattedReference = 'PWD-APP-' . date('Y') . '-' . str_pad((string) $activeExisting->id, 5, '0', STR_PAD_LEFT);
+            if ($activeExisting->status === 'hired') {
+                $workforceRecord = \App\Models\WorkforceRecord::where('application_id', $activeExisting->id)->first();
+                if (! $workforceRecord || $workforceRecord->separation_status !== 'acknowledged') {
+                    $this->alreadyApplied = true;
+                    $this->applicationSuccessMessage = 'You are currently employed or under active separation review for this position.';
+                    $this->submitted = true;
+                    $this->referenceNumber = $activeExisting->id;
+                    $this->formattedReference = 'PWD-APP-' . date('Y') . '-' . str_pad((string) $activeExisting->id, 5, '0', STR_PAD_LEFT);
 
-            return;
+                    return;
+                }
+            } else {
+                $this->alreadyApplied = true;
+                $this->applicationSuccessMessage = 'You already have an active application under review for this job.';
+                $this->submitted = true;
+                $this->referenceNumber = $activeExisting->id;
+                $this->formattedReference = 'PWD-APP-' . date('Y') . '-' . str_pad((string) $activeExisting->id, 5, '0', STR_PAD_LEFT);
+
+                return;
+            }
         }
 
-        // If candidate previously withdrew, link the previous application ID
-        $previousWithdrawnApp = Application::where('candidate_profile_id', $profile->id)
+        // If candidate previously withdrew, was closed, or was separated from this job, link the previous application ID
+        $previousApp = Application::where('candidate_profile_id', $profile->id)
             ->where('job_posting_id', $this->job->id)
-            ->whereIn('status', ['withdrawn', 'closed'])
             ->latest()
             ->first();
 
@@ -266,7 +297,7 @@ class Apply extends Component
         $application = Application::create([
             'candidate_profile_id' => $profile->id,
             'job_posting_id' => $this->job->id,
-            'reapplied_from_id' => $previousWithdrawnApp?->id,
+            'reapplied_from_id' => $previousApp?->id,
             'status' => 'applied',
             'status_subtext' => Application::computeStatusSubtext(Application::STATUS_APPLIED),
             'cover_letter' => $this->coverLetter ?: null,

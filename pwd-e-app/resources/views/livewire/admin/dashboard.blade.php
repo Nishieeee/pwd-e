@@ -58,6 +58,25 @@
         </div>
     </div>
 
+    @if(($stats['disputed_separations'] ?? 0) > 0)
+        <!-- Contested Employment Separations Compliance Alert -->
+        <div class="p-4 sm:p-5 rounded-2xl bg-red-50 border-2 border-red-300 text-red-950 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs" role="alert">
+            <div class="flex items-start gap-3">
+                <div class="size-9 rounded-xl bg-red-100 border border-red-200 text-red-700 flex items-center justify-center shrink-0 mt-0.5">
+                    <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                </div>
+                <div class="text-xs leading-relaxed">
+                    <strong class="block font-bold text-sm text-red-950">{{ __(':count PWD Employment Separation(s) Contested by Candidates', ['count' => $stats['disputed_separations']]) }}</strong>
+                    <span class="text-red-900">{{ __('Employees have filed formal disputes against separation notices under RA 7277 (Magna Carta for Disabled Persons). Tax deductions for contested records are held pending resolution.') }}</span>
+                </div>
+            </div>
+            <a href="{{ route('admin.users') }}" class="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-red-600 text-white text-xs font-bold hover:bg-red-700 transition-colors shadow-xs shrink-0">
+                <span>{{ __('Review in Compliance') }}</span>
+                <span>&rarr;</span>
+            </a>
+        </div>
+    @endif
+
     <!-- Pending Verification Approvals & Bulk Actions Section -->
     <section class="rounded-2xl border border-primary-border bg-white shadow-sm overflow-hidden" aria-labelledby="verification-approvals-heading">
         <div class="p-6 border-b border-gray-100 flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-gradient-to-r from-surface to-white">

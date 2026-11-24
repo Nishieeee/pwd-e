@@ -166,9 +166,8 @@
 
                                     <button
                                         type="button"
-                                        wire:click="delete({{ $term->id }})"
-                                        wire:confirm="{{ __('Are you sure you want to delete this term?') }}"
-                                        class="inline-flex items-center rounded-lg bg-rose-50 border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-700 transition hover:bg-rose-100"
+                                        wire:click="openDeleteModal({{ $term->id }})"
+                                        class="inline-flex items-center rounded-lg bg-rose-50 border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-700 transition hover:bg-rose-100 cursor-pointer"
                                     >
                                         {{ __('Delete') }}
                                     </button>
@@ -190,4 +189,29 @@
             {{ $terms->links() }}
         </div>
     </div>
+
+    {{-- Delete Lexicon Term Modal --}}
+    @if ($showDeleteModal)
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs" role="dialog" aria-modal="true" aria-label="{{ __('Delete Lexicon Term') }}">
+            <div class="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-6 sm:p-7 shadow-2xl space-y-4" wire:click.stop>
+                <div class="flex items-start justify-between border-b border-primary-border pb-3">
+                    <h2 class="font-heading text-lg font-bold text-primary-dark">{{ __('Delete Lexicon Term?') }}</h2>
+                    <button type="button" wire:click="closeDeleteModal" class="text-body-muted hover:text-primary-dark text-xl leading-none cursor-pointer">&times;</button>
+                </div>
+
+                <p class="text-xs text-body-muted leading-relaxed">
+                    {{ __('Are you sure you want to delete ":phrase" from the exclusionary terms lexicon?', ['phrase' => $deletingPhrase]) }}
+                </p>
+
+                <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-primary-border">
+                    <button type="button" wire:click="closeDeleteModal" class="rounded-xl border border-primary-border px-4 py-2 text-xs font-semibold text-primary-dark hover:bg-primary-tint transition-colors cursor-pointer">
+                        {{ __('Cancel') }}
+                    </button>
+                    <button type="button" wire:click="confirmDelete" class="rounded-xl bg-red-600 px-4 py-2 text-xs font-bold text-white hover:bg-red-700 shadow-xs transition-colors cursor-pointer">
+                        {{ __('Delete Term') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>

@@ -534,7 +534,7 @@ class ApplicationsTracker extends Component
 
         // Base query for applications belonging to candidate
         $query = Application::where('candidate_profile_id', $candidateProfile->id)
-            ->with(['jobPosting.employerProfile', 'jobPosting.accommodations']);
+            ->with(['jobPosting.employerProfile', 'jobPosting.accommodations', 'workforceRecord']);
 
         // Tab counts
         $allCount = Application::where('candidate_profile_id', $candidateProfile->id)->count();

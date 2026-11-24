@@ -2,15 +2,11 @@
      x-data="{
          scrollToTop() {
              this.$nextTick(() => {
-                 const el = document.getElementById('profile-builder-top') || document.getElementById('main-content');
-                 if (el) {
-                     el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                 }
-                 const scrollable = el?.closest('.overflow-y-auto') || document.querySelector('.lg\\:overflow-y-auto');
+                 const scrollable = document.querySelector('.lg\\:overflow-y-auto') || document.querySelector('.overflow-y-auto') || document.querySelector('main');
                  if (scrollable) {
                      scrollable.scrollTo({ top: 0, behavior: 'smooth' });
                  }
-                 window.scrollTo({ top: 0, behavior: 'smooth' });
+                 window.scrollTo(0, 0);
              });
          }
      }"
@@ -278,11 +274,19 @@
                     <p class="text-xs text-[#4E5F6E]">
                         Try saying &ldquo;My name is {{ $firstName }} {{ $lastName }}.&rdquo; Pause whenever you need a moment.
                     </p>
-                    <button type="button"
-                            wire:click="selectInputMode('standard')"
-                            class="text-xs font-bold text-[#244F73] hover:underline focus:outline-none focus:ring-2 focus:ring-[#244F73] rounded">
-                        Prefer your keyboard? Switch to Standard Typing
-                    </button>
+                    <div class="flex flex-wrap items-center gap-3 pt-1">
+                        <button type="button"
+                                wire:click="goToStep(2)"
+                                class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-[#244F73] text-white text-xs font-bold hover:bg-[#1A2840] transition shadow-xs focus:ring-2 focus:ring-[#244F73] shrink-0">
+                            <span>Continue to Professional Details</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                        </button>
+                        <button type="button"
+                                wire:click="selectInputMode('standard')"
+                                class="text-xs font-bold text-[#244F73] hover:underline focus:outline-none focus:ring-2 focus:ring-[#244F73] rounded">
+                            Prefer your keyboard? Switch to Standard Typing
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Listening Pill Box with WCAG 44px Touch Targets -->
@@ -508,10 +512,10 @@
                                 <div wire:loading wire:target="avatarUpload" class="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
                                     <svg class="size-6 animate-spin text-white" fill="none" viewBox="0 0 24 24" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
                                 </div>
-                                @if($avatarUpload)
-                                    <img src="{{ $avatarUpload->temporaryUrl() }}" alt="2x2 Photo Preview" class="w-full h-full object-cover">
-                                @elseif($avatarPath)
+                                @if($avatarPath)
                                     <img src="{{ Storage::url($avatarPath) }}" alt="Saved 2x2 Photo" class="w-full h-full object-cover">
+                                @elseif($avatarUpload)
+                                    <img src="{{ $avatarUpload->temporaryUrl() }}" alt="2x2 Photo Preview" class="w-full h-full object-cover">
                                 @else
                                     <div class="flex flex-col items-center justify-center text-center p-1">
                                         <span class="font-heading font-bold text-xl text-primary">{{ strtoupper(substr($firstName, 0, 1).substr($lastName, 0, 1)) ?: 'MS' }}</span>
@@ -526,6 +530,12 @@
                                 <p class="text-xs sm:text-[13px] text-gray-500 leading-relaxed max-w-md">
                                     Featured on your official Digital Profile. A clear 2x2 photo with a white or plain background is recommended (JPG/PNG, up to 5 MB).
                                 </p>
+                                @error('avatarUpload')
+                                    <p class="text-xs text-red-600 mt-1 flex items-center gap-1.5" role="alert">
+                                        <svg class="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                                        <span>{{ $message }}</span>
+                                    </p>
+                                @enderror
                             </div>
                         </div>
 
@@ -538,8 +548,8 @@
                                 <input id="avatar-upload-input"
                                        type="file"
                                        wire:model="avatarUpload"
-                                       accept="image/png,image/jpeg"
-                                       class="sr-only"
+                                       accept="image/png,image/jpeg,image/webp"
+                                       class="hidden"
                                        aria-label="Upload 2x2 ID photo or avatar">
                             </label>
 
@@ -1594,10 +1604,10 @@
                 <div class="flex flex-wrap items-center justify-between gap-4 pb-5 border-b border-gray-100">
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 rounded-full bg-[#DCEAF4] text-[#244F73] flex items-center justify-center font-bold text-sm overflow-hidden shrink-0">
-                            @if($avatarUpload)
-                                <img src="{{ $avatarUpload->temporaryUrl() }}" alt="Candidate avatar" class="w-full h-full object-cover">
-                            @elseif($avatarPath)
+                            @if($avatarPath)
                                 <img src="{{ Storage::url($avatarPath) }}" alt="Candidate avatar" class="w-full h-full object-cover">
+                            @elseif($avatarUpload)
+                                <img src="{{ $avatarUpload->temporaryUrl() }}" alt="Candidate avatar" class="w-full h-full object-cover">
                             @else
                                 <span>{{ strtoupper(substr($firstName, 0, 1).substr($lastName, 0, 1)) ?: 'MS' }}</span>
                             @endif
@@ -1829,6 +1839,15 @@
             </div>
         </div>
 
+        @if ($errors->any())
+            <div class="w-full p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs flex items-center gap-2.5" role="alert" aria-live="assertive">
+                <svg class="w-4 h-4 text-red-600 shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                </svg>
+                <span class="font-semibold">Please complete all required fields above before proceeding to the next step.</span>
+            </div>
+        @endif
+
         <div class="flex flex-wrap items-center gap-3.5 max-w-full">
             <button type="button"
                     wire:click="saveDraftAndExit"
@@ -1938,11 +1957,7 @@
                             <div class="flex flex-col sm:flex-row items-start gap-6 min-w-0 flex-1">
                                 {{-- 2x2 Photo Frame --}}
                                 <div class="relative w-28 h-28 sm:w-32 sm:h-32 rounded-xl border-2 border-primary-border bg-primary-tint/30 flex items-center justify-center overflow-hidden shrink-0 shadow-xs">
-                                    @if($avatarUpload)
-                                        <img src="{{ $avatarUpload->temporaryUrl() }}"
-                                             alt="{{ $resumeFullName }} 2x2 Photo"
-                                             class="w-full h-full object-cover">
-                                    @elseif($avatarPath)
+                                    @if($avatarPath)
                                         <img src="{{ Storage::url($avatarPath) }}"
                                              alt="{{ $resumeFullName }} 2x2 Photo"
                                              class="w-full h-full object-cover"
@@ -1951,6 +1966,10 @@
                                             <span class="font-heading text-2xl font-bold text-primary">{{ $resumeInitials }}</span>
                                             <span class="text-[10px] uppercase font-semibold text-body-muted mt-1 tracking-wider">2x2 Photo</span>
                                         </div>
+                                    @elseif($avatarUpload)
+                                        <img src="{{ $avatarUpload->temporaryUrl() }}"
+                                             alt="{{ $resumeFullName }} 2x2 Photo"
+                                             class="w-full h-full object-cover">
                                     @else
                                         <div class="flex flex-col items-center justify-center text-center p-2">
                                             <span class="font-heading text-2xl font-bold text-primary">{{ $resumeInitials }}</span>

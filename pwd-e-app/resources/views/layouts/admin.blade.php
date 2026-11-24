@@ -232,9 +232,9 @@
     <!-- Main Content Area -->
     <div class="flex-1 flex flex-col min-w-0 lg:h-screen lg:overflow-y-auto">
         <!-- Top Accessibility & Navigation Header -->
-        <header class="bg-[#F8FAFC] border-b border-gray-200 px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3 flex items-center justify-between gap-4 sticky top-0 z-30 shadow-xs min-w-0" role="region" aria-label="Accessibility settings and profile controls">
+        <header class="bg-[#F8FAFC] border-b border-gray-200 px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 flex flex-wrap items-center justify-between gap-y-2 gap-x-3.5 sticky top-0 z-30 shadow-xs min-w-0" role="region" aria-label="Accessibility settings and profile controls">
             <!-- Left: Accessibility Tools -->
-            <div class="flex items-center gap-2 sm:gap-2.5 text-xs text-gray-700 min-w-0 overflow-x-auto no-scrollbar py-0.5">
+            <div class="flex items-center flex-wrap gap-2 text-xs text-gray-700 min-w-0">
                 <div class="flex items-center gap-1.5 sm:gap-2 font-semibold text-[#1A2840] mr-1 sm:mr-2 shrink-0">
                     <svg class="w-5 h-5 text-[#244F73] shrink-0" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24" aria-hidden="true">
                         <circle cx="12" cy="12" r="10"/>
@@ -246,28 +246,28 @@
 
                 <!-- Contrast Level Controls -->
                 <div class="inline-flex items-center rounded-lg border border-gray-300 bg-white p-0.5 shadow-2xs shrink-0" role="group" aria-label="Contrast level controls">
-                    <button type="button" @click="decreaseContrast()" class="px-2.5 py-1.5 rounded-md text-gray-700 hover:bg-gray-100 font-bold text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#244F73] focus-visible:ring-offset-1 cursor-pointer" aria-label="Decrease contrast" title="Decrease contrast">C-</button>
-                    <button type="button" @click="cycleContrast()" class="px-2.5 py-1.5 rounded-md text-gray-700 font-semibold text-xs hover:bg-gray-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#244F73] focus-visible:ring-offset-1 inline-flex items-center gap-1 cursor-pointer" :class="a11yContrastLevel > 100 ? 'font-bold text-[#1A2840]' : ''" aria-label="Contrast level: click to cycle presets">
+                    <button type="button" @click="decreaseContrast()" class="px-2 sm:px-2.5 py-1.5 rounded-md text-gray-700 hover:bg-gray-100 font-bold text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#244F73] focus-visible:ring-offset-1 cursor-pointer" aria-label="Decrease contrast" title="Decrease contrast">C-</button>
+                    <button type="button" @click="cycleContrast()" class="px-2 sm:px-2.5 py-1.5 rounded-md text-gray-700 font-semibold text-xs hover:bg-gray-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#244F73] focus-visible:ring-offset-1 inline-flex items-center gap-1 cursor-pointer" :class="a11yContrastLevel > 100 ? 'font-bold text-[#1A2840]' : ''" aria-label="Contrast level: click to cycle presets">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke-width="2"/><path fill="currentColor" d="M12 3a9 9 0 000 18V3z"/></svg>
                         <span x-text="a11yContrastLevel > 100 ? a11yContrastLevel + '%' : 'Contrast'">Contrast</span>
                     </button>
-                    <button type="button" @click="increaseContrast()" class="px-2.5 py-1.5 rounded-md text-gray-700 hover:bg-gray-100 font-bold text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#244F73] focus-visible:ring-offset-1 cursor-pointer" aria-label="Increase contrast" title="Increase contrast">C+</button>
+                    <button type="button" @click="increaseContrast()" class="px-2 sm:px-2.5 py-1.5 rounded-md text-gray-700 hover:bg-gray-100 font-bold text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#244F73] focus-visible:ring-offset-1 cursor-pointer" aria-label="Increase contrast" title="Increase contrast">C+</button>
                 </div>
 
                 <!-- Font Resizing Controls -->
                 <div class="inline-flex items-center rounded-lg border border-gray-300 bg-white p-0.5 shadow-2xs shrink-0" role="group" aria-label="Text scaling controls">
-                    <button type="button" @click="decreaseScale()" class="px-2.5 py-1.5 rounded-md text-gray-700 hover:bg-gray-100 font-bold text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#244F73] focus-visible:ring-offset-1 cursor-pointer" aria-label="Decrease text size">A-</button>
-                    <button type="button" @click="resetScale()" class="px-2.5 py-1.5 rounded-md text-gray-700 font-semibold text-xs hover:bg-gray-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#244F73] focus-visible:ring-offset-1 cursor-pointer" aria-label="Reset text size to 100%">
+                    <button type="button" @click="decreaseScale()" class="px-2 sm:px-2.5 py-1.5 rounded-md text-gray-700 hover:bg-gray-100 font-bold text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#244F73] focus-visible:ring-offset-1 cursor-pointer" aria-label="Decrease text size">A-</button>
+                    <button type="button" @click="resetScale()" class="px-2 sm:px-2.5 py-1.5 rounded-md text-gray-700 font-semibold text-xs hover:bg-gray-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#244F73] focus-visible:ring-offset-1 cursor-pointer" aria-label="Reset text size to 100%">
                         <span x-text="a11yScale + '%'">100%</span>
                     </button>
-                    <button type="button" @click="increaseScale()" class="px-2.5 py-1.5 rounded-md text-gray-700 hover:bg-gray-100 font-bold text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#244F73] focus-visible:ring-offset-1 cursor-pointer" aria-label="Increase text size">A+</button>
+                    <button type="button" @click="increaseScale()" class="px-2 sm:px-2.5 py-1.5 rounded-md text-gray-700 hover:bg-gray-100 font-bold text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#244F73] focus-visible:ring-offset-1 cursor-pointer" aria-label="Increase text size">A+</button>
                 </div>
 
                 <!-- Dyslexia Font Toggle -->
                 <button type="button"
                         @click="toggleDyslexia()"
                         :class="a11yDyslexia ? 'bg-[#1A2840] text-white border-[#1A2840]' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'"
-                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium border shadow-2xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#244F73] focus-visible:ring-offset-2 cursor-pointer shrink-0"
+                        class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg font-medium border shadow-2xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#244F73] focus-visible:ring-offset-2 cursor-pointer shrink-0"
                         :aria-pressed="a11yDyslexia.toString()"
                         aria-label="Toggle dyslexia-friendly font">
                     <span class="font-serif font-bold text-xs" aria-hidden="true">T</span>
@@ -278,7 +278,7 @@
                 <button type="button"
                         @click="toggleScreenReader()"
                         :class="a11yScreenReader ? 'bg-[#1A2840] text-white border-[#1A2840]' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'"
-                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium border shadow-2xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#244F73] focus-visible:ring-offset-2 cursor-pointer shrink-0"
+                        class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg font-medium border shadow-2xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#244F73] focus-visible:ring-offset-2 cursor-pointer shrink-0"
                         :aria-pressed="a11yScreenReader.toString()"
                         aria-label="Toggle screen reader live assistance">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -325,5 +325,13 @@
     @endpersist
 
     @fluxScripts
+    <script>
+        // Safeguard desktop 100vh layout against unintended window scroll shifts
+        window.addEventListener('scroll', function () {
+            if (window.innerWidth >= 1024 && window.scrollY !== 0) {
+                window.scrollTo(0, 0);
+            }
+        }, { passive: true });
+    </script>
 </body>
 </html>

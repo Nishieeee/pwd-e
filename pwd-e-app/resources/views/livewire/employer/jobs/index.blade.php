@@ -2,14 +2,14 @@
     <!-- Hero Header with Landing Page Design -->
     <div class="relative overflow-hidden rounded-2xl border border-primary-border bg-white p-6 lg:p-7 shadow-sm" style="background: linear-gradient(135deg, #DCEAF4 0%, #FFFFFF 100%); box-shadow: 0 4px 20px rgba(26,40,64,0.06);">
         <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-            <div class="space-y-2.5 max-w-3xl min-w-0">
+            <div class="space-y-2.5 max-w-3xl min-w-0 flex-1">
                 <div class="flex flex-wrap items-center gap-2">
-                    <span class="inline-flex items-center gap-1.5 rounded-full border border-primary-border bg-white px-3 py-1 text-xs font-bold text-secondary shadow-2xs">
+                    <span class="inline-flex items-center gap-1.5 rounded-full border border-primary-border bg-white px-3 py-1 text-xs font-bold text-secondary shadow-2xs whitespace-nowrap">
                         <svg class="size-3.5 text-secondary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                         <span>{{ __('Inclusive Employer Portal') }}</span>
                     </span>
                     @if (auth()->user()->employerProfile?->company_name)
-                        <span class="rounded-full bg-primary-tint px-3 py-1 text-xs font-bold text-primary-dark border border-primary-border/70">
+                        <span class="rounded-full bg-primary-tint px-3 py-1 text-xs font-bold text-primary-dark border border-primary-border/70 whitespace-nowrap">
                             {{ auth()->user()->employerProfile->company_name }}
                         </span>
                     @endif
@@ -300,8 +300,7 @@
                                 @if ($job->status === 'published')
                                     <button
                                         type="button"
-                                        wire:click="closeJob({{ $job->id }})"
-                                        wire:confirm="{{ __('Are you sure you want to close this job posting?') }}"
+                                        wire:click="openConfirmModal('closeJob', {{ $job->id }}, '{{ __('Close Job Posting?') }}', '{{ __('Are you sure you want to close :title? Candidates will no longer be able to submit applications.', ['title' => $job->title]) }}', '{{ __('Close Posting') }}', 'bg-rose-600')"
                                         class="rounded-xl border border-rose-200 bg-rose-50/50 px-3.5 py-2 text-xs font-bold text-rose-700 hover:bg-rose-100 transition whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-600 focus-visible:ring-offset-2"
                                     >
                                         {{ __('Close') }}
@@ -319,8 +318,7 @@
                                 @if ($job->status === 'draft')
                                     <button
                                         type="button"
-                                        wire:click="deleteJob({{ $job->id }})"
-                                        wire:confirm="{{ __('Are you sure you want to delete this draft?') }}"
+                                        wire:click="openConfirmModal('deleteJob', {{ $job->id }}, '{{ __('Delete Draft?') }}', '{{ __('Are you sure you want to delete this draft job posting? This cannot be undone.') }}', '{{ __('Delete Draft') }}', 'bg-rose-600')"
                                         class="rounded-xl border border-rose-300 bg-white px-3.5 py-2 text-xs font-bold text-rose-700 hover:bg-rose-50 transition whitespace-nowrap cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-600 focus-visible:ring-offset-2"
                                     >
                                         {{ __('Delete') }}
@@ -335,6 +333,31 @@
             <!-- Pagination Container -->
             <div class="pt-4">
                 {{ $jobs->links() }}
+            </div>
+        </div>
+    @endif
+
+    {{-- Job Action Confirmation Modal --}}
+    @if ($showConfirmModal)
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs" role="dialog" aria-modal="true" aria-label="{{ $confirmTitle }}">
+            <div class="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-6 sm:p-7 shadow-2xl space-y-4" wire:click.stop>
+                <div class="flex items-start justify-between border-b border-primary-border pb-3">
+                    <h2 class="font-heading text-lg font-bold text-primary-dark">{{ $confirmTitle }}</h2>
+                    <button type="button" wire:click="closeConfirmModal" class="text-body-muted hover:text-primary-dark text-xl leading-none cursor-pointer">&times;</button>
+                </div>
+
+                <p class="text-xs text-body-muted leading-relaxed">
+                    {{ $confirmDescription }}
+                </p>
+
+                <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-primary-border">
+                    <button type="button" wire:click="closeConfirmModal" class="rounded-xl border border-primary-border px-4 py-2 text-xs font-semibold text-primary-dark hover:bg-primary-tint transition-colors cursor-pointer">
+                        {{ __('Cancel') }}
+                    </button>
+                    <button type="button" wire:click="executeConfirmedAction" class="rounded-xl {{ $confirmButtonClass }} px-4 py-2 text-xs font-bold text-white shadow-xs transition-colors cursor-pointer">
+                        {{ $confirmButtonText }}
+                    </button>
+                </div>
             </div>
         </div>
     @endif

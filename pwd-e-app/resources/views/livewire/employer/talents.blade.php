@@ -17,14 +17,14 @@
     {{-- Header Banner Card --}}
     <div class="relative overflow-hidden rounded-2xl border border-primary-border bg-white p-6 lg:p-7 shadow-sm" style="background: linear-gradient(135deg, #DCEAF4 0%, #FFFFFF 100%); box-shadow: 0 4px 20px rgba(26,40,64,0.06);">
         <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-            <div class="space-y-2.5 max-w-3xl min-w-0">
+            <div class="space-y-2.5 max-w-3xl min-w-0 flex-1">
                 <div class="flex flex-wrap items-center gap-2">
-                    <nav class="inline-flex items-center gap-1.5 rounded-full border border-primary-border bg-white px-3 py-1 text-xs font-semibold text-body-muted shadow-2xs" aria-label="Breadcrumb">
+                    <nav class="inline-flex items-center gap-1.5 rounded-full border border-primary-border bg-white px-3 py-1 text-xs font-semibold text-body-muted shadow-2xs whitespace-nowrap" aria-label="Breadcrumb">
                         <a href="{{ route('dashboard') }}" class="hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded">Employer Portal</a>
                         <span aria-hidden="true">/</span>
                         <span class="text-primary-dark font-bold" aria-current="page">Talent Discovery</span>
                     </nav>
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-primary-tint text-primary-dark border border-primary-border/70">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-primary-tint text-primary-dark border border-primary-border/70 whitespace-nowrap">
                         {{ $candidates->total() }} {{ __('Available') }}
                     </span>
                 </div>

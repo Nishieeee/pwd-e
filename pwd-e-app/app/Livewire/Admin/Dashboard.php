@@ -8,6 +8,7 @@ use App\Models\EmployerProfile;
 use App\Models\JobPosting;
 use App\Models\User;
 use App\Models\VerificationRequest;
+use App\Models\WorkforceRecord;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
@@ -55,6 +56,7 @@ class Dashboard extends Component
             'active_postings' => JobPosting::where('status', 'published')->count(),
             'applications_this_week' => Application::where('created_at', '>=', now()->subDays(7))->count(),
             'total_users' => User::count(),
+            'disputed_separations' => WorkforceRecord::where('separation_status', 'disputed')->count(),
         ];
 
         $topEmployers = EmployerProfile::query()

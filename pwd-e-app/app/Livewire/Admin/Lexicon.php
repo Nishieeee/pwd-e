@@ -27,6 +27,12 @@ class Lexicon extends Component
 
     public ?int $editingId = null;
 
+    public bool $showDeleteModal = false;
+
+    public ?int $deletingId = null;
+
+    public string $deletingPhrase = '';
+
     public function mount(): void
     {
         $user = Auth::user();
@@ -76,6 +82,29 @@ class Lexicon extends Component
         $term = ExclusionaryTerm::findOrFail($id);
         $term->update(['is_active' => ! $term->is_active]);
         Flux::toast(variant: 'success', text: $term->is_active ? __('Term activated.') : __('Term deactivated.'));
+    }
+
+    public function openDeleteModal(int $id): void
+    {
+        $term = ExclusionaryTerm::findOrFail($id);
+        $this->deletingId = $term->id;
+        $this->deletingPhrase = $term->phrase;
+        $this->showDeleteModal = true;
+    }
+
+    public function closeDeleteModal(): void
+    {
+        $this->showDeleteModal = false;
+        $this->deletingId = null;
+        $this->deletingPhrase = '';
+    }
+
+    public function confirmDelete(): void
+    {
+        if ($this->deletingId) {
+            $this->delete($this->deletingId);
+        }
+        $this->closeDeleteModal();
     }
 
     public function delete(int $id): void

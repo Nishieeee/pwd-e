@@ -24,6 +24,56 @@ class Index extends Component
     #[Url(as: 'q')]
     public string $search = '';
 
+    public bool $showConfirmModal = false;
+
+    public ?string $confirmAction = null;
+
+    public ?int $confirmJobId = null;
+
+    public string $confirmTitle = '';
+
+    public string $confirmDescription = '';
+
+    public string $confirmButtonText = '';
+
+    public string $confirmButtonClass = 'bg-primary-dark';
+
+    public function openConfirmModal(string $action, int $jobId, string $title, string $description, string $buttonText = 'Confirm', string $buttonClass = 'bg-primary-dark'): void
+    {
+        $this->confirmAction = $action;
+        $this->confirmJobId = $jobId;
+        $this->confirmTitle = $title;
+        $this->confirmDescription = $description;
+        $this->confirmButtonText = $buttonText;
+        $this->confirmButtonClass = $buttonClass;
+        $this->showConfirmModal = true;
+    }
+
+    public function closeConfirmModal(): void
+    {
+        $this->showConfirmModal = false;
+        $this->confirmAction = null;
+        $this->confirmJobId = null;
+    }
+
+    public function executeConfirmedAction(): void
+    {
+        if (! $this->confirmJobId || ! $this->confirmAction) {
+            $this->closeConfirmModal();
+            return;
+        }
+
+        $jobId = $this->confirmJobId;
+        $action = $this->confirmAction;
+        $this->closeConfirmModal();
+
+        match ($action) {
+            'closeJob' => $this->closeJob($jobId),
+            'deleteJob' => $this->deleteJob($jobId),
+            default => null,
+        };
+    }
+
     public function mount(): void
     {
         $user = Auth::user();
