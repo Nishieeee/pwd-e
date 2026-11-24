@@ -518,7 +518,14 @@
 
                 {{-- Documents Submitted --}}
                 <div class="space-y-3">
-                    <h3 class="font-heading text-sm font-bold text-primary-dark">{{ __('Submitted Materials') }}</h3>
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-heading text-sm font-bold text-primary-dark">{{ __('Submitted Materials & Clearances') }}</h3>
+                        <button type="button" wire:click="openRequestDocsModal({{ $viewing->id }})"
+                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-primary bg-primary/5 hover:bg-primary/10 text-primary-dark font-semibold text-xs transition-colors">
+                            <svg class="size-3.5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            <span>{{ __('Request Documents') }}</span>
+                        </button>
+                    </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         @if($cp)
                             <a href="{{ route('employer.candidates.show', $cp->id) }}" target="_blank"
@@ -572,6 +579,54 @@
                             </a>
                         @endif
                     </div>
+
+                    {{-- Requested Clearances / Additional Documents --}}
+                    @if (!empty($viewing->requested_documents))
+                        <div class="mt-3 rounded-xl border border-primary-border bg-surface p-3.5 space-y-2.5">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-primary-dark flex items-center gap-1.5">
+                                    <svg class="size-3.5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                    {{ __('Employer Requested Documents') }}
+                                </span>
+                                <span class="text-[11px] text-body-muted">
+                                    {{ collect($viewing->requested_documents)->where('status', 'uploaded')->count() }}/{{ count($viewing->requested_documents) }} {{ __('Uploaded') }}
+                                </span>
+                            </div>
+
+                            <div class="divide-y divide-gray-100">
+                                @foreach ($viewing->requested_documents as $reqDoc)
+                                    <div class="py-2 flex items-center justify-between gap-3 text-xs">
+                                        <div class="min-w-0">
+                                            <div class="font-semibold text-primary-dark truncate">{{ $reqDoc['name'] }}</div>
+                                            @if (!empty($reqDoc['notes']))
+                                                <div class="text-[11px] text-body-muted italic">{{ $reqDoc['notes'] }}</div>
+                                            @endif
+                                            <div class="text-[10px] text-body-muted mt-0.5">
+                                                {{ __('Requested') }} {{ \Carbon\Carbon::parse($reqDoc['requested_at'])->format('M d, Y') }}
+                                            </div>
+                                        </div>
+
+                                        <div class="shrink-0 flex items-center gap-2">
+                                            @if (($reqDoc['status'] ?? 'pending') === 'uploaded' && !empty($reqDoc['file_path']))
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                                    ✓ {{ __('Uploaded') }}
+                                                </span>
+                                                <a href="{{ route('employer.applicants.document', ['application' => $viewing->id, 'type' => 'requested', 'doc_id' => $reqDoc['id']]) }}" target="_blank"
+                                                   class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-primary-tint text-primary-dark font-semibold text-xs hover:bg-primary-tint/70 transition-colors">
+                                                    <svg class="size-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                                    {{ __('View') }}
+                                                </a>
+                                            @else
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-800 border border-amber-200">
+                                                    ⏳ {{ __('Awaiting Upload') }}
+                                                </span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
                 </div>
 
                 @if ($viewing->cover_letter)
@@ -991,6 +1046,83 @@
                     </button>
                     <button type="button" wire:click="closeJobListing" class="rounded-xl bg-primary-dark px-4 py-2 text-xs font-bold text-white hover:bg-primary shadow-xs transition-colors cursor-pointer">
                         {{ __('Close Job Listing') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- Request Additional Documents Modal --}}
+    @if ($showRequestDocsModal)
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs" role="dialog" aria-modal="true" aria-label="{{ __('Request Additional Documents') }}">
+            <div class="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 sm:p-7 shadow-2xl space-y-4" wire:click.stop>
+                <div class="flex items-start justify-between border-b border-primary-border pb-3">
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-primary-tint text-primary-dark border border-primary-border mb-1">
+                            {{ __('Pre-Employment & Compliance') }}
+                        </div>
+                        <h2 class="font-heading text-lg font-bold text-primary-dark">{{ __('Request Documents from Candidate') }}</h2>
+                    </div>
+                    <button type="button" wire:click="closeRequestDocsModal" class="text-body-muted hover:text-primary-dark text-xl leading-none cursor-pointer">&times;</button>
+                </div>
+
+                <p class="text-xs text-body-muted leading-relaxed">
+                    {{ __('Select the clearances, government IDs, or certifications you require from this applicant. The candidate will receive a notification and an upload prompt in their applications portal.') }}
+                </p>
+
+                <div class="space-y-3">
+                    <label class="block text-xs font-bold uppercase tracking-wide text-primary-dark">
+                        {{ __('Standard Clearances & Records') }}
+                    </label>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                        @foreach ([
+                            'NBI Clearance' => 'National Bureau of Investigation clearance',
+                            'Barangay Clearance' => 'Local residence certificate',
+                            'Police Clearance' => 'Local police record check',
+                            'Medical Certificate (Fit to Work)' => 'Clinical occupational readiness',
+                            'Official PWD ID Card (BIR Tax Credit)' => 'Required for BIR RA 10524 tax credits',
+                            'Transcript of Records / Diploma' => 'Academic / educational proof',
+                            'SSS / PhilHealth / Pag-IBIG Record' => 'Mandatory statutory benefits proof',
+                            'BIR Form 1902 / 2316 (TIN)' => 'Tax identification & withholding record',
+                        ] as $docName => $docDesc)
+                            <label class="flex items-start gap-2.5 p-2.5 rounded-xl border border-primary-border hover:bg-slate-50 cursor-pointer transition-colors {{ in_array($docName, $selectedDocTypes) ? 'bg-primary/5 border-primary ring-1 ring-primary' : 'bg-surface' }}">
+                                <input type="checkbox" wire:model="selectedDocTypes" value="{{ $docName }}" class="mt-0.5 rounded text-primary focus:ring-primary h-4 w-4">
+                                <div class="min-w-0">
+                                    <div class="font-semibold text-primary-dark leading-snug">{{ $docName }}</div>
+                                    <div class="text-[10px] text-body-muted leading-tight mt-0.5">{{ $docDesc }}</div>
+                                </div>
+                            </label>
+                        @endforeach
+                    </div>
+
+                    {{-- Custom Document Option --}}
+                    <div class="space-y-1.5 pt-2">
+                        <label for="customDocName" class="block text-xs font-semibold text-primary-dark">
+                            {{ __('Other Document (Optional)') }}
+                        </label>
+                        <input id="customDocName" type="text" wire:model="customDocName"
+                               placeholder="{{ __('e.g. Portfolio samples, specialized driver license, training certificates') }}"
+                               class="w-full rounded-xl border border-primary-border px-3.5 py-2 text-xs text-primary-dark placeholder:text-body-muted focus:outline-none focus:ring-2 focus:ring-primary">
+                    </div>
+
+                    {{-- Notes / Instructions --}}
+                    <div class="space-y-1.5">
+                        <label for="requestDocsNotes" class="block text-xs font-semibold text-primary-dark">
+                            {{ __('Special Instructions / Submission Deadline (Optional)') }}
+                        </label>
+                        <textarea id="requestDocsNotes" wire:model="requestDocsNotes" rows="2"
+                                  placeholder="{{ __('e.g. Please submit clearances valid within the last 6 months before next Monday.') }}"
+                                  class="w-full rounded-xl border border-primary-border px-3.5 py-2 text-xs text-primary-dark placeholder:text-body-muted focus:outline-none focus:ring-2 focus:ring-primary"></textarea>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-primary-border">
+                    <button type="button" wire:click="closeRequestDocsModal" class="rounded-xl border border-primary-border px-4 py-2 text-xs font-semibold text-primary-dark hover:bg-primary-tint transition-colors cursor-pointer">
+                        {{ __('Cancel') }}
+                    </button>
+                    <button type="button" wire:click="sendDocumentRequest" class="rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white hover:bg-primary-dark shadow-xs transition-colors cursor-pointer">
+                        {{ __('Send Document Request') }}
                     </button>
                 </div>
             </div>

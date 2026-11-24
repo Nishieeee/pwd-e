@@ -10,10 +10,13 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 #[Layout('layouts.candidate')]
 class ApplicationsTracker extends Component
 {
+    use WithFileUploads;
+
     public string $activeTab = 'all'; // all, active, interviews, archived
 
     public string $search = '';
@@ -49,6 +52,152 @@ class ApplicationsTracker extends Component
     public string $chatMessageText = '';
 
     public ?string $actionNotification = null;
+
+    public bool $showUploadDocModal = false;
+
+    public ?int $uploadingAppId = null;
+
+    public ?string $uploadingDocId = null;
+
+    public ?string $uploadingDocName = '';
+
+    public $uploadedDocumentFile = null;
+
+    public bool $showPwdUpgradeModal = false;
+
+    public string $upgradePwdIdNumber = '';
+
+    public $upgradePwdIdFile = null;
+
+    public function openUploadDocModal(int $applicationId, string $docId): void
+    {
+        $candidateProfile = Auth::user()?->candidateProfile;
+        $app = Application::where('candidate_profile_id', $candidateProfile?->id)->findOrFail($applicationId);
+        $doc = collect($app->requested_documents)->firstWhere('id', $docId);
+        if (! $doc) {
+            return;
+        }
+
+        $this->uploadingAppId = $app->id;
+        $this->uploadingDocId = $docId;
+        $this->uploadingDocName = $doc['name'] ?? 'Requested Document';
+        $this->uploadedDocumentFile = null;
+        $this->showUploadDocModal = true;
+    }
+
+    public function closeUploadDocModal(): void
+    {
+        $this->showUploadDocModal = false;
+        $this->uploadingAppId = null;
+        $this->uploadingDocId = null;
+        $this->uploadingDocName = '';
+        $this->uploadedDocumentFile = null;
+    }
+
+    public function submitRequestedDocument(): void
+    {
+        if (! $this->uploadingAppId || ! $this->uploadingDocId) {
+            return;
+        }
+
+        $this->validate([
+            'uploadedDocumentFile' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+        ]);
+
+        $candidateProfile = Auth::user()?->candidateProfile;
+        $app = Application::with('jobPosting.employerProfile.user')
+            ->where('candidate_profile_id', $candidateProfile?->id)
+            ->findOrFail($this->uploadingAppId);
+
+        $docs = $app->requested_documents ?? [];
+        $updatedDocs = [];
+        $origName = $this->uploadedDocumentFile->getClientOriginalName();
+        $storedPath = $this->uploadedDocumentFile->store('applications/' . $app->id . '/documents', 'private');
+
+        foreach ($docs as $d) {
+            if (($d['id'] ?? null) === $this->uploadingDocId) {
+                $d['status'] = 'uploaded';
+                $d['file_path'] = $storedPath;
+                $d['file_name'] = $origName;
+                $d['uploaded_at'] = now()->toIso8601String();
+            }
+            $updatedDocs[] = $d;
+        }
+
+        $app->update([
+            'requested_documents' => $updatedDocs,
+        ]);
+
+        ApplicationMessage::create([
+            'application_id' => $app->id,
+            'sender_id' => Auth::id(),
+            'body' => 'Candidate uploaded requested document: ' . $this->uploadingDocName . ' (' . $origName . ')',
+            'type' => 'system',
+            'metadata' => [
+                'event' => 'document_uploaded',
+                'doc_id' => $this->uploadingDocId,
+                'doc_name' => $this->uploadingDocName,
+                'file_name' => $origName,
+            ],
+        ]);
+
+        $employerUser = $app->jobPosting?->employerProfile?->user;
+        if ($employerUser) {
+            $employerUser->notify(
+                new \App\Notifications\ApplicationStatusChanged(
+                    $app->jobPosting?->title ?? 'Position',
+                    $app->status,
+                    'Candidate ' . (Auth::user()?->name ?? 'Applicant') . ' uploaded: ' . $this->uploadingDocName
+                )
+            );
+        }
+
+        $docName = $this->uploadingDocName;
+        $this->closeUploadDocModal();
+        $this->actionNotification = __('Document :doc successfully uploaded.', ['doc' => $docName]);
+    }
+
+    public function openPwdUpgradeModal(): void
+    {
+        $this->upgradePwdIdNumber = '';
+        $this->upgradePwdIdFile = null;
+        $this->showPwdUpgradeModal = true;
+    }
+
+    public function closePwdUpgradeModal(): void
+    {
+        $this->showPwdUpgradeModal = false;
+        $this->upgradePwdIdNumber = '';
+        $this->upgradePwdIdFile = null;
+    }
+
+    public function submitPwdUpgrade(): void
+    {
+        $this->validate([
+            'upgradePwdIdNumber' => 'required|string|max:50',
+            'upgradePwdIdFile' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+        ]);
+
+        $user = Auth::user();
+        $path = $this->upgradePwdIdFile->store('documents/pwd_ids', 'private');
+
+        $user->update([
+            'pwd_id_number' => $this->upgradePwdIdNumber,
+            'pwd_id_path' => $path,
+            'pwd_document_type' => 'pwd_id',
+        ]);
+
+        \App\Models\VerificationRequest::create([
+            'user_id' => $user->id,
+            'type' => 'pwd_id',
+            'id_number' => $this->upgradePwdIdNumber,
+            'document_path' => $path,
+            'status' => 'pending',
+        ]);
+
+        $this->closePwdUpgradeModal();
+        $this->actionNotification = __('Your official PWD ID card has been submitted for verification! Your profile is now updated.');
+    }
 
     public function openChatModal(int $appId): void
     {

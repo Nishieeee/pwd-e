@@ -35,6 +35,7 @@
                  step: {{ $errors->hasAny(['date_of_birth']) ? 1 : ($errors->hasAny(['disability_type', 'pwd_id_number', 'pwd_id_file', 'consent']) ? 2 : 0) }},
                  candidateSteps: 3,
                  employerSteps: 1,
+                 candidateDocType: '{{ old('pwd_document_type', 'pwd_id') }}',
                  showCandidatePassword: false,
                  showEmployerPassword: false,
                  canContinue: false,
@@ -423,7 +424,7 @@
                         </div>
                     </div>
 
-                    {{-- Candidate Step 2: PWD ID --}}
+                    {{-- Candidate Step 2: PWD ID or Medical Cert --}}
                     <div x-show="role === 'candidate' && step === 2" x-cloak class="flex flex-col gap-5">
                         <div>
                             <label for="disability_type" class="mb-1.5 block text-sm font-semibold text-primary-dark">Disability type <span class="text-[#B3261E]">*</span></label>
@@ -435,15 +436,49 @@
                             </select>
                             @error('disability_type')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                         </div>
+
                         <div>
-                            <label for="pwd_id_number" class="mb-1.5 block text-sm font-semibold text-primary-dark">PWD ID or Medical Certificate Number <span class="text-[#B3261E]">*</span></label>
-                            <input id="pwd_id_number" name="pwd_id_number" type="text" value="{{ old('pwd_id_number') }}" :required="role === 'candidate'" placeholder="e.g. PWD-12345 or MED-2026-001"
+                            <label class="mb-2 block text-sm font-semibold text-primary-dark">Qualification Credential <span class="text-[#B3261E]">*</span></label>
+                            <div class="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                                <label class="flex items-center gap-3 rounded-xl border p-3 cursor-pointer transition-all"
+                                       :class="candidateDocType === 'pwd_id' ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'border-[#CBD5E1] hover:bg-slate-50'">
+                                    <input type="radio" name="pwd_document_type" value="pwd_id" x-model="candidateDocType" class="text-primary focus:ring-primary h-4 w-4">
+                                    <div>
+                                        <p class="text-xs font-bold text-primary-dark">Government PWD ID</p>
+                                        <p class="text-[11px] text-body-muted">Official LGU PDAO / CSWDO card</p>
+                                    </div>
+                                </label>
+                                <label class="flex items-center gap-3 rounded-xl border p-3 cursor-pointer transition-all"
+                                       :class="candidateDocType === 'medical_certificate' ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'border-[#CBD5E1] hover:bg-slate-50'">
+                                    <input type="radio" name="pwd_document_type" value="medical_certificate" x-model="candidateDocType" class="text-primary focus:ring-primary h-4 w-4">
+                                    <div>
+                                        <p class="text-xs font-bold text-primary-dark">Clinical Medical Cert</p>
+                                        <p class="text-[11px] text-body-muted">Fit-to-Work / Medical diagnosis</p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="pwd_id_number" class="mb-1.5 block text-sm font-semibold text-primary-dark">
+                                <span x-text="candidateDocType === 'pwd_id' ? 'PWD ID Card Number' : 'Medical Certificate / PRC License Ref. No.'">PWD ID or Medical Certificate Number</span> <span class="text-[#B3261E]">*</span>
+                            </label>
+                            <input id="pwd_id_number" name="pwd_id_number" type="text" value="{{ old('pwd_id_number') }}" :required="role === 'candidate'" 
+                                   :placeholder="candidateDocType === 'pwd_id' ? 'e.g. 12-3456-7890' : 'e.g. MED-2026-001 / PRC-123456'"
                                    class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                             @error('pwd_id_number')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
-                            <p class="mt-1 text-xs text-body-muted">Per PESO guidelines, a Clinical Medical Certificate or Government PWD ID validates qualification. PWD ID is required for employer RA 10524 tax credits.</p>
+                            
+                            <p class="mt-1 text-xs text-body-muted" x-show="candidateDocType === 'medical_certificate'">
+                                <strong>PESO Qualification Note:</strong> A Clinical Medical Certificate qualifies you for immediate job application. You may upload an official PWD ID card later for employer R.A. 10524 tax credits.
+                            </p>
+                            <p class="mt-1 text-xs text-body-muted" x-show="candidateDocType === 'pwd_id'">
+                                <strong>Tax Compliance Note:</strong> Your official PWD ID validates qualification and enables participating employers to claim statutory R.A. 10524 gross wage tax deductions.
+                            </p>
                         </div>
                         <div>
-                            <label for="pwd_id_file" class="mb-1.5 block text-sm font-semibold text-primary-dark">Medical Certificate or PWD ID Card</label>
+                            <label for="pwd_id_file" class="mb-1.5 block text-sm font-semibold text-primary-dark">
+                                <span x-text="candidateDocType === 'pwd_id' ? 'Upload PWD ID Card (Photo / PDF)' : 'Upload Clinical Medical Certificate (Photo / PDF)'">Medical Certificate or PWD ID Card</span>
+                            </label>
                             <input id="pwd_id_file" name="pwd_id_file" type="file" accept=".jpg,.jpeg,.png,.pdf"
                                    class="block w-full text-sm text-primary-dark file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-2 file:text-white">
                             @error('pwd_id_file')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror

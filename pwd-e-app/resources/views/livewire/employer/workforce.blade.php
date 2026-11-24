@@ -74,11 +74,25 @@
     </div>
 
     <!-- Benefit explanation -->
-    <div class="rounded-2xl border border-primary-border bg-white p-6 shadow-sm">
-        <h2 class="font-heading text-lg font-bold text-primary-dark mb-2">{{ __('RA 10524 benefit') }}</h2>
+    <div class="rounded-2xl border border-primary-border bg-white p-6 shadow-sm space-y-2">
+        <div class="flex items-center justify-between">
+            <h2 class="font-heading text-lg font-bold text-primary-dark">{{ __('RA 10524 Statutory Tax Benefit') }}</h2>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                BIR Audit Aligned
+            </span>
+        </div>
         <p class="text-sm text-body-muted leading-relaxed">
-            {{ __('Eligible employers may claim an additional 25% gross income deduction on the total amount of salaries and wages paid to qualified PWD employees. The deduction above is computed from verified active PWD wages (₱:wage).', ['wage' => number_format($totalWages, 2)]) }}
+            {{ __('Eligible employers may claim an additional 25% gross income deduction on the total amount of salaries and wages paid to qualified PWD employees holding an official Government PWD ID. The deduction above is computed from verified active PWD wages (₱:wage).', ['wage' => number_format($totalWages, 2)]) }}
         </p>
+        @if($medCertOnlyCount > 0)
+            <div class="mt-2 p-3 rounded-xl bg-purple-50 border border-purple-200 text-xs text-purple-900 flex items-start gap-2">
+                <span class="text-base">🩺</span>
+                <div>
+                    <strong>{{ __(':count employee(s) verified via Clinical Medical Certificate (Fit to Work):', ['count' => $medCertOnlyCount]) }}</strong>
+                    <span>{{ __(' They are fully compliant for inclusive employment under R.A. 7277. To include their wages in your BIR R.A. 10524 gross wage tax deduction, request their official PWD ID card via the Applicants / Documents panel once issued by their LGU.') }}</span>
+                </div>
+            </div>
+        @endif
     </div>
 
     <!-- Records tabs -->
@@ -144,8 +158,28 @@
                                     <div class="text-xs text-body-muted">{{ $record->application->jobPosting->title }}</div>
                                 @endif
                             </td>
-                            <td class="px-4 py-4 text-left text-xs font-mono text-body-muted whitespace-nowrap">
-                                {{ $record->candidateProfile?->user?->pwd_id_number ?? __('DOLE Verified') }}
+                            <td class="px-4 py-4 text-left text-xs whitespace-nowrap">
+                                @php
+                                    $u = $record->candidateProfile?->user;
+                                    $isMedCert = $u?->pwd_document_type === 'medical_certificate';
+                                @endphp
+                                @if($isMedCert)
+                                    <div class="space-y-0.5">
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-800 border border-purple-200">
+                                            🩺 {{ __('Med Cert (Fit to Work)') }}
+                                        </span>
+                                        <div class="text-[10px] text-body-muted font-mono">{{ $u?->pwd_id_number }}</div>
+                                        <div class="text-[9px] text-amber-700 font-medium">{{ __('PWD ID required for BIR 25% credit') }}</div>
+                                    </div>
+                                @else
+                                    <div class="space-y-0.5">
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-800 border border-blue-200">
+                                            🪪 {{ __('Official PWD ID') }}
+                                        </span>
+                                        <div class="text-[10px] text-primary-dark font-mono font-semibold">{{ $u?->pwd_id_number ?? __('DOLE Verified') }}</div>
+                                        <div class="text-[9px] text-emerald-700 font-medium">{{ __('BIR RA 10524 Tax Eligible') }}</div>
+                                    </div>
+                                @endif
                             </td>
                             <td class="px-4 py-4 text-left text-xs text-body-muted whitespace-nowrap">{{ $record->hired_at?->format('M d, Y') ?? '—' }}</td>
                             

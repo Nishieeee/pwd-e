@@ -32,6 +32,7 @@ class CreateNewUser implements CreatesNewUsers
             $rules['last_name'] = ['required', 'string', 'max:100'];
             $rules['middle_name'] = ['nullable', 'string', 'max:100'];
             $rules['disability_type'] = ['required', 'string', 'max:100'];
+            $rules['pwd_document_type'] = ['nullable', 'string', 'in:pwd_id,medical_certificate'];
             $rules['pwd_id_number'] = ['required', 'string', 'max:50'];
             $rules['pwd_id_file'] = ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'];
             $rules['consent'] = ['accepted'];
@@ -67,6 +68,7 @@ class CreateNewUser implements CreatesNewUsers
             ])));
 
             $isCandidate = $role === 'candidate';
+            $pwdDocType = $isCandidate ? ($input['pwd_document_type'] ?? 'pwd_id') : 'pwd_id';
 
             $user = User::create([
                 'name' => $fullName,
@@ -80,6 +82,7 @@ class CreateNewUser implements CreatesNewUsers
                 'verified_at' => $isCandidate ? null : now(),
                 'pwd_id_number' => $isCandidate ? ($input['pwd_id_number'] ?? null) : null,
                 'pwd_id_path' => $pwdIdPath,
+                'pwd_document_type' => $pwdDocType,
             ]);
 
             $user->assignRole($role);
@@ -92,7 +95,7 @@ class CreateNewUser implements CreatesNewUsers
                 ]);
                 VerificationRequest::create([
                     'user_id' => $user->id,
-                    'type' => 'pwd_id',
+                    'type' => $pwdDocType,
                     'id_number' => $input['pwd_id_number'] ?? null,
                     'document_path' => $pwdIdPath,
                     'status' => 'pending',

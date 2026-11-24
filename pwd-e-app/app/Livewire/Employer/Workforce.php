@@ -306,7 +306,18 @@ class Workforce extends Component
         $totalEmployees = $activeEmployeesList->count();
         $pwdCount = $activeEmployeesList->where('pwd_verified', true)->count();
         $pwdPercent = $totalEmployees > 0 ? round(($pwdCount / $totalEmployees) * 100, 1) : 0;
-        $totalWages = $activeEmployeesList->where('pwd_verified', true)->sum('annual_wage');
+
+        // BIR R.A. 10524: official PWD ID required for tax deduction; medical certificate qualifies for employment
+        $taxEligibleList = $activeEmployeesList->filter(function ($rec) {
+            $u = $rec->candidateProfile?->user;
+            return $rec->pwd_verified && ($u?->pwd_document_type === 'pwd_id' || empty($u?->pwd_document_type));
+        });
+        $medCertOnlyCount = $activeEmployeesList->filter(function ($rec) {
+            $u = $rec->candidateProfile?->user;
+            return $rec->pwd_verified && $u?->pwd_document_type === 'medical_certificate';
+        })->count();
+
+        $totalWages = $taxEligibleList->sum('annual_wage');
         $deduction = round($totalWages * 0.25, 2);
 
         $endingRecord = $this->endingRecordId
@@ -324,6 +335,7 @@ class Workforce extends Component
             'pwdPercent' => $pwdPercent,
             'totalWages' => $totalWages,
             'deduction' => $deduction,
+            'medCertOnlyCount' => $medCertOnlyCount,
             'activeCount' => $activeCount,
             'separatedCount' => $separatedCount,
             'disputedCount' => $disputedCount,

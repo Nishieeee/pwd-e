@@ -189,7 +189,19 @@
                     <dl class="grid grid-cols-2 gap-4 sm:grid-cols-4 py-4 text-sm">
                         <div class="space-y-1">
                             <dt class="text-xs font-semibold uppercase tracking-wide text-body-muted">{{ __('Document Type') }}</dt>
-                            <dd class="font-semibold text-primary-dark">{{ ucwords(str_replace('_', ' ', $vr->type)) }}</dd>
+                            <dd class="font-semibold text-primary-dark">
+                                @if ($vr->type === 'medical_certificate' || $vr->user?->pwd_document_type === 'medical_certificate')
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-50 text-purple-800 border border-purple-200">
+                                        🩺 {{ __('Medical Certificate (Fit to Work)') }}
+                                    </span>
+                                @elseif ($vr->type === 'pwd_id' || $vr->user?->pwd_document_type === 'pwd_id')
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-blue-800 border border-blue-200">
+                                        🪪 {{ __('Official PWD ID Card') }}
+                                    </span>
+                                @else
+                                    {{ ucwords(str_replace('_', ' ', $vr->type)) }}
+                                @endif
+                            </dd>
                         </div>
                         <div class="space-y-1">
                             <dt class="text-xs font-semibold uppercase tracking-wide text-body-muted">{{ __('ID / Reference Number') }}</dt>

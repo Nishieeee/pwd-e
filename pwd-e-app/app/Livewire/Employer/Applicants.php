@@ -87,6 +87,119 @@ class Applicants extends Component
 
     public string $chatMessageText = '';
 
+    public bool $showRequestDocsModal = false;
+
+    public ?int $requestingDocsAppId = null;
+
+    public array $selectedDocTypes = [];
+
+    public string $customDocName = '';
+
+    public string $requestDocsNotes = '';
+
+    public function openRequestDocsModal(int $applicationId): void
+    {
+        $profile = Auth::user()?->employerProfile;
+        if (! $profile) {
+            return;
+        }
+
+        $app = Application::whereHas('jobPosting', function ($q) use ($profile) {
+            $q->where('employer_profile_id', $profile->id);
+        })->findOrFail($applicationId);
+
+        $this->requestingDocsAppId = $app->id;
+        $this->selectedDocTypes = [];
+        $this->customDocName = '';
+        $this->requestDocsNotes = '';
+        $this->showRequestDocsModal = true;
+    }
+
+    public function closeRequestDocsModal(): void
+    {
+        $this->showRequestDocsModal = false;
+        $this->requestingDocsAppId = null;
+        $this->selectedDocTypes = [];
+        $this->customDocName = '';
+        $this->requestDocsNotes = '';
+    }
+
+    public function sendDocumentRequest(): void
+    {
+        if (! $this->requestingDocsAppId) {
+            return;
+        }
+
+        $profile = Auth::user()?->employerProfile;
+        if (! $profile) {
+            return;
+        }
+
+        $app = Application::with(['candidateProfile.user', 'jobPosting'])
+            ->whereHas('jobPosting', function ($q) use ($profile) {
+                $q->where('employer_profile_id', $profile->id);
+            })->findOrFail($this->requestingDocsAppId);
+
+        $docsToRequest = $this->selectedDocTypes;
+        $customName = trim($this->customDocName);
+        if (! empty($customName) && ! in_array($customName, $docsToRequest, true)) {
+            $docsToRequest[] = $customName;
+        }
+
+        if (empty($docsToRequest)) {
+            Flux::toast(variant: 'warning', text: __('Please select or enter at least one document to request.'));
+            return;
+        }
+
+        $existing = $app->requested_documents ?? [];
+        $newEntries = [];
+
+        foreach ($docsToRequest as $name) {
+            $newEntries[] = [
+                'id' => (string) \Illuminate\Support\Str::uuid(),
+                'name' => $name,
+                'notes' => $this->requestDocsNotes ?: null,
+                'status' => 'pending',
+                'requested_at' => now()->toIso8601String(),
+                'file_path' => null,
+                'file_name' => null,
+                'uploaded_at' => null,
+            ];
+        }
+
+        $merged = array_merge($existing, $newEntries);
+        $app->update([
+            'requested_documents' => $merged,
+            'status_subtext' => Application::computeStatusSubtext($app->status, now()) . ' · ' . count($docsToRequest) . ' docs requested',
+        ]);
+
+        $docListStr = implode(', ', $docsToRequest);
+        ApplicationMessage::create([
+            'application_id' => $app->id,
+            'sender_id' => Auth::id(),
+            'body' => 'Employer requested additional documents: ' . $docListStr . ($this->requestDocsNotes ? ' (Instructions: ' . $this->requestDocsNotes . ')' : ''),
+            'type' => 'system',
+            'metadata' => [
+                'event' => 'documents_requested',
+                'documents' => $docsToRequest,
+                'notes' => $this->requestDocsNotes ?: null,
+            ],
+        ]);
+
+        if ($app->candidateProfile?->user) {
+            $app->candidateProfile->user->notify(
+                new \App\Notifications\ApplicationStatusChanged(
+                    $app->jobPosting?->title ?? 'Position',
+                    $app->status,
+                    'The hiring manager requested additional pre-employment documents: ' . $docListStr
+                )
+            );
+        }
+
+        $this->closeRequestDocsModal();
+        Flux::toast(variant: 'success', text: __('Document request sent to candidate.'));
+    }
+
     public function openChatModal(int $appId): void
     {
         $user = Auth::user();

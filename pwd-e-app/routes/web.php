@@ -67,6 +67,7 @@ Route::middleware(['auth', 'account.verified', 'role:candidate'])->group(functio
     Route::get('jobs/matches/{job?}', JobMatches::class)->name('candidate.jobs');
     Route::get('jobs/{job}/apply', Apply::class)->name('candidate.apply');
     Route::get('applications', ApplicationsTracker::class)->name('candidate.applications');
+    Route::get('applications/{application}/document/{type}', [ApplicantDocumentController::class, 'showCandidateDocument'])->name('candidate.applications.document');
     Route::get('employers/{employer}', EmployerShow::class)->name('candidate.employers.show');
 });
 

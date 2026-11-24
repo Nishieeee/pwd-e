@@ -37,6 +37,7 @@ class Application extends Model
         'offer_declined_at',
         'offer_decline_reason',
         'application_materials',
+        'requested_documents',
         'resume_path',
         'rejection_reason',
         'rejected_at',
@@ -54,6 +55,7 @@ class Application extends Model
         'offer_declined_at' => 'datetime',
         'offer_details' => 'array',
         'application_materials' => 'array',
+        'requested_documents' => 'array',
         'interview_checklist' => 'array',
     ];
 
@@ -67,6 +69,22 @@ class Application extends Model
     public const STATUS_REJECTED = 'rejected';
     public const STATUS_WITHDRAWN = 'withdrawn';
     public const STATUS_CLOSED = 'closed';
+
+    public function pendingDocumentRequestsCount(): int
+    {
+        if (empty($this->requested_documents)) {
+            return 0;
+        }
+
+        return collect($this->requested_documents)
+            ->where('status', 'pending')
+            ->count();
+    }
+
+    public function hasPendingDocumentRequests(): bool
+    {
+        return $this->pendingDocumentRequestsCount() > 0;
+    }
 
     public const TERMINAL_STATUSES = [
         self::STATUS_HIRED,

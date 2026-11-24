@@ -24,7 +24,9 @@ class ApplicantDocumentController
             'resume' => $application->resume_path ?: $application->candidateProfile?->resume_pdf_path,
             'fsl' => $application->fsl_video_path ?: $application->candidateProfile?->fsl_video_path,
             'cover_letter' => $application->cover_letter_pdf_path,
-            default => null,
+            'pwd_id' => $application->candidateProfile?->user?->pwd_id_path,
+            'requested' => $this->getRequestedDocPath($application, $request->query('doc_id')),
+            default => $this->getRequestedDocPath($application, $type),
         };
 
         if (! $path || ! Storage::disk('private')->exists($path)) {
@@ -32,5 +34,44 @@ class ApplicantDocumentController
         }
 
         return Storage::disk('private')->response($path);
+    }
+
+    public function showCandidateDocument(Request $request, Application $application, string $type)
+    {
+        $user = $request->user();
+        if (! $user || ! $user->isCandidate()) {
+            abort(403);
+        }
+
+        if ($application->candidate_profile_id !== $user->candidateProfile?->id) {
+            abort(403);
+        }
+
+        $path = match ($type) {
+            'resume' => $application->resume_path ?: $application->candidateProfile?->resume_pdf_path,
+            'fsl' => $application->fsl_video_path ?: $application->candidateProfile?->fsl_video_path,
+            'cover_letter' => $application->cover_letter_pdf_path,
+            'requested' => $this->getRequestedDocPath($application, $request->query('doc_id')),
+            default => $this->getRequestedDocPath($application, $type),
+        };
+
+        if (! $path || ! Storage::disk('private')->exists($path)) {
+            abort(404);
+        }
+
+        return Storage::disk('private')->response($path);
+    }
+
+    private function getRequestedDocPath(Application $application, ?string $docId): ?string
+    {
+        if (! $docId || empty($application->requested_documents)) {
+            return null;
+        }
+
+        $doc = collect($application->requested_documents)->first(function ($d) use ($docId) {
+            return ($d['id'] ?? null) === $docId || ($d['name'] ?? null) === $docId;
+        });
+
+        return $doc['file_path'] ?? null;
     }
 }

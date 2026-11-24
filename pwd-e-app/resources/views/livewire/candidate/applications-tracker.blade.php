@@ -38,6 +38,26 @@
         </div>
     </div>
 
+    {{-- Medical Certificate to PWD ID Upgrade Prompt --}}
+    @if(Auth::user()?->pwd_document_type === 'medical_certificate')
+        <div class="rounded-2xl border border-purple-200 bg-gradient-to-r from-purple-50 via-white to-purple-50/50 p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div class="space-y-1">
+                <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-100 text-purple-800">
+                    🩺 {{ __('Medical Certificate Verified') }}
+                </div>
+                <h3 class="text-sm font-bold text-primary-dark">{{ __('Received your official LGU PWD ID card?') }}</h3>
+                <p class="text-xs text-body-muted max-w-2xl leading-relaxed">
+                    {{ __('You are fully qualified to apply for jobs. Once you receive your official PWD ID card from your local PDAO or CSWDO, submit it here so your hiring employer can claim R.A. 10524 gross wage tax deductions.') }}
+                </p>
+            </div>
+            <button type="button" wire:click="openPwdUpgradeModal"
+                    class="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-purple-700 hover:bg-purple-800 text-white text-xs font-bold shadow-xs transition-colors">
+                <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                <span>{{ __('Submit Official PWD ID') }}</span>
+            </button>
+        </div>
+    @endif
+
     <!-- Tabbed Navigation -->
     <div class="border-b border-primary-border/80 pb-3.5">
         <div class="flex flex-wrap items-center gap-2 max-w-full" role="tablist" aria-label="Application categories">
@@ -358,6 +378,44 @@
                                             <svg class="size-3 text-gray-400 group-hover:text-rose-500 transition-colors shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                             <span>Withdraw Application</span>
                                         </button>
+                                    @endif
+
+                                    {{-- Candidate Document Requests Box --}}
+                                    @if(!empty($app->requested_documents))
+                                        <div class="mt-2 pt-2 border-t border-gray-100">
+                                            @php
+                                                $pendingDocs = collect($app->requested_documents)->where('status', 'pending');
+                                                $uploadedDocs = collect($app->requested_documents)->where('status', 'uploaded');
+                                            @endphp
+                                            @if($pendingDocs->count() > 0)
+                                                <div class="rounded-xl bg-amber-50 border border-amber-200 p-2.5 text-xs text-amber-900 space-y-1.5 shadow-2xs">
+                                                    <div class="font-bold flex items-center justify-between text-[11px]">
+                                                        <span class="flex items-center gap-1 text-amber-800">
+                                                            <svg class="size-3 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                                            <span>{{ __('Action Required') }}</span>
+                                                        </span>
+                                                        <span class="px-1.5 py-0.2 rounded-full bg-amber-200 text-amber-900 font-extrabold text-[10px]">{{ $pendingDocs->count() }}</span>
+                                                    </div>
+                                                    <div class="space-y-1">
+                                                        @foreach($pendingDocs as $pDoc)
+                                                            <div class="flex items-center justify-between gap-1 text-[11px]">
+                                                                <span class="truncate font-medium text-amber-950" title="{{ $pDoc['name'] }}">{{ $pDoc['name'] }}</span>
+                                                                <button type="button" wire:click="openUploadDocModal({{ $app->id }}, '{{ $pDoc['id'] }}')"
+                                                                        class="shrink-0 px-2 py-0.5 rounded-lg bg-amber-700 text-white font-bold hover:bg-amber-800 transition-colors shadow-2xs">
+                                                                    {{ __('Upload') }}
+                                                                </button>
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            @endif
+                                            @if($uploadedDocs->count() > 0)
+                                                <div class="mt-1 text-[10px] text-emerald-800 flex items-center gap-1 font-medium bg-emerald-50/80 px-2 py-1 rounded-lg border border-emerald-100">
+                                                    <svg class="size-3 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                                    <span>{{ $uploadedDocs->count() }} {{ __('clearance(s) submitted') }}</span>
+                                                </div>
+                                            @endif
+                                        </div>
                                     @endif
                                 </div>
                             </td>
@@ -864,6 +922,115 @@
                             <span>{{ __('Send Message') }}</span>
                         </button>
                     </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- Candidate Upload Requested Document Modal --}}
+    @if ($showUploadDocModal)
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs" role="dialog" aria-modal="true" aria-label="{{ __('Upload Requested Document') }}">
+            <div class="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl space-y-4" wire:click.stop>
+                <div class="flex items-start justify-between border-b border-primary-border pb-3">
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 mb-1">
+                            {{ __('Pre-Employment Submission') }}
+                        </div>
+                        <h2 class="font-heading text-lg font-bold text-primary-dark">{{ __('Upload :doc', ['doc' => $uploadingDocName]) }}</h2>
+                    </div>
+                    <button type="button" wire:click="closeUploadDocModal" class="text-body-muted hover:text-primary-dark text-xl leading-none cursor-pointer">&times;</button>
+                </div>
+
+                <p class="text-xs text-body-muted leading-relaxed">
+                    {{ __('The employer requested this document for qualification, security clearance, or statutory benefits compliance. Accepted formats: PDF, PNG, JPG (max 5MB).') }}
+                </p>
+
+                <div class="space-y-3">
+                    <div>
+                        <label for="uploadedDocumentFile" class="block text-xs font-semibold text-primary-dark mb-1.5">
+                            {{ __('Select File to Upload') }} <span class="text-rose-600">*</span>
+                        </label>
+                        <input id="uploadedDocumentFile" type="file" wire:model="uploadedDocumentFile" accept=".pdf,.png,.jpg,.jpeg"
+                               class="block w-full text-xs text-primary-dark file:mr-3 file:rounded-xl file:border-0 file:bg-primary file:px-3 file:py-2 file:text-white file:font-semibold hover:file:bg-primary-dark cursor-pointer">
+                        @error('uploadedDocumentFile')
+                            <p class="text-xs text-rose-600 mt-1 font-medium">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div wire:loading wire:target="uploadedDocumentFile" class="text-xs text-primary font-medium flex items-center gap-2">
+                        <svg class="size-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                        <span>{{ __('Uploading file preview...') }}</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-primary-border">
+                    <button type="button" wire:click="closeUploadDocModal" class="rounded-xl border border-primary-border px-4 py-2 text-xs font-semibold text-primary-dark hover:bg-primary-tint transition-colors cursor-pointer">
+                        {{ __('Cancel') }}
+                    </button>
+                    <button type="button" wire:click="submitRequestedDocument" wire:loading.attr="disabled"
+                            class="rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white hover:bg-primary-dark shadow-xs transition-colors cursor-pointer disabled:opacity-50">
+                        {{ __('Submit Document') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- Candidate Submit Official PWD ID Modal --}}
+    @if ($showPwdUpgradeModal)
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs" role="dialog" aria-modal="true" aria-label="{{ __('Submit Official Government PWD ID') }}">
+            <div class="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl space-y-4" wire:click.stop>
+                <div class="flex items-start justify-between border-b border-primary-border pb-3">
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-50 text-purple-800 border border-purple-200 mb-1">
+                            🪪 {{ __('Official Credential Upgrade') }}
+                        </div>
+                        <h2 class="font-heading text-lg font-bold text-primary-dark">{{ __('Submit Official PWD ID Card') }}</h2>
+                    </div>
+                    <button type="button" wire:click="closePwdUpgradeModal" class="text-body-muted hover:text-primary-dark text-xl leading-none cursor-pointer">&times;</button>
+                </div>
+
+                <p class="text-xs text-body-muted leading-relaxed">
+                    {{ __('Congratulations on receiving your government-issued PWD ID! Enter your ID number and upload a clear photo or scan. Once validated, your profile will enable hiring employers to claim statutory R.A. 10524 gross wage tax credits.') }}
+                </p>
+
+                <div class="space-y-3">
+                    <div>
+                        <label for="upgradePwdIdNumber" class="block text-xs font-semibold text-primary-dark mb-1.5">
+                            {{ __('Official PWD ID Card Number') }} <span class="text-rose-600">*</span>
+                        </label>
+                        <input id="upgradePwdIdNumber" type="text" wire:model="upgradePwdIdNumber" placeholder="e.g. 12-3456-7890"
+                               class="w-full rounded-xl border border-primary-border px-3.5 py-2 text-xs text-primary-dark placeholder:text-body-muted focus:outline-none focus:ring-2 focus:ring-purple-600">
+                        @error('upgradePwdIdNumber')
+                            <p class="text-xs text-rose-600 mt-1 font-medium">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="upgradePwdIdFile" class="block text-xs font-semibold text-primary-dark mb-1.5">
+                            {{ __('Upload PWD ID Card (Photo / PDF)') }} <span class="text-rose-600">*</span>
+                        </label>
+                        <input id="upgradePwdIdFile" type="file" wire:model="upgradePwdIdFile" accept=".pdf,.png,.jpg,.jpeg"
+                               class="block w-full text-xs text-primary-dark file:mr-3 file:rounded-xl file:border-0 file:bg-purple-700 file:px-3 file:py-2 file:text-white file:font-semibold hover:file:bg-purple-800 cursor-pointer">
+                        @error('upgradePwdIdFile')
+                            <p class="text-xs text-rose-600 mt-1 font-medium">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div wire:loading wire:target="upgradePwdIdFile" class="text-xs text-purple-700 font-medium flex items-center gap-2">
+                        <svg class="size-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                        <span>{{ __('Uploading card preview...') }}</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-primary-border">
+                    <button type="button" wire:click="closePwdUpgradeModal" class="rounded-xl border border-primary-border px-4 py-2 text-xs font-semibold text-primary-dark hover:bg-primary-tint transition-colors cursor-pointer">
+                        {{ __('Cancel') }}
+                    </button>
+                    <button type="button" wire:click="submitPwdUpgrade" wire:loading.attr="disabled"
+                            class="rounded-xl bg-purple-700 px-4 py-2 text-xs font-bold text-white hover:bg-purple-800 shadow-xs transition-colors cursor-pointer disabled:opacity-50">
+                        {{ __('Submit for Verification') }}
+                    </button>
                 </div>
             </div>
         </div>
