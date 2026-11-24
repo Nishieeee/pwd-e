@@ -63,9 +63,42 @@
         aside::-webkit-scrollbar-track { background: transparent; }
         aside::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 9999px; }
         aside::-webkit-scrollbar-thumb:hover { background: #334155; }
+        @media print {
+            html, body {
+                height: auto !important;
+                min-height: 0 !important;
+                overflow: visible !important;
+                background: #ffffff !important;
+                color: #0f172a !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                display: block !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            aside,
+            body > header,
+            body > div > header,
+            [role="banner"],
+            [role="navigation"],
+            [role="region"][aria-label*="Accessibility"],
+            .phpdebugbar,
+            [data-flux-toast],
+            ui-toast-group {
+                display: none !important;
+            }
+            main#main-content {
+                padding: 0 !important;
+                margin: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                overflow: visible !important;
+                background: #ffffff !important;
+            }
+        }
     </style>
 </head>
-<body class="min-h-screen lg:h-screen lg:overflow-hidden bg-[#F4F7FA] text-[#25313B] antialiased flex flex-col lg:flex-row">
+<body class="min-h-screen lg:h-screen lg:overflow-hidden bg-[#F4F7FA] text-[#25313B] antialiased flex flex-col lg:flex-row print:block print:h-auto print:min-h-0 print:overflow-visible print:bg-white">
     <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-white focus:text-[#1A2840] focus:ring-2 focus:ring-[#244F73] focus:shadow-lg focus:rounded-md">Skip to main content</a>
     <div id="a11y-announcer" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
 
@@ -78,7 +111,7 @@
     @endphp
 
     <!-- Mobile Header Bar -->
-    <header class="lg:hidden flex items-center justify-between bg-[#0e1726] text-white px-4 py-3 border-b border-[#1e293b]" role="banner">
+    <header class="lg:hidden print:hidden flex items-center justify-between bg-[#0e1726] text-white px-4 py-3 border-b border-[#1e293b]" role="banner">
         <div class="flex items-center gap-3">
             <button type="button" @click="mobileMenuOpen = !mobileMenuOpen" class="p-1 rounded-md text-white hover:bg-[#1e293b] focus:outline-none focus:ring-2 focus:ring-white" aria-label="Toggle navigation menu" :aria-expanded="mobileMenuOpen.toString()">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -100,7 +133,7 @@
 
     <!-- Sidebar Navigation -->
     <aside :class="{ 'block': mobileMenuOpen, 'hidden lg:flex': !mobileMenuOpen }"
-           class="w-full lg:w-64 bg-[#0e1726] text-white flex-col justify-between shrink-0 lg:sticky lg:top-0 lg:h-screen overflow-y-auto px-4 py-4 z-40 transition-all duration-200"
+           class="w-full lg:w-64 print:hidden bg-[#0e1726] text-white flex-col justify-between shrink-0 lg:sticky lg:top-0 lg:h-screen overflow-y-auto px-4 py-4 z-40 transition-all duration-200"
            role="navigation" aria-label="Employer Portal Workspace Navigation">
         <div>
             <!-- Compact Branding -->
@@ -234,9 +267,9 @@
     </aside>
 
     <!-- Main Content Area -->
-    <div class="flex-1 flex flex-col min-w-0 lg:h-screen lg:overflow-y-auto">
+    <div class="flex-1 flex flex-col min-w-0 lg:h-screen lg:overflow-y-auto print:block print:h-auto print:overflow-visible">
         <!-- Top Accessibility & Navigation Header -->
-        <header class="bg-[#F8FAFC] border-b border-gray-200 px-5 py-3 sm:px-8 sm:py-3.5 flex flex-wrap items-center justify-between gap-4 sticky top-0 z-30 shadow-xs" role="region" aria-label="Accessibility settings and profile controls">
+        <header class="print:hidden bg-[#F8FAFC] border-b border-gray-200 px-5 py-3 sm:px-8 sm:py-3.5 flex flex-wrap items-center justify-between gap-4 sticky top-0 z-30 shadow-xs" role="region" aria-label="Accessibility settings and profile controls">
             <!-- Left: Accessibility Tools -->
             <div class="flex items-center flex-wrap gap-2.5 text-xs text-gray-700">
                 <div class="flex items-center gap-2 font-semibold text-[#1A2840] mr-2">
@@ -304,16 +337,18 @@
         </header>
 
         <!-- Dynamic Main Content -->
-        <main id="main-content" class="flex-1 p-6 lg:p-8" tabindex="-1">
+        <main id="main-content" class="flex-1 p-6 lg:p-8 print:p-0 print:m-0 print:bg-white" tabindex="-1">
             {{ $slot }}
         </main>
     </div>
 
-    @persist('toast')
-        <flux:toast.group>
-            <flux:toast />
-        </flux:toast.group>
-    @endpersist
+    <div class="print:hidden">
+        @persist('toast')
+            <flux:toast.group>
+                <flux:toast />
+            </flux:toast.group>
+        @endpersist
+    </div>
 
     @fluxScripts
 </body>
