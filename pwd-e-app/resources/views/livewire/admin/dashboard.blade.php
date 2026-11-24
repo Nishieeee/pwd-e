@@ -93,7 +93,7 @@
                     </span>
                 </div>
                 <p class="text-xs text-body-muted mt-1">
-                    {{ __('Review and multi-approve or multi-reject candidate PWD credentials and employer enterprise business permits.') }}
+                    {{ __('Review and multi-approve or multi-reject candidate medical certificates / PWD credentials and employer DTI/SEC accreditations.') }}
                 </p>
             </div>
 

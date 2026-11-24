@@ -13,7 +13,7 @@
                 </h1>
 
                 <p class="text-sm sm:text-base text-body-muted leading-relaxed">
-                    {{ __('Review government-issued PWD IDs and employer business registration documents to maintain platform integrity.') }}
+                    {{ __('Review candidate medical certificates / PWD credentials and employer DTI / SEC / BIR business accreditations.') }}
                 </p>
             </div>
 

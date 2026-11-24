@@ -431,13 +431,14 @@
                             @error('disability_type')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                         </div>
                         <div>
-                            <label for="pwd_id_number" class="mb-1.5 block text-sm font-semibold text-primary-dark">PWD ID number <span class="text-[#B3261E]">*</span></label>
-                            <input id="pwd_id_number" name="pwd_id_number" type="text" value="{{ old('pwd_id_number') }}" :required="role === 'candidate'" placeholder="PWD-12345"
+                            <label for="pwd_id_number" class="mb-1.5 block text-sm font-semibold text-primary-dark">PWD ID or Medical Certificate Number <span class="text-[#B3261E]">*</span></label>
+                            <input id="pwd_id_number" name="pwd_id_number" type="text" value="{{ old('pwd_id_number') }}" :required="role === 'candidate'" placeholder="e.g. PWD-12345 or MED-2026-001"
                                    class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                             @error('pwd_id_number')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                            <p class="mt-1 text-xs text-body-muted">Per PESO guidelines, a Clinical Medical Certificate or Government PWD ID validates qualification. PWD ID is required for employer RA 10524 tax credits.</p>
                         </div>
                         <div>
-                            <label for="pwd_id_file" class="mb-1.5 block text-sm font-semibold text-primary-dark">PWD ID document</label>
+                            <label for="pwd_id_file" class="mb-1.5 block text-sm font-semibold text-primary-dark">Medical Certificate or PWD ID Card</label>
                             <input id="pwd_id_file" name="pwd_id_file" type="file" accept=".jpg,.jpeg,.png,.pdf"
                                    class="block w-full text-sm text-primary-dark file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-2 file:text-white">
                             @error('pwd_id_file')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
@@ -460,16 +461,17 @@
                         </div>
                     </div>
 
-                    {{-- Employer Step 1: Permit --}}
+                    {{-- Employer Step 1: Permit & Accreditation --}}
                     <div x-show="role === 'employer' && step === 1" x-cloak class="flex flex-col gap-5">
                         <div>
-                            <label for="business_permit_number" class="mb-1.5 block text-sm font-semibold text-primary-dark">Business permit number <span class="text-[#B3261E]">*</span></label>
-                            <input id="business_permit_number" name="business_permit_number" type="text" value="{{ old('business_permit_number') }}" :required="role === 'employer'" placeholder="BP-123456"
+                            <label for="business_permit_number" class="mb-1.5 block text-sm font-semibold text-primary-dark">DTI / SEC / Business Registration Number <span class="text-[#B3261E]">*</span></label>
+                            <input id="business_permit_number" name="business_permit_number" type="text" value="{{ old('business_permit_number') }}" :required="role === 'employer'" placeholder="e.g. DTI-12345678 or SEC-CS202612345"
                                    class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                             @error('business_permit_number')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                            <p class="mt-1 text-xs text-body-muted">Enter your DTI Certificate, SEC Registration, or Mayor's Business Permit number for compliance verification.</p>
                         </div>
                         <div>
-                            <label for="business_permit_file" class="mb-1.5 block text-sm font-semibold text-primary-dark">Business permit document</label>
+                            <label for="business_permit_file" class="mb-1.5 block text-sm font-semibold text-primary-dark">Business Accreditation Document (DTI / SEC / BIR 2303 / Permit)</label>
                             <input id="business_permit_file" name="business_permit_file" type="file" accept=".jpg,.jpeg,.png,.pdf"
                                    class="block w-full text-sm text-primary-dark file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-2 file:text-white">
                             @error('business_permit_file')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
