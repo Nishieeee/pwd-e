@@ -35,7 +35,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('verification/pending', fn () => view('auth.verification-pending'))->name('verification.notice');
 });
 
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', AdminDashboard::class)->name('dashboard');
     Route::get('users', Users::class)->name('users');
     Route::get('lexicon', Lexicon::class)->name('lexicon');
@@ -59,25 +59,28 @@ Route::middleware(['auth', 'account.verified'])->group(function () {
 
         return view('dashboard');
     })->name('dashboard');
+});
+
+Route::middleware(['auth', 'account.verified', 'role:candidate'])->group(function () {
     Route::get('profile', ShowProfile::class)->name('candidate.profile.show');
     Route::get('profile/builder/{step?}', ProfileBuilder::class)->name('candidate.profile.builder');
     Route::get('jobs/matches/{job?}', JobMatches::class)->name('candidate.jobs');
     Route::get('jobs/{job}/apply', Apply::class)->name('candidate.apply');
     Route::get('applications', ApplicationsTracker::class)->name('candidate.applications');
     Route::get('employers/{employer}', EmployerShow::class)->name('candidate.employers.show');
+});
 
-    Route::prefix('employer')->name('employer.')->group(function () {
-        Route::get('/jobs', Index::class)->name('jobs.index');
-        Route::get('/jobs/create', Create::class)->name('jobs.create');
-        Route::get('/jobs/{job}/edit', Edit::class)->name('jobs.edit');
-        Route::get('/jobs/{job}/applicants', Applicants::class)->name('jobs.applicants');
-        Route::get('/talents', Talents::class)->name('talents');
-        Route::get('/applicants/{application}/document/{type}', [ApplicantDocumentController::class, 'show'])->name('applicants.document');
-        Route::get('/candidates/{candidateProfile}', ShowProfile::class)->name('candidates.show');
-        Route::get('/applicants', Applicants::class)->name('applicants');
-        Route::get('/workforce', Workforce::class)->name('workforce');
-        Route::get('/profile', \App\Livewire\Employer\Profile::class)->name('profile');
-    });
+Route::middleware(['auth', 'account.verified', 'role:employer'])->prefix('employer')->name('employer.')->group(function () {
+    Route::get('/jobs', Index::class)->name('jobs.index');
+    Route::get('/jobs/create', Create::class)->middleware('employer.permit')->name('jobs.create');
+    Route::get('/jobs/{job}/edit', Edit::class)->middleware('employer.permit')->name('jobs.edit');
+    Route::get('/jobs/{job}/applicants', Applicants::class)->name('jobs.applicants');
+    Route::get('/talents', Talents::class)->name('talents');
+    Route::get('/applicants/{application}/document/{type}', [ApplicantDocumentController::class, 'show'])->name('applicants.document');
+    Route::get('/candidates/{candidateProfile}', ShowProfile::class)->name('candidates.show');
+    Route::get('/applicants', Applicants::class)->name('applicants');
+    Route::get('/workforce', Workforce::class)->name('workforce');
+    Route::get('/profile', \App\Livewire\Employer\Profile::class)->name('profile');
 });
 
 require __DIR__.'/settings.php';

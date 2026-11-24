@@ -173,6 +173,17 @@ class Create extends Component
 
         $employerProfile = Auth::user()->employerProfile;
 
+        // Check active job posting limit
+        $maxActivePostings = config('recruitment.max_active_job_postings', 5);
+        $activePostingsCount = JobPosting::where('employer_profile_id', $employerProfile->id)
+            ->where('status', 'published')
+            ->count();
+
+        if ($activePostingsCount >= $maxActivePostings) {
+            $this->addError('title', "You have reached the limit of {$maxActivePostings} active published job postings. Please close or archive an existing job posting first.");
+            return;
+        }
+
         $job = JobPosting::create([
             'employer_profile_id' => $employerProfile->id,
             'title' => $this->title,

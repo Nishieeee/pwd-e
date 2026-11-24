@@ -23,14 +23,50 @@ class Workforce extends Component
 
     public function removeRecord(int $id): void
     {
-        WorkforceRecord::where('employer_profile_id', Auth::user()->employerProfile?->id)->findOrFail($id)->delete();
+        $record = WorkforceRecord::where('employer_profile_id', Auth::user()->employerProfile?->id)->findOrFail($id);
+
+        if (function_exists('activity')) {
+            activity('workforce')
+                ->performedOn($record)
+                ->causedBy(Auth::user())
+                ->withProperties([
+                    'candidate_profile_id' => $record->candidate_profile_id,
+                    'annual_wage' => $record->annual_wage,
+                ])
+                ->log('Workforce record removed');
+        }
+
+        $record->delete();
         $this->dispatch('toast', message: __('Record removed.'));
+    }
+
+    public function syncPwdVerification(int $id): void
+    {
+        $record = WorkforceRecord::with('candidateProfile.user')
+            ->where('employer_profile_id', Auth::user()->employerProfile?->id)
+            ->findOrFail($id);
+
+        $user = $record->candidateProfile?->user;
+        $isVerified = (bool) ($user && $user->isVerified() && ! empty($user->pwd_id_number));
+
+        $record->update(['pwd_verified' => $isVerified]);
+
+        if (function_exists('activity')) {
+            activity('workforce')
+                ->performedOn($record)
+                ->causedBy(Auth::user())
+                ->withProperties(['pwd_verified' => $isVerified])
+                ->log('Workforce PWD verification status synchronized');
+        }
+
+        $this->dispatch('toast', message: $isVerified
+            ? __('PWD status verified against registry.')
+            : __('Candidate does not have verified PWD credentials.'));
     }
 
     public function togglePwdVerified(int $id): void
     {
-        $record = WorkforceRecord::where('employer_profile_id', Auth::user()->employerProfile?->id)->findOrFail($id);
-        $record->update(['pwd_verified' => ! $record->pwd_verified]);
+        $this->syncPwdVerification($id);
     }
 
     public function render(): View
@@ -38,6 +74,7 @@ class Workforce extends Component
         $profile = Auth::user()->employerProfile;
         $records = WorkforceRecord::with('candidateProfile.user')
             ->where('employer_profile_id', $profile?->id)
+            ->whereNull('ended_at')
             ->latest('hired_at')
             ->get();
 

@@ -66,6 +66,14 @@ class Apply extends Component
             abort(403, 'Unauthorized. Candidate access required.');
         }
 
+        if ($job->status !== 'published') {
+            abort(403, 'This job posting is not open for applications.');
+        }
+
+        if ($job->closes_at && $job->closes_at->isPast()) {
+            abort(403, 'The application deadline for this position has passed.');
+        }
+
         $this->job = $job->load(['employerProfile', 'accommodations']);
 
         $profile = $user->candidateProfile;
@@ -84,6 +92,7 @@ class Apply extends Component
 
             $this->existingApplication = Application::where('candidate_profile_id', $profile->id)
                 ->where('job_posting_id', $this->job->id)
+                ->whereNotIn('status', ['withdrawn', 'closed', 'rejected'])
                 ->first();
 
             if ($this->existingApplication) {
@@ -146,6 +155,16 @@ class Apply extends Component
             return;
         }
 
+        if ($this->job->status !== 'published') {
+            $this->addError('materials', 'This job posting is no longer accepting applications.');
+            return;
+        }
+
+        if ($this->job->closes_at && $this->job->closes_at->isPast()) {
+            $this->addError('materials', 'The application deadline for this position has passed.');
+            return;
+        }
+
         if (! $this->includeBiodata && ! $this->includeResume && ! $this->includeFslVideo) {
             $this->addError('materials', 'Please select at least one application format (Bio-Data, Résumé, or FSL Video).');
             return;
@@ -172,20 +191,28 @@ class Apply extends Component
             return;
         }
 
-        // Check duplicate
-        $existing = Application::where('candidate_profile_id', $profile->id)
+        // Active duplicate check
+        $activeExisting = Application::where('candidate_profile_id', $profile->id)
             ->where('job_posting_id', $this->job->id)
+            ->whereNotIn('status', ['withdrawn', 'closed', 'rejected'])
             ->first();
 
-        if ($existing) {
+        if ($activeExisting) {
             $this->alreadyApplied = true;
-            $this->applicationSuccessMessage = 'You have already applied to this job.';
+            $this->applicationSuccessMessage = 'You already have an active application under review for this job.';
             $this->submitted = true;
-            $this->referenceNumber = $existing->id;
-            $this->formattedReference = 'PWD-APP-' . date('Y') . '-' . str_pad((string) $existing->id, 5, '0', STR_PAD_LEFT);
+            $this->referenceNumber = $activeExisting->id;
+            $this->formattedReference = 'PWD-APP-' . date('Y') . '-' . str_pad((string) $activeExisting->id, 5, '0', STR_PAD_LEFT);
 
             return;
         }
+
+        // If candidate previously withdrew, link the previous application ID
+        $previousWithdrawnApp = Application::where('candidate_profile_id', $profile->id)
+            ->where('job_posting_id', $this->job->id)
+            ->whereIn('status', ['withdrawn', 'closed'])
+            ->latest()
+            ->first();
 
         if ($this->pwdIdFile) {
             $pwdIdPath = $this->pwdIdFile->store('applications/pwd_ids', 'private');
@@ -213,7 +240,17 @@ class Apply extends Component
         }
 
         $match = $profile->jobMatches()->where('job_posting_id', $this->job->id)->first();
-        $fitScore = $match ? (float) round($match->total_score * 100, 2) : 95.00;
+        if ($match) {
+            $fitScore = (float) round($match->total_score * 100, 2);
+        } else {
+            try {
+                $scorer = app(\App\Services\Matching\MatchScorer::class);
+                $scores = $scorer->score($profile->id, $this->job->id);
+                $fitScore = (float) round(($scores['total_score'] ?? 0.0) * 100, 2);
+            } catch (\Throwable $e) {
+                $fitScore = null;
+            }
+        }
 
         $coverLetterPdfPath = null;
         if ($this->coverLetterFile) {
@@ -229,8 +266,9 @@ class Apply extends Component
         $application = Application::create([
             'candidate_profile_id' => $profile->id,
             'job_posting_id' => $this->job->id,
+            'reapplied_from_id' => $previousWithdrawnApp?->id,
             'status' => 'applied',
-            'status_subtext' => 'Application submitted and under review',
+            'status_subtext' => Application::computeStatusSubtext(Application::STATUS_APPLIED),
             'cover_letter' => $this->coverLetter ?: null,
             'cover_letter_pdf_path' => $coverLetterPdfPath,
             'fsl_video_path' => $fslPath,
