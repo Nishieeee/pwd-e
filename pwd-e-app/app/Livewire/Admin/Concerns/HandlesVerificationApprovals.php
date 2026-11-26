@@ -286,4 +286,32 @@ trait HandlesVerificationApprovals
         Flux::toast(variant: 'success', text: __('Verification rejected.'));
         $this->closeSingleReview();
     }
+
+    public function requestMoreDocsSingle(int $id): void
+    {
+        $vr = VerificationRequest::with('user')->findOrFail($id);
+        $admin = Auth::user();
+        $note = trim($this->singleReviewNote ?? '') ?: 'Please upload a clearer copy of your PWD ID card or Clinical Medical Certificate.';
+
+        $vr->update([
+            'status' => 'needs_more_docs',
+            'rejection_reason' => $note,
+            'reviewed_by' => $admin?->id,
+            'reviewed_at' => now(),
+        ]);
+
+        if ($vr->user) {
+            $vr->user->notify(new VerificationStatusUpdated('needs_more_docs', $note));
+        }
+
+        activity()
+            ->causedBy($admin)
+            ->performedOn($vr)
+            ->event('needs_more_docs')
+            ->log('Requested more documents for verification request #'.$vr->id.': '.$note);
+
+        $this->selectedIds = array_values(array_filter($this->selectedIds, fn ($item) => (int) $item !== $id));
+        Flux::toast(variant: 'success', text: __('Additional documents requested from applicant.'));
+        $this->closeSingleReview();
+    }
 }

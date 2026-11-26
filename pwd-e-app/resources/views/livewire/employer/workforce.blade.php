@@ -162,6 +162,7 @@
                                 @php
                                     $u = $record->candidateProfile?->user;
                                     $isMedCert = $u?->pwd_document_type === 'medical_certificate';
+                                    $isBothDocs = $u?->pwd_document_type === 'both';
                                 @endphp
                                 @if($isMedCert)
                                     <div class="space-y-0.5">
@@ -170,6 +171,14 @@
                                         </span>
                                         <div class="text-[10px] text-body-muted font-mono">{{ $u?->pwd_id_number }}</div>
                                         <div class="text-[9px] text-amber-700 font-medium">{{ __('PWD ID required for BIR 25% credit') }}</div>
+                                    </div>
+                                @elseif($isBothDocs)
+                                    <div class="space-y-0.5">
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                            🪪+🩺 {{ __('PWD ID & Med Cert') }}
+                                        </span>
+                                        <div class="text-[10px] text-primary-dark font-mono font-semibold">{{ $u?->pwd_id_number ?? __('DOLE Verified') }}</div>
+                                        <div class="text-[9px] text-emerald-700 font-medium">{{ __('BIR RA 10524 Tax Eligible') }}</div>
                                     </div>
                                 @else
                                     <div class="space-y-0.5">

@@ -102,6 +102,10 @@ if (typeof document !== 'undefined') {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     function addVoiceButton(input) {
         if (!SpeechRecognition) return;
+        if (input._syncVoiceBtn) {
+            input._syncVoiceBtn();
+            return;
+        }
         if (input.dataset.voiceBound) return;
         input.dataset.voiceBound = '1';
         const btn = document.createElement('button');
@@ -109,10 +113,17 @@ if (typeof document !== 'undefined') {
         btn.setAttribute('aria-label', 'Voice input');
         btn.title = 'Voice input';
         btn.textContent = '🎤';
-        btn.style.cssText = 'position:absolute;right:6px;top:50%;transform:translateY(-50%);border:none;background:transparent;cursor:pointer;font-size:16px;padding:2px 4px;';
+        btn.style.cssText = 'position:absolute;right:8px;top:50%;transform:translateY(-50%);border:none;background:transparent;cursor:pointer;font-size:16px;padding:2px 4px;line-height:1;z-index:2;';
         const parent = input.parentElement;
         if (getComputedStyle(parent).position === 'static') parent.style.position = 'relative';
+        const syncPos = () => {
+            if (input.offsetHeight > 0) {
+                btn.style.top = (input.offsetTop + input.offsetHeight / 2) + 'px';
+            }
+        };
+        input._syncVoiceBtn = syncPos;
         parent.appendChild(btn);
+        requestAnimationFrame(syncPos);
         btn.addEventListener('click', (e) => {
             e.preventDefault();
             const rec = new SpeechRecognition();

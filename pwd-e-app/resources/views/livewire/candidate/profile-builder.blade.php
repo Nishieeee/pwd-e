@@ -679,9 +679,28 @@
                         <span>PWD ID is automatically linked from your verified account registration record and is read-only.</span>
                     </p>
 
-                    <!-- Searchable Address / Location Comboboxes + Auto-populated Zip Code (Single-line clean items, PSGC-backed) -->
-                    <div class="space-y-3 pt-2">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 min-w-0">
+                    <!-- Complete Address & Searchable PSGC Location Comboboxes -->
+                    <div class="space-y-4 pt-2">
+                        <!-- Row 1: Complete Street / House / Lot / Purok Address -->
+                        <div class="min-w-0">
+                            <label for="street-address-input" class="block text-xs sm:text-[13px] font-semibold text-[#1A2840] mb-2">
+                                House / Unit No., Street, Subdivision / Purok <span class="font-normal text-gray-500">(Complete Address)</span>
+                            </label>
+                            <div class="relative">
+                                <input id="street-address-input"
+                                       type="text"
+                                       wire:model.live="address"
+                                       placeholder="e.g., Blk 4 Lot 12, Veterans Ave., Purok 3"
+                                       aria-label="Complete street or house address"
+                                       class="h-11 w-full px-3.5 pr-9 rounded-lg border border-gray-300 hover:border-gray-400 bg-white text-sm text-gray-900 placeholder-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-[#244F73] focus:ring-offset-1 focus:border-[#244F73]">
+                            </div>
+                            @error('address')
+                                <p class="text-xs text-red-600 mt-1.5" role="alert">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Row 2: Country, Province, City / Municipality -->
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 items-start min-w-0">
                             <!-- Country Searchable Combobox -->
                             <div class="relative min-w-0" x-data="{ openCountry: false }">
                                 <label for="country-combobox" class="block text-xs sm:text-[13px] font-semibold text-[#1A2840] mb-2">Country</label>
@@ -697,7 +716,7 @@
                                            aria-autocomplete="list"
                                            aria-label="Country"
                                            placeholder="Select country"
-                                           class="w-full pl-3.5 pr-8 py-2.5 rounded-lg border border-gray-300 hover:border-gray-400 bg-white text-sm text-gray-900 placeholder-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-[#244F73] focus:ring-offset-1 focus:border-[#244F73]">
+                                           class="h-11 w-full pl-3.5 pr-8 rounded-lg border border-gray-300 hover:border-gray-400 bg-white text-sm text-gray-900 placeholder-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-[#244F73] focus:ring-offset-1 focus:border-[#244F73]">
                                     <button type="button"
                                             @click="openCountry = !openCountry"
                                             tabindex="-1"
@@ -724,6 +743,51 @@
                                 </ul>
                             </div>
 
+                            <!-- Province Searchable Combobox -->
+                            <div class="relative min-w-0" x-data="{ openProvince: false }">
+                                <label for="province-combobox" class="block text-xs sm:text-[13px] font-semibold text-[#1A2840] mb-2">Province</label>
+                                <div class="relative">
+                                    <input id="province-combobox"
+                                           type="text"
+                                           wire:model.live="province"
+                                           @focus="openProvince = true"
+                                           @click.away="openProvince = false"
+                                           @keydown.escape="openProvince = false"
+                                           role="combobox"
+                                           :aria-expanded="openProvince.toString()"
+                                           aria-autocomplete="list"
+                                           aria-label="Province"
+                                           placeholder="Select or enter province..."
+                                           class="h-11 w-full pl-3.5 pr-8 rounded-lg border border-gray-300 hover:border-gray-400 bg-white text-sm text-gray-900 placeholder-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-[#244F73] focus:ring-offset-1 focus:border-[#244F73]">
+                                    <button type="button"
+                                            @click="openProvince = !openProvince"
+                                            tabindex="-1"
+                                            aria-label="Toggle province list"
+                                            class="absolute inset-y-0 right-0 px-2.5 flex items-center text-gray-400 hover:text-gray-600">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                    </button>
+                                </div>
+                                @error('province')
+                                    <p class="text-xs text-red-600 mt-1.5" role="alert">{{ $message }}</p>
+                                @enderror
+                                <ul x-show="openProvince"
+                                    x-cloak
+                                    role="listbox"
+                                    aria-label="Provinces"
+                                    class="absolute left-0 right-0 w-full mt-1.5 max-h-56 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-xl z-50 py-1 text-xs">
+                                    @foreach($provinces as $provinceOption)
+                                        <li>
+                                            <button type="button"
+                                                    wire:click="selectProvinceOption('{{ addslashes($provinceOption) }}')"
+                                                    @click="openProvince = false"
+                                                    class="w-full text-left px-3.5 py-2 truncate whitespace-nowrap hover:bg-[#EBF3FA] focus-visible:outline-none focus-visible:bg-[#EBF3FA] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#244F73] {{ $province === $provinceOption ? 'bg-[#EBF3FA] font-bold text-[#244F73]' : 'text-[#1A2840]' }}">
+                                                {{ $provinceOption }}
+                                            </button>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
+
                             <!-- City Searchable Combobox (Single-line clean items: "City Name (ZIP 7000)") -->
                             <div class="relative min-w-0" x-data="{ openCity: false }">
                                 <label for="city-combobox" class="block text-xs sm:text-[13px] font-semibold text-[#1A2840] mb-2">
@@ -743,7 +807,7 @@
                                            placeholder="Search city..."
                                            aria-required="true"
                                            aria-invalid="{{ $errors->has('city') ? 'true' : 'false' }}"
-                                           class="w-full pl-3.5 pr-8 py-2.5 rounded-lg border {{ $errors->has('city') ? 'border-red-600 focus:ring-red-600 focus:border-red-600' : 'border-gray-300 hover:border-gray-400 focus:ring-[#244F73] focus:border-[#244F73]' }} bg-white text-sm text-gray-900 placeholder-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1">
+                                           class="h-11 w-full pl-3.5 pr-8 rounded-lg border {{ $errors->has('city') ? 'border-red-600 focus:ring-red-600 focus:border-red-600' : 'border-gray-300 hover:border-gray-400 focus:ring-[#244F73] focus:border-[#244F73]' }} bg-white text-sm text-gray-900 placeholder-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1">
                                     <button type="button"
                                             @click="openCity = !openCity"
                                             tabindex="-1"
@@ -775,9 +839,12 @@
                                     @endforeach
                                 </ul>
                             </div>
+                        </div>
 
-                            <!-- Barangay Searchable Combobox (Single-line clean items) -->
-                            <div class="relative min-w-0" x-data="{ openBarangay: false }">
+                        <!-- Row 3: Barangay + Zip Code -->
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 items-start min-w-0">
+                            <!-- Barangay Searchable Combobox -->
+                            <div class="relative sm:col-span-2 min-w-0" x-data="{ openBarangay: false }">
                                 <label for="barangay-combobox" class="block text-xs sm:text-[13px] font-semibold text-[#1A2840] mb-2">Barangay</label>
                                 <div class="relative">
                                     <input id="barangay-combobox"
@@ -790,8 +857,8 @@
                                            :aria-expanded="openBarangay.toString()"
                                            aria-autocomplete="list"
                                            aria-label="Barangay"
-                                           placeholder="Search barangay..."
-                                           class="w-full pl-3.5 pr-8 py-2.5 rounded-lg border border-gray-300 hover:border-gray-400 bg-white text-sm text-gray-900 placeholder-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-[#244F73] focus:ring-offset-1 focus:border-[#244F73]">
+                                           placeholder="Search or enter barangay..."
+                                           class="h-11 w-full pl-3.5 pr-8 rounded-lg border border-gray-300 hover:border-gray-400 bg-white text-sm text-gray-900 placeholder-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-[#244F73] focus:ring-offset-1 focus:border-[#244F73]">
                                     <button type="button"
                                             @click="openBarangay = !openBarangay"
                                             tabindex="-1"
@@ -818,17 +885,15 @@
                                 </ul>
                             </div>
 
-                            <!-- Auto-Populated Zip Code -->
+                            <!-- Zip Code (Auto-populated from selected city, editable if custom) -->
                             <div class="min-w-0">
                                 <label for="zip-code-input" class="block text-xs sm:text-[13px] font-semibold text-[#1A2840] mb-2">Zip Code</label>
                                 <input id="zip-code-input"
                                        type="text"
-                                       wire:model="zipCode"
-                                       placeholder="Auto-filled"
-                                       readonly
-                                       aria-readonly="true"
-                                       aria-label="Zip Code (auto-populated from selected city)"
-                                       class="w-full px-3.5 py-2.5 rounded-lg border border-gray-200 bg-gray-100 text-sm text-gray-700 font-semibold cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[#244F73] focus:ring-offset-1">
+                                       wire:model.live="zipCode"
+                                       placeholder="e.g., 7000"
+                                       aria-label="Zip Code"
+                                       class="h-11 w-full px-3.5 rounded-lg border border-gray-300 hover:border-gray-400 bg-white text-sm text-gray-900 font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-[#244F73] focus:ring-offset-1 focus:border-[#244F73]">
                             </div>
                         </div>
                     </div>
@@ -988,38 +1053,42 @@
                             Select your highest educational level. Uploading diplomas or certificates for Tertiary, Vocational, or any level is strictly optional.
                         </p>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
-                        <div>
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-end">
+                        <div class="md:col-span-5 flex flex-col justify-end min-w-0">
                             <label for="highest-education-select" class="block text-xs sm:text-[13px] font-semibold text-[#1A2840] mb-2">
                                 Highest Educational Attainment
                             </label>
                             <select id="highest-education-select"
                                     wire:model.live="highestEducation"
-                                    class="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 hover:border-gray-400 bg-white text-sm text-gray-900 transition-colors focus:outline-none focus:ring-2 focus:ring-[#244F73] focus:ring-offset-1 focus:border-[#244F73]">
+                                    class="h-11 w-full px-3.5 rounded-lg border border-gray-300 hover:border-gray-400 bg-white text-sm text-gray-900 transition-colors focus:outline-none focus:ring-2 focus:ring-[#244F73] focus:ring-offset-1 focus:border-[#244F73]">
                                 @foreach($educationLevels as $eduOption)
                                     <option value="{{ $eduOption->name }}">{{ $eduOption->name }}</option>
                                 @endforeach
                             </select>
                         </div>
-                        <div>
+                        <div class="md:col-span-4 flex flex-col justify-end min-w-0">
                             <label for="institution-name" class="block text-xs sm:text-[13px] font-semibold text-[#1A2840] mb-2">
                                 Institution Name <span class="font-normal text-gray-500">(Optional)</span>
                             </label>
-                            <input id="institution-name"
-                                   type="text"
-                                   wire:model.live="institutionName"
-                                   placeholder="e.g., Western Mindanao State University"
-                                   class="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 hover:border-gray-400 bg-white text-sm text-gray-900 placeholder-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-[#244F73] focus:ring-offset-1 focus:border-[#244F73]">
+                            <div class="relative">
+                                <input id="institution-name"
+                                       type="text"
+                                       wire:model.live="institutionName"
+                                       placeholder="e.g., Western Mindanao State University"
+                                       class="h-11 w-full px-3.5 pr-9 rounded-lg border border-gray-300 hover:border-gray-400 bg-white text-sm text-gray-900 placeholder-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-[#244F73] focus:ring-offset-1 focus:border-[#244F73]">
+                            </div>
                         </div>
-                        <div>
+                        <div class="md:col-span-3 flex flex-col justify-end min-w-0">
                             <label for="year-graduated" class="block text-xs sm:text-[13px] font-semibold text-[#1A2840] mb-2">
                                 Year Graduated <span class="font-normal text-gray-500">(Optional)</span>
                             </label>
                             <input id="year-graduated"
                                    type="text"
+                                   inputmode="numeric"
+                                   maxlength="4"
                                    wire:model.live="yearGraduated"
                                    placeholder="e.g., 2025"
-                                   class="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 hover:border-gray-400 bg-white text-sm text-gray-900 placeholder-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-[#244F73] focus:ring-offset-1 focus:border-[#244F73]">
+                                   class="h-11 w-full px-3.5 rounded-lg border border-gray-300 hover:border-gray-400 bg-white text-sm text-gray-900 placeholder-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-[#244F73] focus:ring-offset-1 focus:border-[#244F73]">
                         </div>
                     </div>
 
@@ -1566,6 +1635,85 @@
                 @endif
             </div>
 
+            <!-- Dedicated Secure Card for Clinical Medical Certificate (Fit-to-Work) -->
+            <div class="rounded-xl border {{ $hasMedCertAttached ? 'border-[#A5D6A7] bg-[#F4FAF5]' : 'border-dashed border-gray-300 bg-gray-50/50' }} p-5 space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="flex items-start gap-3.5">
+                        <div class="w-10 h-10 rounded-lg {{ $hasMedCertAttached ? 'bg-[#E8F5E9] text-[#176B47] border border-[#A5D6A7]' : 'bg-white text-[#244F73] border border-gray-200' }} flex items-center justify-center shrink-0">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <h3 class="text-base font-bold text-[#1A2840]">Clinical Medical Certificate (Fit-to-Work)</h3>
+                                @if($hasMedCertAttached)
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-[#E8F5E9] text-[#176B47]">
+                                        &#10003; Attached
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#DCEAF4] text-[#244F73]">
+                                        Optional Credential
+                                    </span>
+                                @endif
+                            </div>
+                            <p class="text-xs text-[#4E5F6E] mt-1">
+                                @if($hasMedCertAttached)
+                                    Your Clinical Medical Certificate {{ $medCertNumber ? '(Ref: '.$medCertNumber.')' : '' }} is attached to your profile and visible to employers reviewing your application.
+                                @else
+                                    Upload a Fit-to-Work or clinical medical diagnosis certificate (PDF, JPG, or PNG, up to 10 MB) to share occupational fitness clearance alongside your PWD ID.
+                                @endif
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2 shrink-0">
+                        <div class="relative">
+                            <input type="text"
+                                   wire:model.live="medCertNumber"
+                                   placeholder="Med Cert / PRC Ref. (Optional)"
+                                   aria-label="Medical Certificate or PRC reference number"
+                                   class="h-9 w-48 sm:w-52 rounded-lg border border-gray-300 bg-white px-3 pr-8 text-xs text-[#1A2840] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#244F73]">
+                        </div>
+                        <label class="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg border border-gray-300 bg-white text-xs font-semibold text-[#1A2840] hover:bg-gray-50 cursor-pointer focus-within:ring-2 focus-within:ring-[#244F73]">
+                            <span>{{ $hasMedCertAttached ? 'Update scan (optional)' : 'Upload Medical Certificate' }}</span>
+                            <input type="file"
+                                   wire:model="medCertUpload"
+                                   accept=".pdf,.jpg,.jpeg,.png"
+                                   class="hidden"
+                                   aria-label="Upload clinical medical certificate">
+                        </label>
+                        @if($medCertUpload || $medCertPath)
+                            <button type="button"
+                                    wire:click="removeMedCertDocument"
+                                    class="text-xs font-semibold text-red-600 hover:underline px-2">
+                                Remove
+                            </button>
+                        @endif
+                    </div>
+                </div>
+                @error('medCertUpload')
+                    <p class="text-xs text-red-600" role="alert">{{ $message }}</p>
+                @enderror
+
+                @if($hasMedCertAttached)
+                    <div class="bg-white rounded-xl border border-gray-200 p-3 flex items-center justify-between gap-3 shadow-2xs">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <svg class="w-4 h-4 text-[#176B47] shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <span class="text-xs font-bold text-[#1A2840] truncate">
+                                {{ $medCertFilename ?: 'Medical Certificate Record' }}
+                            </span>
+                            @if($medCertFileSize)
+                                <span class="text-[11px] text-gray-500">&middot; {{ $medCertFileSize }}</span>
+                            @endif
+                        </div>
+                        <span class="text-[11px] font-semibold text-[#176B47]">RA 10173 Encrypted &amp; Protected</span>
+                    </div>
+                @endif
+            </div>
+
             <div class="flex items-center gap-2 text-xs font-semibold text-[#176B47]">
                 <svg class="w-4 h-4 text-[#176B47]" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
@@ -1638,8 +1786,8 @@
                     @if($phone)
                         <div class="text-xs text-[#4E5F6E]">{{ $phone }}</div>
                     @endif
-                    @if($barangay || $city || $country || $zipCode)
-                        <div class="text-xs text-[#4E5F6E]">{{ implode(', ', array_filter([$barangay, $city, $country, $zipCode ? 'ZIP '.$zipCode : null])) }}</div>
+                    @if($address || $barangay || $city || $province || $country || $zipCode)
+                        <div class="text-xs text-[#4E5F6E]">{{ implode(', ', array_filter([$address, $barangay, $city, $province, $country, $zipCode ? 'ZIP '.$zipCode : null])) }}</div>
                     @endif
                     @php
                         $allLanguages = array_values(array_filter(array_merge($spokenLanguages, $hasOtherLanguage && $otherLanguage ? [$otherLanguage] : [])));
@@ -1895,7 +2043,7 @@
             $resumeInitials = strtoupper(substr($firstName, 0, 1).substr($lastName, 0, 1)) ?: ($resumeUser?->initials() ?? 'MS');
             $resumeMaskedId = 'PWD-'.str_pad((string) ($resumeUser?->id ?? 0), 5, '0', STR_PAD_LEFT);
             $resumeUpdatedDate = $resumeProfile?->updated_at ? $resumeProfile->updated_at->format('M d, Y') : now()->format('M d, Y');
-            $resumeLocation = implode(', ', array_filter([$barangay, $city, $country]));
+            $resumeLocation = implode(', ', array_filter([$address, $barangay, $city, $province, $country]));
             $resumeLanguages = array_values(array_filter(array_merge(
                 $spokenLanguages,
                 ($hasOtherLanguage && trim($otherLanguage) !== '') ? [trim($otherLanguage)] : []

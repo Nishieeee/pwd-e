@@ -251,8 +251,8 @@
 
                                         <button type="button"
                                                 wire:click="openSingleReview({{ $vr->id }})"
-                                                class="px-2.5 py-1 rounded-md border border-rose-200 text-rose-700 bg-white hover:bg-rose-50 text-[11px] font-semibold transition-colors">
-                                            {{ __('Reject...') }}
+                                                class="px-2.5 py-1 rounded-md border border-primary-border text-primary-dark bg-white hover:bg-primary-tint text-[11px] font-semibold transition-colors">
+                                            {{ __('Review...') }}
                                         </button>
                                     </div>
                                 </td>
@@ -362,31 +362,33 @@
         </div>
     @endif
 
-    <!-- Single Reject Reason Modal -->
+    <!-- Single Review / Request More Docs / Reject Modal -->
     @if($singleReviewingId !== null)
         <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" role="dialog" aria-modal="true" aria-labelledby="single-reject-title">
             <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl space-y-4" wire:click.stop>
                 <div class="flex items-start justify-between border-b border-gray-100 pb-3">
                     <div>
-                        <h3 id="single-reject-title" class="font-heading text-base font-bold text-rose-800 flex items-center gap-2">
-                            <svg class="size-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                            {{ __('Reject Verification Request') }}
+                        <h3 id="single-reject-title" class="font-heading text-base font-bold text-primary-dark flex items-center gap-2">
+                            {{ __('Review Verification Submission') }}
                         </h3>
-                        <p class="text-xs text-body-muted mt-0.5">{{ __('Enter the specific reason for rejecting this document.') }}</p>
+                        <p class="text-xs text-body-muted mt-0.5">{{ __('Request a clearer copy / additional document, or reject this verification request.') }}</p>
                     </div>
                     <button type="button" wire:click="closeSingleReview" class="text-body-muted hover:text-primary-dark">&times;</button>
                 </div>
 
                 <div>
                     <label class="block text-xs font-bold text-primary-dark mb-1">
-                        {{ __('Rejection Reason') }}
+                        {{ __('Instructions / Feedback for Candidate') }}
                     </label>
-                    <textarea wire:model="singleReviewNote" rows="3" class="w-full rounded-xl border border-primary-border p-3 text-xs text-primary-dark focus:ring-2 focus:ring-primary focus:outline-none" placeholder="{{ __('e.g. ID photo is unreadable, expired document, or mismatched name.') }}"></textarea>
+                    <textarea wire:model="singleReviewNote" rows="3" class="w-full rounded-xl border border-primary-border p-3 text-xs text-primary-dark focus:ring-2 focus:ring-primary focus:outline-none" placeholder="{{ __('e.g. Please re-upload a clearer copy of your PWD ID card, or attach your Fit-to-Work Medical Certificate.') }}"></textarea>
                 </div>
 
-                <div class="flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
+                <div class="flex flex-wrap items-center justify-end gap-2 pt-2 border-t border-gray-100">
                     <button type="button" wire:click="closeSingleReview" class="px-3.5 py-1.5 rounded-lg border border-primary-border text-xs font-semibold text-primary-dark hover:bg-primary-tint">
                         {{ __('Cancel') }}
+                    </button>
+                    <button type="button" wire:click="requestMoreDocsSingle({{ $singleReviewingId }})" class="px-3.5 py-1.5 rounded-lg bg-amber-600 text-white text-xs font-bold hover:bg-amber-700 shadow-2xs">
+                        {{ __('Request More / Re-upload') }}
                     </button>
                     <button type="button" wire:click="rejectSingle({{ $singleReviewingId }})" class="px-4 py-1.5 rounded-lg bg-rose-600 text-white text-xs font-bold hover:bg-rose-700 shadow-2xs">
                         {{ __('Reject Request') }}

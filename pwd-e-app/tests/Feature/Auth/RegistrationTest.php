@@ -17,7 +17,59 @@ beforeEach(function () {
 test('registration screen can be rendered', function () {
     $response = $this->get(route('register'));
 
-    $response->assertOk();
+    $response->assertOk()
+        ->assertSee('id="candidate_terms"', false)
+        ->assertSee('id="candidate_consent"', false)
+        ->assertSee('id="employer_terms"', false)
+        ->assertSee('value="both"', false)
+        ->assertSee('name="pwd_id_file"', false)
+        ->assertSee('name="medical_certificate_file"', false)
+        ->assertDontSee("this.closest('form').submit()", false);
+});
+
+test('candidate turning 18 today can register with both pwd id and medical certificate files', function () {
+    \Illuminate\Support\Facades\Storage::fake('private');
+
+    $pwdFile = \Illuminate\Http\UploadedFile::fake()->create('pwd_id.pdf', 300, 'application/pdf');
+    $medFile = \Illuminate\Http\UploadedFile::fake()->create('med_cert.pdf', 400, 'application/pdf');
+
+    $response = $this->post(route('register.store'), [
+        'role' => 'candidate',
+        'first_name' => 'Elena',
+        'last_name' => 'Reyes',
+        'email' => 'elena.both@example.com',
+        'password' => 'password123',
+        'password_confirmation' => 'password123',
+        'date_of_birth' => now()->subYears(18)->toDateString(),
+        'disability_type' => 'Hearing',
+        'pwd_document_type' => 'both',
+        'pwd_id_number' => 'PWD-NCR-2026-555',
+        'medical_certificate_number' => 'MED-PRC-2026-777',
+        'pwd_id_file' => $pwdFile,
+        'medical_certificate_file' => $medFile,
+        'consent' => '1',
+        'terms' => '1',
+    ]);
+
+    $response->assertSessionHasNoErrors()
+        ->assertRedirect(route('verification.notice'));
+
+    $user = User::where('email', 'elena.both@example.com')->first();
+    expect($user)->not->toBeNull()
+        ->and($user->pwd_document_type)->toBe('both')
+        ->and($user->pwd_id_number)->toBe('PWD-NCR-2026-555')
+        ->and($user->medical_certificate_number)->toBe('MED-PRC-2026-777')
+        ->and($user->pwd_id_path)->not->toBeNull()
+        ->and($user->medical_certificate_path)->not->toBeNull();
+
+    \Illuminate\Support\Facades\Storage::disk('private')->assertExists($user->pwd_id_path);
+    \Illuminate\Support\Facades\Storage::disk('private')->assertExists($user->medical_certificate_path);
+
+    $vr = VerificationRequest::where('user_id', $user->id)->first();
+    expect($vr)->not->toBeNull()
+        ->and($vr->type)->toBe('both')
+        ->and($vr->document_path)->toBe($user->pwd_id_path)
+        ->and($vr->secondary_document_path)->toBe($user->medical_certificate_path);
 });
 
 test('candidate can register with pwd id and creates profile', function () {

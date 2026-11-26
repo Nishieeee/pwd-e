@@ -29,6 +29,8 @@ class Apply extends Component
 
     public $pwdIdFile = null;
 
+    public $medicalCertificateFile = null;
+
     public $resumeFile = null;
 
     public $fslVideoFile = null;
@@ -192,6 +194,7 @@ class Apply extends Component
             'coverLetter' => ['nullable', 'string', 'max:5000'],
             'coverLetterFile' => ['nullable', 'file', 'mimes:pdf', 'max:5120'],
             'pwdIdFile' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
+            'medicalCertificateFile' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
             'resumeFile' => ['nullable', 'file', 'mimes:pdf', 'max:5120'],
             'fslVideoFile' => ['nullable', 'file', 'mimes:mp4,mov,webm', 'max:51200'],
         ]);
@@ -247,7 +250,24 @@ class Apply extends Component
 
         if ($this->pwdIdFile) {
             $pwdIdPath = $this->pwdIdFile->store('applications/pwd_ids', 'private');
-            $user->update(['pwd_id_path' => $pwdIdPath]);
+            $newDocType = ($user->medical_certificate_path || $this->medicalCertificateFile || $user->pwd_document_type === 'medical_certificate')
+                ? 'both'
+                : ($user->pwd_document_type ?: 'pwd_id');
+            $user->update([
+                'pwd_id_path' => $pwdIdPath,
+                'pwd_document_type' => $newDocType,
+            ]);
+        }
+
+        if ($this->medicalCertificateFile) {
+            $medCertPath = $this->medicalCertificateFile->store('applications/medical_certificates', 'private');
+            $newDocType = ($user->pwd_id_path || $this->pwdIdFile || $user->pwd_document_type === 'pwd_id')
+                ? 'both'
+                : ($user->pwd_document_type ?: 'medical_certificate');
+            $user->update([
+                'medical_certificate_path' => $medCertPath,
+                'pwd_document_type' => $newDocType,
+            ]);
         }
 
         $resumePath = null;

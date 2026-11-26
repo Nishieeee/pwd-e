@@ -58,7 +58,11 @@ class ProfileBuilder extends Component
     public string $pwdIdNumber = '';
 
     // Searchable Location Comboboxes (PSGC-backed)
+    public string $address = '';
+
     public string $country = '';
+
+    public string $province = '';
 
     public ?int $locationCityId = null;
 
@@ -115,6 +119,8 @@ class ProfileBuilder extends Component
 
     public $pwdIdUpload = null;
 
+    public $medCertUpload = null;
+
     public string $resumeFilename = '';
 
     public string $resumeFileSize = '4 KB';
@@ -132,6 +138,14 @@ class ProfileBuilder extends Component
     public string $pwdIdFileSize = '';
 
     public ?string $pwdIdPath = null;
+
+    public string $medCertNumber = '';
+
+    public string $medCertFilename = '';
+
+    public string $medCertFileSize = '';
+
+    public ?string $medCertPath = null;
 
     public bool $showResumePreviewModal = false;
 
@@ -230,10 +244,12 @@ class ProfileBuilder extends Component
             ?? ($profile->city ? LocationCity::where('name', $profile->city)->first() : null)
             ?? LocationCity::orderBy('name')->first();
 
-        $this->country = $profile->country ?: ($cityRecord?->country ?? '');
+        $this->address = trim((string) ($profile->address ?? ''));
+        $this->country = $profile->country ?: ($cityRecord?->country ?? 'Philippines');
+        $this->province = trim((string) ($profile->province ?: ($cityRecord?->province_name ?? '')));
         $this->locationCityId = $cityRecord?->id;
         $this->city = $cityRecord?->name ?? ($profile->city ?? '');
-        $this->zipCode = $cityRecord?->zip_code ?? ($profile->zip_code ?? '');
+        $this->zipCode = ($profile->zip_code ?: ($cityRecord?->zip_code ?? ''));
 
         $brgyRecord = $profile->locationBarangay
             ?? ($cityRecord && $profile->barangay
@@ -332,7 +348,7 @@ class ProfileBuilder extends Component
                 $bytes = Storage::disk('public')->size($user->pwd_id_path);
             }
             $this->pwdIdFileSize = $bytes > 0 ? max(1, (int) round($bytes / 1024)).' KB' : 'On File';
-        } elseif (! empty($user->pwd_id_number)) {
+        } elseif (! empty($user->pwd_id_number) && $user->pwd_document_type !== 'medical_certificate') {
             $this->pwdIdPath = null;
             $this->pwdIdFilename = 'Verified PWD ID (' . $user->pwd_id_number . ')';
             $this->pwdIdFileSize = 'Verified on Registration';
@@ -340,6 +356,27 @@ class ProfileBuilder extends Component
             $this->pwdIdPath = null;
             $this->pwdIdFilename = '';
             $this->pwdIdFileSize = '';
+        }
+
+        $this->medCertNumber = trim((string) ($user->medical_certificate_number ?? ($user->pwd_document_type === 'medical_certificate' ? $user->pwd_id_number : '')));
+        if (! empty($user->medical_certificate_path)) {
+            $this->medCertPath = $user->medical_certificate_path;
+            $this->medCertFilename = basename($user->medical_certificate_path);
+            $medBytes = 0;
+            if (Storage::disk('private')->exists($user->medical_certificate_path)) {
+                $medBytes = Storage::disk('private')->size($user->medical_certificate_path);
+            } elseif (Storage::disk('public')->exists($user->medical_certificate_path)) {
+                $medBytes = Storage::disk('public')->size($user->medical_certificate_path);
+            }
+            $this->medCertFileSize = $medBytes > 0 ? max(1, (int) round($medBytes / 1024)).' KB' : 'On File';
+        } elseif ($user->pwd_document_type === 'medical_certificate' && ! empty($user->pwd_id_number)) {
+            $this->medCertPath = null;
+            $this->medCertFilename = 'Verified Medical Cert (' . $user->pwd_id_number . ')';
+            $this->medCertFileSize = 'Verified on Registration';
+        } else {
+            $this->medCertPath = null;
+            $this->medCertFilename = '';
+            $this->medCertFileSize = '';
         }
 
         if ($this->currentStep === 4) {
@@ -358,12 +395,44 @@ class ProfileBuilder extends Component
         $this->isListening = ! $this->isListening;
     }
 
+    public function updatedProvince(string $value): void
+    {
+        $trimmed = trim($value);
+        if ($trimmed === '') {
+            return;
+        }
+
+        $matchingCities = LocationCity::where('province_name', 'like', $trimmed)->orderBy('name')->get();
+        if ($matchingCities->isNotEmpty()) {
+            $this->province = (string) $matchingCities->first()->province_name;
+            $currentInProvince = $matchingCities->first(fn ($c) => strcasecmp($c->name, $this->city) === 0);
+            if (! $currentInProvince) {
+                $firstCity = $matchingCities->first();
+                $this->locationCityId = $firstCity->id;
+                $this->city = $firstCity->name;
+                $this->zipCode = (string) ($firstCity->zip_code ?? '');
+                $firstBrgy = LocationBarangay::where('location_city_id', $firstCity->id)->orderBy('name')->first();
+                $this->locationBarangayId = $firstBrgy?->id;
+                $this->barangay = $firstBrgy?->name ?? '';
+            }
+        }
+    }
+
+    public function selectProvinceOption(string $provinceName): void
+    {
+        $this->province = $provinceName;
+        $this->updatedProvince($provinceName);
+    }
+
     public function updatedCity(string $value): void
     {
         $cityRecord = LocationCity::where('name', 'like', trim($value))->first();
         if ($cityRecord) {
             $this->locationCityId = $cityRecord->id;
             $this->city = $cityRecord->name;
+            if (! empty($cityRecord->province_name)) {
+                $this->province = $cityRecord->province_name;
+            }
             $this->zipCode = $cityRecord->zip_code;
 
             $validBrgy = LocationBarangay::where('location_city_id', $cityRecord->id)
@@ -538,12 +607,27 @@ class ProfileBuilder extends Component
 
     public function updatedPwdIdUpload(): void
     {
+        $this->validate([
+            'pwdIdUpload' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:10240'],
+        ]);
+
         if ($this->pwdIdUpload) {
             $filename = $this->pwdIdUpload->getClientOriginalName();
             $this->pwdIdPath = $this->pwdIdUpload->storeAs('documents/pwd_ids', $filename, 'private');
             $this->pwdIdFilename = $filename;
             $sizeKb = max(1, (int) round($this->pwdIdUpload->getSize() / 1024));
             $this->pwdIdFileSize = $sizeKb.' KB';
+
+            $user = Auth::user();
+            if ($user) {
+                $newDocType = ($this->medCertPath || $user->medical_certificate_path || $user->pwd_document_type === 'medical_certificate')
+                    ? 'both'
+                    : ($user->pwd_document_type ?: 'pwd_id');
+                $user->update([
+                    'pwd_id_path' => $this->pwdIdPath,
+                    'pwd_document_type' => $newDocType,
+                ]);
+            }
         }
     }
 
@@ -560,6 +644,48 @@ class ProfileBuilder extends Component
         $this->pwdIdPath = null;
         $this->pwdIdFilename = '';
         $this->pwdIdFileSize = '';
+    }
+
+    public function updatedMedCertUpload(): void
+    {
+        $this->validate([
+            'medCertUpload' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:10240'],
+        ]);
+
+        if ($this->medCertUpload) {
+            $filename = $this->medCertUpload->getClientOriginalName();
+            $this->medCertPath = $this->medCertUpload->storeAs('documents/medical_certificates', $filename, 'private');
+            $this->medCertFilename = $filename;
+            $sizeKb = max(1, (int) round($this->medCertUpload->getSize() / 1024));
+            $this->medCertFileSize = $sizeKb.' KB';
+
+            $user = Auth::user();
+            if ($user) {
+                $newDocType = ($this->pwdIdPath || $user->pwd_id_path || $user->pwd_document_type === 'pwd_id')
+                    ? 'both'
+                    : ($user->pwd_document_type ?: 'medical_certificate');
+                $user->update([
+                    'medical_certificate_path' => $this->medCertPath,
+                    'medical_certificate_number' => trim($this->medCertNumber) !== '' ? trim($this->medCertNumber) : $user->medical_certificate_number,
+                    'pwd_document_type' => $newDocType,
+                ]);
+            }
+        }
+    }
+
+    public function removeMedCertDocument(): void
+    {
+        if ($this->medCertPath) {
+            if (Storage::disk('private')->exists($this->medCertPath)) {
+                Storage::disk('private')->delete($this->medCertPath);
+            } elseif (Storage::disk('public')->exists($this->medCertPath)) {
+                Storage::disk('public')->delete($this->medCertPath);
+            }
+        }
+        $this->medCertUpload = null;
+        $this->medCertPath = null;
+        $this->medCertFilename = '';
+        $this->medCertFileSize = '';
     }
 
     public function updatedEducationCertificateUpload(): void
@@ -584,7 +710,17 @@ class ProfileBuilder extends Component
         return $this->pwdIdUpload !== null
             || ! empty($this->pwdIdPath)
             || ! empty($user?->pwd_id_path)
-            || ! empty($user?->pwd_id_number);
+            || (! empty($user?->pwd_id_number) && $user?->pwd_document_type !== 'medical_certificate');
+    }
+
+    public function hasMedCertAttached(): bool
+    {
+        $user = Auth::user();
+
+        return $this->medCertUpload !== null
+            || ! empty($this->medCertPath)
+            || ! empty($user?->medical_certificate_path)
+            || ($user?->pwd_document_type === 'medical_certificate' && ! empty($user?->pwd_id_number));
     }
 
     public function getValidExperiences(): array
@@ -655,8 +791,11 @@ class ProfileBuilder extends Component
                 'city' => ['required', 'string', 'max:100'],
                 'middleName' => ['nullable', 'string', 'max:100'],
                 'suffix' => ['nullable', 'string', 'max:50'],
+                'address' => ['nullable', 'string', 'max:255'],
                 'country' => ['nullable', 'string', 'max:100'],
+                'province' => ['nullable', 'string', 'max:120'],
                 'barangay' => ['nullable', 'string', 'max:100'],
+                'zipCode' => ['nullable', 'string', 'max:20'],
                 'headline' => ['nullable', 'string', 'max:255'],
                 'bio' => ['nullable', 'string', 'max:2000'],
                 'highestEducation' => ['required', 'string', 'max:255'],
@@ -764,8 +903,10 @@ class ProfileBuilder extends Component
         }
 
         $locationParts = array_filter([
+            trim($this->address),
             $this->barangay,
             $this->city,
+            trim($this->province),
             $this->country,
         ]);
 
@@ -1292,6 +1433,10 @@ class ProfileBuilder extends Component
             $this->updatedPwdIdUpload();
         }
 
+        if ($this->medCertUpload) {
+            $this->updatedMedCertUpload();
+        }
+
         if ($this->educationCertificateUpload) {
             $this->updatedEducationCertificateUpload();
         }
@@ -1307,12 +1452,25 @@ class ProfileBuilder extends Component
         if ($this->pwdIdPath) {
             $userUpdates['pwd_id_path'] = $this->pwdIdPath;
         }
+        if ($this->medCertPath) {
+            $userUpdates['medical_certificate_path'] = $this->medCertPath;
+        }
+        if (trim($this->medCertNumber) !== '') {
+            $userUpdates['medical_certificate_number'] = trim($this->medCertNumber);
+        }
+        if (($this->pwdIdPath || $user->pwd_id_path) && ($this->medCertPath || $user->medical_certificate_path)) {
+            $userUpdates['pwd_document_type'] = 'both';
+        }
         $user->update($userUpdates);
 
         $resolvedCity = ($this->locationCityId ? LocationCity::find($this->locationCityId) : null)
             ?? LocationCity::where('name', $this->city)->first();
         $resolvedBarangay = ($this->locationBarangayId ? LocationBarangay::find($this->locationBarangayId) : null)
             ?? ($resolvedCity ? LocationBarangay::where('location_city_id', $resolvedCity->id)->where('name', $this->barangay)->first() : null);
+
+        $resolvedProvince = trim($this->province) !== ''
+            ? trim($this->province)
+            : ($resolvedCity?->province_name ?? null);
 
         $profile = CandidateProfile::updateOrCreate(
             ['user_id' => $user->id],
@@ -1323,13 +1481,15 @@ class ProfileBuilder extends Component
                 'highest_education' => $this->highestEducation,
                 'input_mode' => $this->inputMode,
                 'bio' => trim($this->bio),
-                'location' => trim(implode(', ', array_filter([$resolvedCity?->name ?? $this->city, $this->country]))),
+                'location' => trim(implode(', ', array_filter([$resolvedCity?->name ?? $this->city, $resolvedProvince, $this->country]))),
+                'address' => trim($this->address) !== '' ? trim($this->address) : null,
                 'country' => $this->country,
+                'province' => $resolvedProvince,
                 'location_city_id' => $resolvedCity?->id,
                 'city' => $resolvedCity?->name ?? $this->city,
                 'location_barangay_id' => $resolvedBarangay?->id,
                 'barangay' => $resolvedBarangay?->name ?? $this->barangay,
-                'zip_code' => $resolvedCity?->zip_code ?? $this->zipCode,
+                'zip_code' => trim($this->zipCode) !== '' ? trim($this->zipCode) : ($resolvedCity?->zip_code ?? ''),
                 'spoken_languages' => array_values(array_filter($this->spokenLanguages)),
                 'other_language' => $this->hasOtherLanguage && trim($this->otherLanguage) !== '' ? trim($this->otherLanguage) : null,
                 'phone' => trim($this->phone),
@@ -1451,6 +1611,12 @@ class ProfileBuilder extends Component
         if (! empty($parsed['city'])) {
             $this->city = $parsed['city'];
             $this->locationCityId = $parsed['location_city_id'];
+            if ($parsed['location_city_id']) {
+                $parsedCityRec = LocationCity::find($parsed['location_city_id']);
+                if ($parsedCityRec?->province_name) {
+                    $this->province = $parsedCityRec->province_name;
+                }
+            }
         }
         if (! empty($parsed['barangay'])) {
             $this->barangay = $parsed['barangay'];
@@ -1576,9 +1742,21 @@ class ProfileBuilder extends Component
         $this->ensureLocationTablesAndData();
 
         $countries = LocationCity::query()->select('country')->distinct()->orderBy('country')->pluck('country');
+
+        $provincesQuery = LocationCity::query()
+            ->whereNotNull('province_name')
+            ->where('province_name', '!=', '');
+        if (! empty($this->country) && LocationCity::where('country', $this->country)->exists()) {
+            $provincesQuery->where('country', $this->country);
+        }
+        $provinces = $provincesQuery->select('province_name')->distinct()->orderBy('province_name')->pluck('province_name');
+
         $citiesQuery = LocationCity::orderBy('name');
         if (! empty($this->country) && LocationCity::where('country', $this->country)->exists()) {
             $citiesQuery->where('country', $this->country);
+        }
+        if (! empty($this->province) && LocationCity::where('province_name', $this->province)->exists()) {
+            $citiesQuery->where('province_name', $this->province);
         }
         $cities = $citiesQuery->get();
 
@@ -1618,10 +1796,12 @@ class ProfileBuilder extends Component
 
         $hasFslAttached = $this->hasFslVideoAttached();
         $hasPwdIdAttached = $this->hasPwdIdAttached();
-        $attachedFilesCount = 1 + ($hasFslAttached ? 1 : 0) + ($hasPwdIdAttached ? 1 : 0);
+        $hasMedCertAttached = $this->hasMedCertAttached();
+        $attachedFilesCount = 1 + ($hasFslAttached ? 1 : 0) + ($hasPwdIdAttached ? 1 : 0) + ($hasMedCertAttached ? 1 : 0);
 
         return view('livewire.candidate.profile-builder', [
             'countries' => $countries,
+            'provinces' => $provinces,
             'cities' => $cities,
             'selectedCityRecord' => $selectedCityRecord,
             'barangays' => $barangays,
@@ -1636,6 +1816,7 @@ class ProfileBuilder extends Component
             'validExperiences' => $this->getValidExperiences(),
             'hasFslAttached' => $hasFslAttached,
             'hasPwdIdAttached' => $hasPwdIdAttached,
+            'hasMedCertAttached' => $hasMedCertAttached,
             'attachedFilesCount' => $attachedFilesCount,
         ]);
     }

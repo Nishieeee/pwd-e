@@ -124,6 +124,28 @@ class Applicants extends Component
         $this->requestDocsNotes = '';
     }
 
+    private function getAlreadyAttachedDocTypes(Application $app): array
+    {
+        $u = $app->candidateProfile?->user;
+        $attached = [];
+
+        if (! empty($u?->pwd_id_path)) {
+            $attached[] = 'Official PWD ID Card (BIR Tax Credit)';
+        }
+
+        if (! empty($u?->medical_certificate_path)) {
+            $attached[] = 'Medical Certificate (Fit to Work)';
+        }
+
+        foreach ($app->requested_documents ?? [] as $reqDoc) {
+            if (($reqDoc['status'] ?? null) === 'uploaded' && ! empty($reqDoc['name'])) {
+                $attached[] = $reqDoc['name'];
+            }
+        }
+
+        return array_values(array_unique($attached));
+    }
+
     public function sendDocumentRequest(): void
     {
         if (! $this->requestingDocsAppId) {
@@ -140,7 +162,8 @@ class Applicants extends Component
                 $q->where('employer_profile_id', $profile->id);
             })->findOrFail($this->requestingDocsAppId);
 
-        $docsToRequest = $this->selectedDocTypes;
+        $alreadyAttached = $this->getAlreadyAttachedDocTypes($app);
+        $docsToRequest = array_values(array_diff($this->selectedDocTypes, $alreadyAttached));
         $customName = trim($this->customDocName);
         if (! empty($customName) && ! in_array($customName, $docsToRequest, true)) {
             $docsToRequest[] = $customName;
@@ -922,6 +945,16 @@ class Applicants extends Component
             ? Application::with(['candidateProfile.user', 'jobPosting', 'messages.sender'])->find($this->selectedChatAppId)
             : null;
 
+        $requestingDocsApp = $this->requestingDocsAppId
+            ? Application::with(['candidateProfile.user'])->whereHas('jobPosting', function ($q) use ($profile) {
+                $q->where('employer_profile_id', $profile?->id ?? 0);
+            })->find($this->requestingDocsAppId)
+            : null;
+
+        $alreadyAttachedDocTypes = $requestingDocsApp
+            ? $this->getAlreadyAttachedDocTypes($requestingDocsApp)
+            : [];
+
         return view('livewire.employer.applicants', [
             'applications' => $applications,
             'allCounts' => $allCounts,
@@ -931,6 +964,7 @@ class Applicants extends Component
             'hiringApp' => $hiringApp,
             'rejectingApp' => $rejectingApp,
             'chatApp' => $chatApp,
+            'alreadyAttachedDocTypes' => $alreadyAttachedDocTypes,
             'showChatModal' => $this->showChatModal,
             'showOfferModal' => $this->showOfferModal,
             'employerJobs' => $employerJobs,

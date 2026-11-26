@@ -230,3 +230,156 @@ test('workforce calculates tax deduction strictly from official PWD IDs', functi
         ->assertViewHas('totalWages', 400000.0) // Only the official PWD ID wage is counted
         ->assertViewHas('deduction', 100000.0); // 25% of 400,000
 });
+
+test('admin can view both primary pwd id and secondary medical certificate documents and workforce counts both as tax eligible', function () {
+    $admin = User::factory()->verified()->create(['role' => 'admin']);
+    $admin->assignRole('admin');
+
+    $pwdFile = UploadedFile::fake()->create('official_pwd.png', 200, 'image/png');
+    $medFile = UploadedFile::fake()->create('clinical_med.pdf', 300, 'application/pdf');
+
+    $action = new CreateNewUser();
+    $candidate = $action->create([
+        'first_name' => 'Carlo',
+        'last_name' => 'Dual',
+        'email' => 'carlo.dual@example.com',
+        'password' => 'Password123!',
+        'password_confirmation' => 'Password123!',
+        'role' => 'candidate',
+        'disability_type' => 'Motor/Physical',
+        'pwd_document_type' => 'both',
+        'pwd_id_number' => 'PWD-DUAL-001',
+        'medical_certificate_number' => 'MED-DUAL-001',
+        'pwd_id_file' => $pwdFile,
+        'medical_certificate_file' => $medFile,
+        'date_of_birth' => '1994-03-10',
+        'consent' => '1',
+        'terms' => '1',
+    ]);
+
+    $vr = VerificationRequest::where('user_id', $candidate->id)->firstOrFail();
+
+    $this->actingAs($admin)
+        ->get(route('admin.verifications.document', $vr))
+        ->assertOk();
+
+    $this->actingAs($admin)
+        ->get(route('admin.verifications.document', ['verificationRequest' => $vr, 'doc' => 'secondary']))
+        ->assertOk();
+
+    $candidate->update(['status' => 'active', 'verified_at' => now()]);
+    expect($candidate->fresh()->isPwdIdVerified())->toBeTrue()
+        ->and($candidate->fresh()->isMedCertVerified())->toBeTrue();
+
+    $employerUser = User::factory()->verified()->create(['role' => 'employer']);
+    $employerUser->assignRole('employer');
+    $employerProfile = EmployerProfile::create([
+        'user_id' => $employerUser->id,
+        'company_name' => 'Dual Inclusive Inc',
+    ]);
+
+    WorkforceRecord::create([
+        'employer_profile_id' => $employerProfile->id,
+        'candidate_profile_id' => $candidate->candidateProfile->id,
+        'annual_wage' => 500000,
+        'pwd_verified' => true,
+        'separation_status' => 'active',
+        'hired_at' => now()->subMonths(2),
+    ]);
+
+    Livewire::actingAs($employerUser)
+        ->test(Workforce::class)
+        ->assertViewHas('medCertOnlyCount', 0)
+        ->assertViewHas('totalWages', 500000.0)
+        ->assertViewHas('deduction', 125000.0);
+});
+
+test('candidate can attach med cert in profile builder or apply page and employer sees both pwd id and med cert in applicant details', function () {
+    $candidateUser = User::factory()->verified()->create([
+        'role' => 'candidate',
+        'name' => 'Marco Credential',
+        'pwd_document_type' => 'pwd_id',
+        'pwd_id_number' => 'PWD-09-2026-444',
+    ]);
+    $candidateUser->assignRole('candidate');
+    $candidateProfile = CandidateProfile::create([
+        'user_id' => $candidateUser->id,
+        'phone' => '+639171112233',
+        'city' => 'Zamboanga City',
+    ]);
+
+    $medFileProfile = UploadedFile::fake()->create('profile_medcert.pdf', 250, 'application/pdf');
+
+    Livewire::actingAs($candidateUser)
+        ->test(\App\Livewire\Candidate\ProfileBuilder::class)
+        ->set('medCertNumber', 'PRC-MED-8899')
+        ->set('medCertUpload', $medFileProfile)
+        ->assertSet('medCertFilename', 'profile_medcert.pdf');
+
+    $candidateUser->refresh();
+    expect($candidateUser->medical_certificate_path)->not->toBeNull()
+        ->and($candidateUser->medical_certificate_number)->toBe('PRC-MED-8899')
+        ->and($candidateUser->pwd_document_type)->toBe('both');
+
+    $employerUser = User::factory()->verified()->create(['role' => 'employer', 'name' => 'Hiring Manager']);
+    $employerUser->assignRole('employer');
+    $employerProfile = EmployerProfile::create([
+        'user_id' => $employerUser->id,
+        'company_name' => 'Inclusive Careers PH',
+    ]);
+
+    $job = JobPosting::create([
+        'employer_profile_id' => $employerProfile->id,
+        'title' => 'Operations Coordinator',
+        'description' => 'Accessible operations coordinator role',
+        'status' => 'published',
+    ]);
+
+    $pwdScan = UploadedFile::fake()->create('apply_pwd_card.png', 200, 'image/png');
+    $medScan = UploadedFile::fake()->create('apply_med_cert.pdf', 300, 'application/pdf');
+
+    Livewire::actingAs($candidateUser)
+        ->test(\App\Livewire\Candidate\Apply::class, ['job' => $job])
+        ->assertSee('Clinical Medical Certificate:')
+        ->set('pwdIdFile', $pwdScan)
+        ->set('medicalCertificateFile', $medScan)
+        ->call('submit')
+        ->assertSet('submitted', true);
+
+    $app = Application::where('candidate_profile_id', $candidateProfile->id)
+        ->where('job_posting_id', $job->id)
+        ->firstOrFail();
+
+    Livewire::actingAs($employerUser)
+        ->test(Applicants::class, ['job' => $job])
+        ->call('viewDetails', $app->id)
+        ->assertSee('Government PWD ID Card')
+        ->assertSee('Clinical Medical Certificate');
+
+    $this->actingAs($employerUser)
+        ->get(route('employer.applicants.document', ['application' => $app->id, 'type' => 'pwd_id']))
+        ->assertOk();
+
+    $this->actingAs($employerUser)
+        ->get(route('employer.applicants.document', ['application' => $app->id, 'type' => 'medical_certificate']))
+        ->assertOk();
+
+    // Request Documents modal disables already-attached PWD ID and Medical Certificate and blocks duplicate requests
+    Livewire::actingAs($employerUser)
+        ->test(Applicants::class, ['job' => $job])
+        ->call('openRequestDocsModal', $app->id)
+        ->assertViewHas('alreadyAttachedDocTypes', function (array $attached) {
+            return in_array('Official PWD ID Card (BIR Tax Credit)', $attached, true)
+                && in_array('Medical Certificate (Fit to Work)', $attached, true);
+        })
+        ->assertSee('Already attached')
+        ->set('selectedDocTypes', [
+            'Official PWD ID Card (BIR Tax Credit)',
+            'Medical Certificate (Fit to Work)',
+            'NBI Clearance',
+        ])
+        ->call('sendDocumentRequest');
+
+    $app->refresh();
+    expect(collect($app->requested_documents)->pluck('name')->all())->toBe(['NBI Clearance']);
+});

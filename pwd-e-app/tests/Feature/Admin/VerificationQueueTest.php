@@ -218,3 +218,54 @@ test('admin can multi reject verification requests with feedback reason in queue
     Notification::assertSentTo($user1, VerificationStatusUpdated::class);
     Notification::assertSentTo($user2, VerificationStatusUpdated::class);
 });
+
+test('candidate pending screen displays admin document request and allows reuploading pwd id and medical certificate', function () {
+    Storage::fake('private');
+    Notification::fake();
+
+    $admin = User::factory()->create(['role' => 'admin', 'status' => 'active', 'verified_at' => now()]);
+    $admin->assignRole('admin');
+
+    [$candidate, $vr] = makePendingRequest('pwd_id');
+
+    Livewire::actingAs($admin)
+        ->test(\App\Livewire\Admin\Dashboard::class)
+        ->call('openSingleReview', $vr->id)
+        ->set('singleReviewNote', 'Please re-upload a clearer copy of your PWD ID and attach your Fit-to-Work Medical Certificate.')
+        ->call('requestMoreDocsSingle', $vr->id)
+        ->assertHasNoErrors();
+
+    expect($vr->fresh()->status)->toBe('needs_more_docs');
+
+    $this->actingAs($candidate)
+        ->get(route('verification.notice'))
+        ->assertOk()
+        ->assertSee('Action Required: Additional Document or Clearer Copy Requested')
+        ->assertSee('Please re-upload a clearer copy of your PWD ID and attach your Fit-to-Work Medical Certificate.')
+        ->assertSee('Submit Requested Verification Document(s)');
+
+    $clearPwdId = \Illuminate\Http\UploadedFile::fake()->create('clear_pwd_id.png', 300, 'image/png');
+    $clearMedCert = \Illuminate\Http\UploadedFile::fake()->create('fit_to_work.pdf', 400, 'application/pdf');
+
+    Livewire::actingAs($candidate)
+        ->test(\App\Livewire\Auth\ResubmitVerification::class)
+        ->set('documentType', 'both')
+        ->set('idNumber', 'PWD-CLEAR-2026')
+        ->set('medicalCertificateNumber', 'MED-CLEAR-2026')
+        ->set('documentFile', $clearPwdId)
+        ->set('secondaryDocumentFile', $clearMedCert)
+        ->call('submit')
+        ->assertHasNoErrors();
+
+    $vr->refresh();
+    $candidate->refresh();
+
+    expect($vr->status)->toBe('pending')
+        ->and($vr->type)->toBe('both')
+        ->and($vr->rejection_reason)->toBeNull()
+        ->and($vr->document_path)->not->toBeNull()
+        ->and($vr->secondary_document_path)->not->toBeNull()
+        ->and($candidate->pwd_document_type)->toBe('both')
+        ->and($candidate->pwd_id_number)->toBe('PWD-CLEAR-2026')
+        ->and($candidate->medical_certificate_number)->toBe('MED-CLEAR-2026');
+});

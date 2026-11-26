@@ -310,7 +310,7 @@ class Workforce extends Component
         // BIR R.A. 10524: official PWD ID required for tax deduction; medical certificate qualifies for employment
         $taxEligibleList = $activeEmployeesList->filter(function ($rec) {
             $u = $rec->candidateProfile?->user;
-            return $rec->pwd_verified && ($u?->pwd_document_type === 'pwd_id' || empty($u?->pwd_document_type));
+            return $rec->pwd_verified && (in_array($u?->pwd_document_type, ['pwd_id', 'both'], true) || empty($u?->pwd_document_type));
         });
         $medCertOnlyCount = $activeEmployeesList->filter(function ($rec) {
             $u = $rec->candidateProfile?->user;

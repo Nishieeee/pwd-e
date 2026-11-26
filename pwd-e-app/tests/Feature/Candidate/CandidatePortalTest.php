@@ -374,3 +374,29 @@ test('unauthorized candidate cannot view another candidate profile', function ()
     $response = $this->get(route('employer.candidates.show', $this->candidate->candidateProfile));
     $response->assertForbidden();
 });
+
+test('profile builder supports complete address and province cascading and persists all location fields', function () {
+    $this->actingAs($this->candidate);
+
+    Livewire::test(\App\Livewire\Candidate\ProfileBuilder::class)
+        ->call('selectInputMode', 'standard')
+        ->call('nextStep')
+        ->assertSet('currentStep', 2)
+        ->assertSee('id="street-address-input"', false)
+        ->assertSee('id="province-combobox"', false)
+        ->set('address', 'Blk 5 Lot 9, Veterans Avenue, Purok 2')
+        ->call('selectProvinceOption', 'Cebu')
+        ->assertSet('province', 'Cebu')
+        ->assertSet('city', 'Cebu City')
+        ->assertSet('zipCode', '6000')
+        ->set('phone', '+639171234567')
+        ->call('saveProfileAndRedirect')
+        ->assertHasNoErrors();
+
+    $profile = $this->candidate->candidateProfile->fresh();
+    expect($profile->address)->toBe('Blk 5 Lot 9, Veterans Avenue, Purok 2')
+        ->and($profile->province)->toBe('Cebu')
+        ->and($profile->city)->toBe('Cebu City')
+        ->and($profile->country)->toBe('Philippines')
+        ->and($profile->zip_code)->toBe('6000');
+});

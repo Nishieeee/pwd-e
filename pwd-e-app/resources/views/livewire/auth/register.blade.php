@@ -32,7 +32,7 @@
         <div class="flex flex-col-reverse items-stretch overflow-hidden rounded-2xl bg-white shadow-[0_8px_24px_rgba(26,40,64,0.06)] md:grid md:grid-cols-2"
              x-data="{
                  role: '{{ old('role', 'candidate') }}',
-                 step: {{ $errors->hasAny(['date_of_birth']) ? 1 : ($errors->hasAny(['disability_type', 'pwd_id_number', 'pwd_id_file', 'consent']) ? 2 : 0) }},
+                 step: {{ old('role', 'candidate') === 'employer' || $errors->hasAny(['first_name', 'last_name', 'email', 'password', 'company_name']) ? 0 : ($errors->hasAny(['date_of_birth']) ? 1 : ($errors->hasAny(['disability_type', 'pwd_document_type', 'pwd_id_number', 'medical_certificate_number', 'pwd_id_file', 'medical_certificate_file', 'consent', 'terms']) ? 2 : 0)) }},
                  candidateSteps: 3,
                  employerSteps: 1,
                  candidateDocType: '{{ old('pwd_document_type', 'pwd_id') }}',
@@ -41,7 +41,17 @@
                  canContinue: false,
                  totalSteps() { return this.role === 'candidate' ? this.candidateSteps : this.employerSteps; },
                  val(id) { const el = document.getElementById(id); return el ? (el.value || '').trim() : ''; },
-                 isChecked(name) { const el = document.querySelector('input[name=' + name + ']'); return !!(el && el.checked); },
+                 checked(id) { const el = document.getElementById(id); return !!(el && !el.matches(':disabled') && el.checked); },
+                 isAdultDob(dobVal) {
+                     if (!dobVal) return false;
+                     const parts = dobVal.split('-').map(Number);
+                     if (parts.length !== 3 || parts.some(isNaN)) return false;
+                     const now = new Date();
+                     let age = now.getFullYear() - parts[0];
+                     const m = (now.getMonth() + 1) - parts[1];
+                     if (m < 0 || (m === 0 && now.getDate() < parts[2])) age--;
+                     return age >= 18;
+                 },
                  stepValid() {
                      if (this.role === 'candidate') {
                          if (this.step === 0) {
@@ -53,16 +63,13 @@
                                     p.length >= 8 && p === pc;
                          }
                          if (this.step === 1) {
-                             const d = new Date(this.val('date_of_birth'));
-                             if (isNaN(d.getTime())) return false;
-                             const age = (Date.now() - d.getTime()) / (365.25 * 24 * 60 * 60 * 1000);
-                             return age >= 18;
+                             return this.isAdultDob(this.val('date_of_birth'));
                          }
                          if (this.step === 2) {
                              return this.val('disability_type') !== '' &&
                                     this.val('pwd_id_number') !== '' &&
-                                    this.isChecked('consent') &&
-                                    this.isChecked('terms');
+                                    this.checked('candidate_consent') &&
+                                    this.checked('candidate_terms');
                          }
                      } else {
                          const p = this.val('employer_password');
@@ -70,7 +77,7 @@
                          return this.val('employer_company_name') !== '' &&
                                 this.val('employer_email') !== '' &&
                                 p.length >= 8 && p === pc &&
-                                this.isChecked('terms');
+                                this.checked('employer_terms');
                      }
                      return true;
                  },
@@ -82,7 +89,7 @@
                  },
                  prev() { if (this.step > 0) this.step--; this.$nextTick(() => this.updateState()); },
              }"
-             x-init="updateState()"
+             x-init="$nextTick(() => updateState())"
              @input="updateState()"
              @change="updateState()">
             <section class="flex h-full flex-col justify-between bg-gradient-to-b from-primary-tint to-[#D6E7F3] px-5 py-6 md:px-9 md:py-7">
@@ -288,11 +295,11 @@
                             <p class="mb-1.5 text-sm font-semibold text-primary-dark">I am registering as <span class="text-[#B3261E]">*</span></p>
                             <div class="flex gap-3" role="radiogroup" aria-label="Registration role">
                                 <label class="flex-1 cursor-pointer focus:outline-none focus:ring-0">
-                                    <input type="radio" name="role" value="candidate" x-model="role" @change="updateState()" class="sr-only">
+                                    <input type="radio" name="role" value="candidate" x-model="role" @change="step = 0; $nextTick(() => updateState())" class="sr-only">
                                     <span class="flex h-12 items-center justify-center rounded-lg border border-[#CBD5E1] text-sm font-semibold text-primary-dark focus:outline-none focus:ring-0" :class="role === 'candidate' ? 'bg-primary text-white border-primary' : 'bg-white'">Candidate (PWD)</span>
                                 </label>
                                 <label class="flex-1 cursor-pointer focus:outline-none focus:ring-0">
-                                    <input type="radio" name="role" value="employer" x-model="role" @change="updateState()" class="sr-only">
+                                    <input type="radio" name="role" value="employer" x-model="role" @change="step = 0; $nextTick(() => updateState())" class="sr-only">
                                     <span class="flex h-12 items-center justify-center rounded-lg border border-[#CBD5E1] text-sm font-semibold text-primary-dark focus:outline-none focus:ring-0" :class="role === 'employer' ? 'bg-primary text-white border-primary' : 'bg-white'">Employer</span>
                                 </label>
                             </div>
@@ -394,7 +401,7 @@
                             </div>
 
                             <label class="flex cursor-pointer items-start gap-2 text-sm text-primary-dark">
-                                <input type="checkbox" name="terms" value="1" {{ old('terms') ? 'checked' : '' }} class="mt-1 h-4 w-4" @change="updateState()">
+                                <input id="employer_terms" type="checkbox" name="terms" value="1" {{ old('terms') ? 'checked' : '' }} class="mt-1 h-4 w-4" @change="updateState()">
                                 <span>I accept the Terms and Conditions. <span class="text-[#B3261E]">*</span></span>
                             </label>
                             @error('terms')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
@@ -411,10 +418,10 @@
                     </div>
 
                     {{-- Candidate Step 1: DOB --}}
-                    <div x-show="role === 'candidate' && step === 1" x-cloak class="flex flex-col gap-5">
+                    <fieldset x-show="role === 'candidate' && step === 1" x-cloak :disabled="role !== 'candidate'" class="flex flex-col gap-5 border-0 p-0 m-0">
                         <div>
                             <label for="date_of_birth" class="mb-1.5 block text-sm font-semibold text-primary-dark">Date of birth <span class="text-[#B3261E]">*</span></label>
-                            <input id="date_of_birth" name="date_of_birth" type="date" value="{{ old('date_of_birth') }}" :required="role === 'candidate'"
+                            <input id="date_of_birth" name="date_of_birth" type="date" value="{{ old('date_of_birth') }}" :required="role === 'candidate'" @input="updateState()" @change="updateState()"
                                    class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                             @error('date_of_birth')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                         </div>
@@ -422,13 +429,13 @@
                             <button type="button" @click="prev()" class="flex h-[52px] flex-1 items-center justify-center rounded-lg border border-[#CBD5E1] text-base font-semibold text-primary-dark hover:bg-primary-tint">Back</button>
                             <button type="button" @click="next()" :disabled="!canContinue" :class="canContinue ? 'bg-[#2A5D8F] hover:bg-[#224B73]' : 'bg-[#94A3B8] cursor-not-allowed'" class="flex h-[52px] flex-1 items-center justify-center rounded-lg text-base font-semibold text-white disabled:opacity-60">Next</button>
                         </div>
-                    </div>
+                    </fieldset>
 
-                    {{-- Candidate Step 2: PWD ID or Medical Cert --}}
-                    <div x-show="role === 'candidate' && step === 2" x-cloak class="flex flex-col gap-5">
+                    {{-- Candidate Step 2: PWD ID, Medical Cert, or Both --}}
+                    <fieldset x-show="role === 'candidate' && step === 2" x-cloak :disabled="role !== 'candidate'" class="flex flex-col gap-5 border-0 p-0 m-0">
                         <div>
                             <label for="disability_type" class="mb-1.5 block text-sm font-semibold text-primary-dark">Disability type <span class="text-[#B3261E]">*</span></label>
-                            <select id="disability_type" name="disability_type" :required="role === 'candidate'" class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                            <select id="disability_type" name="disability_type" :required="role === 'candidate'" @change="updateState()" class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                                 <option value="">Select…</option>
                                 @foreach (['Visual','Hearing','Motor/Physical','Speech','Cerebral Palsy','Psychosocial','Intellectual','Multiple'] as $dt)
                                     <option value="{{ $dt }}" {{ old('disability_type') === $dt ? 'selected' : '' }}>{{ $dt }}</option>
@@ -439,57 +446,100 @@
 
                         <div>
                             <label class="mb-2 block text-sm font-semibold text-primary-dark">Qualification Credential <span class="text-[#B3261E]">*</span></label>
-                            <div class="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-                                <label class="flex items-center gap-3 rounded-xl border p-3 cursor-pointer transition-all"
+                            <div class="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+                                <label class="flex items-start gap-2.5 rounded-xl border p-3 cursor-pointer transition-all"
                                        :class="candidateDocType === 'pwd_id' ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'border-[#CBD5E1] hover:bg-slate-50'">
-                                    <input type="radio" name="pwd_document_type" value="pwd_id" x-model="candidateDocType" class="text-primary focus:ring-primary h-4 w-4">
+                                    <input type="radio" name="pwd_document_type" value="pwd_id" x-model="candidateDocType" @change="$nextTick(() => updateState())" class="mt-0.5 text-primary focus:ring-primary h-4 w-4 shrink-0">
                                     <div>
                                         <p class="text-xs font-bold text-primary-dark">Government PWD ID</p>
                                         <p class="text-[11px] text-body-muted">Official LGU PDAO / CSWDO card</p>
                                     </div>
                                 </label>
-                                <label class="flex items-center gap-3 rounded-xl border p-3 cursor-pointer transition-all"
+                                <label class="flex items-start gap-2.5 rounded-xl border p-3 cursor-pointer transition-all"
                                        :class="candidateDocType === 'medical_certificate' ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'border-[#CBD5E1] hover:bg-slate-50'">
-                                    <input type="radio" name="pwd_document_type" value="medical_certificate" x-model="candidateDocType" class="text-primary focus:ring-primary h-4 w-4">
+                                    <input type="radio" name="pwd_document_type" value="medical_certificate" x-model="candidateDocType" @change="$nextTick(() => updateState())" class="mt-0.5 text-primary focus:ring-primary h-4 w-4 shrink-0">
                                     <div>
                                         <p class="text-xs font-bold text-primary-dark">Clinical Medical Cert</p>
                                         <p class="text-[11px] text-body-muted">Fit-to-Work / Medical diagnosis</p>
                                     </div>
                                 </label>
+                                <label class="flex items-start gap-2.5 rounded-xl border p-3 cursor-pointer transition-all"
+                                       :class="candidateDocType === 'both' ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'border-[#CBD5E1] hover:bg-slate-50'">
+                                    <input type="radio" name="pwd_document_type" value="both" x-model="candidateDocType" @change="$nextTick(() => updateState())" class="mt-0.5 text-primary focus:ring-primary h-4 w-4 shrink-0">
+                                    <div>
+                                        <p class="text-xs font-bold text-primary-dark">Both PWD ID &amp; Med Cert</p>
+                                        <p class="text-[11px] text-body-muted">Upload both ID card &amp; medical cert</p>
+                                    </div>
+                                </label>
+                            </div>
+                            @error('pwd_document_type')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                        </div>
+
+                        <div class="space-y-2">
+                            <div class="grid grid-cols-1 gap-3" :class="candidateDocType === 'both' ? 'sm:grid-cols-2' : ''">
+                                <div>
+                                    <label for="pwd_id_number" class="mb-1.5 block text-sm font-semibold text-primary-dark">
+                                        <span x-text="candidateDocType === 'medical_certificate' ? 'Medical Certificate / PRC License Ref. No.' : 'PWD ID Card Number'">PWD ID or Medical Certificate Number</span> <span class="text-[#B3261E]">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <input id="pwd_id_number" name="pwd_id_number" type="text" value="{{ old('pwd_id_number') }}" :required="role === 'candidate'" @input="updateState()"
+                                               :placeholder="candidateDocType === 'medical_certificate' ? 'e.g. MED-2026-001 / PRC-123456' : 'e.g. 12-3456-7890'"
+                                               class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 pr-9 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                    </div>
+                                    @error('pwd_id_number')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                                </div>
+
+                                <div x-show="candidateDocType === 'both'" x-cloak>
+                                    <label for="medical_certificate_number" class="mb-1.5 block text-sm font-semibold text-primary-dark">
+                                        Med Cert / PRC Ref. No. <span class="text-xs font-normal text-body-muted">(Optional)</span>
+                                    </label>
+                                    <div class="relative">
+                                        <input id="medical_certificate_number" name="medical_certificate_number" type="text" value="{{ old('medical_certificate_number') }}" :disabled="role !== 'candidate' || candidateDocType !== 'both'"
+                                               placeholder="e.g. MED-2026-001 / PRC-123456"
+                                               class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 pr-9 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                    </div>
+                                    @error('medical_certificate_number')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                                </div>
+                            </div>
+
+                            <p class="text-xs text-body-muted" x-show="candidateDocType === 'medical_certificate'">
+                                <strong>PESO Qualification Note:</strong> A Clinical Medical Certificate qualifies you for immediate job application. You may upload an official PWD ID card later for employer R.A. 10524 tax credits.
+                            </p>
+                            <p class="text-xs text-body-muted" x-show="candidateDocType === 'pwd_id'">
+                                <strong>Tax Compliance Note:</strong> Your official PWD ID validates qualification and enables participating employers to claim statutory R.A. 10524 gross wage tax deductions.
+                            </p>
+                            <p class="text-xs text-body-muted" x-show="candidateDocType === 'both'" x-cloak>
+                                <strong>Complete Credential Note:</strong> Submitting both your official PWD ID and Clinical Medical Certificate provides immediate occupational fitness clearance and full R.A. 10524 employer tax credit eligibility.
+                            </p>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-3" :class="candidateDocType === 'both' ? 'sm:grid-cols-2' : ''">
+                            <div x-show="candidateDocType === 'pwd_id' || candidateDocType === 'both'">
+                                <label for="pwd_id_file" class="mb-1.5 block text-sm font-semibold text-primary-dark">
+                                    Upload PWD ID Card (Photo / PDF)
+                                </label>
+                                <input id="pwd_id_file" name="pwd_id_file" type="file" accept=".jpg,.jpeg,.png,.pdf" :disabled="role !== 'candidate' || candidateDocType === 'medical_certificate'"
+                                       class="block w-full text-sm text-primary-dark file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-2 file:text-white">
+                                @error('pwd_id_file')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                            </div>
+
+                            <div x-show="candidateDocType === 'medical_certificate' || candidateDocType === 'both'" x-cloak>
+                                <label for="medical_certificate_file" class="mb-1.5 block text-sm font-semibold text-primary-dark">
+                                    Upload Medical Certificate (Photo / PDF)
+                                </label>
+                                <input id="medical_certificate_file" name="medical_certificate_file" type="file" accept=".jpg,.jpeg,.png,.pdf" :disabled="role !== 'candidate' || candidateDocType === 'pwd_id'"
+                                       class="block w-full text-sm text-primary-dark file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-2 file:text-white">
+                                @error('medical_certificate_file')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                             </div>
                         </div>
 
-                        <div>
-                            <label for="pwd_id_number" class="mb-1.5 block text-sm font-semibold text-primary-dark">
-                                <span x-text="candidateDocType === 'pwd_id' ? 'PWD ID Card Number' : 'Medical Certificate / PRC License Ref. No.'">PWD ID or Medical Certificate Number</span> <span class="text-[#B3261E]">*</span>
-                            </label>
-                            <input id="pwd_id_number" name="pwd_id_number" type="text" value="{{ old('pwd_id_number') }}" :required="role === 'candidate'" 
-                                   :placeholder="candidateDocType === 'pwd_id' ? 'e.g. 12-3456-7890' : 'e.g. MED-2026-001 / PRC-123456'"
-                                   class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
-                            @error('pwd_id_number')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
-                            
-                            <p class="mt-1 text-xs text-body-muted" x-show="candidateDocType === 'medical_certificate'">
-                                <strong>PESO Qualification Note:</strong> A Clinical Medical Certificate qualifies you for immediate job application. You may upload an official PWD ID card later for employer R.A. 10524 tax credits.
-                            </p>
-                            <p class="mt-1 text-xs text-body-muted" x-show="candidateDocType === 'pwd_id'">
-                                <strong>Tax Compliance Note:</strong> Your official PWD ID validates qualification and enables participating employers to claim statutory R.A. 10524 gross wage tax deductions.
-                            </p>
-                        </div>
-                        <div>
-                            <label for="pwd_id_file" class="mb-1.5 block text-sm font-semibold text-primary-dark">
-                                <span x-text="candidateDocType === 'pwd_id' ? 'Upload PWD ID Card (Photo / PDF)' : 'Upload Clinical Medical Certificate (Photo / PDF)'">Medical Certificate or PWD ID Card</span>
-                            </label>
-                            <input id="pwd_id_file" name="pwd_id_file" type="file" accept=".jpg,.jpeg,.png,.pdf"
-                                   class="block w-full text-sm text-primary-dark file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-2 file:text-white">
-                            @error('pwd_id_file')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
-                        </div>
                         <label class="flex cursor-pointer items-start gap-2 text-sm text-primary-dark">
-                            <input type="checkbox" name="consent" value="1" {{ old('consent') ? 'checked' : '' }} class="mt-1 h-4 w-4">
-                            <span>I consent to the collection of my disability information for matching purposes (RA 10173).</span>
+                            <input id="candidate_consent" type="checkbox" name="consent" value="1" {{ old('consent') ? 'checked' : '' }} class="mt-1 h-4 w-4" @change="updateState()">
+                            <span>I consent to the collection of my disability information for matching purposes (RA 10173). <span class="text-[#B3261E]">*</span></span>
                         </label>
                         @error('consent')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                         <label class="flex cursor-pointer items-start gap-2 text-sm text-primary-dark">
-                            <input type="checkbox" name="terms" value="1" {{ old('terms') ? 'checked' : '' }} class="mt-1 h-4 w-4">
+                            <input id="candidate_terms" type="checkbox" name="terms" value="1" {{ old('terms') ? 'checked' : '' }} class="mt-1 h-4 w-4" @change="updateState()">
                             <span>I accept the Terms and Conditions. <span class="text-[#B3261E]">*</span></span>
                         </label>
                         @error('terms')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
@@ -499,7 +549,7 @@
                                 Create account
                             </button>
                         </div>
-                    </div>
+                    </fieldset>
 
 
 
@@ -537,10 +587,13 @@
                     const pw = fieldset ? fieldset.querySelector('input[name="password"]') : document.querySelector('input[name="password"]');
                     if (pw && val !== pw.value) msg = 'Passwords do not match.';
                 } else if (name === 'date_of_birth' && val) {
-                    const d = new Date(val);
-                    if (isNaN(d.getTime())) msg = 'Please enter a valid date.';
+                    const parts = val.split('-').map(Number);
+                    if (parts.length !== 3 || parts.some(isNaN)) msg = 'Please enter a valid date.';
                     else {
-                        const age = (Date.now() - d.getTime()) / (365.25 * 24 * 60 * 60 * 1000);
+                        const now = new Date();
+                        let age = now.getFullYear() - parts[0];
+                        const m = (now.getMonth() + 1) - parts[1];
+                        if (m < 0 || (m === 0 && now.getDate() < parts[2])) age--;
                         if (age < 18) msg = 'You must be at least 18 years old.';
                     }
                 } else if (name === 'disability_type' && val === '') {
@@ -548,13 +601,15 @@
                 } else if ((name === 'pwd_id_number' || name === 'company_name' || (el.hasAttribute('required') && (name === 'first_name' || name === 'last_name'))) && val === '') {
                     msg = 'This field is required.';
                 }
-                const span = el.parentElement.querySelector('.client-error');
+                const anchor = el.parentElement && el.parentElement.classList.contains('relative') ? el.parentElement : el;
+                const container = anchor.parentElement || el.parentElement;
+                const span = container.querySelector('.client-error');
                 if (msg) {
                     if (!span) {
                         const p = document.createElement('p');
                         p.className = 'mt-1.5 text-sm text-[#FF0000] client-error';
                         p.textContent = msg;
-                        el.insertAdjacentElement('afterend', p);
+                        anchor.insertAdjacentElement('afterend', p);
                     } else {
                         span.textContent = msg;
                     }

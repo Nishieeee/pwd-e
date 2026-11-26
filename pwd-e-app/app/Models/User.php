@@ -28,7 +28,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name', 'first_name', 'middle_name', 'last_name', 'email', 'password', 'role', 'status', 'verified_at', 'pwd_id_number', 'pwd_id_path', 'pwd_document_type', 'display_settings'])]
+#[Fillable(['name', 'first_name', 'middle_name', 'last_name', 'email', 'password', 'role', 'status', 'verified_at', 'pwd_id_number', 'pwd_id_path', 'medical_certificate_number', 'medical_certificate_path', 'pwd_document_type', 'display_settings'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -42,18 +42,19 @@ class User extends Authenticatable
             'password' => 'hashed',
             'verified_at' => 'datetime',
             'pwd_id_number' => 'encrypted',
+            'medical_certificate_number' => 'encrypted',
             'display_settings' => 'array',
         ];
     }
 
     public function isMedCertVerified(): bool
     {
-        return $this->isCandidate() && $this->isVerified() && $this->pwd_document_type === 'medical_certificate';
+        return $this->isCandidate() && $this->isVerified() && in_array($this->pwd_document_type, ['medical_certificate', 'both'], true);
     }
 
     public function isPwdIdVerified(): bool
     {
-        return $this->isCandidate() && $this->isVerified() && ($this->pwd_document_type === 'pwd_id' || empty($this->pwd_document_type));
+        return $this->isCandidate() && $this->isVerified() && (in_array($this->pwd_document_type, ['pwd_id', 'both'], true) || empty($this->pwd_document_type));
     }
 
     public function candidateProfile()

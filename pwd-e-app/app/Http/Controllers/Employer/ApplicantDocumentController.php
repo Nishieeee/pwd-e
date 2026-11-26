@@ -25,15 +25,24 @@ class ApplicantDocumentController
             'fsl' => $application->fsl_video_path ?: $application->candidateProfile?->fsl_video_path,
             'cover_letter' => $application->cover_letter_pdf_path,
             'pwd_id' => $application->candidateProfile?->user?->pwd_id_path,
+            'medical_certificate' => $application->candidateProfile?->user?->medical_certificate_path,
             'requested' => $this->getRequestedDocPath($application, $request->query('doc_id')),
             default => $this->getRequestedDocPath($application, $type),
         };
 
-        if (! $path || ! Storage::disk('private')->exists($path)) {
+        if (! $path) {
             abort(404);
         }
 
-        return Storage::disk('private')->response($path);
+        if (Storage::disk('private')->exists($path)) {
+            return Storage::disk('private')->response($path);
+        }
+
+        if (Storage::disk('public')->exists($path)) {
+            return Storage::disk('public')->response($path);
+        }
+
+        abort(404);
     }
 
     public function showCandidateDocument(Request $request, Application $application, string $type)
@@ -55,11 +64,19 @@ class ApplicantDocumentController
             default => $this->getRequestedDocPath($application, $type),
         };
 
-        if (! $path || ! Storage::disk('private')->exists($path)) {
+        if (! $path) {
             abort(404);
         }
 
-        return Storage::disk('private')->response($path);
+        if (Storage::disk('private')->exists($path)) {
+            return Storage::disk('private')->response($path);
+        }
+
+        if (Storage::disk('public')->exists($path)) {
+            return Storage::disk('public')->response($path);
+        }
+
+        abort(404);
     }
 
     private function getRequestedDocPath(Application $application, ?string $docId): ?string

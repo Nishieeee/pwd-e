@@ -578,6 +578,50 @@
                                 </div>
                             </a>
                         @endif
+
+                        @if ($u?->pwd_id_path)
+                            <a href="{{ route('employer.applicants.document', ['application' => $viewing->id, 'type' => 'pwd_id']) }}" target="_blank"
+                               class="flex items-center gap-3 p-3 rounded-xl border border-emerald-200 bg-emerald-50/50 hover:bg-emerald-50 transition-colors">
+                                <div class="size-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xs shrink-0">
+                                    <svg class="size-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/></svg>
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="text-xs font-semibold text-primary-dark truncate">{{ __('Government PWD ID Card') }}</div>
+                                    <div class="text-[11px] text-emerald-800 truncate">
+                                        {{ ($u->pwd_document_type !== 'medical_certificate' && $u->pwd_id_number) ? 'ID: '.$u->pwd_id_number.' · View scan' : __('View submitted ID card') }}
+                                    </div>
+                                </div>
+                            </a>
+                        @elseif ($u?->pwd_document_type !== 'medical_certificate' && !empty($u?->pwd_id_number))
+                            <div class="flex items-center gap-3 p-3 rounded-xl border border-emerald-200 bg-emerald-50/30">
+                                <div class="size-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xs shrink-0">✓</div>
+                                <div class="min-w-0">
+                                    <div class="text-xs font-semibold text-primary-dark truncate">{{ __('Government PWD ID Record') }}</div>
+                                    <div class="text-[11px] text-emerald-800 font-mono truncate">{{ $u->pwd_id_number }}</div>
+                                </div>
+                            </div>
+                        @endif
+
+                        @if ($u?->medical_certificate_path)
+                            <a href="{{ route('employer.applicants.document', ['application' => $viewing->id, 'type' => 'medical_certificate']) }}" target="_blank"
+                               class="flex items-center gap-3 p-3 rounded-xl border border-purple-200 bg-purple-50/50 hover:bg-purple-50 transition-colors">
+                                <div class="size-8 rounded-lg bg-purple-100 text-purple-800 flex items-center justify-center font-bold text-xs shrink-0">🩺</div>
+                                <div class="min-w-0">
+                                    <div class="text-xs font-semibold text-primary-dark truncate">{{ __('Clinical Medical Certificate') }}</div>
+                                    <div class="text-[11px] text-purple-800 truncate">
+                                        {{ $u->medical_certificate_number ? 'Ref: '.$u->medical_certificate_number.' · View cert' : __('View Fit-to-Work certificate') }}
+                                    </div>
+                                </div>
+                            </a>
+                        @elseif ($u?->pwd_document_type === 'medical_certificate' && !empty($u?->pwd_id_number))
+                            <div class="flex items-center gap-3 p-3 rounded-xl border border-purple-200 bg-purple-50/30">
+                                <div class="size-8 rounded-lg bg-purple-100 text-purple-800 flex items-center justify-center font-bold text-xs shrink-0">🩺</div>
+                                <div class="min-w-0">
+                                    <div class="text-xs font-semibold text-primary-dark truncate">{{ __('Clinical Medical Certificate') }}</div>
+                                    <div class="text-[11px] text-purple-800 font-mono truncate">{{ $u->pwd_id_number }}</div>
+                                </div>
+                            </div>
+                        @endif
                     </div>
 
                     {{-- Requested Clearances / Additional Documents --}}
@@ -1086,13 +1130,29 @@
                             'SSS / PhilHealth / Pag-IBIG Record' => 'Mandatory statutory benefits proof',
                             'BIR Form 1902 / 2316 (TIN)' => 'Tax identification & withholding record',
                         ] as $docName => $docDesc)
-                            <label class="flex items-start gap-2.5 p-2.5 rounded-xl border border-primary-border hover:bg-slate-50 cursor-pointer transition-colors {{ in_array($docName, $selectedDocTypes) ? 'bg-primary/5 border-primary ring-1 ring-primary' : 'bg-surface' }}">
-                                <input type="checkbox" wire:model="selectedDocTypes" value="{{ $docName }}" class="mt-0.5 rounded text-primary focus:ring-primary h-4 w-4">
-                                <div class="min-w-0">
-                                    <div class="font-semibold text-primary-dark leading-snug">{{ $docName }}</div>
-                                    <div class="text-[10px] text-body-muted leading-tight mt-0.5">{{ $docDesc }}</div>
-                                </div>
-                            </label>
+                            @php
+                                $isAlreadyAttached = in_array($docName, $alreadyAttachedDocTypes ?? [], true);
+                            @endphp
+                            @if ($isAlreadyAttached)
+                                <label aria-disabled="true" class="flex items-start gap-2.5 p-2.5 rounded-xl border border-slate-200 bg-slate-100/90 opacity-65 cursor-not-allowed select-none">
+                                    <input type="checkbox" disabled class="mt-0.5 rounded border-slate-300 bg-slate-200 text-slate-400 h-4 w-4 cursor-not-allowed">
+                                    <div class="min-w-0">
+                                        <div class="flex flex-wrap items-center gap-1.5 font-semibold text-slate-500 leading-snug">
+                                            <span>{{ $docName }}</span>
+                                            <span class="inline-flex items-center rounded-full bg-emerald-100 px-1.5 py-0.5 text-[9px] font-bold text-emerald-800">✓ Already attached</span>
+                                        </div>
+                                        <div class="text-[10px] text-slate-400 leading-tight mt-0.5">{{ $docDesc }}</div>
+                                    </div>
+                                </label>
+                            @else
+                                <label class="flex items-start gap-2.5 p-2.5 rounded-xl border border-primary-border hover:bg-slate-50 cursor-pointer transition-colors {{ in_array($docName, $selectedDocTypes) ? 'bg-primary/5 border-primary ring-1 ring-primary' : 'bg-surface' }}">
+                                    <input type="checkbox" wire:model="selectedDocTypes" value="{{ $docName }}" class="mt-0.5 rounded text-primary focus:ring-primary h-4 w-4">
+                                    <div class="min-w-0">
+                                        <div class="font-semibold text-primary-dark leading-snug">{{ $docName }}</div>
+                                        <div class="text-[10px] text-body-muted leading-tight mt-0.5">{{ $docDesc }}</div>
+                                    </div>
+                                </label>
+                            @endif
                         @endforeach
                     </div>
 

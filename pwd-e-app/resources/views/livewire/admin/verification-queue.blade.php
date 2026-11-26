@@ -190,11 +190,15 @@
                         <div class="space-y-1">
                             <dt class="text-xs font-semibold uppercase tracking-wide text-body-muted">{{ __('Document Type') }}</dt>
                             <dd class="font-semibold text-primary-dark">
-                                @if ($vr->type === 'medical_certificate' || $vr->user?->pwd_document_type === 'medical_certificate')
+                                @if ($vr->type === 'both')
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                        🪪+🩺 {{ __('PWD ID & Medical Cert') }}
+                                    </span>
+                                @elseif ($vr->type === 'medical_certificate' || $vr->user?->pwd_document_type === 'medical_certificate')
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-50 text-purple-800 border border-purple-200">
                                         🩺 {{ __('Medical Certificate (Fit to Work)') }}
                                     </span>
-                                @elseif ($vr->type === 'pwd_id' || $vr->user?->pwd_document_type === 'pwd_id')
+                                @elseif ($vr->type === 'pwd_id' || in_array($vr->user?->pwd_document_type, ['pwd_id', 'both'], true))
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-blue-800 border border-blue-200">
                                         🪪 {{ __('Official PWD ID Card') }}
                                     </span>
@@ -218,26 +222,60 @@
                     </dl>
 
                     <!-- Document Attachment Link -->
-                    @if ($vr->document_path)
-                        <div class="my-2 p-3 rounded-xl bg-surface border border-primary-border flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <div class="p-2 rounded-lg bg-white border border-primary-border text-primary shadow-2xs">
-                                    <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    @if ($vr->document_path || $vr->secondary_document_path)
+                        <div class="my-2 space-y-2">
+                            @if ($vr->document_path)
+                                <div class="p-3 rounded-xl bg-surface border border-primary-border flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <div class="p-2 rounded-lg bg-white border border-primary-border text-primary shadow-2xs">
+                                            <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                        </div>
+                                        <div>
+                                            <div class="text-xs font-semibold text-primary-dark">
+                                                {{ $vr->type === 'both' ? __('Attached PWD ID Card') : ($vr->type === 'medical_certificate' ? __('Attached Medical Certificate') : __('Attached Verification File')) }}
+                                            </div>
+                                            <div class="text-[11px] text-body-muted">{{ __('Secure private document link') }}</div>
+                                        </div>
+                                    </div>
+                                    <a
+                                        href="{{ route('admin.verifications.document', $vr) }}"
+                                        target="_blank"
+                                        rel="noopener"
+                                        class="inline-flex items-center gap-1.5 rounded-lg bg-primary-dark px-3.5 py-1.5 text-xs font-semibold text-white transition hover:bg-primary"
+                                    >
+                                        <span>{{ __('Open Document') }}</span>
+                                        <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                    </a>
                                 </div>
-                                <div>
-                                    <div class="text-xs font-semibold text-primary-dark">{{ __('Attached Verification File') }}</div>
-                                    <div class="text-[11px] text-body-muted">{{ __('Secure private document link') }}</div>
+                            @endif
+
+                            @if ($vr->secondary_document_path)
+                                <div class="p-3 rounded-xl bg-surface border border-primary-border flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <div class="p-2 rounded-lg bg-white border border-primary-border text-purple-700 shadow-2xs">
+                                            <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                        </div>
+                                        <div>
+                                            <div class="text-xs font-semibold text-primary-dark">
+                                                {{ __('Attached Clinical Medical Certificate') }}
+                                                @if($vr->user?->medical_certificate_number)
+                                                    <span class="font-mono font-normal text-body-muted">({{ $vr->user->medical_certificate_number }})</span>
+                                                @endif
+                                            </div>
+                                            <div class="text-[11px] text-body-muted">{{ __('Secure private document link') }}</div>
+                                        </div>
+                                    </div>
+                                    <a
+                                        href="{{ route('admin.verifications.document', ['verificationRequest' => $vr, 'doc' => 'secondary']) }}"
+                                        target="_blank"
+                                        rel="noopener"
+                                        class="inline-flex items-center gap-1.5 rounded-lg bg-primary-dark px-3.5 py-1.5 text-xs font-semibold text-white transition hover:bg-primary"
+                                    >
+                                        <span>{{ __('Open Med Cert') }}</span>
+                                        <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                    </a>
                                 </div>
-                            </div>
-                            <a
-                                href="{{ route('admin.verifications.document', $vr) }}"
-                                target="_blank"
-                                rel="noopener"
-                                class="inline-flex items-center gap-1.5 rounded-lg bg-primary-dark px-3.5 py-1.5 text-xs font-semibold text-white transition hover:bg-primary"
-                            >
-                                <span>{{ __('Open Document') }}</span>
-                                <svg class="size-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                            </a>
+                            @endif
                         </div>
                     @endif
 

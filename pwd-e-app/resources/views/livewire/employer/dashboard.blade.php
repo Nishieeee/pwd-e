@@ -425,6 +425,28 @@
                                 </div>
                             </a>
                         @endif
+
+                        @if ($u?->pwd_id_path)
+                            <a href="{{ route('employer.applicants.document', ['application' => $viewing->id, 'type' => 'pwd_id']) }}" target="_blank"
+                               class="flex items-center gap-3 p-3 rounded-xl border border-emerald-200 bg-emerald-50/50 hover:bg-emerald-50 transition-colors">
+                                <div class="size-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xs shrink-0">🪪</div>
+                                <div class="min-w-0">
+                                    <div class="text-xs font-semibold text-primary-dark truncate">{{ __('Government PWD ID Card') }}</div>
+                                    <div class="text-[11px] text-emerald-800 truncate">{{ __('View submitted ID card') }}</div>
+                                </div>
+                            </a>
+                        @endif
+
+                        @if ($u?->medical_certificate_path)
+                            <a href="{{ route('employer.applicants.document', ['application' => $viewing->id, 'type' => 'medical_certificate']) }}" target="_blank"
+                               class="flex items-center gap-3 p-3 rounded-xl border border-purple-200 bg-purple-50/50 hover:bg-purple-50 transition-colors">
+                                <div class="size-8 rounded-lg bg-purple-100 text-purple-800 flex items-center justify-center font-bold text-xs shrink-0">🩺</div>
+                                <div class="min-w-0">
+                                    <div class="text-xs font-semibold text-primary-dark truncate">{{ __('Clinical Medical Certificate') }}</div>
+                                    <div class="text-[11px] text-purple-800 truncate">{{ __('View Fit-to-Work certificate') }}</div>
+                                </div>
+                            </a>
+                        @endif
                     </div>
                 </div>
 

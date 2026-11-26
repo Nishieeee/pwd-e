@@ -15,10 +15,14 @@ class VerificationDocumentController
             abort(403);
         }
 
-        if (! $verificationRequest->document_path) {
+        $path = $request->query('doc') === 'secondary'
+            ? $verificationRequest->secondary_document_path
+            : ($verificationRequest->document_path ?: $verificationRequest->secondary_document_path);
+
+        if (! $path || ! Storage::disk('private')->exists($path)) {
             abort(404);
         }
 
-        return Storage::disk('private')->response($verificationRequest->document_path);
+        return Storage::disk('private')->response($path);
     }
 }

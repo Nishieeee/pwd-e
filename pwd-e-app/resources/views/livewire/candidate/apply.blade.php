@@ -322,23 +322,61 @@
                     </div>
                 @enderror
 
-                {{-- Compact Verified PWD ID Strip --}}
-                <div class="rounded-xl border border-gray-200 bg-gray-50/60 p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-                    <div class="flex items-center gap-2">
-                        <span class="size-5 rounded-full bg-secondary text-white flex items-center justify-center font-bold text-xs shrink-0">✓</span>
-                        <span class="text-body-muted">
-                            {{ __('Government PWD ID:') }}
-                            <strong class="text-primary-dark font-mono font-bold">{{ $user->pwd_id_number }}</strong>
-                            <span class="text-secondary font-semibold ml-1">({{ __('Verified under RA 7277') }})</span>
-                        </span>
-                    </div>
+                {{-- Compact Verified PWD ID & Medical Certificate Strips --}}
+                <div class="space-y-2.5">
+                    <div class="rounded-xl border border-gray-200 bg-gray-50/60 p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                        <div class="flex items-center gap-2">
+                            <span class="size-5 rounded-full {{ ($user->pwd_id_path || $user->pwd_document_type !== 'medical_certificate') ? 'bg-secondary text-white' : 'bg-gray-200 text-gray-600' }} flex items-center justify-center font-bold text-xs shrink-0">✓</span>
+                            <span class="text-body-muted">
+                                {{ __('Government PWD ID:') }}
+                                @if($user->pwd_document_type !== 'medical_certificate' && $user->pwd_id_number)
+                                    <strong class="text-primary-dark font-mono font-bold">{{ $user->pwd_id_number }}</strong>
+                                    <span class="text-secondary font-semibold ml-1">({{ __('Verified under RA 7277') }})</span>
+                                @elseif($user->pwd_id_path)
+                                    <strong class="text-primary-dark font-semibold">{{ __('Card scan attached') }}</strong>
+                                @else
+                                    <span class="text-body-muted">{{ __('Optional — attach scan if available') }}</span>
+                                @endif
+                            </span>
+                        </div>
 
-                    <div class="flex items-center gap-2">
-                        <label for="pwdIdFile" class="text-xs text-body-muted hover:text-primary-dark cursor-pointer font-medium">
-                            {{ __('Update card scan (optional):') }}
-                        </label>
-                        <input id="pwdIdFile" type="file" wire:model="pwdIdFile" accept="image/*,.pdf" class="text-xs text-body-muted file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-[11px] file:font-semibold file:bg-white file:border file:border-gray-200 file:text-primary-dark" />
+                        <div class="flex items-center gap-2">
+                            <label for="pwdIdFile" class="text-xs text-body-muted hover:text-primary-dark cursor-pointer font-medium whitespace-nowrap">
+                                {{ $user->pwd_id_path ? __('Update card scan (optional):') : __('Attach PWD ID (optional):') }}
+                            </label>
+                            <input id="pwdIdFile" type="file" wire:model="pwdIdFile" accept="image/*,.pdf" class="text-xs text-body-muted file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-[11px] file:font-semibold file:bg-white file:border file:border-gray-200 file:text-primary-dark" />
+                        </div>
                     </div>
+                    @error('pwdIdFile') <p class="text-xs text-red-600">{{ $message }}</p> @enderror
+
+                    @php
+                        $hasMedCertOnAccount = !empty($user->medical_certificate_path) || in_array($user->pwd_document_type, ['medical_certificate', 'both'], true);
+                        $medCertRefDisplay = $user->medical_certificate_number ?: ($user->pwd_document_type === 'medical_certificate' ? $user->pwd_id_number : null);
+                    @endphp
+                    <div class="rounded-xl border border-gray-200 bg-gray-50/60 p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                        <div class="flex items-center gap-2">
+                            <span class="size-5 rounded-full {{ $hasMedCertOnAccount ? 'bg-secondary text-white' : 'bg-purple-100 text-purple-700' }} flex items-center justify-center font-bold text-xs shrink-0">
+                                {{ $hasMedCertOnAccount ? '✓' : '🩺' }}
+                            </span>
+                            <span class="text-body-muted">
+                                {{ __('Clinical Medical Certificate:') }}
+                                @if($hasMedCertOnAccount)
+                                    <strong class="text-primary-dark font-mono font-bold">{{ $medCertRefDisplay ?: __('On File') }}</strong>
+                                    <span class="text-secondary font-semibold ml-1">({{ __('Fit-to-Work Attached') }})</span>
+                                @else
+                                    <span class="text-body-muted">{{ __('Not yet attached (Optional Fit-to-Work clearance)') }}</span>
+                                @endif
+                            </span>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <label for="medicalCertificateFile" class="text-xs text-body-muted hover:text-primary-dark cursor-pointer font-medium whitespace-nowrap">
+                                {{ $user->medical_certificate_path ? __('Update cert scan (optional):') : __('Attach med cert (optional):') }}
+                            </label>
+                            <input id="medicalCertificateFile" type="file" wire:model="medicalCertificateFile" accept="image/*,.pdf" class="text-xs text-body-muted file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-[11px] file:font-semibold file:bg-white file:border file:border-gray-200 file:text-primary-dark" />
+                        </div>
+                    </div>
+                    @error('medicalCertificateFile') <p class="text-xs text-red-600">{{ $message }}</p> @enderror
                 </div>
             </div>
 

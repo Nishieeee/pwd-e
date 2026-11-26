@@ -140,20 +140,22 @@ class VerificationQueue extends Component
     public function requestMoreDocs(int $id): void
     {
         $vr = VerificationRequest::with('user')->findOrFail($id);
+        $note = trim($this->reviewNote ?? '') ?: 'Please upload a clearer copy of your PWD ID card or Clinical Medical Certificate.';
+
         $vr->update([
             'status' => 'needs_more_docs',
-            'rejection_reason' => $this->reviewNote,
+            'rejection_reason' => $note,
             'reviewed_by' => Auth::id(),
             'reviewed_at' => now(),
         ]);
 
-        $vr->user->notify(new VerificationStatusUpdated('needs_more_docs', $this->reviewNote));
+        $vr->user->notify(new VerificationStatusUpdated('needs_more_docs', $note));
 
         activity()
             ->causedBy(Auth::user())
             ->performedOn($vr)
             ->event('needs_more_docs')
-            ->log('Requested more documents for verification request #'.$vr->id.($this->reviewNote ? ': '.$this->reviewNote : ''));
+            ->log('Requested more documents for verification request #'.$vr->id.': '.$note);
 
         Flux::toast(variant: 'success', text: __('Additional documents requested.'));
         $this->closeReview();
