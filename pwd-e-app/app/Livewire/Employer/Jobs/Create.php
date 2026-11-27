@@ -3,11 +3,14 @@
 namespace App\Livewire\Employer\Jobs;
 
 use App\Models\Accommodation;
+use App\Models\EmployerBranch;
 use App\Models\JobPosting;
+use App\Models\LocationCity;
 use App\Services\Language\ExclusionaryLanguageScanner;
 use Flux\Flux;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -24,7 +27,21 @@ class Create extends Component
 
     public string $work_arrangement = 'onsite';
 
+    public ?int $employer_branch_id = null;
+
     public string $location = '';
+
+    public string $street_address = '';
+
+    public string $country = 'Philippines';
+
+    public string $province = '';
+
+    public string $city = '';
+
+    public string $barangay = '';
+
+    public string $zip_code = '';
 
     public ?string $salary_min = null;
 
@@ -40,7 +57,6 @@ class Create extends Component
     /** @var array<int, int> */
     public array $selectedAccommodations = [];
 
-    // Language scanner modal state
     public bool $showScanModal = false;
 
     /** @var array<int, array{id: int, phrase: string, suggestion: string, category: string|null, occurrences: int}> */
@@ -54,21 +70,100 @@ class Create extends Component
             abort(403, 'Unauthorized. Employer access required.');
         }
 
-        // Pre-fill accommodations with the employer's default matrix if available
-        $defaultAccommodations = $user->employerProfile?->accommodations()->pluck('accommodations.id')->toArray() ?? [];
+        $employerProfile = $user->employerProfile;
+
+        $defaultAccommodations = $employerProfile?->accommodations()->pluck('accommodations.id')->toArray() ?? [];
         if (! empty($defaultAccommodations)) {
             $this->selectedAccommodations = $defaultAccommodations;
         }
 
-        // Pre-fill location from company profile if available
-        if ($user->employerProfile?->location) {
-            $this->location = $user->employerProfile->location;
+        if ($employerProfile) {
+            $defaultBranch = $employerProfile->branches()->first();
+            if ($defaultBranch) {
+                $this->employer_branch_id = $defaultBranch->id;
+                $this->applyBranchLocation($defaultBranch);
+            } else {
+                $this->street_address = (string) ($employerProfile->street_address ?? '');
+                $this->country = (string) ($employerProfile->country ?: 'Philippines');
+                $this->province = (string) ($employerProfile->province ?? '');
+                $this->city = (string) ($employerProfile->city ?? '');
+                $this->barangay = (string) ($employerProfile->barangay ?? '');
+                $this->zip_code = (string) ($employerProfile->zip_code ?? '');
+                $this->location = (string) ($employerProfile->location ?? '');
+            }
+        }
+    }
+
+    public function updatedEmployerBranchId($branchId): void
+    {
+        if (! $branchId) {
+            $this->employer_branch_id = null;
+            return;
+        }
+
+        $employerProfile = Auth::user()?->employerProfile;
+        if (! $employerProfile) {
+            return;
+        }
+
+        $branch = EmployerBranch::where('employer_profile_id', $employerProfile->id)->find((int) $branchId);
+        if ($branch) {
+            $this->employer_branch_id = $branch->id;
+            $this->applyBranchLocation($branch);
+        }
+    }
+
+    private function applyBranchLocation(EmployerBranch $branch): void
+    {
+        $this->street_address = (string) ($branch->street_address ?? '');
+        $this->country = (string) ($branch->country ?: 'Philippines');
+        $this->province = (string) ($branch->province ?? '');
+        $this->city = (string) ($branch->city ?? '');
+        $this->barangay = (string) ($branch->barangay ?? '');
+        $this->zip_code = (string) ($branch->zip_code ?? '');
+        $this->location = $branch->shortLocation() ?: $branch->name;
+    }
+
+    public function updatedCity(string $value): void
+    {
+        if (Schema::hasTable('location_cities') && trim($value) !== '') {
+            $cityRecord = LocationCity::where('name', 'like', trim($value))->first();
+            if ($cityRecord) {
+                $this->city = $cityRecord->name;
+                if (! empty($cityRecord->province_name)) {
+                    $this->province = $cityRecord->province_name;
+                }
+                if (! empty($cityRecord->zip_code)) {
+                    $this->zip_code = $cityRecord->zip_code;
+                }
+            }
+        }
+        $this->syncChoppedLocation();
+    }
+
+    public function updatedProvince(): void
+    {
+        $this->syncChoppedLocation();
+    }
+
+    public function updatedBarangay(): void
+    {
+        $this->syncChoppedLocation();
+    }
+
+    private function syncChoppedLocation(): void
+    {
+        if (trim($this->city) !== '' || trim($this->province) !== '' || trim($this->barangay) !== '') {
+            $this->location = implode(', ', array_filter([
+                trim($this->barangay),
+                trim($this->city),
+                trim($this->province),
+                trim($this->country) ?: 'Philippines',
+            ]));
         }
     }
 
     /**
-     * Validation rules for publishing a job.
-     *
      * @return array<string, mixed>
      */
     protected function rules(): array
@@ -78,11 +173,18 @@ class Create extends Component
             'description' => ['required', 'string', 'min:20'],
             'employment_type' => ['required', 'in:full_time,part_time,contract'],
             'work_arrangement' => ['required', 'in:onsite,remote,hybrid'],
+            'employer_branch_id' => ['nullable', 'integer', 'exists:employer_branches,id'],
             'location' => [
                 $this->work_arrangement === 'remote' ? 'nullable' : 'required',
                 'string',
                 'max:255',
             ],
+            'street_address' => ['nullable', 'string', 'max:255'],
+            'country' => ['nullable', 'string', 'max:100'],
+            'province' => ['nullable', 'string', 'max:120'],
+            'city' => ['nullable', 'string', 'max:120'],
+            'barangay' => ['nullable', 'string', 'max:120'],
+            'zip_code' => ['nullable', 'string', 'max:20'],
             'salary_min' => ['nullable', 'numeric', 'min:0'],
             'salary_max' => ['nullable', 'numeric', 'gte:salary_min'],
             'closes_at' => ['nullable', 'date', 'after:today'],
@@ -119,12 +221,21 @@ class Create extends Component
 
     public function saveDraft(): void
     {
+        $this->syncChoppedLocation();
+
         $this->validate([
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'employment_type' => ['required', 'in:full_time,part_time,contract'],
             'work_arrangement' => ['required', 'in:onsite,remote,hybrid'],
+            'employer_branch_id' => ['nullable', 'integer', 'exists:employer_branches,id'],
             'location' => ['nullable', 'string', 'max:255'],
+            'street_address' => ['nullable', 'string', 'max:255'],
+            'country' => ['nullable', 'string', 'max:100'],
+            'province' => ['nullable', 'string', 'max:120'],
+            'city' => ['nullable', 'string', 'max:120'],
+            'barangay' => ['nullable', 'string', 'max:120'],
+            'zip_code' => ['nullable', 'string', 'max:20'],
             'salary_min' => ['nullable', 'numeric', 'min:0'],
             'salary_max' => ['nullable', 'numeric'],
             'closes_at' => ['nullable', 'date'],
@@ -134,10 +245,17 @@ class Create extends Component
 
         $job = JobPosting::create([
             'employer_profile_id' => $employerProfile->id,
+            'employer_branch_id' => $this->employer_branch_id,
             'title' => $this->title,
             'description' => $this->description ?: '',
             'required_skills' => $this->required_skills,
             'location' => $this->location,
+            'street_address' => trim($this->street_address) ?: null,
+            'country' => trim($this->country) ?: 'Philippines',
+            'province' => trim($this->province) ?: null,
+            'city' => trim($this->city) ?: null,
+            'barangay' => trim($this->barangay) ?: null,
+            'zip_code' => trim($this->zip_code) ?: null,
             'work_arrangement' => $this->work_arrangement,
             'employment_type' => $this->employment_type,
             'salary_min' => filled($this->salary_min) ? (float) $this->salary_min : null,
@@ -157,13 +275,13 @@ class Create extends Component
 
     public function publish(bool $ignoreScanWarnings = false): void
     {
+        $this->syncChoppedLocation();
         $this->validate();
 
         $scanner = app(ExclusionaryLanguageScanner::class);
         $fullText = $this->title.' '.$this->description;
         $scan = $scanner->scan($fullText);
 
-        // Check for exclusionary language
         if ($scan['has_flags'] && ! $ignoreScanWarnings) {
             $this->scanFlags = $scan['flags'];
             $this->showScanModal = true;
@@ -173,7 +291,6 @@ class Create extends Component
 
         $employerProfile = Auth::user()->employerProfile;
 
-        // Check active job posting limit
         $maxActivePostings = config('recruitment.max_active_job_postings', 5);
         $activePostingsCount = JobPosting::where('employer_profile_id', $employerProfile->id)
             ->where('status', 'published')
@@ -186,10 +303,17 @@ class Create extends Component
 
         $job = JobPosting::create([
             'employer_profile_id' => $employerProfile->id,
+            'employer_branch_id' => $this->employer_branch_id,
             'title' => $this->title,
             'description' => $this->description,
             'required_skills' => $this->required_skills,
             'location' => $this->location,
+            'street_address' => trim($this->street_address) ?: null,
+            'country' => trim($this->country) ?: 'Philippines',
+            'province' => trim($this->province) ?: null,
+            'city' => trim($this->city) ?: null,
+            'barangay' => trim($this->barangay) ?: null,
+            'zip_code' => trim($this->zip_code) ?: null,
             'work_arrangement' => $this->work_arrangement,
             'employment_type' => $this->employment_type,
             'salary_min' => filled($this->salary_min) ? (float) $this->salary_min : null,
@@ -204,7 +328,6 @@ class Create extends Component
         if (! empty($this->selectedAccommodations)) {
             $job->accommodations()->sync($this->selectedAccommodations);
 
-            // Mark matrix as complete if not set yet
             if (! $employerProfile->isMatrixComplete()) {
                 $employerProfile->update(['matrix_completed_at' => now()]);
             }
@@ -222,7 +345,6 @@ class Create extends Component
         $this->description = $scanner->applySuggestion($this->description, $phrase, $suggestion);
         $this->title = $scanner->applySuggestion($this->title, $phrase, $suggestion);
 
-        // Remove phrase from active scanFlags
         $this->scanFlags = array_values(array_filter(
             $this->scanFlags,
             fn ($flag) => strcasecmp($flag['phrase'], $phrase) !== 0
@@ -259,6 +381,14 @@ class Create extends Component
     public function render(): View
     {
         $accommodationsByCategory = Accommodation::all()->groupBy('category');
+        $branches = Auth::user()?->employerProfile?->branches()->get() ?? collect();
+
+        $psgcProvinces = collect();
+        $psgcCities = collect();
+        if (Schema::hasTable('location_cities')) {
+            $psgcCities = LocationCity::orderBy('name')->get(['name', 'province_name', 'zip_code']);
+            $psgcProvinces = $psgcCities->pluck('province_name')->filter()->unique()->sort()->values();
+        }
 
         $categoryLabels = [
             'mobility' => __('Mobility & Physical Accessibility'),
@@ -272,6 +402,9 @@ class Create extends Component
         return view('livewire.employer.jobs.create', [
             'accommodationsByCategory' => $accommodationsByCategory,
             'categoryLabels' => $categoryLabels,
+            'branches' => $branches,
+            'psgcProvinces' => $psgcProvinces,
+            'psgcCities' => $psgcCities,
         ]);
     }
 }

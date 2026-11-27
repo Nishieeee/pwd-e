@@ -57,6 +57,9 @@ class ProfileBuilder extends Component
 
     public string $pwdIdNumber = '';
 
+    /** @var array<int, string> */
+    public array $disabilityTypes = [];
+
     // Searchable Location Comboboxes (PSGC-backed)
     public string $address = '';
 
@@ -238,6 +241,7 @@ class ProfileBuilder extends Component
 
         // PWD ID Number: Auto-filled & read-only from authenticated user's account record
         $this->pwdIdNumber = trim((string) ($user->pwd_id_number ?? ''));
+        $this->disabilityTypes = $profile->resolvedDisabilityTypes();
 
         // Location fields (dynamically resolved from PSGC database models)
         $cityRecord = $profile->locationCity
@@ -1472,6 +1476,12 @@ class ProfileBuilder extends Component
             ? trim($this->province)
             : ($resolvedCity?->province_name ?? null);
 
+        $cleanDisabilities = array_values(array_unique(array_filter(array_map('trim', $this->disabilityTypes))));
+        $existingProfile = $user->candidateProfile;
+        $resolvedDisabilities = ! empty($cleanDisabilities)
+            ? $cleanDisabilities
+            : ($existingProfile ? $existingProfile->resolvedDisabilityTypes() : []);
+
         $profile = CandidateProfile::updateOrCreate(
             ['user_id' => $user->id],
             [
@@ -1481,6 +1491,8 @@ class ProfileBuilder extends Component
                 'highest_education' => $this->highestEducation,
                 'input_mode' => $this->inputMode,
                 'bio' => trim($this->bio),
+                'disability_type' => ! empty($resolvedDisabilities) ? implode(', ', $resolvedDisabilities) : ($existingProfile?->disability_type ?? null),
+                'disability_types' => ! empty($resolvedDisabilities) ? $resolvedDisabilities : null,
                 'location' => trim(implode(', ', array_filter([$resolvedCity?->name ?? $this->city, $resolvedProvince, $this->country]))),
                 'address' => trim($this->address) !== '' ? trim($this->address) : null,
                 'country' => $this->country,

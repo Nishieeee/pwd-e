@@ -679,6 +679,24 @@
                         <span>PWD ID is automatically linked from your verified account registration record and is read-only.</span>
                     </p>
 
+                    <!-- Multiple Disabilities Selection -->
+                    <fieldset class="pt-2 space-y-2.5">
+                        <legend class="text-xs sm:text-[13px] font-semibold text-[#1A2840]">
+                            Disability Category / Categories <span class="font-normal text-gray-500">(Select all that apply)</span>
+                        </legend>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                            @foreach(['Visual', 'Hearing', 'Motor/Physical', 'Speech', 'Cerebral Palsy', 'Psychosocial', 'Intellectual', 'Chronic / Orthopedic'] as $disOpt)
+                                <label class="inline-flex items-center gap-2.5 px-3 py-2 rounded-lg border text-xs font-medium cursor-pointer transition-colors {{ in_array($disOpt, $disabilityTypes, true) ? 'border-[#244F73] bg-[#EBF3FA] text-[#1A2840] font-bold' : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400' }}">
+                                    <input type="checkbox"
+                                           value="{{ $disOpt }}"
+                                           wire:model.live="disabilityTypes"
+                                           class="w-4 h-4 rounded border-gray-300 text-[#244F73] focus:ring-[#244F73] shrink-0">
+                                    <span class="leading-tight">{{ $disOpt }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                    </fieldset>
+
                     <!-- Complete Address & Searchable PSGC Location Comboboxes -->
                     <div class="space-y-4 pt-2">
                         <!-- Row 1: Complete Street / House / Lot / Purok Address -->

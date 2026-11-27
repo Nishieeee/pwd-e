@@ -28,7 +28,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name', 'first_name', 'middle_name', 'last_name', 'email', 'password', 'role', 'status', 'verified_at', 'pwd_id_number', 'pwd_id_path', 'medical_certificate_number', 'medical_certificate_path', 'pwd_document_type', 'display_settings'])]
+#[Fillable(['name', 'first_name', 'middle_name', 'last_name', 'email', 'phone', 'password', 'role', 'status', 'verified_at', 'pwd_id_number', 'pwd_id_path', 'medical_certificate_number', 'medical_certificate_path', 'pwd_document_type', 'display_settings'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable
 {

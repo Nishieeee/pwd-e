@@ -44,6 +44,12 @@
                     </h1>
 
                     <div class="flex flex-wrap items-center gap-y-1.5 gap-x-4 text-xs sm:text-sm text-body-muted">
+                        @if($profile->company_type)
+                            <div class="flex items-center gap-1.5 font-semibold text-primary-dark">
+                                <span>{{ $profile->company_type }}</span>
+                            </div>
+                        @endif
+
                         @if($profile->industry)
                             <div class="flex items-center gap-1.5">
                                 <svg class="size-3.5 text-primary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
@@ -55,6 +61,12 @@
                             <div class="flex items-center gap-1.5">
                                 <svg class="size-3.5 text-primary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                                 <span>{{ $profile->location }}</span>
+                            </div>
+                        @endif
+
+                        @if($profile->contact_phone)
+                            <div class="flex items-center gap-1.5">
+                                <span>{{ $profile->contact_phone }}</span>
                             </div>
                         @endif
 
@@ -182,6 +194,42 @@
                     <p class="text-xs sm:text-sm text-gray-700 leading-relaxed whitespace-pre-line">
                         {{ $profile->about_summary }}
                     </p>
+                </section>
+
+                {{-- Company Branches & Office Addresses --}}
+                <section class="rounded-xl border border-gray-200 bg-white p-6 shadow-2xs space-y-3">
+                    <div class="flex items-center justify-between pb-2 border-b border-gray-100">
+                        <h2 class="text-base font-bold text-[#1A2840] flex items-center gap-2">
+                            <svg class="size-4 text-[#244F73]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            <span>{{ __('Company Branches & Office Locations (:count)', ['count' => $branches->count()]) }}</span>
+                        </h2>
+                        <button type="button" wire:click="setTab('edit')" class="text-xs font-semibold text-[#244F73] hover:underline">
+                            {{ __('Manage Branches') }}
+                        </button>
+                    </div>
+
+                    @if($branches->isNotEmpty())
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                            @foreach($branches as $branch)
+                                <div class="rounded-xl border border-gray-200 bg-gray-50/70 p-3.5 space-y-1 text-xs">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <span class="font-bold text-gray-900">{{ $branch->name }}</span>
+                                        @if($branch->is_headquarters)
+                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#DCEAF4] text-[#244F73]">{{ __('Headquarters') }}</span>
+                                        @endif
+                                    </div>
+                                    <p class="text-gray-600 leading-snug">{{ $branch->formattedAddress() ?: $branch->city }}</p>
+                                    @if($branch->contact_phone)
+                                        <p class="text-[11px] text-gray-500">{{ $branch->contact_phone }}</p>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <p class="text-xs text-gray-500">
+                            {{ $profile->location ? __('Primary location: :loc. Add structured branches in Edit Profile.', ['loc' => $profile->location]) : __('No office branches added yet.') }}
+                        </p>
+                    @endif
                 </section>
 
                 {{-- Accessibility Highlights --}}
@@ -337,7 +385,7 @@
                     <p class="text-xs text-gray-500 mt-0.5">{{ __('Update your company branding, primary workplace location, and public website.') }}</p>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {{-- Company Name --}}
                     <div>
                         <label for="company_name" class="block text-xs font-bold text-gray-700 mb-1">
@@ -349,6 +397,31 @@
                                class="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#244F73] @error('company_name') border-red-500 @enderror"
                                required>
                         @error('company_name') <span class="text-xs text-red-600 mt-1 block">{{ $message }}</span> @enderror
+                    </div>
+
+                    {{-- Company Type --}}
+                    <div>
+                        <label for="company_type" class="block text-xs font-bold text-gray-700 mb-1">
+                            {{ __('Company Type') }}
+                        </label>
+                        <select id="company_type"
+                                wire:model="company_type"
+                                class="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#244F73]">
+                            <option value="">{{ __('Select Company Type...') }}</option>
+                            @foreach ([
+                                'Private Corporation',
+                                'SME / Sole Proprietorship',
+                                'Partnership',
+                                'BPO / Multinational',
+                                'Cooperative / Social Enterprise',
+                                'NGO / Non-Profit Organization',
+                                'Government Agency / LGU',
+                                'Educational Institution',
+                            ] as $ctOpt)
+                                <option value="{{ $ctOpt }}">{{ $ctOpt }}</option>
+                            @endforeach
+                        </select>
+                        @error('company_type') <span class="text-xs text-red-600 mt-1 block">{{ $message }}</span> @enderror
                     </div>
 
                     {{-- Industry --}}
@@ -374,21 +447,21 @@
                         @error('industry') <span class="text-xs text-red-600 mt-1 block">{{ $message }}</span> @enderror
                     </div>
 
-                    {{-- Primary Location --}}
+                    {{-- Contact Phone --}}
                     <div>
-                        <label for="location" class="block text-xs font-bold text-gray-700 mb-1">
-                            {{ __('Primary Workplace Location') }}
+                        <label for="contact_phone" class="block text-xs font-bold text-gray-700 mb-1">
+                            {{ __('Contact Phone Number') }}
                         </label>
-                        <input type="text"
-                               id="location"
-                               wire:model="location"
-                               placeholder="e.g. Bonifacio Global City, Taguig / Remote Philippines"
+                        <input type="tel"
+                               id="contact_phone"
+                               wire:model="contact_phone"
+                               placeholder="e.g. +63 917 000 0000"
                                class="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#244F73]">
-                        @error('location') <span class="text-xs text-red-600 mt-1 block">{{ $message }}</span> @enderror
+                        @error('contact_phone') <span class="text-xs text-red-600 mt-1 block">{{ $message }}</span> @enderror
                     </div>
 
                     {{-- Company Website --}}
-                    <div>
+                    <div class="sm:col-span-2">
                         <label for="website" class="block text-xs font-bold text-gray-700 mb-1">
                             {{ __('Company Website URL') }}
                         </label>
@@ -400,6 +473,67 @@
                         @error('website') <span class="text-xs text-red-600 mt-1 block">{{ $message }}</span> @enderror
                     </div>
                 </div>
+
+                {{-- Chopped Primary / Headquarters Address --}}
+                <div class="rounded-xl border border-gray-200 bg-gray-50/50 p-4 space-y-3">
+                    <h3 class="text-xs font-bold text-gray-800 uppercase tracking-wider">{{ __('Primary / Headquarters Address') }}</h3>
+                    <div>
+                        <label for="street_address" class="block text-xs font-bold text-gray-700 mb-1">{{ __('Building / Floor / Street Address') }}</label>
+                        <input type="text" id="street_address" wire:model="street_address" placeholder="e.g. 12F Inclusion Tower, Ayala Ave."
+                               class="w-full px-3.5 py-2 rounded-lg border border-gray-300 bg-white text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#244F73]">
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                            <label for="hq_country" class="block text-xs font-bold text-gray-700 mb-1">{{ __('Country') }}</label>
+                            <input type="text" id="hq_country" wire:model="country" placeholder="Philippines"
+                                   class="w-full px-3.5 py-2 rounded-lg border border-gray-300 bg-white text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#244F73]">
+                        </div>
+                        <div>
+                            <label for="hq_province" class="block text-xs font-bold text-gray-700 mb-1">{{ __('Province') }}</label>
+                            <input type="text" id="hq_province" list="employer-profile-provinces" wire:model="province" placeholder="e.g. Metro Manila"
+                                   class="w-full px-3.5 py-2 rounded-lg border border-gray-300 bg-white text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#244F73]">
+                        </div>
+                        <div>
+                            <label for="hq_city" class="block text-xs font-bold text-gray-700 mb-1">{{ __('City / Municipality') }}</label>
+                            <input type="text" id="hq_city" list="employer-profile-cities" wire:model.live="city" placeholder="e.g. Makati City"
+                                   class="w-full px-3.5 py-2 rounded-lg border border-gray-300 bg-white text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#244F73]">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div class="sm:col-span-2">
+                            <label for="hq_barangay" class="block text-xs font-bold text-gray-700 mb-1">{{ __('Barangay') }}</label>
+                            <input type="text" id="hq_barangay" wire:model="barangay" placeholder="e.g. Barangay San Lorenzo"
+                                   class="w-full px-3.5 py-2 rounded-lg border border-gray-300 bg-white text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#244F73]">
+                        </div>
+                        <div>
+                            <label for="hq_zip_code" class="block text-xs font-bold text-gray-700 mb-1">{{ __('Zip Code') }}</label>
+                            <input type="text" id="hq_zip_code" wire:model="zip_code" placeholder="e.g. 1223"
+                                   class="w-full px-3.5 py-2 rounded-lg border border-gray-300 bg-white text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#244F73]">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="location" class="block text-xs font-semibold text-gray-600 mb-1">
+                            {{ __('Public Display Location Summary') }}
+                        </label>
+                        <input type="text"
+                               id="location"
+                               wire:model="location"
+                               placeholder="e.g. Bonifacio Global City, Taguig / Remote Philippines"
+                               class="w-full px-3.5 py-2 rounded-lg border border-gray-300 bg-white text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#244F73]">
+                        @error('location') <span class="text-xs text-red-600 mt-1 block">{{ $message }}</span> @enderror
+                    </div>
+                </div>
+
+                <datalist id="employer-profile-provinces">
+                    @foreach($psgcProvinces as $pOpt)
+                        <option value="{{ $pOpt }}"></option>
+                    @endforeach
+                </datalist>
+                <datalist id="employer-profile-cities">
+                    @foreach($psgcCities as $cOpt)
+                        <option value="{{ $cOpt->name }}">{{ $cOpt->province_name }} (ZIP {{ $cOpt->zip_code }})</option>
+                    @endforeach
+                </datalist>
 
                 {{-- About the Company & Culture --}}
                 <div>
@@ -413,6 +547,115 @@
                               class="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#244F73]"></textarea>
                     <p class="text-[11px] text-gray-500 mt-1">{{ __('This description is prominently presented on your public page to candidates evaluating your accessibility credentials.') }}</p>
                     @error('about') <span class="text-xs text-red-600 mt-1 block">{{ $message }}</span> @enderror
+                </div>
+            </section>
+
+            {{-- Multiple Company Branches Manager --}}
+            <section class="rounded-xl border border-gray-200 bg-white p-6 shadow-2xs space-y-4">
+                <div class="pb-3 border-b border-gray-100 flex items-center justify-between gap-2">
+                    <div>
+                        <h2 class="text-base font-bold text-[#1A2840] flex items-center gap-2">
+                            <svg class="size-4 text-[#244F73]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            <span>{{ __('Company Branches & Regional Offices') }}</span>
+                        </h2>
+                        <p class="text-xs text-gray-500 mt-0.5">{{ __('Add multiple branch addresses so you can assign specific office locations when posting job opportunities.') }}</p>
+                    </div>
+                    <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-[#DCEAF4] text-[#1A2840]">{{ $branches->count() }} {{ __('Branches') }}</span>
+                </div>
+
+                @if($branches->isNotEmpty())
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        @foreach($branches as $b)
+                            <div class="rounded-xl border border-gray-200 bg-gray-50/70 p-3.5 flex items-start justify-between gap-3 text-xs">
+                                <div class="space-y-0.5 min-w-0">
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="font-bold text-gray-900">{{ $b->name }}</span>
+                                        @if($b->is_headquarters)
+                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#DCEAF4] text-[#244F73]">{{ __('HQ') }}</span>
+                                        @endif
+                                    </div>
+                                    <div class="text-gray-600">{{ $b->formattedAddress() }}</div>
+                                    @if($b->contact_phone)
+                                        <div class="text-[11px] text-gray-500">{{ $b->contact_phone }}</div>
+                                    @endif
+                                </div>
+                                <div class="flex items-center gap-2 shrink-0">
+                                    <button type="button" wire:click="editBranch({{ $b->id }})" class="text-xs font-semibold text-[#244F73] hover:underline">{{ __('Edit') }}</button>
+                                    <button type="button" wire:click="deleteBranch({{ $b->id }})" class="text-xs font-semibold text-rose-600 hover:underline">{{ __('Remove') }}</button>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+
+                <div class="rounded-xl border border-dashed border-gray-300 bg-gray-50/40 p-4 space-y-3">
+                    <div class="text-xs font-bold text-gray-800">
+                        {{ $editingBranchId ? __('Edit Branch Office') : __('Add New Branch Office') }}
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">{{ __('Branch Name') }} *</label>
+                            <input type="text" wire:model="branchName" placeholder="e.g. Cebu IT Park Hub, Zamboanga Regional Office"
+                                   class="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#244F73]">
+                            @error('branchName') <span class="text-[11px] text-red-600">{{ $message }}</span> @enderror
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">{{ __('Branch Phone (Optional)') }}</label>
+                            <input type="tel" wire:model="branchPhone" placeholder="e.g. +63 32 234 5678"
+                                   class="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#244F73]">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1">{{ __('Street / Building Address') }}</label>
+                        <input type="text" wire:model="branchStreet" placeholder="e.g. 5F eBloc Tower 2, W. Geonzon St."
+                               class="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#244F73]">
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">{{ __('Country') }}</label>
+                            <input type="text" wire:model="branchCountry" placeholder="Philippines"
+                                   class="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#244F73]">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">{{ __('Province') }}</label>
+                            <input type="text" list="employer-profile-provinces" wire:model="branchProvince" placeholder="e.g. Cebu"
+                                   class="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#244F73]">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">{{ __('City / Municipality') }} *</label>
+                            <input type="text" list="employer-profile-cities" wire:model.live="branchCity" placeholder="e.g. Cebu City"
+                                   class="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#244F73]">
+                            @error('branchCity') <span class="text-[11px] text-red-600">{{ $message }}</span> @enderror
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">{{ __('Barangay') }}</label>
+                            <input type="text" wire:model="branchBarangay" placeholder="e.g. Barangay Apas"
+                                   class="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#244F73]">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">{{ __('Zip Code') }}</label>
+                            <input type="text" wire:model="branchZipCode" placeholder="e.g. 6000"
+                                   class="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#244F73]">
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+                        <label class="inline-flex items-center gap-2 text-xs text-gray-700 cursor-pointer">
+                            <input type="checkbox" wire:model="branchIsHq" class="rounded border-gray-300 text-[#244F73] focus:ring-[#244F73]">
+                            <span>{{ __('Mark as Main Headquarters') }}</span>
+                        </label>
+                        <div class="flex items-center gap-2">
+                            @if($editingBranchId)
+                                <button type="button" wire:click="resetBranchForm" class="px-3 py-1.5 rounded-lg border border-gray-300 bg-white text-xs font-semibold text-gray-700 hover:bg-gray-50">
+                                    {{ __('Cancel Edit') }}
+                                </button>
+                            @endif
+                            <button type="button" wire:click="saveBranch" class="px-4 py-1.5 rounded-lg bg-[#244F73] text-white text-xs font-bold hover:bg-[#1A2840] transition-colors">
+                                {{ $editingBranchId ? __('Update Branch') : __('+ Save Branch') }}
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </section>
 

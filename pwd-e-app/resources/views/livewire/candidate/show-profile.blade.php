@@ -166,9 +166,9 @@
                             <svg class="size-3.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
                             RA 7277 Verified PWD
                         </span>
-                        @if($profile->disability_type)
+                        @if(!empty($profile->resolvedDisabilityTypes()))
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary-tint text-primary-dark border border-primary-border">
-                                Category: {{ $profile->disability_type }}
+                                Category: {{ implode(', ', $profile->resolvedDisabilityTypes()) }}
                             </span>
                         @endif
                     </div>

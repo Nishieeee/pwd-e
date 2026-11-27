@@ -12,11 +12,19 @@ class EmployerProfile extends Model
     protected $fillable = [
         'user_id',
         'company_name',
+        'company_type',
         'business_permit_number',
         'business_permit_path',
+        'contact_phone',
         'verified_at',
         'industry',
         'location',
+        'street_address',
+        'country',
+        'province',
+        'city',
+        'barangay',
+        'zip_code',
         'about',
         'website',
         'accessibility_highlights',
@@ -40,6 +48,11 @@ class EmployerProfile extends Model
     public function jobPostings(): HasMany
     {
         return $this->hasMany(JobPosting::class);
+    }
+
+    public function branches(): HasMany
+    {
+        return $this->hasMany(EmployerBranch::class)->orderByDesc('is_headquarters')->orderBy('name');
     }
 
     public function accommodations(): BelongsToMany

@@ -5,6 +5,7 @@ namespace App\Actions\Fortify;
 use App\Concerns\PasswordValidationRules;
 use App\Concerns\ProfileValidationRules;
 use App\Models\CandidateProfile;
+use App\Models\EmployerBranch;
 use App\Models\EmployerProfile;
 use App\Models\User;
 use App\Models\VerificationRequest;
@@ -31,7 +32,10 @@ class CreateNewUser implements CreatesNewUsers
             $rules['first_name'] = ['required', 'string', 'max:100'];
             $rules['last_name'] = ['required', 'string', 'max:100'];
             $rules['middle_name'] = ['nullable', 'string', 'max:100'];
-            $rules['disability_type'] = ['required', 'string', 'max:100'];
+            $rules['phone'] = ['nullable', 'string', 'min:7', 'max:30'];
+            $rules['disability_types'] = ['required_without:disability_type', 'array', 'min:1'];
+            $rules['disability_types.*'] = ['string', 'max:100'];
+            $rules['disability_type'] = ['required_without:disability_types', 'string', 'max:255'];
             $rules['pwd_document_type'] = ['nullable', 'string', 'in:pwd_id,medical_certificate,both'];
             $rules['pwd_id_number'] = ['required', 'string', 'max:50'];
             $rules['medical_certificate_number'] = ['nullable', 'string', 'max:50'];
@@ -41,9 +45,18 @@ class CreateNewUser implements CreatesNewUsers
             $rules['date_of_birth'] = ['required', 'date', 'before_or_equal:'.now()->subYears(18)->toDateString()];
         } elseif ($role === 'employer') {
             $rules['company_name'] = ['required', 'string', 'max:255'];
+            $rules['company_type'] = ['nullable', 'string', 'max:100'];
+            $rules['industry'] = ['nullable', 'string', 'max:100'];
             $rules['first_name'] = ['nullable', 'string', 'max:100'];
-            $rules['last_name'] = ['nullable', 'string', 'max:100'];
             $rules['middle_name'] = ['nullable', 'string', 'max:100'];
+            $rules['last_name'] = ['nullable', 'string', 'max:100'];
+            $rules['phone'] = ['nullable', 'string', 'min:7', 'max:30'];
+            $rules['street_address'] = ['nullable', 'string', 'max:255'];
+            $rules['country'] = ['nullable', 'string', 'max:100'];
+            $rules['province'] = ['nullable', 'string', 'max:120'];
+            $rules['city'] = ['nullable', 'string', 'max:120'];
+            $rules['barangay'] = ['nullable', 'string', 'max:120'];
+            $rules['zip_code'] = ['nullable', 'string', 'max:20'];
             $rules['business_permit_number'] = ['nullable', 'string', 'max:100'];
             $rules['business_permit_file'] = ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'];
         }
@@ -94,12 +107,15 @@ class CreateNewUser implements CreatesNewUsers
                 ? ($input['medical_certificate_number'] ?? ($pwdDocType === 'medical_certificate' ? ($input['pwd_id_number'] ?? null) : null))
                 : null;
 
+            $phone = ! empty($input['phone']) ? trim((string) $input['phone']) : null;
+
             $user = User::create([
                 'name' => $fullName,
                 'first_name' => $firstName,
                 'middle_name' => $input['middle_name'] ?? null,
                 'last_name' => $lastName,
                 'email' => $input['email'],
+                'phone' => $phone,
                 'password' => $input['password'],
                 'role' => $role,
                 'status' => $isCandidate ? 'pending' : 'active',
@@ -114,9 +130,15 @@ class CreateNewUser implements CreatesNewUsers
             $user->assignRole($role);
 
             if ($isCandidate) {
+                $disabilityTypes = ! empty($input['disability_types']) && is_array($input['disability_types'])
+                    ? array_values(array_unique(array_filter(array_map('trim', $input['disability_types']))))
+                    : array_values(array_filter(array_map('trim', explode(',', (string) ($input['disability_type'] ?? '')))));
+
                 CandidateProfile::create([
                     'user_id' => $user->id,
-                    'disability_type' => $input['disability_type'],
+                    'disability_type' => implode(', ', $disabilityTypes),
+                    'disability_types' => $disabilityTypes,
+                    'phone' => $phone,
                     'date_of_birth' => $input['date_of_birth'] ?? null,
                 ]);
                 VerificationRequest::create([
@@ -128,12 +150,46 @@ class CreateNewUser implements CreatesNewUsers
                     'status' => 'pending',
                 ]);
             } else {
-                EmployerProfile::create([
+                $street = ! empty($input['street_address']) ? trim((string) $input['street_address']) : null;
+                $country = ! empty($input['country']) ? trim((string) $input['country']) : 'Philippines';
+                $province = ! empty($input['province']) ? trim((string) $input['province']) : null;
+                $city = ! empty($input['city']) ? trim((string) $input['city']) : null;
+                $barangay = ! empty($input['barangay']) ? trim((string) $input['barangay']) : null;
+                $zipCode = ! empty($input['zip_code']) ? trim((string) $input['zip_code']) : null;
+
+                $formattedLocation = trim(implode(', ', array_filter([$barangay, $city, $province, ($city || $province) ? $country : null])));
+
+                $employerProfile = EmployerProfile::create([
                     'user_id' => $user->id,
                     'company_name' => $input['company_name'],
+                    'company_type' => ! empty($input['company_type']) ? trim((string) $input['company_type']) : null,
+                    'industry' => ! empty($input['industry']) ? trim((string) $input['industry']) : null,
+                    'contact_phone' => $phone,
+                    'location' => $formattedLocation !== '' ? $formattedLocation : null,
+                    'street_address' => $street,
+                    'country' => $country,
+                    'province' => $province,
+                    'city' => $city,
+                    'barangay' => $barangay,
+                    'zip_code' => $zipCode,
                     'business_permit_number' => $input['business_permit_number'] ?? null,
                     'business_permit_path' => $permitPath,
                 ]);
+
+                if ($city || $province || $street) {
+                    EmployerBranch::create([
+                        'employer_profile_id' => $employerProfile->id,
+                        'name' => 'Main Headquarters',
+                        'street_address' => $street,
+                        'country' => $country,
+                        'province' => $province,
+                        'city' => $city,
+                        'barangay' => $barangay,
+                        'zip_code' => $zipCode,
+                        'contact_phone' => $phone,
+                        'is_headquarters' => true,
+                    ]);
+                }
             }
 
             return $user;

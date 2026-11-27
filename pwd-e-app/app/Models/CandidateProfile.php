@@ -34,6 +34,7 @@ class CandidateProfile extends Model
         'fsl_caption_path',
         'resume_pdf_path',
         'disability_type',
+        'disability_types',
         'disability_description',
         'phone',
         'date_of_birth',
@@ -46,10 +47,27 @@ class CandidateProfile extends Model
         'skills' => 'array',
         'spoken_languages' => 'array',
         'disability_type' => 'encrypted',
+        'disability_types' => 'encrypted:array',
         'disability_description' => 'encrypted',
         'date_of_birth' => 'date',
         'visibility_settings' => 'array',
     ];
+
+    /**
+     * @return array<int, string>
+     */
+    public function resolvedDisabilityTypes(): array
+    {
+        if (is_array($this->disability_types) && ! empty($this->disability_types)) {
+            return array_values(array_filter(array_map('trim', $this->disability_types)));
+        }
+
+        if (! empty($this->disability_type)) {
+            return array_values(array_filter(array_map('trim', explode(',', (string) $this->disability_type))));
+        }
+
+        return [];
+    }
 
     public function user(): BelongsTo
     {

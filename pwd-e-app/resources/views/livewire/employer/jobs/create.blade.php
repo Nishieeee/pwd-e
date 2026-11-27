@@ -96,22 +96,108 @@
                 </div>
             </div>
 
-            <!-- Location -->
-            <div>
-                <label for="job-location" class="block text-sm font-bold text-primary-dark mb-1.5">
-                    {{ __('Work Location / City') }}
-                    @if ($work_arrangement !== 'remote') <span class="text-rose-500">*</span> @endif
-                </label>
-                <input
-                    id="job-location"
-                    type="text"
-                    wire:model="location"
-                    placeholder="{{ $work_arrangement === 'remote' ? 'Optional for remote roles (e.g. Anywhere in Philippines)' : 'e.g. Makati City, Metro Manila' }}"
-                    class="w-full rounded-xl border border-primary-border bg-surface px-4 py-3 text-sm text-dark-neutral placeholder-body-muted focus:outline-none focus:ring-2 focus:ring-primary focus:bg-white transition"
-                />
-                @error('location')
-                    <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
-                @enderror
+            <!-- Branch & Chopped Work Location -->
+            <div class="rounded-xl border border-primary-border/80 bg-surface/60 p-4 sm:p-5 space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                        <h3 class="text-sm font-bold text-primary-dark">
+                            {{ __('Workplace Branch & Structured Location') }}
+                            @if ($work_arrangement !== 'remote') <span class="text-rose-500">*</span> @endif
+                        </h3>
+                        <p class="text-xs text-body-muted">{{ __('Select one of your saved company branches or enter the specific work address below.') }}</p>
+                    </div>
+                    @if($branches->isNotEmpty())
+                        <div class="w-full sm:w-64">
+                            <select
+                                id="employer_branch_id"
+                                wire:model.live="employer_branch_id"
+                                aria-label="{{ __('Select company branch') }}"
+                                class="w-full rounded-lg border border-primary-border bg-white px-3 py-2 text-xs font-semibold text-primary-dark focus:outline-none focus:ring-2 focus:ring-primary"
+                            >
+                                <option value="">{{ __('Custom location / Other branch...') }}</option>
+                                @foreach($branches as $bOpt)
+                                    <option value="{{ $bOpt->id }}">
+                                        {{ $bOpt->name }}{{ $bOpt->city ? ' — '.$bOpt->city : '' }}{{ $bOpt->is_headquarters ? ' (HQ)' : '' }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    @endif
+                </div>
+
+                <div>
+                    <label for="job-street-address" class="block text-xs font-bold text-primary-dark mb-1">
+                        {{ __('Building / Floor / Street Address') }}
+                    </label>
+                    <input
+                        id="job-street-address"
+                        type="text"
+                        wire:model="street_address"
+                        placeholder="{{ __('e.g. 8F Ayala North Exchange, Ayala Ave.') }}"
+                        class="w-full rounded-xl border border-primary-border bg-white px-3.5 py-2.5 text-sm text-dark-neutral placeholder-body-muted focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label for="job-country" class="block text-xs font-bold text-primary-dark mb-1">{{ __('Country') }}</label>
+                        <input id="job-country" type="text" wire:model="country" placeholder="Philippines"
+                               class="w-full rounded-xl border border-primary-border bg-white px-3.5 py-2.5 text-sm text-dark-neutral focus:outline-none focus:ring-2 focus:ring-primary" />
+                    </div>
+                    <div>
+                        <label for="job-province" class="block text-xs font-bold text-primary-dark mb-1">{{ __('Province') }}</label>
+                        <input id="job-province" type="text" list="create-job-provinces" wire:model.live="province" placeholder="e.g. Metro Manila"
+                               class="w-full rounded-xl border border-primary-border bg-white px-3.5 py-2.5 text-sm text-dark-neutral focus:outline-none focus:ring-2 focus:ring-primary" />
+                    </div>
+                    <div>
+                        <label for="job-city" class="block text-xs font-bold text-primary-dark mb-1">
+                            {{ __('City / Municipality') }}
+                            @if ($work_arrangement !== 'remote') <span class="text-rose-500">*</span> @endif
+                        </label>
+                        <input id="job-city" type="text" list="create-job-cities" wire:model.live="city" placeholder="e.g. Makati City"
+                               class="w-full rounded-xl border border-primary-border bg-white px-3.5 py-2.5 text-sm text-dark-neutral focus:outline-none focus:ring-2 focus:ring-primary" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="sm:col-span-2">
+                        <label for="job-barangay" class="block text-xs font-bold text-primary-dark mb-1">{{ __('Barangay') }}</label>
+                        <input id="job-barangay" type="text" wire:model.live="barangay" placeholder="e.g. Barangay San Lorenzo"
+                               class="w-full rounded-xl border border-primary-border bg-white px-3.5 py-2.5 text-sm text-dark-neutral focus:outline-none focus:ring-2 focus:ring-primary" />
+                    </div>
+                    <div>
+                        <label for="job-zip" class="block text-xs font-bold text-primary-dark mb-1">{{ __('Zip Code') }}</label>
+                        <input id="job-zip" type="text" wire:model="zip_code" placeholder="e.g. 1223"
+                               class="w-full rounded-xl border border-primary-border bg-white px-3.5 py-2.5 text-sm text-dark-neutral focus:outline-none focus:ring-2 focus:ring-primary" />
+                    </div>
+                </div>
+
+                <div>
+                    <label for="job-location" class="block text-xs font-semibold text-body-muted mb-1">
+                        {{ __('Formatted Location Summary') }}
+                    </label>
+                    <input
+                        id="job-location"
+                        type="text"
+                        wire:model="location"
+                        placeholder="{{ $work_arrangement === 'remote' ? 'Optional for remote roles (e.g. Anywhere in Philippines)' : 'Auto-populated from city & province or enter custom summary' }}"
+                        class="w-full rounded-xl border border-primary-border bg-white px-3.5 py-2 text-xs text-dark-neutral placeholder-body-muted focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                    @error('location')
+                        <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <datalist id="create-job-provinces">
+                    @foreach($psgcProvinces as $pOpt)
+                        <option value="{{ $pOpt }}"></option>
+                    @endforeach
+                </datalist>
+                <datalist id="create-job-cities">
+                    @foreach($psgcCities as $cOpt)
+                        <option value="{{ $cOpt->name }}">{{ $cOpt->province_name }} (ZIP {{ $cOpt->zip_code }})</option>
+                    @endforeach
+                </datalist>
             </div>
 
             <!-- Salary Range & Deadline -->

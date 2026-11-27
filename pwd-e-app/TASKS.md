@@ -1,7 +1,35 @@
 # TASKS.md
 
 Deadline: core features working by **December 1, 2026**. All features targeted by **Nov 22**. See `ROADMAP.md`.
-_Last synced with `docs/REQUIREMENTS.md` v1.1 — 2026-11-11_
+_Last synced with SE Advisor Consultation Revisions — 2026-11-26_
+
+---
+
+## SE Advisor Consultation Revisions (2026-11-26) 🔥
+
+### Registration, Onboarding & Role Management
+- [ ] **REV-01 — In-Account Role Switcher Toggle (Candidate ↔ Employer):** Add role-switch toggle inside both Candidate and Employer account headers/settings allowing users to switch active portal context (`candidate` ↔ `employer`), prompting one-time profile/credential setup when activating the secondary role for the first time.
+- [x] **REV-02 — Representative Middle Name on Company Registration:** Add `middle_name` input to Employer registration (`register.blade.php` & `CreateNewUser.php`) alongside representative first and last names.
+- [x] **REV-03 — Company Address on Employer Registration:** Capture company headquarters address during Employer registration (`register.blade.php` & `CreateNewUser.php`) and persist to `employer_profiles`.
+- [x] **REV-04 — Company Type / Industry Upon Registration:** Add required Company Type & Industry selector (e.g., Corporation, SME, BPO/IT, Retail, Healthcare, NGO, Government) to Employer registration and `employer_profiles`.
+- [x] **REV-08 — Multiple Disabilities Selection:** Replace single-select `disability_type` with multi-select disability categories in Registration and `CandidateProfile` so candidates can select multiple specific disabilities (e.g., Visual + Motor/Physical) instead of a generic "Multiple" label.
+- [x] **REV-09 — Phone Number Upon Registration:** Collect validated contact phone number (`+63` / `09` PH mobile format) during both Candidate and Employer registration (`register.blade.php` & `CreateNewUser.php`).
+
+### Structured ("Chopped") Locations & Multi-Branch Employers
+- [x] **REV-05 — Chopped / Structured Location Fields Platform-Wide:** Standardize all single-string `location` inputs across Employer Registration, Employer Profile (`Employer\Profile`), and Job Postings (`Employer\Jobs`) into discrete PSGC-backed fields (`street_address`, `country`, `province`, `city`, `barangay`, `zip_code`), matching Candidate Profile Builder.
+- [x] **REV-06 — Multiple Company Branch Addresses:** Support multiple branch addresses per employer (`employer_branches` table: branch name, chopped address fields, `is_headquarters`), manageable in Employer Profile and selectable per `JobPosting`.
+
+### Verification, Compliance & Dynamic Tax Incentives
+- [ ] **REV-07 — Dynamic Tax Exemption / Incentive Calculation (RA 10524):** Replace static calculation in `Employer\Workforce` with dynamic tax exemption/deduction modeling (configurable wage/tenure pro-rating, company tax parameters, and RA 10524 25% wage deduction + 50% accessibility facility modification credit).
+- [ ] **REV-10 — Admin Verification Checklist for Med Cert & PWD ID:** Add structured verification criteria checklists in `Admin\VerificationQueue` for both PWD ID (ID format, photo/signature clarity, validity, disability match) and Clinical Medical Certificate (physician name, PRC license, occupational fitness statement, signature/date) prior to approval.
+
+### Resume-Driven Profile Automation, Trainings & Matching
+- [ ] **REV-11 — Auto-Read Uploaded Résumé When Standard Typing Is Not Used:** Automatically invoke `ResumeParserService` whenever a candidate uploads a résumé without manually completing Standard Typing fields, populating identification, contact, chopped location, education, work experiences, trainings/seminars, and skills.
+- [ ] **REV-12 — Resume-Based Job Matching:** Drive `MatchScorer` directly from extracted and verified résumé content (skills, experience roles/years, education, trainings/seminars) and automatically recompute `job_matches` whenever a candidate uploads or replaces their résumé.
+- [ ] **REV-13 — Trainings, Seminars & Experiences Section:** Add repeatable **Trainings & Seminars** entries (title, organizer, date/year, optional certificate) alongside Work Experiences in `ProfileBuilder`, `ResumeParserService`, Digital Profile / Résumé PDF, and `MatchScorer`.
+
+### Multi-Offer Candidate Decision Flow
+- [ ] **REV-14 — Dual/Multiple Accepted Applications Popup Notification:** Display an accessible modal popup when a candidate has two (or more) concurrent accepted/offered applications, presenting clear **Accept** or **Ignore / Decline** actions for each offer.
 
 ---
 

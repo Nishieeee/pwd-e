@@ -1,4 +1,20 @@
 <x-layouts::auth.full :title="__('Register')">
+    @php
+        $psgcProvinces = collect();
+        $psgcCities = collect();
+        $psgcCityMeta = [];
+        if (\Illuminate\Support\Facades\Schema::hasTable('location_cities')) {
+            $psgcCities = \App\Models\LocationCity::orderBy('name')->get(['name', 'province_name', 'zip_code']);
+            $psgcProvinces = $psgcCities->pluck('province_name')->filter()->unique()->sort()->values();
+            foreach ($psgcCities as $cItem) {
+                $psgcCityMeta[strtolower($cItem->name)] = [
+                    'province' => $cItem->province_name ?? '',
+                    'zip' => $cItem->zip_code ?? '',
+                ];
+            }
+        }
+        $oldDisabilities = old('disability_types', old('disability_type') ? [old('disability_type')] : []);
+    @endphp
     <header class="bg-primary-dark">
         <div class="mx-auto flex h-16 max-w-[1200px] items-center justify-between px-4 sm:px-6 lg:px-8">
             <a href="{{ route('home') }}" class="flex items-center gap-2 text-white font-heading font-bold text-lg focus:outline-none focus:ring-0">
@@ -32,16 +48,38 @@
         <div class="flex flex-col-reverse items-stretch overflow-hidden rounded-2xl bg-white shadow-[0_8px_24px_rgba(26,40,64,0.06)] md:grid md:grid-cols-2"
              x-data="{
                  role: '{{ old('role', 'candidate') }}',
-                 step: {{ old('role', 'candidate') === 'employer' || $errors->hasAny(['first_name', 'last_name', 'email', 'password', 'company_name']) ? 0 : ($errors->hasAny(['date_of_birth']) ? 1 : ($errors->hasAny(['disability_type', 'pwd_document_type', 'pwd_id_number', 'medical_certificate_number', 'pwd_id_file', 'medical_certificate_file', 'consent', 'terms']) ? 2 : 0)) }},
+                 step: {{ old('role', 'candidate') === 'employer' ? ($errors->hasAny(['company_name', 'company_type', 'industry', 'first_name', 'middle_name', 'last_name', 'email', 'phone', 'password']) ? 0 : ($errors->hasAny(['street_address', 'country', 'province', 'city', 'barangay', 'zip_code', 'terms']) ? 1 : 0)) : ($errors->hasAny(['first_name', 'middle_name', 'last_name', 'email', 'phone', 'password']) ? 0 : ($errors->hasAny(['date_of_birth']) ? 1 : ($errors->hasAny(['disability_type', 'disability_types', 'pwd_document_type', 'pwd_id_number', 'medical_certificate_number', 'pwd_id_file', 'medical_certificate_file', 'consent', 'terms']) ? 2 : 0))) }},
                  candidateSteps: 3,
-                 employerSteps: 1,
+                 employerSteps: 2,
                  candidateDocType: '{{ old('pwd_document_type', 'pwd_id') }}',
+                 cityMeta: @js($psgcCityMeta),
                  showCandidatePassword: false,
                  showEmployerPassword: false,
                  canContinue: false,
                  totalSteps() { return this.role === 'candidate' ? this.candidateSteps : this.employerSteps; },
                  val(id) { const el = document.getElementById(id); return el ? (el.value || '').trim() : ''; },
                  checked(id) { const el = document.getElementById(id); return !!(el && !el.matches(':disabled') && el.checked); },
+                 hasCheckedDisability() {
+                     const boxes = document.querySelectorAll('input.candidate-disability-checkbox');
+                     for (const b of boxes) {
+                         if (!b.matches(':disabled') && b.checked) return true;
+                     }
+                     return false;
+                 },
+                 syncEmployerCity() {
+                     const cVal = this.val('employer_city').toLowerCase();
+                     if (cVal && this.cityMeta[cVal]) {
+                         const provEl = document.getElementById('employer_province');
+                         const zipEl = document.getElementById('employer_zip_code');
+                         if (provEl && this.cityMeta[cVal].province && !provEl.value) {
+                             provEl.value = this.cityMeta[cVal].province;
+                         }
+                         if (zipEl && this.cityMeta[cVal].zip) {
+                             zipEl.value = this.cityMeta[cVal].zip;
+                         }
+                     }
+                     this.updateState();
+                 },
                  isAdultDob(dobVal) {
                      if (!dobVal) return false;
                      const parts = dobVal.split('-').map(Number);
@@ -60,24 +98,33 @@
                              return this.val('candidate_first_name') !== '' &&
                                     this.val('candidate_last_name') !== '' &&
                                     this.val('candidate_email') !== '' &&
+                                    this.val('candidate_phone').length >= 7 &&
                                     p.length >= 8 && p === pc;
                          }
                          if (this.step === 1) {
                              return this.isAdultDob(this.val('date_of_birth'));
                          }
                          if (this.step === 2) {
-                             return this.val('disability_type') !== '' &&
+                             return this.hasCheckedDisability() &&
                                     this.val('pwd_id_number') !== '' &&
                                     this.checked('candidate_consent') &&
                                     this.checked('candidate_terms');
                          }
                      } else {
-                         const p = this.val('employer_password');
-                         const pc = this.val('employer_password_confirmation');
-                         return this.val('employer_company_name') !== '' &&
-                                this.val('employer_email') !== '' &&
-                                p.length >= 8 && p === pc &&
-                                this.checked('employer_terms');
+                         if (this.step === 0) {
+                             const p = this.val('employer_password');
+                             const pc = this.val('employer_password_confirmation');
+                             return this.val('employer_company_name') !== '' &&
+                                    this.val('employer_company_type') !== '' &&
+                                    this.val('employer_email') !== '' &&
+                                    this.val('employer_phone').length >= 7 &&
+                                    p.length >= 8 && p === pc;
+                         }
+                         if (this.step === 1) {
+                             return this.val('employer_province') !== '' &&
+                                    this.val('employer_city') !== '' &&
+                                    this.checked('employer_terms');
+                         }
                      }
                      return true;
                  },
@@ -327,11 +374,21 @@
                                     @error('last_name')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                                 </div>
                             </div>
-                            <div>
-                                <label for="candidate_email" class="mb-1.5 block text-sm font-semibold text-primary-dark">Email address <span class="text-[#B3261E]">*</span></label>
-                                <input id="candidate_email" name="email" type="email" value="{{ old('email') }}" :required="role === 'candidate'" autocomplete="email" placeholder="you@example.com"
-                                       class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
-                                @error('email')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                <div>
+                                    <label for="candidate_email" class="mb-1.5 block text-sm font-semibold text-primary-dark">Email address <span class="text-[#B3261E]">*</span></label>
+                                    <div class="relative">
+                                        <input id="candidate_email" name="email" type="email" value="{{ old('email') }}" :required="role === 'candidate'" autocomplete="email" placeholder="you@example.com"
+                                               class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 pr-9 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                    </div>
+                                    @error('email')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                                </div>
+                                <div>
+                                    <label for="candidate_phone" class="mb-1.5 block text-sm font-semibold text-primary-dark">Phone number <span class="text-[#B3261E]">*</span></label>
+                                    <input id="candidate_phone" name="phone" type="tel" value="{{ old('phone') }}" :required="role === 'candidate'" autocomplete="tel" placeholder="e.g. +63 917 123 4567"
+                                           class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                    @error('phone')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                                </div>
                             </div>
                             <div>
                                 <label for="candidate_password" class="mb-1.5 block text-sm font-semibold text-primary-dark">Password <span class="text-[#B3261E]">*</span></label>
@@ -352,70 +409,217 @@
                             </div>
                         </fieldset>
 
-                        {{-- Employer first inputs --}}
-                        <fieldset x-show="role === 'employer'" class="flex flex-col gap-5 border-0 p-0 m-0" :disabled="role !== 'employer'">
+                        {{-- Employer Step 0 inputs --}}
+                        <fieldset x-show="role === 'employer'" class="flex flex-col gap-4 border-0 p-0 m-0" :disabled="role !== 'employer'">
                             <div>
                                 <label for="employer_company_name" class="mb-1.5 block text-sm font-semibold text-primary-dark">Company name <span class="text-[#B3261E]">*</span></label>
-                                <input id="employer_company_name" name="company_name" type="text" value="{{ old('company_name') }}" :required="role === 'employer'" placeholder="e.g. Acme Accessibility Corp."
-                                       class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                <div class="relative">
+                                    <input id="employer_company_name" name="company_name" type="text" value="{{ old('company_name') }}" :required="role === 'employer'" placeholder="e.g. Acme Accessibility Corp."
+                                           class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 pr-9 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                </div>
                                 @error('company_name')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                             </div>
 
                             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                 <div>
-                                    <label for="employer_first_name" class="mb-1.5 block text-sm font-semibold text-primary-dark">Representative first name</label>
-                                    <input id="employer_first_name" name="first_name" type="text" value="{{ old('first_name') }}" autocomplete="given-name" placeholder="HR / Recruiter first name"
-                                           class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                    <label for="employer_company_type" class="mb-1.5 block text-sm font-semibold text-primary-dark">Company type <span class="text-[#B3261E]">*</span></label>
+                                    <select id="employer_company_type" name="company_type" :required="role === 'employer'" @change="updateState()"
+                                            class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-sm text-primary-dark focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                        <option value="">Select company type…</option>
+                                        @foreach ([
+                                            'Private Corporation',
+                                            'SME / Sole Proprietorship',
+                                            'Partnership',
+                                            'BPO / Multinational',
+                                            'Cooperative / Social Enterprise',
+                                            'NGO / Non-Profit Organization',
+                                            'Government Agency / LGU',
+                                            'Educational Institution',
+                                        ] as $ct)
+                                            <option value="{{ $ct }}" {{ old('company_type') === $ct ? 'selected' : '' }}>{{ $ct }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('company_type')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                                </div>
+
+                                <div>
+                                    <label for="employer_industry" class="mb-1.5 block text-sm font-semibold text-primary-dark">Industry sector</label>
+                                    <select id="employer_industry" name="industry"
+                                            class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-sm text-primary-dark focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                        <option value="">Select industry…</option>
+                                        @foreach ([
+                                            'Information Technology & Software',
+                                            'BPO & Customer Experience',
+                                            'Healthcare & Medical Services',
+                                            'Banking, Financial Services & FinTech',
+                                            'Education & Academic Institutions',
+                                            'Manufacturing & Logistics',
+                                            'Retail, E-Commerce & Hospitality',
+                                            'Government & Non-Profit Services',
+                                            'Creative, Media & Design',
+                                            'Other',
+                                        ] as $ind)
+                                            <option value="{{ $ind }}" {{ old('industry') === $ind ? 'selected' : '' }}>{{ $ind }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('industry')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                                <div>
+                                    <label for="employer_first_name" class="mb-1.5 block text-sm font-semibold text-primary-dark">Rep. first name</label>
+                                    <div class="relative">
+                                        <input id="employer_first_name" name="first_name" type="text" value="{{ old('first_name') }}" autocomplete="given-name" placeholder="First name"
+                                               class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 pr-8 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                    </div>
                                     @error('first_name')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                                 </div>
                                 <div>
-                                    <label for="employer_last_name" class="mb-1.5 block text-sm font-semibold text-primary-dark">Representative last name</label>
-                                    <input id="employer_last_name" name="last_name" type="text" value="{{ old('last_name') }}" autocomplete="family-name" placeholder="HR / Recruiter last name"
-                                           class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                    <label for="employer_middle_name" class="mb-1.5 block text-sm font-semibold text-primary-dark">Rep. middle name</label>
+                                    <div class="relative">
+                                        <input id="employer_middle_name" name="middle_name" type="text" value="{{ old('middle_name') }}" autocomplete="additional-name" placeholder="Middle name"
+                                               class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 pr-8 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                    </div>
+                                    @error('middle_name')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                                </div>
+                                <div>
+                                    <label for="employer_last_name" class="mb-1.5 block text-sm font-semibold text-primary-dark">Rep. last name</label>
+                                    <div class="relative">
+                                        <input id="employer_last_name" name="last_name" type="text" value="{{ old('last_name') }}" autocomplete="family-name" placeholder="Last name"
+                                               class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 pr-8 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                    </div>
                                     @error('last_name')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                                 </div>
                             </div>
 
-                            <div>
-                                <label for="employer_email" class="mb-1.5 block text-sm font-semibold text-primary-dark">Work email address <span class="text-[#B3261E]">*</span></label>
-                                <input id="employer_email" name="email" type="email" value="{{ old('email') }}" :required="role === 'employer'" autocomplete="email" placeholder="hr@company.com"
-                                       class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
-                                @error('email')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
-                            </div>
-                            <div>
-                                <label for="employer_password" class="mb-1.5 block text-sm font-semibold text-primary-dark">Password <span class="text-[#B3261E]">*</span></label>
-                                <div class="relative">
-                                    <input id="employer_password" name="password" :type="showEmployerPassword ? 'text' : 'password'" autocomplete="new-password" placeholder="Password (min. 8 characters)"
-                                           class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 pr-12 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
-                                    <button type="button" @click="showEmployerPassword = !showEmployerPassword" :aria-label="showEmployerPassword ? 'Hide password' : 'Show password'"
-                                            class="absolute right-1 top-1 grid h-10 w-10 place-items-center rounded-md text-body-muted hover:text-primary-dark focus:outline-none focus:ring-2 focus:ring-primary/30">
-                                        <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                    </button>
+                            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                <div>
+                                    <label for="employer_email" class="mb-1.5 block text-sm font-semibold text-primary-dark">Work email address <span class="text-[#B3261E]">*</span></label>
+                                    <div class="relative">
+                                        <input id="employer_email" name="email" type="email" value="{{ old('email') }}" :required="role === 'employer'" autocomplete="email" placeholder="hr@company.com"
+                                               class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 pr-9 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                    </div>
+                                    @error('email')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                                 </div>
-                                @error('password')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
-                            </div>
-                            <div>
-                                <label for="employer_password_confirmation" class="mb-1.5 block text-sm font-semibold text-primary-dark">Confirm password <span class="text-[#B3261E]">*</span></label>
-                                <input id="employer_password_confirmation" name="password_confirmation" :type="showEmployerPassword ? 'text' : 'password'" autocomplete="new-password" placeholder="Confirm password"
-                                       class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                <div>
+                                    <label for="employer_phone" class="mb-1.5 block text-sm font-semibold text-primary-dark">Contact phone <span class="text-[#B3261E]">*</span></label>
+                                    <input id="employer_phone" name="phone" type="tel" value="{{ old('phone') }}" :required="role === 'employer'" autocomplete="tel" placeholder="e.g. +63 917 000 0000"
+                                           class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                    @error('phone')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                                </div>
                             </div>
 
-                            <label class="flex cursor-pointer items-start gap-2 text-sm text-primary-dark">
-                                <input id="employer_terms" type="checkbox" name="terms" value="1" {{ old('terms') ? 'checked' : '' }} class="mt-1 h-4 w-4" @change="updateState()">
-                                <span>I accept the Terms and Conditions. <span class="text-[#B3261E]">*</span></span>
-                            </label>
-                            @error('terms')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                <div>
+                                    <label for="employer_password" class="mb-1.5 block text-sm font-semibold text-primary-dark">Password <span class="text-[#B3261E]">*</span></label>
+                                    <div class="relative">
+                                        <input id="employer_password" name="password" :type="showEmployerPassword ? 'text' : 'password'" autocomplete="new-password" placeholder="Min. 8 characters"
+                                               class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 pr-12 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                        <button type="button" @click="showEmployerPassword = !showEmployerPassword" :aria-label="showEmployerPassword ? 'Hide password' : 'Show password'"
+                                                class="absolute right-1 top-1 grid h-10 w-10 place-items-center rounded-md text-body-muted hover:text-primary-dark focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                        </button>
+                                    </div>
+                                    @error('password')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                                </div>
+                                <div>
+                                    <label for="employer_password_confirmation" class="mb-1.5 block text-sm font-semibold text-primary-dark">Confirm password <span class="text-[#B3261E]">*</span></label>
+                                    <input id="employer_password_confirmation" name="password_confirmation" :type="showEmployerPassword ? 'text' : 'password'" autocomplete="new-password" placeholder="Confirm password"
+                                           class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                </div>
+                            </div>
                         </fieldset>
 
                         <div class="flex gap-3">
-                            <button x-show="role === 'candidate'" type="button" @click="next()" :disabled="!canContinue" :class="canContinue ? 'bg-[#2A5D8F] hover:bg-[#224B73]' : 'bg-[#94A3B8] cursor-not-allowed'" class="flex h-[52px] w-full items-center justify-center gap-2 rounded-lg text-base font-semibold text-white disabled:opacity-60">
+                            <button type="button" @click="next()" :disabled="!canContinue" :class="canContinue ? 'bg-[#2A5D8F] hover:bg-[#224B73]' : 'bg-[#94A3B8] cursor-not-allowed'" class="flex h-[52px] w-full items-center justify-center gap-2 rounded-lg text-base font-semibold text-white disabled:opacity-60">
                                 Continue
-                            </button>
-                            <button x-show="role === 'employer'" type="submit" :disabled="!canContinue" :class="canContinue ? 'bg-[#2A5D8F] hover:bg-[#224B73]' : 'bg-[#94A3B8] cursor-not-allowed'" class="flex h-[52px] w-full items-center justify-center gap-2 rounded-lg text-base font-semibold text-white disabled:opacity-60">
-                                Create account
                             </button>
                         </div>
                     </div>
+
+                    {{-- Employer Step 1: Chopped Headquarters Address & Terms --}}
+                    <fieldset x-show="role === 'employer' && step === 1" x-cloak :disabled="role !== 'employer'" class="flex flex-col gap-4 border-0 p-0 m-0">
+                        <div>
+                            <h3 class="text-sm font-bold text-primary-dark">Headquarters Address</h3>
+                            <p class="text-xs text-body-muted mt-0.5">Provide your main company address. Additional branch addresses can be added anytime in your Company Profile.</p>
+                        </div>
+
+                        <div>
+                            <label for="employer_street_address" class="mb-1.5 block text-sm font-semibold text-primary-dark">Building / Floor / Street Address</label>
+                            <div class="relative">
+                                <input id="employer_street_address" name="street_address" type="text" value="{{ old('street_address') }}" placeholder="e.g. 12F Inclusion Tower, Ayala Ave."
+                                       class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 pr-9 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                            </div>
+                            @error('street_address')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                            <div>
+                                <label for="employer_country" class="mb-1.5 block text-sm font-semibold text-primary-dark">Country</label>
+                                <input id="employer_country" name="country" type="text" value="{{ old('country', 'Philippines') }}"
+                                       class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                @error('country')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                            </div>
+                            <div>
+                                <label for="employer_province" class="mb-1.5 block text-sm font-semibold text-primary-dark">Province <span class="text-[#B3261E]">*</span></label>
+                                <div class="relative">
+                                    <input id="employer_province" name="province" type="text" list="psgc-provinces-list" value="{{ old('province') }}" :required="role === 'employer'" @input="updateState()" @change="updateState()" placeholder="e.g. Metro Manila"
+                                           class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 pr-8 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                </div>
+                                @error('province')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                            </div>
+                            <div>
+                                <label for="employer_city" class="mb-1.5 block text-sm font-semibold text-primary-dark">City / Municipality <span class="text-[#B3261E]">*</span></label>
+                                <div class="relative">
+                                    <input id="employer_city" name="city" type="text" list="psgc-cities-list" value="{{ old('city') }}" :required="role === 'employer'" @input="syncEmployerCity()" @change="syncEmployerCity()" placeholder="e.g. Makati City"
+                                           class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 pr-8 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                </div>
+                                @error('city')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                            <div class="sm:col-span-2">
+                                <label for="employer_barangay" class="mb-1.5 block text-sm font-semibold text-primary-dark">Barangay</label>
+                                <div class="relative">
+                                    <input id="employer_barangay" name="barangay" type="text" value="{{ old('barangay') }}" placeholder="e.g. Barangay San Lorenzo"
+                                           class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 pr-8 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                </div>
+                                @error('barangay')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                            </div>
+                            <div>
+                                <label for="employer_zip_code" class="mb-1.5 block text-sm font-semibold text-primary-dark">Zip code</label>
+                                <input id="employer_zip_code" name="zip_code" type="text" value="{{ old('zip_code') }}" placeholder="e.g. 1223"
+                                       class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                @error('zip_code')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                            </div>
+                        </div>
+
+                        <datalist id="psgc-provinces-list">
+                            @foreach($psgcProvinces as $provOpt)
+                                <option value="{{ $provOpt }}"></option>
+                            @endforeach
+                        </datalist>
+                        <datalist id="psgc-cities-list">
+                            @foreach($psgcCities as $cityOpt)
+                                <option value="{{ $cityOpt->name }}">{{ $cityOpt->province_name }} (ZIP {{ $cityOpt->zip_code }})</option>
+                            @endforeach
+                        </datalist>
+
+                        <label class="flex cursor-pointer items-start gap-2 text-sm text-primary-dark pt-1">
+                            <input id="employer_terms" type="checkbox" name="terms" value="1" {{ old('terms') ? 'checked' : '' }} class="mt-1 h-4 w-4" @change="updateState()">
+                            <span>I accept the Terms and Conditions. <span class="text-[#B3261E]">*</span></span>
+                        </label>
+                        @error('terms')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+
+                        <div class="flex gap-3">
+                            <button type="button" @click="prev()" class="flex h-[52px] flex-1 items-center justify-center rounded-lg border border-[#CBD5E1] text-base font-semibold text-primary-dark hover:bg-primary-tint">Back</button>
+                            <button type="submit" :disabled="!canContinue" :class="canContinue ? 'bg-[#2A5D8F] hover:bg-[#224B73]' : 'bg-[#94A3B8] cursor-not-allowed'" class="flex h-[52px] flex-1 items-center justify-center gap-2 rounded-lg text-base font-semibold text-white disabled:opacity-60">
+                                Create account
+                            </button>
+                        </div>
+                    </fieldset>
 
                     {{-- Candidate Step 1: DOB --}}
                     <fieldset x-show="role === 'candidate' && step === 1" x-cloak :disabled="role !== 'candidate'" class="flex flex-col gap-5 border-0 p-0 m-0">
@@ -434,13 +638,23 @@
                     {{-- Candidate Step 2: PWD ID, Medical Cert, or Both --}}
                     <fieldset x-show="role === 'candidate' && step === 2" x-cloak :disabled="role !== 'candidate'" class="flex flex-col gap-5 border-0 p-0 m-0">
                         <div>
-                            <label for="disability_type" class="mb-1.5 block text-sm font-semibold text-primary-dark">Disability type <span class="text-[#B3261E]">*</span></label>
-                            <select id="disability_type" name="disability_type" :required="role === 'candidate'" @change="updateState()" class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-base text-primary-dark focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
-                                <option value="">Select…</option>
-                                @foreach (['Visual','Hearing','Motor/Physical','Speech','Cerebral Palsy','Psychosocial','Intellectual','Multiple'] as $dt)
-                                    <option value="{{ $dt }}" {{ old('disability_type') === $dt ? 'selected' : '' }}>{{ $dt }}</option>
+                            <label class="mb-2 block text-sm font-semibold text-primary-dark">
+                                Disability type(s) <span class="text-xs font-normal text-body-muted">(Select all that apply)</span> <span class="text-[#B3261E]">*</span>
+                            </label>
+                            <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                                @foreach (['Visual','Hearing','Motor/Physical','Speech','Cerebral Palsy','Psychosocial','Intellectual','Chronic / Orthopedic'] as $dt)
+                                    <label class="flex items-center gap-2 rounded-lg border border-[#CBD5E1] bg-white px-2.5 py-2 text-xs font-medium text-primary-dark hover:bg-slate-50 cursor-pointer has-[:checked]:border-primary has-[:checked]:bg-primary/5 has-[:checked]:font-bold transition-colors">
+                                        <input type="checkbox"
+                                               name="disability_types[]"
+                                               value="{{ $dt }}"
+                                               {{ is_array($oldDisabilities) && in_array($dt, $oldDisabilities, true) ? 'checked' : '' }}
+                                               @change="updateState()"
+                                               class="candidate-disability-checkbox h-4 w-4 rounded text-primary focus:ring-primary shrink-0">
+                                        <span class="leading-tight">{{ $dt }}</span>
+                                    </label>
                                 @endforeach
-                            </select>
+                            </div>
+                            @error('disability_types')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                             @error('disability_type')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                         </div>
 

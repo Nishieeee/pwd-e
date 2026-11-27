@@ -14,6 +14,7 @@ class JobPosting extends Model
 
     protected $fillable = [
         'employer_profile_id',
+        'employer_branch_id',
         'title',
         'description',
         'overview_headline',
@@ -23,6 +24,12 @@ class JobPosting extends Model
         'benefits',
         'required_skills',
         'location',
+        'street_address',
+        'country',
+        'province',
+        'city',
+        'barangay',
+        'zip_code',
         'work_arrangement',
         'employment_type',
         'salary_min',
@@ -50,6 +57,11 @@ class JobPosting extends Model
     public function employerProfile(): BelongsTo
     {
         return $this->belongsTo(EmployerProfile::class);
+    }
+
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(EmployerBranch::class, 'employer_branch_id');
     }
 
     public function accommodations(): BelongsToMany
