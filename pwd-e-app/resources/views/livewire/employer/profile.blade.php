@@ -405,7 +405,7 @@
                             {{ __('Company Type') }}
                         </label>
                         <select id="company_type"
-                                wire:model="company_type"
+                                wire:model.live="company_type"
                                 class="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#244F73]">
                             <option value="">{{ __('Select Company Type...') }}</option>
                             @foreach ([
@@ -417,11 +417,19 @@
                                 'NGO / Non-Profit Organization',
                                 'Government Agency / LGU',
                                 'Educational Institution',
+                                'Other',
                             ] as $ctOpt)
                                 <option value="{{ $ctOpt }}">{{ $ctOpt }}</option>
                             @endforeach
                         </select>
+                        @if($company_type === 'Other')
+                            <input type="text"
+                                   wire:model="company_type_other"
+                                   placeholder="{{ __('Specify company type...') }}"
+                                   class="mt-2 w-full px-3 py-2 rounded-lg border border-gray-300 text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#244F73]">
+                        @endif
                         @error('company_type') <span class="text-xs text-red-600 mt-1 block">{{ $message }}</span> @enderror
+                        @error('company_type_other') <span class="text-xs text-red-600 mt-1 block">{{ $message }}</span> @enderror
                     </div>
 
                     {{-- Industry --}}
@@ -430,7 +438,7 @@
                             {{ __('Industry Sector') }}
                         </label>
                         <select id="industry"
-                                wire:model="industry"
+                                wire:model.live="industry"
                                 class="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#244F73]">
                             <option value="">{{ __('Select Industry Sector...') }}</option>
                             <option value="Information Technology & Software">Information Technology & Software</option>
@@ -444,7 +452,14 @@
                             <option value="Creative, Media & Design">Creative, Media & Design</option>
                             <option value="Other">Other</option>
                         </select>
+                        @if($industry === 'Other')
+                            <input type="text"
+                                   wire:model="industry_other"
+                                   placeholder="{{ __('Specify industry sector...') }}"
+                                   class="mt-2 w-full px-3 py-2 rounded-lg border border-gray-300 text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#244F73]">
+                        @endif
                         @error('industry') <span class="text-xs text-red-600 mt-1 block">{{ $message }}</span> @enderror
+                        @error('industry_other') <span class="text-xs text-red-600 mt-1 block">{{ $message }}</span> @enderror
                     </div>
 
                     {{-- Contact Phone --}}

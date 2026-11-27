@@ -21,6 +21,8 @@ test('registration screen can be rendered', function () {
         ->assertSee('id="candidate_terms"', false)
         ->assertSee('id="candidate_consent"', false)
         ->assertSee('id="employer_terms"', false)
+        ->assertSee('id="disability-multiselect-trigger"', false)
+        ->assertSee('aria-multiselectable="true"', false)
         ->assertSee('value="both"', false)
         ->assertSee('name="pwd_id_file"', false)
         ->assertSee('name="medical_certificate_file"', false)

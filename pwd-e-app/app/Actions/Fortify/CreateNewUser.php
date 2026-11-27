@@ -46,7 +46,9 @@ class CreateNewUser implements CreatesNewUsers
         } elseif ($role === 'employer') {
             $rules['company_name'] = ['required', 'string', 'max:255'];
             $rules['company_type'] = ['nullable', 'string', 'max:100'];
+            $rules['company_type_other'] = ['required_if:company_type,Other', 'nullable', 'string', 'max:100'];
             $rules['industry'] = ['nullable', 'string', 'max:100'];
+            $rules['industry_other'] = ['required_if:industry,Other', 'nullable', 'string', 'max:100'];
             $rules['first_name'] = ['nullable', 'string', 'max:100'];
             $rules['middle_name'] = ['nullable', 'string', 'max:100'];
             $rules['last_name'] = ['nullable', 'string', 'max:100'];
@@ -159,11 +161,19 @@ class CreateNewUser implements CreatesNewUsers
 
                 $formattedLocation = trim(implode(', ', array_filter([$barangay, $city, $province, ($city || $province) ? $country : null])));
 
+                $resolvedCompanyType = (($input['company_type'] ?? null) === 'Other')
+                    ? (! empty($input['company_type_other']) ? trim((string) $input['company_type_other']) : 'Other')
+                    : (! empty($input['company_type']) ? trim((string) $input['company_type']) : null);
+
+                $resolvedIndustry = (($input['industry'] ?? null) === 'Other')
+                    ? (! empty($input['industry_other']) ? trim((string) $input['industry_other']) : 'Other')
+                    : (! empty($input['industry']) ? trim((string) $input['industry']) : null);
+
                 $employerProfile = EmployerProfile::create([
                     'user_id' => $user->id,
                     'company_name' => $input['company_name'],
-                    'company_type' => ! empty($input['company_type']) ? trim((string) $input['company_type']) : null,
-                    'industry' => ! empty($input['industry']) ? trim((string) $input['industry']) : null,
+                    'company_type' => $resolvedCompanyType,
+                    'industry' => $resolvedIndustry,
                     'contact_phone' => $phone,
                     'location' => $formattedLocation !== '' ? $formattedLocation : null,
                     'street_address' => $street,

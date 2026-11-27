@@ -21,9 +21,34 @@ class Profile extends Component
     #[Url(as: 'tab')]
     public string $activeTab = 'overview';
 
+    public const COMPANY_TYPES = [
+        'Private Corporation',
+        'SME / Sole Proprietorship',
+        'Partnership',
+        'BPO / Multinational',
+        'Cooperative / Social Enterprise',
+        'NGO / Non-Profit Organization',
+        'Government Agency / LGU',
+        'Educational Institution',
+    ];
+
+    public const INDUSTRIES = [
+        'Information Technology & Software',
+        'BPO & Customer Experience',
+        'Healthcare & Medical Services',
+        'Banking, Financial Services & FinTech',
+        'Education & Academic Institutions',
+        'Manufacturing & Logistics',
+        'Retail, E-Commerce & Hospitality',
+        'Government & Non-Profit Services',
+        'Creative, Media & Design',
+    ];
+
     public string $company_name = '';
     public string $company_type = '';
+    public string $company_type_other = '';
     public string $industry = '';
+    public string $industry_other = '';
     public string $contact_phone = '';
     public string $location = '';
     public string $street_address = '';
@@ -63,8 +88,23 @@ class Profile extends Component
         ]);
 
         $this->company_name = (string) ($profile->company_name ?? '');
-        $this->company_type = (string) ($profile->company_type ?? '');
-        $this->industry = (string) ($profile->industry ?? '');
+        $storedType = (string) ($profile->company_type ?? '');
+        if ($storedType !== '' && ! in_array($storedType, self::COMPANY_TYPES, true)) {
+            $this->company_type = 'Other';
+            $this->company_type_other = $storedType === 'Other' ? '' : $storedType;
+        } else {
+            $this->company_type = $storedType;
+            $this->company_type_other = '';
+        }
+
+        $storedIndustry = (string) ($profile->industry ?? '');
+        if ($storedIndustry !== '' && ! in_array($storedIndustry, self::INDUSTRIES, true)) {
+            $this->industry = 'Other';
+            $this->industry_other = $storedIndustry === 'Other' ? '' : $storedIndustry;
+        } else {
+            $this->industry = $storedIndustry;
+            $this->industry_other = '';
+        }
         $this->contact_phone = (string) ($profile->contact_phone ?? $user->phone ?? '');
         $this->location = (string) ($profile->location ?? '');
         $this->street_address = (string) ($profile->street_address ?? '');
@@ -238,7 +278,9 @@ class Profile extends Component
         $this->validate([
             'company_name' => 'required|string|max:255',
             'company_type' => 'nullable|string|max:100',
+            'company_type_other' => 'required_if:company_type,Other|nullable|string|max:100',
             'industry' => 'nullable|string|max:100',
+            'industry_other' => 'required_if:industry,Other|nullable|string|max:100',
             'contact_phone' => 'nullable|string|max:30',
             'location' => 'nullable|string|max:255',
             'street_address' => 'nullable|string|max:255',
@@ -264,10 +306,18 @@ class Profile extends Component
             ? implode(', ', array_filter([trim($this->barangay), trim($this->city), trim($this->province), trim($this->country) ?: 'Philippines']))
             : (trim($this->location) ?: null);
 
+        $resolvedCompanyType = $this->company_type === 'Other'
+            ? (trim($this->company_type_other) ?: null)
+            : (trim($this->company_type) ?: null);
+
+        $resolvedIndustry = $this->industry === 'Other'
+            ? (trim($this->industry_other) ?: null)
+            : (trim($this->industry) ?: null);
+
         $profile->update([
             'company_name' => $this->company_name,
-            'company_type' => trim($this->company_type) ?: null,
-            'industry' => $this->industry ?: null,
+            'company_type' => $resolvedCompanyType,
+            'industry' => $resolvedIndustry,
             'contact_phone' => trim($this->contact_phone) ?: null,
             'location' => $resolvedLocation,
             'street_address' => trim($this->street_address) ?: null,

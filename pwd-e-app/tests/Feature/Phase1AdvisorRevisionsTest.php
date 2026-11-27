@@ -170,3 +170,116 @@ test('employer can manage multiple branches and assign a branch with chopped loc
         ->and($job->zip_code)->toBe('6000')
         ->and($job->location)->toBe('Apas, Cebu City, Cebu, Philippines');
 });
+
+test('employer selecting Other for company type and industry saves custom specified values', function () {
+    $response = $this->post(route('register.store'), [
+        'role' => 'employer',
+        'company_name' => 'GreenMobility Collective',
+        'company_type' => 'Other',
+        'company_type_other' => 'Worker-Owned Federation',
+        'industry' => 'Other',
+        'industry_other' => 'Clean Energy & Assistive Mobility',
+        'email' => 'team@greenmobility.ph',
+        'phone' => '09180001122',
+        'password' => 'Password123!',
+        'password_confirmation' => 'Password123!',
+        'province' => 'Davao del Sur',
+        'city' => 'Davao City',
+        'terms' => '1',
+    ]);
+
+    $response->assertSessionHasNoErrors();
+
+    $user = User::where('email', 'team@greenmobility.ph')->firstOrFail();
+    $profile = EmployerProfile::where('user_id', $user->id)->firstOrFail();
+
+    expect($profile->company_type)->toBe('Worker-Owned Federation')
+        ->and($profile->industry)->toBe('Clean Energy & Assistive Mobility');
+
+    // Editing in Employer Profile recognizes custom Other values and allows updating them
+    Livewire::actingAs($user)
+        ->test(EmployerProfileComponent::class)
+        ->assertSet('company_type', 'Other')
+        ->assertSet('company_type_other', 'Worker-Owned Federation')
+        ->assertSet('industry', 'Other')
+        ->assertSet('industry_other', 'Clean Energy & Assistive Mobility')
+        ->set('industry_other', 'Assistive Robotics & Clean Tech')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect($profile->fresh()->industry)->toBe('Assistive Robotics & Clean Tech');
+});
+
+test('validation rejects empty Other specifications, short phone numbers, and supports branch edit/delete and job edit branch switching', function () {
+    // 1. Selecting Other without specifying custom text or short phone fails validation
+    $response = $this->post(route('register.store'), [
+        'role' => 'employer',
+        'company_name' => 'Incomplete Other Co',
+        'company_type' => 'Other',
+        'company_type_other' => '',
+        'industry' => 'Other',
+        'industry_other' => '',
+        'email' => 'bad@otherco.ph',
+        'phone' => '123',
+        'password' => 'Password123!',
+        'password_confirmation' => 'Password123!',
+        'terms' => '1',
+    ]);
+
+    $response->assertSessionHasErrors(['company_type_other', 'industry_other', 'phone']);
+
+    // 2. Branch edit & delete + Job Edit branch switching
+    $employer = User::factory()->verified()->create(['role' => 'employer']);
+    $employer->assignRole('employer');
+    $profile = EmployerProfile::create([
+        'user_id' => $employer->id,
+        'company_name' => 'Branch Lifecycle Corp',
+    ]);
+
+    Livewire::actingAs($employer)
+        ->test(EmployerProfileComponent::class)
+        ->set('branchName', 'Initial Branch')
+        ->set('branchCity', 'Iloilo City')
+        ->set('branchProvince', 'Iloilo')
+        ->call('saveBranch')
+        ->assertHasNoErrors();
+
+    $branch = EmployerBranch::where('employer_profile_id', $profile->id)->firstOrFail();
+
+    Livewire::actingAs($employer)
+        ->test(EmployerProfileComponent::class)
+        ->call('editBranch', $branch->id)
+        ->assertSet('branchName', 'Initial Branch')
+        ->set('branchName', 'Updated Iloilo Hub')
+        ->set('branchZipCode', '5000')
+        ->call('saveBranch')
+        ->assertHasNoErrors();
+
+    expect($branch->fresh()->name)->toBe('Updated Iloilo Hub')
+        ->and($branch->fresh()->zip_code)->toBe('5000');
+
+    $job = JobPosting::create([
+        'employer_profile_id' => $profile->id,
+        'title' => 'Regional Coordinator',
+        'description' => 'Coordinate regional accessibility programs across branches.',
+        'status' => 'draft',
+    ]);
+
+    Livewire::actingAs($employer)
+        ->test(\App\Livewire\Employer\Jobs\Edit::class, ['job' => $job])
+        ->set('employer_branch_id', $branch->id)
+        ->assertSet('city', 'Iloilo City')
+        ->assertSet('province', 'Iloilo')
+        ->assertSet('zip_code', '5000')
+        ->call('saveChanges')
+        ->assertHasNoErrors();
+
+    expect($job->fresh()->employer_branch_id)->toBe($branch->id)
+        ->and($job->fresh()->city)->toBe('Iloilo City');
+
+    Livewire::actingAs($employer)
+        ->test(EmployerProfileComponent::class)
+        ->call('deleteBranch', $branch->id);
+
+    expect(EmployerBranch::find($branch->id))->toBeNull();
+});

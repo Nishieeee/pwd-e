@@ -48,10 +48,14 @@
         <div class="flex flex-col-reverse items-stretch overflow-hidden rounded-2xl bg-white shadow-[0_8px_24px_rgba(26,40,64,0.06)] md:grid md:grid-cols-2"
              x-data="{
                  role: '{{ old('role', 'candidate') }}',
-                 step: {{ old('role', 'candidate') === 'employer' ? ($errors->hasAny(['company_name', 'company_type', 'industry', 'first_name', 'middle_name', 'last_name', 'email', 'phone', 'password']) ? 0 : ($errors->hasAny(['street_address', 'country', 'province', 'city', 'barangay', 'zip_code', 'terms']) ? 1 : 0)) : ($errors->hasAny(['first_name', 'middle_name', 'last_name', 'email', 'phone', 'password']) ? 0 : ($errors->hasAny(['date_of_birth']) ? 1 : ($errors->hasAny(['disability_type', 'disability_types', 'pwd_document_type', 'pwd_id_number', 'medical_certificate_number', 'pwd_id_file', 'medical_certificate_file', 'consent', 'terms']) ? 2 : 0))) }},
+                 step: {{ old('role', 'candidate') === 'employer' ? ($errors->hasAny(['company_name', 'company_type', 'company_type_other', 'industry', 'industry_other', 'first_name', 'middle_name', 'last_name', 'email', 'phone', 'password']) ? 0 : ($errors->hasAny(['street_address', 'country', 'province', 'city', 'barangay', 'zip_code', 'terms']) ? 1 : 0)) : ($errors->hasAny(['first_name', 'middle_name', 'last_name', 'email', 'phone', 'password']) ? 0 : ($errors->hasAny(['date_of_birth']) ? 1 : ($errors->hasAny(['disability_type', 'disability_types', 'pwd_document_type', 'pwd_id_number', 'medical_certificate_number', 'pwd_id_file', 'medical_certificate_file', 'consent', 'terms']) ? 2 : 0))) }},
                  candidateSteps: 3,
                  employerSteps: 2,
                  candidateDocType: '{{ old('pwd_document_type', 'pwd_id') }}',
+                 employerCompanyType: '{{ old('company_type', '') }}',
+                 employerIndustry: '{{ old('industry', '') }}',
+                 selectedDisabilities: @js(array_values((array) $oldDisabilities)),
+                 disabilityDropdownOpen: false,
                  cityMeta: @js($psgcCityMeta),
                  showCandidatePassword: false,
                  showEmployerPassword: false,
@@ -60,11 +64,11 @@
                  val(id) { const el = document.getElementById(id); return el ? (el.value || '').trim() : ''; },
                  checked(id) { const el = document.getElementById(id); return !!(el && !el.matches(':disabled') && el.checked); },
                  hasCheckedDisability() {
-                     const boxes = document.querySelectorAll('input.candidate-disability-checkbox');
-                     for (const b of boxes) {
-                         if (!b.matches(':disabled') && b.checked) return true;
-                     }
-                     return false;
+                     return Array.isArray(this.selectedDisabilities) && this.selectedDisabilities.length > 0;
+                 },
+                 removeDisability(item) {
+                     this.selectedDisabilities = this.selectedDisabilities.filter((d) => d !== item);
+                     this.$nextTick(() => this.updateState());
                  },
                  syncEmployerCity() {
                      const cVal = this.val('employer_city').toLowerCase();
@@ -114,8 +118,11 @@
                          if (this.step === 0) {
                              const p = this.val('employer_password');
                              const pc = this.val('employer_password_confirmation');
+                             const ctOk = this.employerCompanyType !== '' && (this.employerCompanyType !== 'Other' || this.val('employer_company_type_other') !== '');
+                             const indOk = this.employerIndustry !== 'Other' || this.val('employer_industry_other') !== '';
                              return this.val('employer_company_name') !== '' &&
-                                    this.val('employer_company_type') !== '' &&
+                                    ctOk &&
+                                    indOk &&
                                     this.val('employer_email') !== '' &&
                                     this.val('employer_phone').length >= 7 &&
                                     p.length >= 8 && p === pc;
@@ -423,7 +430,7 @@
                             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                 <div>
                                     <label for="employer_company_type" class="mb-1.5 block text-sm font-semibold text-primary-dark">Company type <span class="text-[#B3261E]">*</span></label>
-                                    <select id="employer_company_type" name="company_type" :required="role === 'employer'" @change="updateState()"
+                                    <select id="employer_company_type" name="company_type" x-model="employerCompanyType" :required="role === 'employer'" @change="$nextTick(() => updateState())"
                                             class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-sm text-primary-dark focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                                         <option value="">Select company type…</option>
                                         @foreach ([
@@ -435,16 +442,29 @@
                                             'NGO / Non-Profit Organization',
                                             'Government Agency / LGU',
                                             'Educational Institution',
+                                            'Other',
                                         ] as $ct)
                                             <option value="{{ $ct }}" {{ old('company_type') === $ct ? 'selected' : '' }}>{{ $ct }}</option>
                                         @endforeach
                                     </select>
+                                    <div x-show="employerCompanyType === 'Other'" x-cloak class="mt-2 relative">
+                                        <input id="employer_company_type_other"
+                                               name="company_type_other"
+                                               type="text"
+                                               value="{{ old('company_type_other') }}"
+                                               :disabled="role !== 'employer' || employerCompanyType !== 'Other'"
+                                               :required="role === 'employer' && employerCompanyType === 'Other'"
+                                               @input="updateState()"
+                                               placeholder="Specify company type…"
+                                               class="h-10 w-full rounded-lg border border-[#CBD5E1] bg-white px-3 pr-8 text-xs text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                    </div>
                                     @error('company_type')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                                    @error('company_type_other')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                                 </div>
 
                                 <div>
                                     <label for="employer_industry" class="mb-1.5 block text-sm font-semibold text-primary-dark">Industry sector</label>
-                                    <select id="employer_industry" name="industry"
+                                    <select id="employer_industry" name="industry" x-model="employerIndustry" @change="$nextTick(() => updateState())"
                                             class="h-12 w-full rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-sm text-primary-dark focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                                         <option value="">Select industry…</option>
                                         @foreach ([
@@ -462,7 +482,19 @@
                                             <option value="{{ $ind }}" {{ old('industry') === $ind ? 'selected' : '' }}>{{ $ind }}</option>
                                         @endforeach
                                     </select>
+                                    <div x-show="employerIndustry === 'Other'" x-cloak class="mt-2 relative">
+                                        <input id="employer_industry_other"
+                                               name="industry_other"
+                                               type="text"
+                                               value="{{ old('industry_other') }}"
+                                               :disabled="role !== 'employer' || employerIndustry !== 'Other'"
+                                               :required="role === 'employer' && employerIndustry === 'Other'"
+                                               @input="updateState()"
+                                               placeholder="Specify industry sector…"
+                                               class="h-10 w-full rounded-lg border border-[#CBD5E1] bg-white px-3 pr-8 text-xs text-primary-dark placeholder:text-[#94A3B8] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                                    </div>
                                     @error('industry')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
+                                    @error('industry_other')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                                 </div>
                             </div>
 
@@ -637,23 +669,80 @@
 
                     {{-- Candidate Step 2: PWD ID, Medical Cert, or Both --}}
                     <fieldset x-show="role === 'candidate' && step === 2" x-cloak :disabled="role !== 'candidate'" class="flex flex-col gap-5 border-0 p-0 m-0">
-                        <div>
-                            <label class="mb-2 block text-sm font-semibold text-primary-dark">
-                                Disability type(s) <span class="text-xs font-normal text-body-muted">(Select all that apply)</span> <span class="text-[#B3261E]">*</span>
+                        <div class="relative" @click.outside="disabilityDropdownOpen = false" @keydown.escape.window="disabilityDropdownOpen = false">
+                            <label for="disability-multiselect-trigger" class="mb-1.5 block text-sm font-semibold text-primary-dark">
+                                Disability type(s) <span class="text-[#B3261E]">*</span>
                             </label>
-                            <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                                @foreach (['Visual','Hearing','Motor/Physical','Speech','Cerebral Palsy','Psychosocial','Intellectual','Chronic / Orthopedic'] as $dt)
-                                    <label class="flex items-center gap-2 rounded-lg border border-[#CBD5E1] bg-white px-2.5 py-2 text-xs font-medium text-primary-dark hover:bg-slate-50 cursor-pointer has-[:checked]:border-primary has-[:checked]:bg-primary/5 has-[:checked]:font-bold transition-colors">
-                                        <input type="checkbox"
-                                               name="disability_types[]"
-                                               value="{{ $dt }}"
-                                               {{ is_array($oldDisabilities) && in_array($dt, $oldDisabilities, true) ? 'checked' : '' }}
-                                               @change="updateState()"
-                                               class="candidate-disability-checkbox h-4 w-4 rounded text-primary focus:ring-primary shrink-0">
-                                        <span class="leading-tight">{{ $dt }}</span>
-                                    </label>
-                                @endforeach
+                            <button id="disability-multiselect-trigger"
+                                    type="button"
+                                    @click="disabilityDropdownOpen = !disabilityDropdownOpen"
+                                    aria-haspopup="listbox"
+                                    :aria-expanded="disabilityDropdownOpen.toString()"
+                                    class="flex h-12 w-full items-center justify-between gap-2 rounded-lg border border-[#CBD5E1] bg-white px-3.5 text-left text-base text-primary-dark hover:border-primary/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30 transition-colors cursor-pointer">
+                                <span class="truncate" :class="selectedDisabilities.length === 0 ? 'text-[#94A3B8]' : 'text-primary-dark font-medium'"
+                                      x-text="selectedDisabilities.length === 0 ? 'Select disability type(s)…' : selectedDisabilities.join(', ')">
+                                    Select disability type(s)…
+                                </span>
+                                <span class="flex items-center gap-2 shrink-0">
+                                    <span x-show="selectedDisabilities.length > 0" x-cloak
+                                          class="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary"
+                                          x-text="selectedDisabilities.length + ' selected'"></span>
+                                    <svg class="h-4 w-4 text-body-muted transition-transform duration-150" :class="disabilityDropdownOpen ? 'rotate-180' : ''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </span>
+                            </button>
+
+                            <div x-show="disabilityDropdownOpen"
+                                 x-cloak
+                                 role="listbox"
+                                 aria-multiselectable="true"
+                                 aria-label="Disability types"
+                                 class="absolute left-0 right-0 z-30 mt-1.5 overflow-hidden rounded-xl border border-[#CBD5E1] bg-white shadow-xl">
+                                <div class="max-h-56 overflow-y-auto divide-y divide-slate-100 py-1">
+                                    @foreach (['Visual','Hearing','Motor/Physical','Speech','Cerebral Palsy','Psychosocial','Intellectual','Chronic / Orthopedic'] as $dt)
+                                        <label class="flex items-center justify-between gap-3 px-3.5 py-2.5 text-sm text-primary-dark hover:bg-primary-tint/50 cursor-pointer transition-colors"
+                                               :class="selectedDisabilities.includes('{{ $dt }}') ? 'bg-primary/5 font-semibold' : ''">
+                                            <span class="flex items-center gap-2.5">
+                                                <input type="checkbox"
+                                                       name="disability_types[]"
+                                                       value="{{ $dt }}"
+                                                       x-model="selectedDisabilities"
+                                                       @change="$nextTick(() => updateState())"
+                                                       class="candidate-disability-checkbox h-4 w-4 rounded border-[#CBD5E1] text-primary focus:ring-primary shrink-0">
+                                                <span>{{ $dt }}</span>
+                                            </span>
+                                            <svg x-show="selectedDisabilities.includes('{{ $dt }}')" x-cloak class="h-4 w-4 text-primary shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                            </svg>
+                                        </label>
+                                    @endforeach
+                                </div>
+                                <div class="flex items-center justify-between border-t border-slate-100 bg-slate-50 px-3.5 py-2 text-xs">
+                                    <button type="button"
+                                            x-show="selectedDisabilities.length > 0"
+                                            @click="selectedDisabilities = []; $nextTick(() => updateState())"
+                                            class="font-semibold text-body-muted hover:text-[#B3261E] cursor-pointer">
+                                        Clear all
+                                    </button>
+                                    <span x-show="selectedDisabilities.length === 0" class="text-body-muted">Select one or more categories</span>
+                                    <button type="button"
+                                            @click="disabilityDropdownOpen = false"
+                                            class="ml-auto rounded-md bg-primary px-3 py-1 font-bold text-white hover:bg-primary-dark cursor-pointer">
+                                        Done
+                                    </button>
+                                </div>
                             </div>
+
+                            <div x-show="selectedDisabilities.length > 0" x-cloak class="mt-2 flex flex-wrap gap-1.5">
+                                <template x-for="item in selectedDisabilities" :key="item">
+                                    <span class="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/5 px-2.5 py-0.5 text-xs font-semibold text-primary-dark">
+                                        <span x-text="item"></span>
+                                        <button type="button" @click="removeDisability(item)" :aria-label="'Remove ' + item" class="ml-0.5 text-primary hover:text-[#B3261E] font-bold leading-none cursor-pointer">&times;</button>
+                                    </span>
+                                </template>
+                            </div>
+
                             @error('disability_types')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                             @error('disability_type')<p class="mt-1.5 text-sm text-[#B3261E]">{{ $message }}</p>@enderror
                         </div>
@@ -794,6 +883,8 @@
                     msg = 'This field is required.';
                 } else if (name === 'email' && val && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
                     msg = 'Please enter a valid email address.';
+                } else if (name === 'phone' && val && val.length < 7) {
+                    msg = 'Please enter a valid phone number (at least 7 digits).';
                 } else if (name === 'password' && val && val.length < 8) {
                     msg = 'Password must be at least 8 characters.';
                 } else if (name === 'password_confirmation' && val) {
