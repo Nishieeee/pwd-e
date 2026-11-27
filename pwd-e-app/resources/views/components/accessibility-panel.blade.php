@@ -26,7 +26,7 @@
 <div x-data="{
         open: false,
         contrastLevel: parseInt(localStorage.getItem('pwde_contrast_level') || (localStorage.getItem('pwde_contrast') === 'high' ? '125' : '100')),
-        scale: parseInt(localStorage.getItem('pwde_scale') || '100'),
+        scale: (function () { const v = parseInt(localStorage.getItem('pwde_scale') || (window.__pwdeInitialScale || '100'), 10); return (!isNaN(v) && v >= 90 && v <= 150) ? v : 100; })(),
         dyslexia: localStorage.getItem('pwde_dyslexia') === 'true',
         screenReader: localStorage.getItem('pwde_screenreader') === 'true',
 

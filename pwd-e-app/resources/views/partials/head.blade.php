@@ -30,8 +30,22 @@
     (function () {
         var s = @json($a11y);
         var h = document.documentElement;
+        var rawScale = null;
+        try { rawScale = localStorage.getItem('pwde_scale'); } catch (e) {}
+        var parsedLocal = rawScale !== null ? parseInt(rawScale, 10) : NaN;
+        var parsedServer = s.font_scale ? parseInt(s.font_scale, 10) : NaN;
+        var scale = 100;
+        if (!isNaN(parsedLocal) && parsedLocal >= 90 && parsedLocal <= 150) {
+            scale = parsedLocal;
+        } else if (!isNaN(parsedServer) && parsedServer >= 90 && parsedServer <= 150) {
+            scale = parsedServer;
+        } else if (s.large_text === true) {
+            scale = 125;
+        }
+        window.__pwdeInitialScale = scale;
+        h.style.fontSize = scale + '%';
+        h.classList.toggle('a11y-large-text', scale >= 125);
         if (s.high_contrast) h.classList.add('a11y-high-contrast');
-        if (s.large_text) h.classList.add('a11y-large-text');
         if (s.dyslexia_font) h.classList.add('a11y-dyslexia');
         if (s.reduced_motion) h.classList.add('a11y-reduced-motion');
         if (s.predictive_text === false) h.classList.add('a11y-no-predictive');

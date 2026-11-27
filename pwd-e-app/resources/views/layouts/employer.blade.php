@@ -2,7 +2,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}"
       x-data="{
           a11yContrastLevel: parseInt(localStorage.getItem('pwde_contrast_level') || (localStorage.getItem('pwde_contrast') === 'high' ? '125' : '100')),
-          a11yScale: parseInt(localStorage.getItem('pwde_scale') || '100'),
+          a11yScale: (function () { const v = parseInt(localStorage.getItem('pwde_scale') || (window.__pwdeInitialScale || '100'), 10); return (!isNaN(v) && v >= 90 && v <= 150) ? v : 100; })(),
           a11yDyslexia: localStorage.getItem('pwde_dyslexia') === 'true',
           a11yScreenReader: localStorage.getItem('pwde_screenreader') === 'true',
           mobileMenuOpen: false,
@@ -37,14 +37,19 @@
                   document.documentElement.style.filter = '';
               }
           },
-          increaseScale() { if (this.a11yScale < 150) { this.a11yScale += 10; localStorage.setItem('pwde_scale', this.a11yScale); document.documentElement.style.fontSize = this.a11yScale + '%'; } },
-          decreaseScale() { if (this.a11yScale > 90) { this.a11yScale -= 10; localStorage.setItem('pwde_scale', this.a11yScale); document.documentElement.style.fontSize = this.a11yScale + '%'; } },
-          resetScale() { this.a11yScale = 100; localStorage.setItem('pwde_scale', '100'); document.documentElement.style.fontSize = '100%'; },
+          applyScale() {
+              this.a11yScale = Math.min(150, Math.max(90, parseInt(this.a11yScale, 10) || 100));
+              document.documentElement.style.fontSize = this.a11yScale + '%';
+              document.documentElement.classList.toggle('a11y-large-text', this.a11yScale >= 125);
+          },
+          increaseScale() { if (this.a11yScale < 150) { this.a11yScale += 10; localStorage.setItem('pwde_scale', this.a11yScale); this.applyScale(); } },
+          decreaseScale() { if (this.a11yScale > 90) { this.a11yScale -= 10; localStorage.setItem('pwde_scale', this.a11yScale); this.applyScale(); } },
+          resetScale() { this.a11yScale = 100; localStorage.setItem('pwde_scale', '100'); this.applyScale(); },
           toggleDyslexia() { this.a11yDyslexia = !this.a11yDyslexia; localStorage.setItem('pwde_dyslexia', this.a11yDyslexia ? 'true' : 'false'); },
           toggleScreenReader() { this.a11yScreenReader = !this.a11yScreenReader; localStorage.setItem('pwde_screenreader', this.a11yScreenReader ? 'true' : 'false'); const msg = this.a11yScreenReader ? 'Screen reader assistive enhancements enabled' : 'Screen reader enhancements disabled'; const live = document.getElementById('a11y-announcer'); if (live) live.textContent = msg; }
       }"
       x-init="
-          if (a11yScale !== 100) document.documentElement.style.fontSize = a11yScale + '%';
+          applyScale();
           if (a11yContrastLevel > 100) {
               document.documentElement.style.setProperty('--pwde-contrast-filter', 'contrast(' + a11yContrastLevel + '%)');
               document.documentElement.style.filter = 'contrast(' + a11yContrastLevel + '%)';
@@ -238,72 +243,7 @@
     <!-- Main Content Area -->
     <div class="flex-1 flex flex-col min-w-0 lg:h-screen lg:overflow-y-auto">
         <!-- Top Accessibility & Navigation Header -->
-        <header class="bg-[#F8FAFC] border-b border-gray-200 px-4 sm:px-6 lg:px-8 py-2 sm:py-2.5 flex flex-wrap items-center justify-between gap-y-2 gap-x-3.5 sticky top-0 z-30 shadow-xs min-w-0" role="region" aria-label="Accessibility settings and profile controls">
-            <!-- Left: Accessibility Tools -->
-            <div class="flex items-center flex-wrap gap-2 text-xs text-gray-700 min-w-0">
-                <div class="flex items-center gap-1.5 sm:gap-2 font-semibold text-[#1A2840] mr-1 sm:mr-2 shrink-0">
-                    <svg class="w-5 h-5 text-[#244F73] shrink-0" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24" aria-hidden="true">
-                        <circle cx="12" cy="12" r="10"/>
-                        <circle cx="12" cy="7.25" r="1.35" fill="currentColor" stroke="none"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M7.25 10.5l4.75 1 4.75-1M12 11.5v3.25m0 0l-2.6 3.75m2.6-3.75l2.6 3.75"/>
-                    </svg>
-                    <span>Accessibility</span>
-                </div>
-
-                <!-- Contrast Level Controls -->
-                <div class="inline-flex items-center rounded-lg border border-gray-300 bg-white p-0.5 shadow-2xs shrink-0" role="group" aria-label="Contrast level controls">
-                    <button type="button" @click="decreaseContrast()" class="px-2 sm:px-2.5 py-1.5 rounded-md text-gray-700 hover:bg-gray-100 font-bold text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#244F73] focus-visible:ring-offset-1 cursor-pointer" aria-label="Decrease contrast" title="Decrease contrast">C-</button>
-                    <button type="button" @click="cycleContrast()" class="px-2 sm:px-2.5 py-1.5 rounded-md text-gray-700 font-semibold text-xs hover:bg-gray-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#244F73] focus-visible:ring-offset-1 inline-flex items-center gap-1 cursor-pointer" :class="a11yContrastLevel > 100 ? 'font-bold text-[#1A2840]' : ''" aria-label="Contrast level: click to cycle presets">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke-width="2"/><path fill="currentColor" d="M12 3a9 9 0 000 18V3z"/></svg>
-                        <span x-text="a11yContrastLevel > 100 ? a11yContrastLevel + '%' : 'Contrast'">Contrast</span>
-                    </button>
-                    <button type="button" @click="increaseContrast()" class="px-2 sm:px-2.5 py-1.5 rounded-md text-gray-700 hover:bg-gray-100 font-bold text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#244F73] focus-visible:ring-offset-1 cursor-pointer" aria-label="Increase contrast" title="Increase contrast">C+</button>
-                </div>
-
-                <div class="inline-flex items-center rounded-lg border border-gray-300 bg-white p-0.5 shadow-2xs shrink-0" role="group" aria-label="Text scaling controls">
-                    <button type="button" @click="decreaseScale()" class="px-2 sm:px-2.5 py-1.5 rounded-md text-gray-700 hover:bg-gray-100 font-bold text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#244F73] focus-visible:ring-offset-1 cursor-pointer" aria-label="Decrease text size">A-</button>
-                    <button type="button" @click="resetScale()" class="px-2 sm:px-2.5 py-1.5 rounded-md text-gray-700 font-semibold text-xs hover:bg-gray-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#244F73] focus-visible:ring-offset-1 cursor-pointer" aria-label="Reset text size to 100%">
-                        <span x-text="a11yScale + '%'">100%</span>
-                    </button>
-                    <button type="button" @click="increaseScale()" class="px-2 sm:px-2.5 py-1.5 rounded-md text-gray-700 hover:bg-gray-100 font-bold text-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#244F73] focus-visible:ring-offset-1 cursor-pointer" aria-label="Increase text size">A+</button>
-                </div>
-
-                <button type="button" @click="toggleDyslexia()" :class="a11yDyslexia ? 'bg-[#1A2840] text-white border-[#1A2840]' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'" class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg font-medium border shadow-2xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#244F73] focus-visible:ring-offset-2 cursor-pointer shrink-0" :aria-pressed="a11yDyslexia.toString()" aria-label="Toggle dyslexia-friendly font">
-                    <span class="font-serif font-bold text-xs" aria-hidden="true">T</span>
-                    <span>Dyslexia-friendly font</span>
-                </button>
-
-                <button type="button" @click="toggleScreenReader()" :class="a11yScreenReader ? 'bg-[#1A2840] text-white border-[#1A2840]' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'" class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg font-medium border shadow-2xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#244F73] focus-visible:ring-offset-2 cursor-pointer shrink-0" :aria-pressed="a11yScreenReader.toString()" aria-label="Toggle screen reader live assistance">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
-                    </svg>
-                    <span>Screen reader</span>
-                </button>
-            </div>
-
-            <!-- Right: Settings, Notifications, Logout -->
-            <div class="flex items-center gap-3 sm:gap-4 text-xs font-medium text-gray-700 shrink-0 ml-auto">
-                <a href="{{ route('profile.edit') }}" class="inline-flex items-center gap-1.5 text-gray-700 hover:text-[#1A2840] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#244F73] focus-visible:ring-offset-2 rounded-md px-2 py-1.5">
-                    <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    </svg>
-                    <span>Settings</span>
-                </a>
-
-                <livewire:notification-bell />
-
-                <form method="POST" action="{{ route('logout') }}" class="inline">
-                    @csrf
-                    <button type="submit" class="inline-flex items-center gap-1.5 text-gray-700 hover:text-red-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#244F73] focus-visible:ring-offset-2 rounded-md px-2 py-1.5 cursor-pointer">
-                        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                        </svg>
-                        <span>Log out</span>
-                    </button>
-                </form>
-            </div>
-        </header>
+        @include('partials.accessibility-header-bar')
 
         <!-- Dynamic Main Content -->
         <main id="main-content" class="flex-1 p-6 lg:p-8" tabindex="-1">

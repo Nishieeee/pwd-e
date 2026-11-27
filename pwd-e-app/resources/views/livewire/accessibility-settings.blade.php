@@ -12,7 +12,7 @@
 
             <div class="space-y-3">
                 <flux:toggle wire:model.live="highContrast" :label="__('High contrast')" />
-                <flux:toggle wire:model.live="largeText" :label="__('Large text (1.5×)')" />
+                <flux:toggle wire:model.live="largeText" :label="__('Large text (125%)')" />
                 <flux:toggle wire:model.live="dyslexiaFont" :label="__('Dyslexia-friendly font')" />
                 <flux:toggle wire:model.live="reducedMotion" :label="__('Reduced motion')" />
                 <flux:toggle wire:model.live="predictiveText" :label="__('Predictive text')" />
@@ -22,7 +22,17 @@
 
     <script>
         document.addEventListener('livewire:init', () => {
-            Livewire.on('a11y-settings-changed', () => { window.location.reload(); });
+            Livewire.on('a11y-settings-changed', ({ settings } = {}) => {
+                try {
+                    if (settings) {
+                        localStorage.setItem('pwde_scale', settings.large_text ? '125' : '100');
+                        localStorage.setItem('pwde_contrast_level', settings.high_contrast ? '125' : '100');
+                        localStorage.setItem('pwde_contrast', settings.high_contrast ? 'high' : 'normal');
+                        localStorage.setItem('pwde_dyslexia', settings.dyslexia_font ? 'true' : 'false');
+                    }
+                } catch (e) {}
+                window.location.reload();
+            });
         });
     </script>
 </div>

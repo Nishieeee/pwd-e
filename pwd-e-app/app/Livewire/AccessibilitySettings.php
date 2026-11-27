@@ -40,17 +40,20 @@ class AccessibilitySettings extends Component
             return;
         }
 
+        $payload = [
+            'high_contrast' => $this->highContrast,
+            'large_text' => $this->largeText,
+            'font_scale' => $this->largeText ? 125 : 100,
+            'dyslexia_font' => $this->dyslexiaFont,
+            'reduced_motion' => $this->reducedMotion,
+            'predictive_text' => $this->predictiveText,
+        ];
+
         $user->update([
-            'display_settings' => [
-                'high_contrast' => $this->highContrast,
-                'large_text' => $this->largeText,
-                'dyslexia_font' => $this->dyslexiaFont,
-                'reduced_motion' => $this->reducedMotion,
-                'predictive_text' => $this->predictiveText,
-            ],
+            'display_settings' => $payload,
         ]);
 
-        $this->dispatch('a11y-settings-changed');
+        $this->dispatch('a11y-settings-changed', settings: $payload);
     }
 
     public function render(): View
