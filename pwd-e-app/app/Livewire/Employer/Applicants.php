@@ -29,6 +29,9 @@ class Applicants extends Component
     #[Url(as: 'status')]
     public string $statusFilter = 'all';
 
+    #[Url(as: 'match')]
+    public string $matchScoreFilter = 'all';
+
     public bool $showCloseJobPromptModal = false;
 
     public ?int $promptCloseJobId = null;
@@ -868,6 +871,7 @@ class Applicants extends Component
             'candidateProfile.user',
             'candidateProfile.education',
             'candidateProfile.workExperiences',
+            'candidateProfile.trainings',
             'candidateProfile.certifications',
             'jobPosting.employerProfile',
             'messages',
@@ -890,6 +894,16 @@ class Applicants extends Component
             $query->where('job_posting_id', $this->job->id);
         } elseif ($this->selectedJobId) {
             $query->where('job_posting_id', $this->selectedJobId);
+        }
+
+        if ($this->matchScoreFilter === '90') {
+            $query->whereRaw('COALESCE(fit_score_at_apply, 95) >= 90');
+        } elseif ($this->matchScoreFilter === '80') {
+            $query->whereRaw('COALESCE(fit_score_at_apply, 95) >= 80');
+        } elseif ($this->matchScoreFilter === '70') {
+            $query->whereRaw('COALESCE(fit_score_at_apply, 95) >= 70');
+        } elseif ($this->matchScoreFilter === 'below_70') {
+            $query->whereRaw('COALESCE(fit_score_at_apply, 95) < 70');
         }
 
         $baseCountQuery = clone $query;
@@ -916,13 +930,23 @@ class Applicants extends Component
                 'candidateProfile.user',
                 'candidateProfile.education',
                 'candidateProfile.workExperiences',
+                'candidateProfile.trainings',
                 'candidateProfile.certifications',
-                'jobPosting',
+                'candidateProfile.accessibilityNeeds',
+                'jobPosting.accommodations',
                 'workforceRecord',
                 'reappliedFrom.workforceRecord',
             ])->whereHas('jobPosting', function ($q) use ($profile) {
                 $q->where('employer_profile_id', $profile?->id ?? 0);
             })->find($this->viewingApplicationId)
+            : null;
+
+        $viewingBreakdown = $viewing
+            ? \App\Support\MatchBreakdownPresenter::build(
+                $viewing->candidateProfile,
+                $viewing->jobPosting,
+                $viewing->fit_score_at_apply !== null ? (float) $viewing->fit_score_at_apply : 95.0
+            )
             : null;
 
         $interviewingApp = $this->interviewAppId
@@ -959,6 +983,7 @@ class Applicants extends Component
             'applications' => $applications,
             'allCounts' => $allCounts,
             'viewing' => $viewing,
+            'viewingBreakdown' => $viewingBreakdown,
             'interviewingApp' => $interviewingApp,
             'offeringApp' => $offeringApp,
             'hiringApp' => $hiringApp,

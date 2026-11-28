@@ -201,7 +201,7 @@
                         <!-- Match score pill -->
                         <div class="mt-2 flex items-center justify-between">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#E8F5E9] text-[#176B47] border border-[#A5D6A7]">
-                                {{ $job->score }}% Accessibility fit
+                                {{ $job->score }}% Overall Match
                             </span>
                         </div>
 
@@ -290,9 +290,13 @@
                         </div>
 
                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-[#E8F5E9] text-[#176B47] border border-[#A5D6A7]">
-                            {{ $selectedJob->score }}% Accessibility fit
+                            {{ $selectedJob->score }}% Overall Match
                         </span>
                     </div>
+
+                    @if($selectedJobBreakdown)
+                        <x-match-breakdown-drawer :breakdown="$selectedJobBreakdown" />
+                    @endif
 
                     <div>
                         <h2 class="text-xl font-bold text-[#1A2840] tracking-tight">

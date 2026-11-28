@@ -199,6 +199,7 @@ class JobMatches extends Component
     {
         $user = Auth::user();
         $candidateProfile = $user?->candidateProfile ?? CandidateProfile::firstOrCreate(['user_id' => $user->id]);
+        $candidateProfile->loadMissing(['workExperiences', 'trainings', 'certifications', 'accessibilityNeeds']);
 
         // Base query
         $query = JobPosting::where('status', 'published')
@@ -255,6 +256,7 @@ class JobMatches extends Component
 
         // Selected Job details
         $selectedJob = null;
+        $selectedJobBreakdown = null;
         if ($this->selectedJobId) {
             $selectedJob = JobPosting::with(['employerProfile', 'jobAccommodations.accommodation', 'accommodations'])
                 ->find($this->selectedJobId);
@@ -263,6 +265,12 @@ class JobMatches extends Component
                 $match = $candidateProfile->jobMatches()->where('job_posting_id', $selectedJob->id)->first();
                 $selectedJob->score = $match ? (int) round($match->total_score * 100) : 98;
                 $selectedJob->accessibility_score_pct = $match ? (int) round($match->accessibility_score * 100) : 98;
+                $selectedJobBreakdown = \App\Support\MatchBreakdownPresenter::build(
+                    $candidateProfile,
+                    $selectedJob,
+                    (float) $selectedJob->score,
+                    $this->selectedAccommodations
+                );
             }
         }
 
@@ -273,6 +281,7 @@ class JobMatches extends Component
             'candidateProfile' => $candidateProfile,
             'jobs' => $jobs,
             'selectedJob' => $selectedJob,
+            'selectedJobBreakdown' => $selectedJobBreakdown,
             'selectedJobId' => $this->selectedJobId,
             'allAccommodations' => $allAccommodations,
             'search' => $this->search,

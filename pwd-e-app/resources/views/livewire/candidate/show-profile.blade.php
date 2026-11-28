@@ -299,6 +299,52 @@
             </div>
         </section>
 
+        {{-- Section 3B: Trainings, Seminars & Professional Certifications (REV-13) --}}
+        @php
+            $proCertifications = $profile->certifications->filter(fn ($c) => ($c->category ?? 'certification') !== 'education_diploma');
+        @endphp
+        @if($profile->trainings->isNotEmpty() || $proCertifications->isNotEmpty())
+            <section class="space-y-4 page-break-inside-avoid">
+                <h3 class="font-heading text-xs font-bold uppercase tracking-wider text-primary-dark pb-1.5 border-b border-gray-100 flex items-center gap-2">
+                    <svg class="size-4 text-secondary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span>{{ __('Trainings, Seminars & Professional Certifications') }}</span>
+                </h3>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    @foreach($profile->trainings as $tr)
+                        <div class="rounded-xl border border-gray-200 bg-surface/60 p-3.5 space-y-1">
+                            <div class="flex items-start justify-between gap-2">
+                                <h4 class="font-bold text-sm text-primary-dark">{{ $tr->title }}</h4>
+                                @if($tr->year_completed)
+                                    <span class="text-[11px] font-semibold text-body-muted tabular-nums">{{ $tr->year_completed }}</span>
+                                @endif
+                            </div>
+                            @if($tr->organizer)
+                                <p class="text-xs font-semibold text-primary">{{ $tr->organizer }}</p>
+                            @endif
+                            @if($tr->description)
+                                <p class="text-xs text-body-muted leading-relaxed">{{ $tr->description }}</p>
+                            @endif
+                        </div>
+                    @endforeach
+
+                    @foreach($proCertifications as $cert)
+                        <div class="rounded-xl border border-emerald-200 bg-emerald-50/40 p-3.5 space-y-1">
+                            <div class="flex items-start justify-between gap-2">
+                                <h4 class="font-bold text-sm text-primary-dark">{{ $cert->name }}</h4>
+                                @if($cert->year_obtained || $cert->issued_at)
+                                    <span class="text-[11px] font-semibold text-emerald-800 tabular-nums">{{ $cert->year_obtained ?: $cert->issued_at?->format('Y') }}</span>
+                                @endif
+                            </div>
+                            @if($cert->issuing_organization)
+                                <p class="text-xs font-semibold text-secondary">{{ $cert->issuing_organization }}</p>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            </section>
+        @endif
+
         {{-- Section 4: Educational Attainment --}}
         <section class="space-y-4 page-break-inside-avoid">
             <h3 class="font-heading text-xs font-bold uppercase tracking-wider text-primary-dark pb-1.5 border-b border-gray-100 flex items-center gap-2">

@@ -8,8 +8,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class CandidateCertification extends Model
 {
     protected $fillable = [
-        'candidate_profile_id', 'name', 'issuing_organization',
-        'issued_at', 'expires_at', 'credential_id', 'credential_url',
+        'candidate_profile_id',
+        'category',
+        'name',
+        'issuing_organization',
+        'year_obtained',
+        'issued_at',
+        'expires_at',
+        'credential_id',
+        'credential_url',
+        'file_path',
     ];
 
     protected $casts = [

@@ -1063,6 +1063,135 @@
                     </button>
                 </div>
 
+                <!-- 3B. Trainings & Seminars (REV-13) -->
+                <div class="space-y-5 pt-8 border-t border-gray-200/80">
+                    <div>
+                        <h3 class="text-base font-bold text-[#1A2840]">Trainings &amp; Seminars</h3>
+                        <p class="text-xs sm:text-[13px] text-gray-500 mt-1 leading-relaxed max-w-2xl">
+                            Include workshops, bootcamps, livelihood trainings, or seminars completed (optional, boosts skill &amp; achievement match visibility).
+                        </p>
+                    </div>
+
+                    @foreach($trainings as $tIndex => $tr)
+                        <div wire:key="training-row-{{ $tIndex }}" class="p-5 rounded-xl border border-gray-200 bg-gray-50/40 space-y-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-[#244F73] uppercase tracking-wider">Training / Seminar #{{ $tIndex + 1 }}</span>
+                                @if(count($trainings) > 1 || !empty($tr['title']) || !empty($tr['organizer']))
+                                    <button type="button"
+                                            wire:click="removeTraining({{ $tIndex }})"
+                                            class="text-xs font-semibold text-rose-600 hover:text-rose-800 hover:underline cursor-pointer">
+                                        Remove
+                                    </button>
+                                @endif
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                                <div class="md:col-span-5">
+                                    <label for="training-title-{{ $tIndex }}" class="block text-xs sm:text-[13px] font-semibold text-[#1A2840] mb-1.5">Training or Seminar Title</label>
+                                    <input id="training-title-{{ $tIndex }}"
+                                           type="text"
+                                           wire:model.live="trainings.{{ $tIndex }}.title"
+                                           placeholder="e.g., DICT Digital Jobs Web Accessibility Bootcamp"
+                                           class="h-11 w-full px-3.5 rounded-lg border border-gray-300 bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#244F73] focus:border-[#244F73]" />
+                                </div>
+                                <div class="md:col-span-5">
+                                    <label for="training-org-{{ $tIndex }}" class="block text-xs sm:text-[13px] font-semibold text-[#1A2840] mb-1.5">Organizer / Institution</label>
+                                    <input id="training-org-{{ $tIndex }}"
+                                           type="text"
+                                           wire:model.live="trainings.{{ $tIndex }}.organizer"
+                                           placeholder="e.g., DICT Region IX / DOLE"
+                                           class="h-11 w-full px-3.5 rounded-lg border border-gray-300 bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#244F73] focus:border-[#244F73]" />
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label for="training-year-{{ $tIndex }}" class="block text-xs sm:text-[13px] font-semibold text-[#1A2840] mb-1.5">Year</label>
+                                    <input id="training-year-{{ $tIndex }}"
+                                           type="text"
+                                           inputmode="numeric"
+                                           maxlength="4"
+                                           wire:model.live="trainings.{{ $tIndex }}.year_completed"
+                                           placeholder="2025"
+                                           class="h-11 w-full px-3.5 rounded-lg border border-gray-300 bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#244F73] focus:border-[#244F73]" />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="training-desc-{{ $tIndex }}" class="block text-xs sm:text-[13px] font-semibold text-[#1A2840] mb-1.5">Key Topics / Takeaways <span class="font-normal text-gray-500">(Optional)</span></label>
+                                <input id="training-desc-{{ $tIndex }}"
+                                       type="text"
+                                       wire:model.live="trainings.{{ $tIndex }}.description"
+                                       placeholder="e.g., Screen-reader testing, WCAG 2.1 AA compliance, customer support workflows"
+                                       class="h-11 w-full px-3.5 rounded-lg border border-gray-300 bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#244F73] focus:border-[#244F73]" />
+                            </div>
+                        </div>
+                    @endforeach
+
+                    <button type="button"
+                            wire:click="addTraining"
+                            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-gray-300 bg-white text-xs font-bold text-[#244F73] hover:bg-gray-50 hover:border-gray-400 cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#244F73] focus-visible:ring-offset-2">
+                        <span>+ Add training or seminar</span>
+                    </button>
+                </div>
+
+                <!-- 3C. Certifications, TESDA NC & Eligibility (REV-13) -->
+                <div class="space-y-5 pt-8 border-t border-gray-200/80">
+                    <div>
+                        <h3 class="text-base font-bold text-[#1A2840]">Certifications, TESDA &amp; Eligibility</h3>
+                        <p class="text-xs sm:text-[13px] text-gray-500 mt-1 leading-relaxed max-w-2xl">
+                            Add TESDA National Certificates (NC II/III), Civil Service Eligibility, PRC licenses, or technical certifications (optional).
+                        </p>
+                    </div>
+
+                    @foreach($certificationsList as $cIndex => $certItem)
+                        <div wire:key="cert-row-{{ $cIndex }}" class="p-5 rounded-xl border border-gray-200 bg-gray-50/40 space-y-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-[#176B47] uppercase tracking-wider">Certification / Eligibility #{{ $cIndex + 1 }}</span>
+                                @if(count($certificationsList) > 1 || !empty($certItem['name']) || !empty($certItem['issuing_organization']))
+                                    <button type="button"
+                                            wire:click="removeCertificationItem({{ $cIndex }})"
+                                            class="text-xs font-semibold text-rose-600 hover:text-rose-800 hover:underline cursor-pointer">
+                                        Remove
+                                    </button>
+                                @endif
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                                <div class="md:col-span-5">
+                                    <label for="cert-name-{{ $cIndex }}" class="block text-xs sm:text-[13px] font-semibold text-[#1A2840] mb-1.5">Certificate / Eligibility Name</label>
+                                    <input id="cert-name-{{ $cIndex }}"
+                                           type="text"
+                                           wire:model.live="certificationsList.{{ $cIndex }}.name"
+                                           placeholder="e.g., Computer Systems Servicing NC II"
+                                           class="h-11 w-full px-3.5 rounded-lg border border-gray-300 bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#244F73] focus:border-[#244F73]" />
+                                </div>
+                                <div class="md:col-span-4">
+                                    <label for="cert-org-{{ $cIndex }}" class="block text-xs sm:text-[13px] font-semibold text-[#1A2840] mb-1.5">Issuing Authority</label>
+                                    <input id="cert-org-{{ $cIndex }}"
+                                           type="text"
+                                           wire:model.live="certificationsList.{{ $cIndex }}.issuing_organization"
+                                           placeholder="e.g., TESDA / Civil Service Commission"
+                                           class="h-11 w-full px-3.5 rounded-lg border border-gray-300 bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#244F73] focus:border-[#244F73]" />
+                                </div>
+                                <div class="md:col-span-3">
+                                    <label for="cert-year-{{ $cIndex }}" class="block text-xs sm:text-[13px] font-semibold text-[#1A2840] mb-1.5">Year Obtained</label>
+                                    <input id="cert-year-{{ $cIndex }}"
+                                           type="text"
+                                           inputmode="numeric"
+                                           maxlength="4"
+                                           wire:model.live="certificationsList.{{ $cIndex }}.year_obtained"
+                                           placeholder="2025"
+                                           class="h-11 w-full px-3.5 rounded-lg border border-gray-300 bg-white text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#244F73] focus:border-[#244F73]" />
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+
+                    <button type="button"
+                            wire:click="addCertificationItem"
+                            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-gray-300 bg-white text-xs font-bold text-[#244F73] hover:bg-gray-50 hover:border-gray-400 cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#244F73] focus-visible:ring-offset-2">
+                        <span>+ Add certification or eligibility</span>
+                    </button>
+                </div>
+
                 <!-- 4. Education (Single Dropdown: Highest Educational Attainment + Strictly Optional Certificate) -->
                 <div class="space-y-6 pt-8 border-t border-gray-200/80">
                     <div>
@@ -1852,6 +1981,31 @@
                         <p class="text-xs text-gray-500">No work experience entries added yet.</p>
                     @endforelse
                 </div>
+
+                @if(!empty($validTrainings) || !empty($validCertifications))
+                    <div class="space-y-2.5 pb-4 border-b border-gray-100">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-xs font-bold text-[#1A2840]">Trainings, Seminars &amp; Certifications</h3>
+                            <button type="button" wire:click="goToStep(2)" class="text-xs font-bold text-[#244F73] hover:underline">Edit</button>
+                        </div>
+                        @foreach($validTrainings as $tr)
+                            <div class="text-xs text-[#1A2840]">
+                                <span class="font-bold">{{ $tr['title'] }}</span>
+                                @if($tr['organizer'] || $tr['year_completed'])
+                                    <span class="text-gray-500"> &middot; {{ implode(' · ', array_filter([$tr['organizer'], $tr['year_completed']])) }}</span>
+                                @endif
+                            </div>
+                        @endforeach
+                        @foreach($validCertifications as $cert)
+                            <div class="text-xs text-[#176B47]">
+                                <span class="font-bold">&#10003; {{ $cert['name'] }}</span>
+                                @if($cert['issuing_organization'] || $cert['year_obtained'])
+                                    <span class="text-gray-500"> &middot; {{ implode(' · ', array_filter([$cert['issuing_organization'], $cert['year_obtained']])) }}</span>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
 
                 <!-- Education -->
                 <div class="space-y-1 pb-4 border-b border-gray-100">

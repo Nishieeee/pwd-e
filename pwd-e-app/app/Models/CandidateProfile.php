@@ -114,6 +114,11 @@ class CandidateProfile extends Model
         return $this->hasMany(CandidateCertification::class)->orderByDesc('issued_at');
     }
 
+    public function trainings(): HasMany
+    {
+        return $this->hasMany(CandidateTraining::class)->orderByDesc('year_completed')->orderByDesc('id');
+    }
+
     public function accommodations(): BelongsToMany
     {
         return $this->belongsToMany(Accommodation::class, 'accessibility_needs')

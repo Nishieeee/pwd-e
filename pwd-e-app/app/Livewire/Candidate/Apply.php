@@ -275,6 +275,20 @@ class Apply extends Component
             if ($this->resumeFile) {
                 $resumePath = $this->resumeFile->store('applications/resumes', 'private');
                 $profile->update(['resume_pdf_path' => $resumePath]);
+
+                // REV-11: Auto-read uploaded résumé if Standard Typing profile data was skipped/empty
+                $hasTypedProfile = ! empty($profile->skills)
+                    || $profile->workExperiences()->exists()
+                    || $profile->trainings()->exists();
+                if (! $hasTypedProfile) {
+                    app(\App\Services\Resume\ResumeParserService::class)->populateCandidateProfileFromFile(
+                        $profile,
+                        $this->resumeFile,
+                        $this->resumeFile->getClientOriginalName(),
+                        true
+                    );
+                    $profile->refresh();
+                }
             } else {
                 $resumePath = $profile->resume_pdf_path;
             }

@@ -7,6 +7,7 @@ use App\Models\Accommodation;
 use App\Models\CandidateCertification;
 use App\Models\CandidateEducation;
 use App\Models\CandidateProfile;
+use App\Models\CandidateTraining;
 use App\Models\CandidateWorkExperience;
 use App\Models\EducationLevel;
 use App\Models\LanguageOption;
@@ -91,6 +92,14 @@ class ProfileBuilder extends Component
 
     // Work Experience (Start Year & End Year + Present toggle)
     public array $experiences = [];
+
+    // Trainings & Seminars (REV-13)
+    public array $trainings = [];
+
+    // Professional Certifications, TESDA NC & Eligibility (REV-13)
+    public array $certificationsList = [];
+
+    public bool $hasCustomUploadedResume = false;
 
     // Education (Highest Educational Attainment + strictly optional certificate)
     public string $highestEducation = 'Tertiary (College / University)';
@@ -297,6 +306,28 @@ class ProfileBuilder extends Component
             ];
         }
 
+        // Trainings & Seminars (REV-13)
+        $existingTrainings = Schema::hasTable('candidate_trainings')
+            ? $profile->trainings()->get()
+            : collect();
+        if ($existingTrainings->isNotEmpty()) {
+            $this->trainings = $existingTrainings->map(fn ($tr) => [
+                'title' => trim((string) $tr->title),
+                'organizer' => trim((string) ($tr->organizer ?? '')),
+                'year_completed' => trim((string) ($tr->year_completed ?? '')),
+                'description' => trim((string) ($tr->description ?? '')),
+            ])->toArray();
+        } else {
+            $this->trainings = [
+                [
+                    'title' => '',
+                    'organizer' => '',
+                    'year_completed' => '',
+                    'description' => '',
+                ],
+            ];
+        }
+
         // Education (Certificate is strictly optional)
         $eduRecord = $profile->education()->first();
         $firstEducationLevel = EducationLevel::orderBy('sort_order')->first()?->name ?? 'Tertiary (College / University)';
@@ -304,10 +335,34 @@ class ProfileBuilder extends Component
         $this->institutionName = trim((string) ($eduRecord?->institution_name ?? ''));
         $this->yearGraduated = $eduRecord?->end_date ? $eduRecord->end_date->format('Y') : '';
 
-        $certRecord = $profile->certifications()->first();
+        $hasCertCategory = Schema::hasColumn('candidate_certifications', 'category');
+        $certRecord = $hasCertCategory
+            ? $profile->certifications()->where('category', 'education_diploma')->first()
+            : $profile->certifications()->whereNotNull('file_path')->first();
         if ($certRecord && ! empty($certRecord->file_path) && Storage::disk('public')->exists($certRecord->file_path)) {
             $this->educationCertificatePath = $certRecord->file_path;
             $this->educationCertificateFilename = basename($certRecord->file_path);
+        }
+
+        $existingProCerts = $hasCertCategory
+            ? $profile->certifications()->where('category', '!=', 'education_diploma')->get()
+            : $profile->certifications()->get();
+        if ($existingProCerts->isNotEmpty()) {
+            $this->certificationsList = $existingProCerts->map(fn ($cert) => [
+                'name' => trim((string) $cert->name),
+                'issuing_organization' => trim((string) ($cert->issuing_organization ?? '')),
+                'year_obtained' => trim((string) ($cert->year_obtained ?: ($cert->issued_at ? $cert->issued_at->format('Y') : ''))),
+                'credential_id' => trim((string) ($cert->credential_id ?? '')),
+            ])->toArray();
+        } else {
+            $this->certificationsList = [
+                [
+                    'name' => '',
+                    'issuing_organization' => '',
+                    'year_obtained' => '',
+                    'credential_id' => '',
+                ],
+            ];
         }
 
         // Skills (ensure any saved custom skills are also present in SkillOption)
@@ -508,6 +563,46 @@ class ProfileBuilder extends Component
         }
     }
 
+    public function addTraining(): void
+    {
+        $this->trainings[] = [
+            'title' => '',
+            'organizer' => '',
+            'year_completed' => '',
+            'description' => '',
+        ];
+    }
+
+    public function removeTraining(int $index): void
+    {
+        if (count($this->trainings) > 1 && isset($this->trainings[$index])) {
+            unset($this->trainings[$index]);
+            $this->trainings = array_values($this->trainings);
+        } elseif (isset($this->trainings[$index])) {
+            $this->trainings = [['title' => '', 'organizer' => '', 'year_completed' => '', 'description' => '']];
+        }
+    }
+
+    public function addCertificationItem(): void
+    {
+        $this->certificationsList[] = [
+            'name' => '',
+            'issuing_organization' => '',
+            'year_obtained' => '',
+            'credential_id' => '',
+        ];
+    }
+
+    public function removeCertificationItem(int $index): void
+    {
+        if (count($this->certificationsList) > 1 && isset($this->certificationsList[$index])) {
+            unset($this->certificationsList[$index]);
+            $this->certificationsList = array_values($this->certificationsList);
+        } elseif (isset($this->certificationsList[$index])) {
+            $this->certificationsList = [['name' => '', 'issuing_organization' => '', 'year_obtained' => '', 'credential_id' => '']];
+        }
+    }
+
     public function toggleSkill(string $skillName): void
     {
         if (in_array($skillName, $this->selectedSkills, true)) {
@@ -548,14 +643,32 @@ class ProfileBuilder extends Component
         }
     }
 
+    public function isStandardTypingUnpopulated(): bool
+    {
+        return empty($this->selectedSkills)
+            && empty($this->getValidExperiences())
+            && empty($this->getValidTrainings())
+            && empty($this->getValidCertifications())
+            && trim($this->bio) === '';
+    }
+
     public function updatedCustomResumeUpload(): void
     {
         if ($this->customResumeUpload) {
             $filename = $this->customResumeUpload->getClientOriginalName();
-            $this->resumePdfPath = $this->customResumeUpload->storeAs('resumes', $filename, 'public');
+            $storedPath = $this->customResumeUpload->storeAs('resumes', $filename, 'public');
+            $this->resumePdfPath = $storedPath;
             $this->resumeFilename = $filename;
             $sizeKb = max(1, (int) round($this->customResumeUpload->getSize() / 1024));
             $this->resumeFileSize = $sizeKb.' KB';
+            $this->hasCustomUploadedResume = true;
+
+            // REV-11: If Standard Typing was not used / profile fields are empty, auto-read the uploaded résumé!
+            if ($this->inputMode !== 'standard' || $this->isStandardTypingUnpopulated()) {
+                $parser = app(\App\Services\Resume\ResumeParserService::class);
+                $parsed = $parser->parse($this->customResumeUpload, $filename);
+                $this->applyParsedResumeData($parsed, $filename, $storedPath, $this->resumeFileSize, false, true);
+            }
         }
     }
 
@@ -748,6 +861,48 @@ class ProfileBuilder extends Component
                 'end_year' => $isCurrent ? 'Present' : (strlen($endYear) === 4 ? $endYear : ''),
                 'is_current' => $isCurrent,
                 'description' => trim((string) ($exp['description'] ?? '')),
+            ];
+        }
+
+        return $valid;
+    }
+
+    public function getValidTrainings(): array
+    {
+        $valid = [];
+        foreach ($this->trainings as $tr) {
+            $title = trim((string) ($tr['title'] ?? ''));
+            $organizer = trim((string) ($tr['organizer'] ?? ''));
+            if ($title === '' && $organizer === '') {
+                continue;
+            }
+            $year = preg_replace('/[^0-9]/', '', (string) ($tr['year_completed'] ?? ''));
+            $valid[] = [
+                'title' => $title ?: 'Training / Seminar',
+                'organizer' => $organizer,
+                'year_completed' => strlen($year) === 4 ? $year : '',
+                'description' => trim((string) ($tr['description'] ?? '')),
+            ];
+        }
+
+        return $valid;
+    }
+
+    public function getValidCertifications(): array
+    {
+        $valid = [];
+        foreach ($this->certificationsList as $cert) {
+            $name = trim((string) ($cert['name'] ?? ''));
+            $org = trim((string) ($cert['issuing_organization'] ?? ''));
+            if ($name === '' && $org === '') {
+                continue;
+            }
+            $year = preg_replace('/[^0-9]/', '', (string) ($cert['year_obtained'] ?? ''));
+            $valid[] = [
+                'name' => $name ?: 'Professional Certification',
+                'issuing_organization' => $org ?: 'Certifying Authority',
+                'year_obtained' => strlen($year) === 4 ? $year : '',
+                'credential_id' => trim((string) ($cert['credential_id'] ?? '')),
             ];
         }
 
@@ -1416,17 +1571,19 @@ class ProfileBuilder extends Component
 
     public function persistProfileData(): CandidateProfile
     {
+        if ($this->customResumeUpload) {
+            $this->updatedCustomResumeUpload();
+        }
+
         $this->applyHeadlineFallback();
-        $this->generateResumePdf();
+        if (! $this->hasCustomUploadedResume) {
+            $this->generateResumePdf();
+        }
 
         $user = Auth::user();
 
         if ($this->avatarUpload) {
             $this->updatedAvatarUpload();
-        }
-
-        if ($this->customResumeUpload) {
-            $this->updatedCustomResumeUpload();
         }
 
         if ($this->fslVideoUpload) {
@@ -1533,6 +1690,20 @@ class ProfileBuilder extends Component
             ]);
         }
 
+        // Sync Trainings & Seminars (REV-13)
+        if (Schema::hasTable('candidate_trainings')) {
+            $profile->trainings()->delete();
+            foreach ($this->getValidTrainings() as $tr) {
+                CandidateTraining::create([
+                    'candidate_profile_id' => $profile->id,
+                    'title' => $tr['title'],
+                    'organizer' => $tr['organizer'] ?: null,
+                    'year_completed' => $tr['year_completed'] ?: null,
+                    'description' => $tr['description'] ?: null,
+                ]);
+            }
+        }
+
         // Sync Education (Strictly optional certificate/institution)
         $profile->education()->delete();
         $gradYear = is_numeric($this->yearGraduated) && strlen($this->yearGraduated) === 4
@@ -1549,14 +1720,32 @@ class ProfileBuilder extends Component
             'is_current' => false,
         ]);
 
+        // Sync Certifications, TESDA & Education Diploma
+        $profile->certifications()->delete();
         if ($this->educationCertificatePath) {
-            $profile->certifications()->delete();
             CandidateCertification::create([
                 'candidate_profile_id' => $profile->id,
+                'category' => 'education_diploma',
                 'name' => $this->highestEducation.' Certificate',
                 'issuing_organization' => trim($this->institutionName) ?: 'Educational Institution',
+                'year_obtained' => $gradYear ? (string) $gradYear : null,
                 'issued_at' => $gradYear ? Carbon::createFromDate(max(1970, $gradYear), 1, 1) : Carbon::now(),
                 'file_path' => $this->educationCertificatePath,
+            ]);
+        }
+
+        foreach ($this->getValidCertifications() as $cert) {
+            $certYear = ! empty($cert['year_obtained']) && is_numeric($cert['year_obtained'])
+                ? (int) $cert['year_obtained']
+                : (int) date('Y');
+            CandidateCertification::create([
+                'candidate_profile_id' => $profile->id,
+                'category' => 'certification',
+                'name' => $cert['name'],
+                'issuing_organization' => $cert['issuing_organization'],
+                'year_obtained' => $cert['year_obtained'] ?: null,
+                'issued_at' => Carbon::createFromDate(max(1970, $certYear), 1, 1),
+                'credential_id' => $cert['credential_id'] ?: null,
             ]);
         }
 
@@ -1606,21 +1795,27 @@ class ProfileBuilder extends Component
         $this->applyParsedResumeData($parsed, 'Sample_Resume_Jhon_Clein.pdf', 'resumes/sample_resume.pdf', '12.5 KB');
     }
 
-    protected function applyParsedResumeData(array $parsed, string $filename, ?string $storedPath = null, ?string $fileSize = null): void
-    {
-        if (! empty($parsed['first_name'])) {
+    protected function applyParsedResumeData(
+        array $parsed,
+        string $filename,
+        ?string $storedPath = null,
+        ?string $fileSize = null,
+        bool $jumpToStep2 = true,
+        bool $onlyFillEmpty = false
+    ): void {
+        if (! empty($parsed['first_name']) && (! $onlyFillEmpty || trim($this->firstName) === '')) {
             $this->firstName = $parsed['first_name'];
         }
-        if (! empty($parsed['middle_name'])) {
+        if (! empty($parsed['middle_name']) && (! $onlyFillEmpty || trim($this->middleName) === '')) {
             $this->middleName = $parsed['middle_name'];
         }
-        if (! empty($parsed['last_name'])) {
+        if (! empty($parsed['last_name']) && (! $onlyFillEmpty || trim($this->lastName) === '')) {
             $this->lastName = $parsed['last_name'];
         }
-        if (! empty($parsed['phone'])) {
+        if (! empty($parsed['phone']) && (! $onlyFillEmpty || trim($this->phone) === '')) {
             $this->phone = $parsed['phone'];
         }
-        if (! empty($parsed['city'])) {
+        if (! empty($parsed['city']) && (! $onlyFillEmpty || trim($this->city) === '')) {
             $this->city = $parsed['city'];
             $this->locationCityId = $parsed['location_city_id'];
             if ($parsed['location_city_id']) {
@@ -1630,17 +1825,17 @@ class ProfileBuilder extends Component
                 }
             }
         }
-        if (! empty($parsed['barangay'])) {
+        if (! empty($parsed['barangay']) && (! $onlyFillEmpty || trim($this->barangay) === '')) {
             $this->barangay = $parsed['barangay'];
             $this->locationBarangayId = $parsed['location_barangay_id'];
         }
-        if (! empty($parsed['zip_code'])) {
+        if (! empty($parsed['zip_code']) && (! $onlyFillEmpty || trim($this->zipCode) === '')) {
             $this->zipCode = $parsed['zip_code'];
         }
-        if (! empty($parsed['headline'])) {
+        if (! empty($parsed['headline']) && (! $onlyFillEmpty || trim($this->headline) === '')) {
             $this->headline = $parsed['headline'];
         }
-        if (! empty($parsed['bio'])) {
+        if (! empty($parsed['bio']) && (! $onlyFillEmpty || trim($this->bio) === '')) {
             $this->bio = $parsed['bio'];
         }
         if (! empty($parsed['skills'])) {
@@ -1652,14 +1847,20 @@ class ProfileBuilder extends Component
         if (! empty($parsed['highest_education'])) {
             $this->highestEducation = $parsed['highest_education'];
         }
-        if (! empty($parsed['institution_name'])) {
+        if (! empty($parsed['institution_name']) && (! $onlyFillEmpty || trim($this->institutionName) === '')) {
             $this->institutionName = $parsed['institution_name'];
         }
-        if (! empty($parsed['year_graduated'])) {
+        if (! empty($parsed['year_graduated']) && (! $onlyFillEmpty || trim($this->yearGraduated) === '')) {
             $this->yearGraduated = $parsed['year_graduated'];
         }
-        if (! empty($parsed['experiences'])) {
+        if (! empty($parsed['experiences']) && (! $onlyFillEmpty || empty($this->getValidExperiences()))) {
             $this->experiences = $parsed['experiences'];
+        }
+        if (! empty($parsed['trainings']) && (! $onlyFillEmpty || empty($this->getValidTrainings()))) {
+            $this->trainings = $parsed['trainings'];
+        }
+        if (! empty($parsed['certifications']) && (! $onlyFillEmpty || empty($this->getValidCertifications()))) {
+            $this->certificationsList = $parsed['certifications'];
         }
         if (! empty($parsed['suggested_accommodations'])) {
             $this->selectedAccommodations = array_values(array_unique(array_merge($this->selectedAccommodations, $parsed['suggested_accommodations'])));
@@ -1667,6 +1868,7 @@ class ProfileBuilder extends Component
 
         if ($storedPath) {
             $this->resumePdfPath = $storedPath;
+            $this->hasCustomUploadedResume = true;
         }
         $this->resumeFilename = $filename;
         if ($fileSize) {
@@ -1679,6 +1881,10 @@ class ProfileBuilder extends Component
             'skills' => $parsed['skills'] ?? [],
             'experiences_count' => count($parsed['experiences'] ?? []),
             'experiences' => $parsed['experiences'] ?? [],
+            'trainings_count' => count($parsed['trainings'] ?? []),
+            'trainings' => $parsed['trainings'] ?? [],
+            'certifications_count' => count($parsed['certifications'] ?? []),
+            'certifications' => $parsed['certifications'] ?? [],
             'education' => $parsed['institution_name'] ? (($parsed['degree'] ?? '') ? "{$parsed['degree']}, {$parsed['institution_name']}" : $parsed['institution_name']) : null,
             'headline' => $parsed['headline'] ?? null,
             'contact' => array_filter([$parsed['full_name'] ?? null, $parsed['phone'] ?? null, $parsed['city'] ?? null]),
@@ -1686,11 +1892,13 @@ class ProfileBuilder extends Component
         ];
 
         $this->resumeScanSuccess = true;
-        $this->showScanReviewModal = true;
         $this->isScanningResume = false;
 
-        $this->currentStep = 2;
-        $this->dispatch('profile-step-changed');
+        if ($jumpToStep2) {
+            $this->showScanReviewModal = true;
+            $this->currentStep = 2;
+            $this->dispatch('profile-step-changed');
+        }
     }
 
     public function confirmAndSaveFromScan()
@@ -1826,6 +2034,8 @@ class ProfileBuilder extends Component
             'selectedAccommodationObjects' => $selectedAccommodationObjects,
             'effectiveHeadline' => $this->getEffectiveHeadline(),
             'validExperiences' => $this->getValidExperiences(),
+            'validTrainings' => $this->getValidTrainings(),
+            'validCertifications' => $this->getValidCertifications(),
             'hasFslAttached' => $hasFslAttached,
             'hasPwdIdAttached' => $hasPwdIdAttached,
             'hasMedCertAttached' => $hasMedCertAttached,

@@ -62,22 +62,37 @@
             @endforeach
         </div>
 
-        {{-- Job Filter Dropdown --}}
-        @if($employerJobs->isNotEmpty())
-            <div class="flex items-center gap-2 shrink-0">
-                <label for="filter-job-select" class="text-xs font-semibold text-body-muted whitespace-nowrap">{{ __('Filter by Job:') }}</label>
-                <select id="filter-job-select"
-                        wire:change="filterByJob($event.target.value ? $event.target.value : null)"
+        {{-- Match Score & Job Filter Dropdowns --}}
+        <div class="flex flex-wrap items-center gap-3 shrink-0">
+            <div class="flex items-center gap-2">
+                <label for="filter-match-score-select" class="text-xs font-semibold text-body-muted whitespace-nowrap">{{ __('Match Score:') }}</label>
+                <select id="filter-match-score-select"
+                        wire:model.live="matchScoreFilter"
                         class="rounded-xl border border-primary-border bg-white px-3 py-2 text-xs font-semibold text-primary-dark focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary shadow-2xs">
-                    <option value="" @selected(empty($selectedJobId))>{{ __('All Jobs') }} ({{ $employerJobs->count() }})</option>
-                    @foreach($employerJobs as $ej)
-                        <option value="{{ $ej->id }}" @selected($selectedJobId == $ej->id)>
-                            {{ $ej->title }}
-                        </option>
-                    @endforeach
+                    <option value="all">{{ __('All Match Scores') }}</option>
+                    <option value="90">{{ __('90%+ Top Match') }}</option>
+                    <option value="80">{{ __('80%+ Strong Match') }}</option>
+                    <option value="70">{{ __('70%+ Good Match') }}</option>
+                    <option value="below_70">{{ __('Below 70%') }}</option>
                 </select>
             </div>
-        @endif
+
+            @if($employerJobs->isNotEmpty())
+                <div class="flex items-center gap-2">
+                    <label for="filter-job-select" class="text-xs font-semibold text-body-muted whitespace-nowrap">{{ __('Filter by Job:') }}</label>
+                    <select id="filter-job-select"
+                            wire:change="filterByJob($event.target.value ? $event.target.value : null)"
+                            class="rounded-xl border border-primary-border bg-white px-3 py-2 text-xs font-semibold text-primary-dark focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary shadow-2xs">
+                        <option value="" @selected(empty($selectedJobId))>{{ __('All Jobs') }} ({{ $employerJobs->count() }})</option>
+                        @foreach($employerJobs as $ej)
+                            <option value="{{ $ej->id }}" @selected($selectedJobId == $ej->id)>
+                                {{ $ej->title }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+            @endif
+        </div>
     </div>
 
     {{-- Position Filled Prompt Banner --}}
@@ -430,17 +445,23 @@
                 </div>
 
                 {{-- Fit score & status --}}
-                <div class="rounded-xl border border-primary-border bg-surface p-4 flex items-center justify-between">
-                    <div>
-                        <span class="text-xs text-body-muted block">{{ __('Accessibility & Skills Match') }}</span>
-                        <span class="text-xl font-bold text-primary-dark tabular-nums">{{ $viewing->fit_score_at_apply !== null ? number_format($viewing->fit_score_at_apply, 0).'%' : '95%' }}</span>
+                <div class="rounded-xl border border-primary-border bg-surface p-4 space-y-2.5">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <span class="text-xs text-body-muted block">{{ __('Accessibility & Skills Match') }}</span>
+                            <span class="text-xl font-bold text-primary-dark tabular-nums">{{ $viewing->fit_score_at_apply !== null ? number_format($viewing->fit_score_at_apply, 0).'%' : '95%' }}</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-body-muted block">{{ __('Current Status') }}</span>
+                            <span class="rounded-full px-2.5 py-0.5 text-xs font-semibold {{ $viewing->status === 'hired' ? 'bg-secondary-tint text-secondary' : ($viewing->status === 'rejected' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-primary-tint text-primary-dark') }}">
+                                {{ ucfirst(str_replace('_', ' ', $viewing->status)) }}
+                            </span>
+                        </div>
                     </div>
-                    <div>
-                        <span class="text-xs text-body-muted block">{{ __('Current Status') }}</span>
-                        <span class="rounded-full px-2.5 py-0.5 text-xs font-semibold {{ $viewing->status === 'hired' ? 'bg-secondary-tint text-secondary' : ($viewing->status === 'rejected' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-primary-tint text-primary-dark') }}">
-                            {{ ucfirst(str_replace('_', ' ', $viewing->status)) }}
-                        </span>
-                    </div>
+
+                    @if(!empty($viewingBreakdown))
+                        <x-match-breakdown-drawer :breakdown="$viewingBreakdown" />
+                    @endif
                 </div>
 
                 {{-- Former Employee Rehire Alert --}}

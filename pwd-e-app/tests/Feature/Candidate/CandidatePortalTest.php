@@ -71,7 +71,8 @@ test('job matches page displays 2-column layout and workspace accessibility matr
     $response->assertSee('Smart Match');
     $response->assertSee('OpenPath Digital');
     $response->assertSee('Junior Frontend Developer');
-    $response->assertSee('98% Accessibility fit');
+    $response->assertSee('98% Overall Match');
+    $response->assertSee('View Match Breakdown');
     $response->assertSee('Workspace Accessibility Matrix');
     $response->assertSee('Wheelchair Ramp Access');
     $response->assertSee('Screen Reader Compatibility');
