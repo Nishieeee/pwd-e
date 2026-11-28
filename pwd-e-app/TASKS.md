@@ -8,7 +8,7 @@ _Last synced with SE Advisor Consultation Revisions — 2026-11-26_
 ## SE Advisor Consultation Revisions (2026-11-26) 🔥
 
 ### Registration, Onboarding & Role Management
-- [ ] **REV-01 — In-Account Role Switcher Toggle (Candidate ↔ Employer):** Add role-switch toggle inside both Candidate and Employer account headers/settings allowing users to switch active portal context (`candidate` ↔ `employer`), prompting one-time profile/credential setup when activating the secondary role for the first time.
+- [x] **REV-01 — In-Account Role Switcher Toggle (Candidate ↔ Employer):** Add role-switch toggle inside both Candidate and Employer account headers/settings allowing users to switch active portal context (`candidate` ↔ `employer`), with Settings account linking/unlinking and password-gated switching.
 - [x] **REV-02 — Representative Middle Name on Company Registration:** Add `middle_name` input to Employer registration (`register.blade.php` & `CreateNewUser.php`) alongside representative first and last names.
 - [x] **REV-03 — Company Address on Employer Registration:** Capture company headquarters address during Employer registration (`register.blade.php` & `CreateNewUser.php`) and persist to `employer_profiles`.
 - [x] **REV-04 — Company Type / Industry Upon Registration:** Add required Company Type & Industry selector (e.g., Corporation, SME, BPO/IT, Retail, Healthcare, NGO, Government) to Employer registration and `employer_profiles`.
@@ -21,7 +21,7 @@ _Last synced with SE Advisor Consultation Revisions — 2026-11-26_
 
 ### Verification, Compliance & Dynamic Tax Incentives
 - [ ] **REV-07 — Dynamic Tax Exemption / Incentive Calculation (RA 10524):** Replace static calculation in `Employer\Workforce` with dynamic tax exemption/deduction modeling (configurable wage/tenure pro-rating, company tax parameters, and RA 10524 25% wage deduction + 50% accessibility facility modification credit).
-- [ ] **REV-10 — Admin Verification Checklist for Med Cert & PWD ID:** Add structured verification criteria checklists in `Admin\VerificationQueue` for both PWD ID (ID format, photo/signature clarity, validity, disability match) and Clinical Medical Certificate (physician name, PRC license, occupational fitness statement, signature/date) prior to approval.
+- [x] **REV-10 — Admin Verification Checklist for Med Cert & PWD ID:** Add structured verification criteria checklists in `Admin\VerificationQueue` for both PWD ID (ID format, photo/signature clarity, validity, disability match) and Clinical Medical Certificate (physician name, PRC license, occupational fitness statement, signature/date) prior to approval.
 
 ### Resume-Driven Profile Automation, Trainings & Matching
 - [ ] **REV-11 — Auto-Read Uploaded Résumé When Standard Typing Is Not Used:** Automatically invoke `ResumeParserService` whenever a candidate uploads a résumé without manually completing Standard Typing fields, populating identification, contact, chopped location, education, work experiences, trainings/seminars, and skills.

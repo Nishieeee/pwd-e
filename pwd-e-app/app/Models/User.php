@@ -72,6 +72,44 @@ class User extends Authenticatable
         return $this->hasMany(VerificationRequest::class);
     }
 
+    public function employerAccountLinks()
+    {
+        return $this->hasMany(AccountLink::class, 'employer_user_id');
+    }
+
+    public function candidateAccountLinks()
+    {
+        return $this->hasMany(AccountLink::class, 'candidate_user_id');
+    }
+
+    /**
+     * Active, verified counterpart accounts available for password-gated role switching.
+     *
+     * @return \Illuminate\Support\Collection<int, User>
+     */
+    public function linkedSwitchTargets()
+    {
+        if ($this->role === 'employer') {
+            return $this->employerAccountLinks()
+                ->with('candidateUser.candidateProfile')
+                ->get()
+                ->pluck('candidateUser')
+                ->filter(fn (?User $u) => $u !== null && $u->role === 'candidate' && $u->isVerified())
+                ->values();
+        }
+
+        if ($this->role === 'candidate') {
+            return $this->candidateAccountLinks()
+                ->with('employerUser.employerProfile')
+                ->get()
+                ->pluck('employerUser')
+                ->filter(fn (?User $u) => $u !== null && $u->role === 'employer' && $u->isVerified())
+                ->values();
+        }
+
+        return collect();
+    }
+
     public function notificationPreferences()
     {
         return $this->hasMany(NotificationPreference::class);

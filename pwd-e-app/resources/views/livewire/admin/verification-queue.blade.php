@@ -290,13 +290,81 @@
                         </div>
                     @endif
 
-                    <!-- Action Buttons -->
+                    @if ($vr->status === 'approved' && ! empty($vr->verification_checklist['checked_keys']))
+                        <div class="my-3 inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50/70 px-3 py-1.5 text-xs font-semibold text-emerald-800">
+                            <svg class="size-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                            <span>{{ __('Credential Checklist Verified (:count/:total criteria)', ['count' => count($vr->verification_checklist['checked_keys']), 'total' => count($vr->requiredChecklistKeys())]) }}</span>
+                        </div>
+                    @endif
+
+                    <!-- Action Buttons & Credential Verification Checklist (REV-10) -->
                     @if (in_array($vr->status, ['pending', 'needs_more_docs']))
+                        @php
+                            $sections = $vr->requiredChecklistSections();
+                            $requiredKeys = $vr->requiredChecklistKeys();
+                            $currentMap = $checklists[$vr->id] ?? [];
+                            $checkedCount = collect($requiredKeys)->filter(fn ($k) => ! empty($currentMap[$k]))->count();
+                            $checklistComplete = $vr->hasCompleteChecklist($currentMap);
+                        @endphp
+
+                        <div class="my-3 rounded-xl border border-primary-border bg-[#F8FAFC] p-4 space-y-3">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs sm:text-sm font-bold text-primary-dark">
+                                        {{ __('Credential Verification Checklist') }}
+                                    </span>
+                                    <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-bold {{ $checklistComplete ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800' }}">
+                                        {{ $checkedCount }} / {{ count($requiredKeys) }} {{ __('verified') }}
+                                    </span>
+                                </div>
+
+                                @if (! $checklistComplete)
+                                    <button
+                                        type="button"
+                                        wire:click="checkAllCriteria({{ $vr->id }})"
+                                        class="text-xs font-semibold text-primary hover:text-primary-dark hover:underline cursor-pointer"
+                                    >
+                                        {{ __('Mark all criteria verified') }}
+                                    </button>
+                                @endif
+                            </div>
+
+                            <div class="grid grid-cols-1 {{ count($sections) > 1 ? 'lg:grid-cols-2' : '' }} gap-3">
+                                @foreach ($sections as $secKey => $section)
+                                    <div class="rounded-xl border border-gray-200 bg-white p-3.5 space-y-2">
+                                        <div class="flex items-center justify-between gap-2 pb-1 border-b border-gray-100">
+                                            <span class="text-xs font-bold text-primary-dark">{{ $section['title'] }}</span>
+                                            <span class="rounded-md bg-primary-tint px-2 py-0.5 text-[10px] font-bold uppercase text-primary-dark">{{ $section['badge'] }}</span>
+                                        </div>
+
+                                        <div class="space-y-2 pt-1">
+                                            @foreach ($section['items'] as $itemKey => $label)
+                                                <label class="flex items-start gap-2.5 text-xs text-primary-dark cursor-pointer select-none">
+                                                    <input
+                                                        type="checkbox"
+                                                        wire:model.live="checklists.{{ $vr->id }}.{{ $itemKey }}"
+                                                        class="mt-0.5 size-4 rounded border-gray-300 text-secondary focus:ring-secondary cursor-pointer shrink-0"
+                                                    />
+                                                    <span class="leading-snug">{{ $label }}</span>
+                                                </label>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+
+                            @error('checklist.'.$vr->id)
+                                <p class="text-xs font-semibold text-rose-600" role="alert">{{ $message }}</p>
+                            @enderror
+                        </div>
+
                         <div class="mt-4 pt-4 border-t border-gray-100 flex flex-wrap items-center gap-3">
                             <button
                                 type="button"
                                 wire:click="approve({{ $vr->id }})"
-                                class="inline-flex items-center gap-2 rounded-lg bg-secondary px-5 py-2.5 min-h-[44px] text-sm font-semibold text-white shadow-xs transition hover:bg-secondary/90 focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2"
+                                @disabled(! $checklistComplete)
+                                class="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 min-h-[44px] text-sm font-semibold text-white shadow-xs transition focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 {{ $checklistComplete ? 'bg-secondary hover:bg-secondary/90 cursor-pointer' : 'bg-secondary/50 cursor-not-allowed' }}"
+                                title="{{ $checklistComplete ? __('Approve verified credentials') : __('Complete all checklist criteria above to enable approval') }}"
                             >
                                 <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                                 {{ __('Approve Verification') }}
@@ -310,6 +378,12 @@
                                 <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                 {{ __('Provide Review Feedback') }}
                             </button>
+
+                            @if (! $checklistComplete)
+                                <span class="text-xs text-amber-800 font-medium">
+                                    {{ __('Complete all checklist items above to unlock approval.') }}
+                                </span>
+                            @endif
                         </div>
 
                         <!-- Review Action Form Drawer -->

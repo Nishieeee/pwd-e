@@ -63,6 +63,7 @@ test('admin can approve a pending request', function () {
 
     Livewire::actingAs($admin)
         ->test(VerificationQueue::class)
+        ->call('checkAllCriteria', $vr->id)
         ->call('approve', $vr->id)
         ->assertHasNoErrors();
 

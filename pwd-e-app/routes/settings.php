@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Settings\Appearance;
+use App\Livewire\Settings\LinkedAccounts;
 use App\Livewire\Settings\Profile;
 use App\Livewire\Settings\Security;
 use Illuminate\Support\Facades\Route;
@@ -9,6 +10,7 @@ Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
 
     Route::livewire('settings/profile', Profile::class)->name('profile.edit');
+    Route::livewire('settings/linked-accounts', LinkedAccounts::class)->name('linked-accounts.edit');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {

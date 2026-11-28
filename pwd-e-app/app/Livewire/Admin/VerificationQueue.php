@@ -31,6 +31,9 @@ class VerificationQueue extends Component
 
     public ?int $reviewingId = null;
 
+    /** @var array<int, array<string, bool>> */
+    public array $checklists = [];
+
     public function mount(): void
     {
         $user = Auth::user();
@@ -84,12 +87,42 @@ class VerificationQueue extends Component
         $this->reviewNote = null;
     }
 
+    public function checkAllCriteria(int $id): void
+    {
+        $vr = VerificationRequest::findOrFail($id);
+        $map = [];
+        foreach ($vr->requiredChecklistKeys() as $key) {
+            $map[$key] = true;
+        }
+        $this->checklists[$id] = $map;
+        $this->resetErrorBag('checklist.'.$id);
+    }
+
     public function approve(int $id): void
     {
         $vr = VerificationRequest::with('user')->findOrFail($id);
+        $checkedMap = $this->checklists[$vr->id] ?? [];
+
+        if (! $vr->hasCompleteChecklist($checkedMap)) {
+            $this->addError('checklist.'.$vr->id, __('Please verify and check all required credential criteria before approving.'));
+            Flux::toast(variant: 'warning', text: __('Complete the verification checklist before approving.'));
+
+            return;
+        }
+
+        $checkedKeys = array_values(array_filter(
+            $vr->requiredChecklistKeys(),
+            fn (string $key) => ! empty($checkedMap[$key])
+        ));
+
         $vr->update([
             'status' => 'approved',
             'rejection_reason' => null,
+            'verification_checklist' => [
+                'checked_keys' => $checkedKeys,
+                'completed_at' => now()->toIso8601String(),
+                'reviewer_id' => Auth::id(),
+            ],
             'reviewed_by' => Auth::id(),
             'reviewed_at' => now(),
         ]);
@@ -98,6 +131,8 @@ class VerificationQueue extends Component
             'status' => 'active',
             'verified_at' => now(),
         ]);
+
+        unset($this->checklists[$vr->id]);
 
         $vr->user->notify(new VerificationStatusUpdated('approved'));
 

@@ -55,9 +55,13 @@
         </button>
     </div>
 
-    <!-- Right: Settings, Notifications, Logout -->
+    <!-- Right: Role Switcher, Settings, Notifications, Logout -->
     <div class="flex items-center gap-[6px] sm:gap-[8px] text-[12px] leading-[16px] font-medium text-gray-700 shrink-0 ml-auto whitespace-nowrap">
         <div class="hidden lg:block h-[18px] w-px bg-gray-200 mr-[2px]" aria-hidden="true"></div>
+
+        @if (auth()->check() && ! auth()->user()->isAdmin())
+            <livewire:role-switcher />
+        @endif
 
         <a href="{{ route('profile.edit') }}" class="inline-flex items-center gap-[5px] text-gray-700 hover:text-[#1A2840] hover:bg-gray-100 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#244F73] focus-visible:ring-offset-1 rounded-[6px] px-[7px] py-[5px]">
             <svg class="w-[15px] h-[15px] text-gray-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
