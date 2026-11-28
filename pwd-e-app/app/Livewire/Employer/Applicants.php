@@ -72,7 +72,24 @@ class Applicants extends Component
 
     public ?float $offerSalary = null;
 
+    public string $offerPayPeriod = 'monthly';
+
+    public string $offerEmploymentType = 'full_time';
+
+    /** @var array<int, string> */
+    public array $offerWorkDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+
+    public string $offerShiftStart = '08:00';
+
+    public string $offerShiftEnd = '17:00';
+
+    public bool $offerIsFlexible = false;
+
+    public ?int $offerBranchId = null;
+
     public string $offerStartDate = '';
+
+    public string $offerExpiresAt = '';
 
     public string $offerAccommodations = '';
 
@@ -551,6 +568,25 @@ class Applicants extends Component
         Flux::toast(variant: 'success', text: __('Applicant declined. Candidate notified politely.'));
     }
 
+    public function toggleOfferWorkDay(string $day): void
+    {
+        if (! in_array($day, \App\Support\EmploymentScheduleHelper::ALL_DAYS, true)) {
+            return;
+        }
+
+        if (in_array($day, $this->offerWorkDays, true)) {
+            $this->offerWorkDays = array_values(array_diff($this->offerWorkDays, [$day]));
+        } else {
+            $ordered = [];
+            foreach (\App\Support\EmploymentScheduleHelper::ALL_DAYS as $d) {
+                if ($d === $day || in_array($d, $this->offerWorkDays, true)) {
+                    $ordered[] = $d;
+                }
+            }
+            $this->offerWorkDays = $ordered;
+        }
+    }
+
     public function openOfferModal(int $applicationId): void
     {
         $profile = Auth::user()?->employerProfile;
@@ -564,7 +600,15 @@ class Applicants extends Component
 
         $this->offeringAppId = $app->id;
         $this->offerSalary = (float) ($app->jobPosting?->salary_max ?? $app->jobPosting?->salary_min ?? 35000);
+        $this->offerPayPeriod = 'monthly';
+        $this->offerEmploymentType = $app->jobPosting?->employment_type ?: 'full_time';
+        $this->offerWorkDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+        $this->offerShiftStart = '08:00';
+        $this->offerShiftEnd = '17:00';
+        $this->offerIsFlexible = false;
+        $this->offerBranchId = $app->jobPosting?->employer_branch_id;
         $this->offerStartDate = now()->addWeeks(2)->format('Y-m-d');
+        $this->offerExpiresAt = now()->addDays(7)->format('Y-m-d');
         $this->offerAccommodations = $app->interview_accommodations ?? 'Standard verified accessibility package';
         $this->offerNotes = 'We are pleased to extend this offer of employment for the ' . ($app->jobPosting?->title ?? 'position') . '.';
         $this->showOfferModal = true;
@@ -609,29 +653,57 @@ class Applicants extends Component
             return;
         }
 
-        $this->validate([
-            'offerSalary' => 'required|numeric|min:1',
-            'offerStartDate' => 'required|date',
-            'offerAccommodations' => 'nullable|string|max:1000',
-            'offerNotes' => 'nullable|string|max:2000',
-        ]);
+        $rules = [
+            'offerSalary' => ['required', 'numeric', 'min:1'],
+            'offerPayPeriod' => ['required', 'in:monthly,annual,hourly,project'],
+            'offerEmploymentType' => ['required', 'in:full_time,part_time,contractual,freelance,internship'],
+            'offerStartDate' => ['required', 'date'],
+            'offerExpiresAt' => ['nullable', 'date'],
+            'offerBranchId' => ['nullable', 'integer'],
+            'offerAccommodations' => ['nullable', 'string', 'max:1000'],
+            'offerNotes' => ['nullable', 'string', 'max:2000'],
+        ];
+        if (! $this->offerIsFlexible) {
+            $rules['offerWorkDays'] = ['required', 'array', 'min:1'];
+            $rules['offerShiftStart'] = ['required', 'string'];
+            $rules['offerShiftEnd'] = ['required', 'string'];
+        }
+        $this->validate($rules);
+
+        $branchName = $this->offerBranchId
+            ? $profile->branches()->where('id', $this->offerBranchId)->value('name')
+            : null;
+
+        $offerPayload = [
+            'salary' => (float) $this->offerSalary,
+            'pay_period' => $this->offerPayPeriod,
+            'employment_type' => $this->offerEmploymentType,
+            'work_days' => $this->offerIsFlexible ? [] : array_values($this->offerWorkDays),
+            'shift_start' => $this->offerIsFlexible ? null : $this->offerShiftStart,
+            'shift_end' => $this->offerIsFlexible ? null : $this->offerShiftEnd,
+            'is_flexible' => $this->offerIsFlexible,
+            'branch_id' => $this->offerBranchId,
+            'branch_name' => $branchName,
+            'start_date' => $this->offerStartDate,
+            'expires_at' => $this->offerExpiresAt ?: null,
+            'accommodations' => $this->offerAccommodations,
+            'notes' => $this->offerNotes,
+        ];
+
+        $scheduleText = \App\Support\EmploymentScheduleHelper::formatSchedule($offerPayload);
 
         $app->update([
             'status' => Application::STATUS_OFFERED,
             'status_subtext' => Application::computeStatusSubtext(Application::STATUS_OFFERED),
             'offer_extended_at' => now(),
-            'offer_details' => [
-                'salary' => (float) $this->offerSalary,
-                'start_date' => $this->offerStartDate,
-                'accommodations' => $this->offerAccommodations,
-                'notes' => $this->offerNotes,
-            ],
+            'multi_offer_ignored_at' => null,
+            'offer_details' => $offerPayload,
         ]);
 
         ApplicationMessage::create([
             'application_id' => $app->id,
             'sender_id' => Auth::id(),
-            'body' => 'Formal Job Offer Extended: PHP ' . number_format($this->offerSalary) . ' annual/gross with start date ' . $this->offerStartDate . '.',
+            'body' => 'Formal Job Offer Extended: PHP ' . number_format((float) $this->offerSalary) . ' (' . $this->offerPayPeriod . ') · Schedule: ' . $scheduleText . ' · Start date: ' . $this->offerStartDate . '.',
             'type' => 'system',
             'metadata' => [
                 'event' => 'offer_extended',
@@ -647,7 +719,7 @@ class Applicants extends Component
                 new \App\Notifications\ApplicationStatusChanged(
                     $app->jobPosting?->title ?? 'Position',
                     Application::STATUS_OFFERED,
-                    'Formal offer extended: PHP ' . number_format($this->offerSalary) . ' annual/gross with start date ' . $this->offerStartDate . '.'
+                    'Formal offer extended: PHP ' . number_format((float) $this->offerSalary) . ' (' . $this->offerPayPeriod . ') · ' . $scheduleText . '.'
                 )
             );
         }
@@ -957,6 +1029,30 @@ class Applicants extends Component
             ? Application::with(['candidateProfile.user', 'jobPosting'])->find($this->offeringAppId)
             : null;
 
+        $offeringEmploymentWarning = ($offeringApp && $profile && $offeringApp->candidate_profile_id)
+            ? \App\Support\EmploymentScheduleHelper::buildEmployerOfferWarning($offeringApp->candidate_profile_id, $profile->id)
+            : null;
+
+        $offeringScheduleConflict = false;
+        if ($offeringEmploymentWarning && ! $this->offerIsFlexible) {
+            $draftOffer = [
+                'work_days' => $this->offerWorkDays,
+                'shift_start' => $this->offerShiftStart,
+                'shift_end' => $this->offerShiftEnd,
+                'is_flexible' => $this->offerIsFlexible,
+            ];
+            foreach ($offeringEmploymentWarning['items'] as $warnItem) {
+                if (\App\Support\EmploymentScheduleHelper::schedulesOverlap($draftOffer, $warnItem['offer_details'] ?? [])) {
+                    $offeringScheduleConflict = true;
+                    break;
+                }
+            }
+        }
+
+        $taxRateDecimal = \App\Models\PlatformSetting::pwdTaxDeductionDecimal();
+        $taxRateLabel = \App\Models\PlatformSetting::pwdTaxDeductionLabel();
+        $employerBranches = $profile ? $profile->branches()->get() : collect();
+
         $hiringApp = $this->hiringAppId
             ? Application::with(['candidateProfile.user', 'jobPosting'])->find($this->hiringAppId)
             : null;
@@ -986,6 +1082,11 @@ class Applicants extends Component
             'viewingBreakdown' => $viewingBreakdown,
             'interviewingApp' => $interviewingApp,
             'offeringApp' => $offeringApp,
+            'offeringEmploymentWarning' => $offeringEmploymentWarning,
+            'offeringScheduleConflict' => $offeringScheduleConflict,
+            'employerBranches' => $employerBranches,
+            'taxRateDecimal' => $taxRateDecimal,
+            'taxRateLabel' => $taxRateLabel,
             'hiringApp' => $hiringApp,
             'rejectingApp' => $rejectingApp,
             'chatApp' => $chatApp,

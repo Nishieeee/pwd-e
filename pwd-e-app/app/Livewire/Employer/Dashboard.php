@@ -237,8 +237,11 @@ class Dashboard extends Component
         $hiredCount = (clone $baseAppQuery)->where('status', 'hired')->count();
         $needsReviewCount = (clone $baseAppQuery)->whereIn('status', ['applied', 'under_review'])->count();
 
+        $taxRateDecimal = \App\Models\PlatformSetting::pwdTaxDeductionDecimal();
+        $taxRateLabel = \App\Models\PlatformSetting::pwdTaxDeductionLabel();
+
         $workforceRecords = $profile ? WorkforceRecord::where('employer_profile_id', $profile->id)->get() : collect();
-        $taxIncentiveEst = $workforceRecords->sum(fn ($rec) => (float) $rec->annual_wage * 0.25);
+        $taxIncentiveEst = $workforceRecords->sum(fn ($rec) => (float) $rec->annual_wage * $taxRateDecimal);
 
         $recentApplicants = (clone $baseAppQuery)->with([
             'candidateProfile.user',
@@ -276,6 +279,8 @@ class Dashboard extends Component
             'hiredCount' => $hiredCount,
             'needsReviewCount' => $needsReviewCount,
             'taxIncentiveEst' => $taxIncentiveEst,
+            'taxRateDecimal' => $taxRateDecimal,
+            'taxRateLabel' => $taxRateLabel,
             'recentApplicants' => $recentApplicants,
             'activeJobs' => $activeJobs,
             'viewing' => $viewing,

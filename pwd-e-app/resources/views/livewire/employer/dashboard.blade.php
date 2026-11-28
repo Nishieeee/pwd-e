@@ -114,7 +114,7 @@
                 @if($taxIncentiveEst > 0)
                     ₱{{ number_format($taxIncentiveEst, 0) }} {{ __('est. tax deduction') }}
                 @else
-                    {{ __('25% gross wage deduction eligible') }}
+                    {{ __(':rate gross wage deduction eligible', ['rate' => $taxRateLabel ?? '20%']) }}
                 @endif
             </p>
         </a>
@@ -322,9 +322,9 @@
                     <span class="text-xs font-bold uppercase tracking-wider text-primary">{{ __('Tax Compliance & Incentives') }}</span>
                     <span class="rounded-full bg-secondary-tint text-secondary px-2 py-0.5 text-xs font-bold">RA 10524</span>
                 </div>
-                <h3 class="font-heading text-base font-bold text-primary-dark">{{ __('25% Additional Wage Deduction') }}</h3>
+                <h3 class="font-heading text-base font-bold text-primary-dark">{{ __(':rate Additional Wage Deduction', ['rate' => $taxRateLabel ?? '20%']) }}</h3>
                 <p class="text-xs text-body-muted leading-relaxed">
-                    {{ __('Private employers who hire qualified persons with disability are entitled to an additional gross deduction from income equivalent to 25% of annual salaries paid.') }}
+                    {{ __('Private employers who hire qualified persons with disability are entitled to an additional gross deduction from income equivalent to :rate of annual salaries paid.', ['rate' => $taxRateLabel ?? '20%']) }}
                 </p>
                 <div class="pt-2 border-t border-primary-border/60">
                     <a href="{{ route('employer.workforce') }}" class="inline-flex items-center gap-1 text-xs font-bold text-secondary hover:underline">
@@ -540,10 +540,10 @@
                 <div class="rounded-xl border border-secondary/30 bg-secondary-tint/40 p-4 text-xs text-secondary-dark space-y-1.5">
                     <div class="font-bold text-secondary text-sm flex items-center gap-1.5">
                         <svg class="size-4 shrink-0 text-secondary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
-                        <span>{{ __('25% Additional Gross Deduction on Annual Wages') }}</span>
+                        <span>{{ __(':rate Additional Gross Deduction on Annual Wages', ['rate' => $taxRateLabel ?? '20%']) }}</span>
                     </div>
                     <p class="leading-relaxed text-secondary/90">
-                        {{ __('Under RA 10524, private entities that employ qualified PWDs who meet the required terms of employment are entitled to an additional deduction from their gross income equivalent to 25% of the total amount paid as salaries.') }}
+                        {{ __('Under RA 10524, private entities that employ qualified PWDs who meet the required terms of employment are entitled to an additional deduction from their gross income equivalent to :rate of the total amount paid as salaries.', ['rate' => $taxRateLabel ?? '20%']) }}
                     </p>
                 </div>
 
@@ -552,7 +552,7 @@
                         <label class="block font-bold text-primary-dark mb-1">{{ __('Annual Gross Wage (PHP)') }}</label>
                         <input type="number" wire:model="hireWage" step="1000" class="w-full rounded-lg border border-primary-border px-3 py-2 text-xs focus:ring-2 focus:ring-primary focus:outline-none" />
                         <span class="text-[11px] text-body-muted mt-0.5 block">
-                            {{ __('Est. statutory annual deduction:') }} <strong>PHP {{ number_format(($hireWage ?: 35000) * 0.25, 2) }}</strong>
+                            {{ __('Est. statutory annual deduction:') }} <strong>PHP {{ number_format(($hireWage ?: 35000) * ($taxRateDecimal ?? 0.20), 2) }}</strong>
                         </span>
                     </div>
 

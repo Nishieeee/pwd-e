@@ -810,33 +810,142 @@
         </div>
     @endif
 
-    {{-- Offer Modal --}}
+    {{-- Offer Modal (Enhanced Schedule & Privacy-Safe Employment Advisory) --}}
     @if ($showOfferModal && $offeringApp)
         <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" role="dialog" aria-modal="true" aria-label="{{ __('Extend job offer') }}">
-            <div class="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 sm:p-8 shadow-xl space-y-5" wire:click.stop>
+            <div class="max-h-[92vh] w-full max-w-xl overflow-y-auto rounded-2xl bg-white p-6 sm:p-8 shadow-xl space-y-5" wire:click.stop>
                 <div class="flex items-start justify-between border-b border-primary-border pb-3">
                     <div>
                         <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-primary-tint text-primary-dark mb-1">
                             📄 {{ __('Formal Employment Offer') }}
                         </div>
-                        <h2 class="font-heading text-lg font-bold text-primary-dark">{{ __('Extend Job Offer') }}</h2>
+                        <h2 class="font-heading text-lg font-bold text-primary-dark">{{ __('Extend Job Offer & Schedule') }}</h2>
                         <p class="text-xs text-body-muted mt-0.5">{{ $offeringApp->candidateProfile?->user?->name }} · {{ $offeringApp->jobPosting?->title }}</p>
                     </div>
-                    <button type="button" wire:click="closeOfferModal" class="text-body-muted hover:text-primary-dark text-lg">&times;</button>
+                    <button type="button" wire:click="closeOfferModal" class="text-body-muted hover:text-primary-dark text-lg cursor-pointer">&times;</button>
                 </div>
 
+                {{-- Privacy-Safe Active Employment Advisory (REV-14) --}}
+                @if (! empty($offeringEmploymentWarning))
+                    <div class="rounded-xl border {{ $offeringEmploymentWarning['is_internal_only'] ? 'border-indigo-200 bg-indigo-50/70 text-indigo-950' : 'border-amber-300 bg-amber-50 text-amber-950' }} p-4 text-xs space-y-2" role="alert">
+                        <div class="font-bold flex items-center gap-1.5">
+                            <span aria-hidden="true">&#9888;&#65039;</span>
+                            <span>{{ __('Candidate Active Employment Notice') }}</span>
+                        </div>
+                        <ul class="space-y-1 pl-4 list-disc">
+                            @foreach ($offeringEmploymentWarning['items'] as $wItem)
+                                <li>
+                                    <span class="font-semibold">{{ $wItem['label'] }}</span>
+                                    <span class="opacity-85"> ({{ __('Active schedule:') }} {{ $wItem['schedule'] }})</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                        @if (! empty($offeringScheduleConflict))
+                            <div class="rounded-lg bg-rose-100/80 border border-rose-300 px-3 py-1.5 text-[11px] font-bold text-rose-900">
+                                &#9888;&#65039; {{ __('Schedule Conflict: Your selected working days and shift hours overlap with this candidate\'s active shift.') }}
+                            </div>
+                        @endif
+                    </div>
+                @endif
+
                 <div class="space-y-4 text-xs">
-                    <div>
-                        <label class="block font-bold text-primary-dark mb-1">{{ __('Annual Gross Wage (PHP)') }}</label>
-                        <input type="number" wire:model="offerSalary" step="1000" class="w-full rounded-lg border border-primary-border px-3 py-2 text-xs focus:ring-2 focus:ring-primary focus:outline-none" />
-                        <span class="text-[11px] text-body-muted mt-0.5 block">
-                            {{ __('Est. RA 10524 annual deduction:') }} <strong>PHP {{ number_format(($offerSalary ?: 35000) * 0.25, 2) }}</strong>
-                        </span>
+                    {{-- Compensation & Pay Period --}}
+                    <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                        <div class="sm:col-span-7">
+                            <label class="block font-bold text-primary-dark mb-1">{{ __('Offered Gross Compensation (PHP)') }}</label>
+                            <input type="number" wire:model.live="offerSalary" step="500" class="w-full rounded-lg border border-primary-border px-3 py-2 text-xs focus:ring-2 focus:ring-primary focus:outline-none" />
+                        </div>
+                        <div class="sm:col-span-5">
+                            <label class="block font-bold text-primary-dark mb-1">{{ __('Pay Frequency') }}</label>
+                            <select wire:model.live="offerPayPeriod" class="w-full rounded-lg border border-primary-border bg-white px-3 py-2 text-xs focus:ring-2 focus:ring-primary focus:outline-none">
+                                <option value="monthly">{{ __('Monthly') }}</option>
+                                <option value="annual">{{ __('Annual') }}</option>
+                                <option value="hourly">{{ __('Hourly') }}</option>
+                                <option value="project">{{ __('Project-based') }}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <span class="text-[11px] text-body-muted -mt-2 block">
+                        @php
+                            $estAnnual = ($offerPayPeriod ?? 'monthly') === 'monthly' ? (($offerSalary ?: 35000) * 12) : ($offerSalary ?: 35000);
+                        @endphp
+                        {{ __('Est. RA 10524 (:rate) annual deduction:', ['rate' => $taxRateLabel ?? '20%']) }}
+                        <strong>PHP {{ number_format($estAnnual * ($taxRateDecimal ?? 0.20), 2) }}</strong>
+                    </span>
+
+                    {{-- Employment Type & Assigned Branch --}}
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block font-bold text-primary-dark mb-1">{{ __('Employment Type') }}</label>
+                            <select wire:model.live="offerEmploymentType" class="w-full rounded-lg border border-primary-border bg-white px-3 py-2 text-xs focus:ring-2 focus:ring-primary focus:outline-none">
+                                <option value="full_time">{{ __('Full-time') }}</option>
+                                <option value="part_time">{{ __('Part-time') }}</option>
+                                <option value="contractual">{{ __('Contractual / Fixed-term') }}</option>
+                                <option value="freelance">{{ __('Freelance / Output-based') }}</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block font-bold text-primary-dark mb-1">{{ __('Assigned Branch / Office') }}</label>
+                            <select wire:model="offerBranchId" class="w-full rounded-lg border border-primary-border bg-white px-3 py-2 text-xs focus:ring-2 focus:ring-primary focus:outline-none">
+                                <option value="">{{ __('Main / Remote Setup') }}</option>
+                                @foreach ($employerBranches ?? [] as $br)
+                                    <option value="{{ $br->id }}">{{ $br->name }}{{ $br->city ? ' — '.$br->city : '' }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
 
-                    <div>
-                        <label class="block font-bold text-primary-dark mb-1">{{ __('Target Start Date') }}</label>
-                        <input type="date" wire:model="offerStartDate" class="w-full rounded-lg border border-primary-border px-3 py-2 text-xs focus:ring-2 focus:ring-primary focus:outline-none" />
+                    {{-- Working Schedule Module --}}
+                    <div class="rounded-xl border border-primary-border bg-surface p-3.5 space-y-3">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="font-bold text-primary-dark">{{ __('Working Days & Shift Hours') }}</span>
+                            <label class="inline-flex items-center gap-1.5 text-xs font-semibold text-primary-dark cursor-pointer">
+                                <input type="checkbox" wire:model.live="offerIsFlexible" class="size-3.5 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer" />
+                                <span>{{ __('Flexible / Output-based hours') }}</span>
+                            </label>
+                        </div>
+
+                        @if (! $offerIsFlexible)
+                            <div class="space-y-2.5">
+                                <div class="flex flex-wrap gap-1.5" role="group" aria-label="{{ __('Select working days') }}">
+                                    @foreach (['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as $day)
+                                        @php $dayActive = in_array($day, $offerWorkDays ?? [], true); @endphp
+                                        <button
+                                            type="button"
+                                            wire:click="toggleOfferWorkDay('{{ $day }}')"
+                                            aria-pressed="{{ $dayActive ? 'true' : 'false' }}"
+                                            class="px-2.5 py-1 rounded-lg text-[11px] font-bold border transition cursor-pointer {{ $dayActive ? 'bg-primary-dark text-white border-primary-dark' : 'bg-white text-body-muted border-primary-border hover:bg-primary-tint/50' }}"
+                                        >
+                                            {{ $day }}
+                                        </button>
+                                    @endforeach
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-[11px] font-semibold text-body-muted mb-1">{{ __('Shift Start Time') }}</label>
+                                        <input type="time" wire:model.live="offerShiftStart" class="w-full rounded-lg border border-primary-border bg-white px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-primary focus:outline-none" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-[11px] font-semibold text-body-muted mb-1">{{ __('Shift End Time') }}</label>
+                                        <input type="time" wire:model.live="offerShiftEnd" class="w-full rounded-lg border border-primary-border bg-white px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-primary focus:outline-none" />
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+
+                    {{-- Start Date & Offer Validity --}}
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block font-bold text-primary-dark mb-1">{{ __('Target Start Date') }}</label>
+                            <input type="date" wire:model="offerStartDate" class="w-full rounded-lg border border-primary-border px-3 py-2 text-xs focus:ring-2 focus:ring-primary focus:outline-none" />
+                        </div>
+                        <div>
+                            <label class="block font-bold text-primary-dark mb-1">{{ __('Offer Valid Until (Optional)') }}</label>
+                            <input type="date" wire:model="offerExpiresAt" class="w-full rounded-lg border border-primary-border px-3 py-2 text-xs focus:ring-2 focus:ring-primary focus:outline-none" />
+                        </div>
                     </div>
 
                     <div>
@@ -851,10 +960,10 @@
                 </div>
 
                 <div class="flex items-center justify-end gap-2 pt-3 border-t border-primary-border">
-                    <button type="button" wire:click="closeOfferModal" class="rounded-lg border border-primary-border px-4 py-2 text-xs font-semibold text-primary-dark hover:bg-primary-tint">
+                    <button type="button" wire:click="closeOfferModal" class="rounded-lg border border-primary-border px-4 py-2 text-xs font-semibold text-primary-dark hover:bg-primary-tint cursor-pointer">
                         {{ __('Cancel') }}
                     </button>
-                    <button type="button" wire:click="sendOffer" class="rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-white hover:bg-primary/90 shadow-xs">
+                    <button type="button" wire:click="sendOffer" class="rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-white hover:bg-primary/90 shadow-xs cursor-pointer">
                         {{ __('Send Formal Offer to Candidate') }}
                     </button>
                 </div>
@@ -880,10 +989,10 @@
                 <div class="rounded-xl border border-secondary/30 bg-secondary-tint/40 p-4 text-xs text-secondary-dark space-y-1.5">
                     <div class="font-bold text-secondary text-sm flex items-center gap-1.5">
                         <svg class="size-4 shrink-0 text-secondary" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
-                        <span>{{ __('25% Additional Gross Deduction on Annual Wages') }}</span>
+                        <span>{{ __(':rate Additional Gross Deduction on Annual Wages', ['rate' => $taxRateLabel ?? '20%']) }}</span>
                     </div>
                     <p class="leading-relaxed text-secondary/90">
-                        {{ __('Under RA 10524, private entities that employ qualified PWDs who meet the required terms of employment are entitled to an additional deduction from their gross income equivalent to 25% of the total amount paid as salaries.') }}
+                        {{ __('Under RA 10524, private entities that employ qualified PWDs who meet the required terms of employment are entitled to an additional deduction from their gross income equivalent to :rate of the total amount paid as salaries.', ['rate' => $taxRateLabel ?? '20%']) }}
                     </p>
                 </div>
 
@@ -892,7 +1001,7 @@
                         <label class="block font-bold text-primary-dark mb-1">{{ __('Annual Gross Wage (PHP)') }}</label>
                         <input type="number" wire:model="hireWage" step="1000" class="w-full rounded-lg border border-primary-border px-3 py-2 text-xs focus:ring-2 focus:ring-primary focus:outline-none" />
                         <span class="text-[11px] text-body-muted mt-0.5 block">
-                            {{ __('Est. statutory annual deduction:') }} <strong>PHP {{ number_format(($hireWage ?: 35000) * 0.25, 2) }}</strong>
+                            {{ __('Est. statutory annual deduction:') }} <strong>PHP {{ number_format(($hireWage ?: 35000) * ($taxRateDecimal ?? 0.20), 2) }}</strong>
                         </span>
                     </div>
 

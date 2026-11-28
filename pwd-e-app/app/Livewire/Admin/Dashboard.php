@@ -6,9 +6,11 @@ use App\Livewire\Admin\Concerns\HandlesVerificationApprovals;
 use App\Models\Application;
 use App\Models\EmployerProfile;
 use App\Models\JobPosting;
+use App\Models\PlatformSetting;
 use App\Models\User;
 use App\Models\VerificationRequest;
 use App\Models\WorkforceRecord;
+use Flux\Flux;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
@@ -23,12 +25,43 @@ class Dashboard extends Component
     use HandlesVerificationApprovals;
     use WithPagination;
 
+    public string $pwdTaxDeductionRate = '20';
+
     public function mount(): void
     {
         $user = Auth::user();
         if (! $user || ! $user->isAdmin()) {
             abort(403, 'Unauthorized. Admin access required.');
         }
+
+        $rate = PlatformSetting::pwdTaxDeductionRate();
+        $this->pwdTaxDeductionRate = floor($rate) == $rate ? (string) (int) $rate : (string) $rate;
+    }
+
+    public function saveTaxDeductionRate(): void
+    {
+        $user = Auth::user();
+        if (! $user || ! $user->isAdmin()) {
+            abort(403);
+        }
+
+        $this->validate([
+            'pwdTaxDeductionRate' => ['required', 'numeric', 'min:0', 'max:100'],
+        ]);
+
+        $normalized = round((float) $this->pwdTaxDeductionRate, 2);
+        PlatformSetting::setValue(PlatformSetting::KEY_PWD_TAX_RATE, $normalized, $user->id);
+
+        $this->pwdTaxDeductionRate = floor($normalized) == $normalized ? (string) (int) $normalized : (string) $normalized;
+
+        if (function_exists('activity')) {
+            activity('platform_settings')
+                ->causedBy($user)
+                ->withProperties(['pwd_tax_deduction_rate' => $normalized])
+                ->log('Updated statutory PWD wage tax deduction rate to '.$this->pwdTaxDeductionRate.'%');
+        }
+
+        Flux::toast(variant: 'success', text: __('Statutory PWD tax deduction rate updated to :rate%.', ['rate' => $this->pwdTaxDeductionRate]));
     }
 
     public function getSelectableRequestIds(): array

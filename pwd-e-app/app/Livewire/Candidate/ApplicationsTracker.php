@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Candidate;
 
+use App\Livewire\Candidate\Concerns\HandlesCandidateOfferDecisions;
 use App\Models\Application;
 use App\Models\ApplicationMessage;
 use App\Models\CandidateProfile;
@@ -15,6 +16,7 @@ use Livewire\WithFileUploads;
 #[Layout('layouts.candidate')]
 class ApplicationsTracker extends Component
 {
+    use HandlesCandidateOfferDecisions;
     use WithFileUploads;
 
     public string $activeTab = 'all'; // all, active, interviews, archived
@@ -332,72 +334,6 @@ class ApplicationsTracker extends Component
     {
         $this->showOfferModal = false;
         $this->selectedOfferAppId = null;
-    }
-
-    public function acceptOffer(int $appId): void
-    {
-        $user = Auth::user();
-        $candidateProfile = $user?->candidateProfile;
-        if (! $candidateProfile) {
-            return;
-        }
-
-        $app = Application::where('id', $appId)
-            ->where('candidate_profile_id', $candidateProfile->id)
-            ->with(['jobPosting.employerProfile'])
-            ->first();
-
-        if (! $app || ! $app->canTransitionTo(Application::STATUS_HIRED)) {
-            $this->actionNotification = 'Unable to accept offer in current state.';
-            return;
-        }
-
-        $app->update([
-            'status' => Application::STATUS_HIRED,
-            'offer_accepted_at' => now(),
-            'status_subtext' => Application::computeStatusSubtext(Application::STATUS_HIRED, now()),
-        ]);
-
-        $salary = $app->offer_details['salary'] ?? ($app->jobPosting?->salary_max ?? $app->jobPosting?->salary_min ?? 35000);
-        $startDate = ! empty($app->offer_details['start_date']) ? Carbon::parse($app->offer_details['start_date']) : now();
-        $isPwd = ! empty($candidateProfile->user?->pwd_id_number);
-
-        \App\Models\WorkforceRecord::firstOrCreate(
-            ['application_id' => $app->id],
-            [
-                'employer_profile_id' => $app->jobPosting->employer_profile_id,
-                'candidate_profile_id' => $app->candidate_profile_id,
-                'hired_at' => $startDate,
-                'pwd_verified' => $isPwd,
-                'annual_wage' => $salary,
-            ]
-        );
-
-        ApplicationMessage::create([
-            'application_id' => $app->id,
-            'sender_id' => $user->id,
-            'type' => 'system',
-            'body' => 'Offer Accepted: Candidate has formally accepted the job offer!',
-            'metadata' => [
-                'event' => 'offer_accepted',
-                'accepted_at' => now()->toIso8601String(),
-            ],
-        ]);
-
-        $this->closeOfferModal();
-        $company = $app->jobPosting?->employerProfile?->company_name ?? 'the employer';
-        $this->actionNotification = "Congratulations! You have accepted the job offer from {$company}.";
-
-        $employerUser = $app->jobPosting?->employerProfile?->user;
-        if ($employerUser) {
-            $employerUser->notify(
-                new \App\Notifications\ApplicationStatusChanged(
-                    $app->jobPosting?->title ?? 'Position',
-                    'offer_accepted',
-                    "{$user->name} has accepted the job offer!"
-                )
-            );
-        }
     }
 
     public function openDeclineModal(int $appId): void
@@ -768,7 +704,9 @@ class ApplicationsTracker extends Component
             ? Application::with(['jobPosting.employerProfile', 'messages.sender'])->find($this->selectedChatAppId)
             : null;
 
-        return view('livewire.candidate.applications-tracker', [
+        $offerModalsData = $this->buildOfferModalsViewData($candidateProfile?->id);
+
+        return view('livewire.candidate.applications-tracker', array_merge([
             'user' => $user,
             'candidateProfile' => $candidateProfile,
             'applications' => $applications,
@@ -790,6 +728,6 @@ class ApplicationsTracker extends Component
             'showOfferModal' => $this->showOfferModal,
             'showWithdrawConfirmModal' => $this->showWithdrawConfirmModal,
             'actionNotification' => $this->actionNotification,
-        ]);
+        ], $offerModalsData));
     }
 }

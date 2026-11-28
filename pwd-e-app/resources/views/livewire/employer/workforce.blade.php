@@ -82,7 +82,7 @@
             </span>
         </div>
         <p class="text-sm text-body-muted leading-relaxed">
-            {{ __('Eligible employers may claim an additional 25% gross income deduction on the total amount of salaries and wages paid to qualified PWD employees holding an official Government PWD ID. The deduction above is computed from verified active PWD wages (₱:wage).', ['wage' => number_format($totalWages, 2)]) }}
+            {{ __('Eligible employers may claim an additional :rate gross income deduction on the total amount of salaries and wages paid to qualified PWD employees holding an official Government PWD ID. The deduction above is computed from verified active PWD wages (₱:wage).', ['rate' => $taxRateLabel ?? '20%', 'wage' => number_format($totalWages, 2)]) }}
         </p>
         @if($medCertOnlyCount > 0)
             <div class="mt-2 p-3 rounded-xl bg-purple-50 border border-purple-200 text-xs text-purple-900 flex items-start gap-2">
@@ -170,7 +170,7 @@
                                             🩺 {{ __('Med Cert (Fit to Work)') }}
                                         </span>
                                         <div class="text-[10px] text-body-muted font-mono">{{ $u?->pwd_id_number }}</div>
-                                        <div class="text-[9px] text-amber-700 font-medium">{{ __('PWD ID required for BIR 25% credit') }}</div>
+                                        <div class="text-[9px] text-amber-700 font-medium">{{ __('PWD ID required for BIR :rate credit', ['rate' => $taxRateLabel ?? '20%']) }}</div>
                                     </div>
                                 @elseif($isBothDocs)
                                     <div class="space-y-0.5">

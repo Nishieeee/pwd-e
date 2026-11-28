@@ -317,8 +317,11 @@ class Workforce extends Component
             return $rec->pwd_verified && $u?->pwd_document_type === 'medical_certificate';
         })->count();
 
+        $taxRateDecimal = \App\Models\PlatformSetting::pwdTaxDeductionDecimal();
+        $taxRateLabel = \App\Models\PlatformSetting::pwdTaxDeductionLabel();
+
         $totalWages = $taxEligibleList->sum('annual_wage');
-        $deduction = round($totalWages * 0.25, 2);
+        $deduction = round($totalWages * $taxRateDecimal, 2);
 
         $endingRecord = $this->endingRecordId
             ? WorkforceRecord::with('candidateProfile.user')->find($this->endingRecordId)
@@ -335,6 +338,7 @@ class Workforce extends Component
             'pwdPercent' => $pwdPercent,
             'totalWages' => $totalWages,
             'deduction' => $deduction,
+            'taxRateLabel' => $taxRateLabel,
             'medCertOnlyCount' => $medCertOnlyCount,
             'activeCount' => $activeCount,
             'separatedCount' => $separatedCount,

@@ -228,7 +228,7 @@ test('workforce calculates tax deduction strictly from official PWD IDs', functi
         ->assertViewHas('pwdCount', 2)
         ->assertViewHas('medCertOnlyCount', 1)
         ->assertViewHas('totalWages', 400000.0) // Only the official PWD ID wage is counted
-        ->assertViewHas('deduction', 100000.0); // 25% of 400,000
+        ->assertViewHas('deduction', 80000.0); // Default 20% dynamic rate of 400,000
 });
 
 test('admin can view both primary pwd id and secondary medical certificate documents and workforce counts both as tax eligible', function () {
@@ -291,7 +291,7 @@ test('admin can view both primary pwd id and secondary medical certificate docum
         ->test(Workforce::class)
         ->assertViewHas('medCertOnlyCount', 0)
         ->assertViewHas('totalWages', 500000.0)
-        ->assertViewHas('deduction', 125000.0);
+        ->assertViewHas('deduction', 100000.0); // Default 20% dynamic rate of 500,000
 });
 
 test('candidate can attach med cert in profile builder or apply page and employer sees both pwd id and med cert in applicant details', function () {

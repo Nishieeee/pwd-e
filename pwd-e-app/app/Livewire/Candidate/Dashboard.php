@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Candidate;
 
+use App\Livewire\Candidate\Concerns\HandlesCandidateOfferDecisions;
 use App\Models\Application;
 use App\Models\CandidateProfile;
 use App\Models\JobInvitation;
@@ -15,6 +16,8 @@ use Livewire\Component;
 #[Layout('layouts.candidate')]
 class Dashboard extends Component
 {
+    use HandlesCandidateOfferDecisions;
+
     public ?int $selectedApplicationId = null;
 
     public bool $showBreakdownModal = false;
@@ -335,7 +338,9 @@ class Dashboard extends Component
                 ->find($this->acknowledgingRecordId)
             : null;
 
-        return view('livewire.candidate.dashboard', [
+        $offerModalsData = $this->buildOfferModalsViewData($candidateProfile->id);
+
+        return view('livewire.candidate.dashboard', array_merge([
             'user' => $user,
             'candidateProfile' => $candidateProfile,
             'activeApplications' => $activeApplications,
@@ -353,6 +358,6 @@ class Dashboard extends Component
             'pendingSeparationNotice' => $pendingSeparationNotice,
             'disputedSeparationNotice' => $disputedSeparationNotice,
             'acknowledgingRecord' => $acknowledgingRecord,
-        ]);
+        ], $offerModalsData));
     }
 }

@@ -666,6 +666,8 @@
         </div>
     @endif
 
+    @include('partials.candidate-offer-modals')
+
     <!-- 2. View Offer Modal -->
     @if($showOfferModal && $offerApp)
         <div class="fixed inset-0 z-50 overflow-y-auto bg-black/50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="modal-offer-title">
@@ -686,19 +688,37 @@
 
                 <div class="p-4 rounded-xl bg-sky-50 border border-sky-200 text-xs text-sky-900 space-y-2">
                     <div class="flex justify-between font-medium">
-                        <span>Offered Salary:</span>
+                        <span>Offered Compensation:</span>
                         <strong class="font-bold text-sm text-gray-900">
                             PHP {{ number_format($offerApp->offer_details['salary'] ?? ($offerApp->jobPosting->salary_max ?? $offerApp->jobPosting->salary_min ?? 35000), 2) }}
+                            @if(!empty($offerApp->offer_details['pay_period']))
+                                <span class="text-xs font-normal text-gray-600">/ {{ $offerApp->offer_details['pay_period'] }}</span>
+                            @endif
                         </strong>
+                    </div>
+                    <div class="flex justify-between gap-2">
+                        <span>Working Schedule:</span>
+                        <span class="font-semibold text-right">{{ \App\Support\EmploymentScheduleHelper::formatSchedule($offerApp->offer_details ?? []) }}</span>
                     </div>
                     <div class="flex justify-between">
                         <span>Work Arrangement:</span>
-                        <span class="font-semibold">{{ ucfirst($offerApp->jobPosting->work_arrangement) }}</span>
+                        <span class="font-semibold">
+                            {{ ucfirst($offerApp->jobPosting->work_arrangement) }}
+                            @if(!empty($offerApp->offer_details['branch_name']))
+                                · {{ $offerApp->offer_details['branch_name'] }}
+                            @endif
+                        </span>
                     </div>
                     <div class="flex justify-between">
                         <span>Target Start Date:</span>
                         <span>{{ $offerApp->offer_details['start_date'] ?? 'Flexible' }}</span>
                     </div>
+                    @if(!empty($offerApp->offer_details['expires_at']))
+                        <div class="flex justify-between">
+                            <span>Offer Valid Until:</span>
+                            <span class="font-medium">{{ $offerApp->offer_details['expires_at'] }}</span>
+                        </div>
+                    @endif
                     @if(!empty($offerApp->offer_details['accommodations']))
                         <div class="pt-1 border-t border-sky-200/60">
                             <span class="block font-semibold mb-0.5">Accommodations Package:</span>

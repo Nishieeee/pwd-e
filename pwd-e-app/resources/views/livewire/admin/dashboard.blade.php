@@ -77,6 +77,50 @@
         </div>
     @endif
 
+    <!-- Statutory Tax Incentive Rate Setting (REV-07) -->
+    <section class="rounded-2xl border border-primary-border bg-white p-5 sm:p-6 shadow-sm" aria-labelledby="tax-rate-config-heading">
+        <form wire:submit="saveTaxDeductionRate" class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div class="space-y-1 max-w-2xl">
+                <div class="flex items-center gap-2">
+                    <h2 id="tax-rate-config-heading" class="font-heading text-base font-bold text-primary-dark">
+                        {{ __('Statutory PWD Wage Tax Deduction Rate') }}
+                    </h2>
+                    <span class="rounded-full bg-secondary-tint text-secondary px-2.5 py-0.5 text-xs font-bold border border-secondary/20">
+                        {{ __('DSWD / PESO / RA 10524') }}
+                    </span>
+                </div>
+                <p class="text-xs text-body-muted leading-relaxed">
+                    {{ __('Controls the gross wage tax deduction percentage applied dynamically across all Employer Workforce & Tax calculators (currently :rate%). Update here if statutory rates change.', ['rate' => $pwdTaxDeductionRate]) }}
+                </p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+                <label for="admin-pwd-tax-rate" class="text-xs font-bold text-primary-dark">{{ __('Deduction Rate (%)') }}</label>
+                <div class="relative w-28">
+                    <input
+                        id="admin-pwd-tax-rate"
+                        type="number"
+                        step="0.5"
+                        min="0"
+                        max="100"
+                        wire:model="pwdTaxDeductionRate"
+                        class="w-full rounded-xl border border-primary-border bg-white px-3 py-2 pr-7 text-sm font-bold text-primary-dark tabular-nums focus:border-primary focus:ring-2 focus:ring-primary focus:outline-none"
+                    />
+                    <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-body-muted">%</span>
+                </div>
+                <button
+                    type="submit"
+                    class="inline-flex items-center gap-1.5 rounded-xl bg-primary-dark px-4 py-2.5 text-xs font-semibold text-white hover:bg-primary transition-colors shadow-xs cursor-pointer"
+                >
+                    <span>{{ __('Save Rate') }}</span>
+                </button>
+            </div>
+        </form>
+        @error('pwdTaxDeductionRate')
+            <p class="mt-2 text-xs font-semibold text-rose-600" role="alert">{{ $message }}</p>
+        @enderror
+    </section>
+
     <!-- Pending Verification Approvals & Bulk Actions Section -->
     <section class="rounded-2xl border border-primary-border bg-white shadow-sm overflow-hidden" aria-labelledby="verification-approvals-heading">
         <div class="p-6 border-b border-gray-100 flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-gradient-to-r from-surface to-white">

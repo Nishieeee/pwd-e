@@ -1,4 +1,6 @@
 <div class="space-y-6 max-w-7xl mx-auto w-full min-w-0">
+    @include('partials.candidate-offer-modals')
+
     <!-- Profile Saved Success Banner (Redirected from Profile Builder) -->
     @if(!empty($profileSavedMessage))
         <div class="p-4 rounded-xl bg-[#F0FDF4] border border-[#BBF7D0] text-[#176B47] flex items-center justify-between gap-4 shadow-xs" role="alert" aria-live="polite">

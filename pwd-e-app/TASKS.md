@@ -20,7 +20,7 @@ _Last synced with SE Advisor Consultation Revisions — 2026-11-26_
 - [x] **REV-06 — Multiple Company Branch Addresses:** Support multiple branch addresses per employer (`employer_branches` table: branch name, chopped address fields, `is_headquarters`), manageable in Employer Profile and selectable per `JobPosting`.
 
 ### Verification, Compliance & Dynamic Tax Incentives
-- [ ] **REV-07 — Dynamic Tax Exemption / Incentive Calculation (RA 10524):** Replace static calculation in `Employer\Workforce` with dynamic tax exemption/deduction modeling (configurable wage/tenure pro-rating, company tax parameters, and RA 10524 25% wage deduction + 50% accessibility facility modification credit).
+- [x] **REV-07 — Dynamic Tax Exemption / Incentive Calculation (RA 10524 / DSWD / PESO):** Replace static hardcoded `25%` calculation across `Employer\Workforce`, `Employer\Dashboard`, and `Employer\Applicants` with a dynamic `platform_settings` rate defaulting to **`20%`** and editable anytime by Platform Admin on `Admin\Dashboard`.
 - [x] **REV-10 — Admin Verification Checklist for Med Cert & PWD ID:** Add structured verification criteria checklists in `Admin\VerificationQueue` for both PWD ID (ID format, photo/signature clarity, validity, disability match) and Clinical Medical Certificate (physician name, PRC license, occupational fitness statement, signature/date) prior to approval.
 
 ### Resume-Driven Profile Automation, Trainings & Matching
@@ -28,8 +28,8 @@ _Last synced with SE Advisor Consultation Revisions — 2026-11-26_
 - [x] **REV-12 — Resume & Accommodations Match Breakdown UI + Employer Match Filter (SE1 UI/UX):** Display overall match `%` with an optional expandable **View Match Breakdown** panel (Accessibility & Accommodations Fit, Skills, Experience & Trainings/Seminars, Certifications/TESDA & Education) on Candidate `JobMatches` and Employer `Applicants` review modal, plus a **Match Score filter** (`All`, `90%+`, `80%+`, `70%+`, `Below 70%`) in `Employer\Applicants` (full scoring engine deferred to SE2).
 - [x] **REV-13 — Trainings/Seminars & Certifications/TESDA Section:** Add repeatable **Trainings & Seminars** and **Certifications / Eligibility (TESDA NC, PRC, Civil Service)** entries alongside Work Experiences in `ProfileBuilder`, `ResumeParserService`, and Digital Profile.
 
-### Multi-Offer Candidate Decision Flow
-- [ ] **REV-14 — Dual/Multiple Accepted Applications Popup Notification:** Display an accessible modal popup when a candidate has two (or more) concurrent accepted/offered applications, presenting clear **Accept** or **Ignore / Decline** actions for each offer.
+### Multi-Offer Candidate Decision Flow & Offer Scheduling
+- [x] **REV-14 — Multi-Offer Popup, Offer Working Schedule & Concurrent-Employment Warnings:** Added working days/shift hours/flexible schedule & pay period to Employer **Extend Offer**, privacy-safe active-employment & schedule-conflict warnings for employers (hiding external company names while showing internal branch roles), a **Multiple Job Offers Received** popup (`Accept` / `Ignore`) for candidates with $\ge 2$ offers, and an **"Already Employed" confirmation prompt** when accepting an additional job.
 
 ---
 
